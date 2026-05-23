@@ -106,7 +106,7 @@ export function HomeScreen({
           >
             Find parking before
             <br />
-            you leave the house.
+            you leave.
           </h1>
           <p
             style={{
@@ -117,7 +117,7 @@ export function HomeScreen({
               maxWidth: 320,
             }}
           >
-            HDB, URA and LTA carparks ranked by cost for your stay.
+            Nearest and cheapest HDB, URA and LTA carparks for your stay.
           </p>
         </div>
 
