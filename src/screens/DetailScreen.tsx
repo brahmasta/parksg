@@ -228,7 +228,11 @@ export function DetailScreen({
               {degraded ? '—' : cp.lotsAvailable}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              {degraded ? 'of ? lots' : `of ${cp.lotsTotal} lots`}
+              {degraded
+                ? 'of ? lots'
+                : cp.lotsTotal > 0
+                  ? `of ${cp.lotsTotal} lots`
+                  : 'total lots unknown'}
             </div>
           </div>
         </div>

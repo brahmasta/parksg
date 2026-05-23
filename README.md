@@ -6,7 +6,18 @@ Singapore parking finder — ranks nearby HDB / URA / LTA carparks by cost for a
 
 - Vite + React 19 + TypeScript
 - Tailwind v4 (CSS-first; design tokens live in `src/index.css`)
-- Mock data only (no live LTA / URA / HDB calls — backend stubs documented in the brief)
+- Live data: data.gov.sg (HDB) + LTA Datamall (URA + LTA) via a Vercel Edge proxy
+- OneMap for geocoding the search box
+
+## Required env vars
+
+| Name | Where set | Notes |
+|---|---|---|
+| `LTA_ACCOUNT_KEY` | Vercel → Settings → Environment Variables | From [datamall.lta.gov.sg](https://datamall.lta.gov.sg). Used server-side only by the `api/lta-availability` Edge function. |
+
+Local dev works without `LTA_ACCOUNT_KEY` — searches just fall back to
+HDB-only results (the LTA proxy returns 500, the frontend treats it as a
+partial failure).
 
 ## Run
 
@@ -50,9 +61,10 @@ src/
     └── DetailScreen.tsx
 ```
 
-## Not shipped (per brief — out of MVP scope)
+## Roadmap
 
-- Live data fetching (LTA Datamall, URA Data Service, HDB via data.gov.sg)
-- OneMap autocomplete
-- "Near me" GPS (the button stubs to mock data)
-- Account / Save flow (UI present, no persistence)
+- **Phase 3 (next):** Real URA rate schedules via the URA Data Service (daily token rotation) — currently URA carparks use a flat $1.20/30 min approximation
+- OneMap autocomplete (the search box is plain text for now)
+- OneMap walking-route distance instead of haversine
+- Account / Save flow (UI present, no persistence yet)
+- "Available only" filter (UI present, currently does basic filter on cards with > 0 lots)

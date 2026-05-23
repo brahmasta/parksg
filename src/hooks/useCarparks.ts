@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Carpark, ResultsState } from '../lib/types';
+import type { Carpark, Operator, ResultsState } from '../lib/types';
 import {
   getHdbAvailability,
   getHdbCarparkInfo,
   type HdbAvailability,
   type HdbCarparkInfo,
 } from '../lib/api/hdb';
+import { getLtaCarparks, type LtaCarpark } from '../lib/api/lta';
 import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
-import { hdbEstByHours, hdbRates } from '../lib/cost';
+import { estByHoursFor, ratesFor } from '../lib/cost';
 
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
@@ -99,16 +100,45 @@ export function useCarparks() {
           return;
         }
 
-        const info = await getHdbCarparkInfo();
+        // Fetch HDB info + HDB live availability + LTA (URA+LTA carparks)
+        // in parallel. Each is independent; partial failures degrade
+        // gracefully rather than blocking the whole result.
+        const [info, ltaSettled, availSettled] = await Promise.all([
+          getHdbCarparkInfo(),
+          // LTA is a serverless proxy call; can be slow on cold start.
+          withTimeout(getLtaCarparks(), 8_000).catch(() => null),
+          withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
+        ]);
         if (requestSeq.current !== seq) return;
 
-        // Nearby HDB carparks first — sorted by distance for the initial cut.
-        const nearby = info
+        const avail = availSettled;
+        if (avail) lastFetchedAt.current = Date.now();
+
+        // ── HDB carparks (data.gov.sg) ────────────────────────────────────
+        const hdbIds = new Set<string>();
+        const hdbNearby = info
           .map((cp) => ({ cp, meters: haversineMeters(dest, cp) }))
           .filter((x) => x.meters <= radius)
           .sort((a, b) => a.meters - b.meters);
 
-        if (nearby.length === 0) {
+        const hdbCarparks = hdbNearby.map(({ cp, meters }) => {
+          hdbIds.add(cp.car_park_no);
+          return hdbToCarpark(cp, meters, avail?.get(cp.car_park_no) ?? null);
+        });
+
+        // ── URA + LTA carparks (LTA Datamall) ────────────────────────────
+        // Skip any LTA entry whose ID matches an HDB entry we already have —
+        // HDB metadata is richer (proper name, total lots).
+        const otherCarparks = (ltaSettled ?? [])
+          .filter((c) => c.agency !== 'HDB' && !hdbIds.has(c.id))
+          .map((cp) => ({ cp, meters: haversineMeters(dest, cp) }))
+          .filter((x) => x.meters <= radius)
+          .sort((a, b) => a.meters - b.meters)
+          .map(({ cp, meters }) => ltaToCarpark(cp, meters));
+
+        const merged = [...hdbCarparks, ...otherCarparks];
+
+        if (merged.length === 0) {
           setResult({
             state: 'empty',
             destination: dest,
@@ -118,26 +148,16 @@ export function useCarparks() {
           return;
         }
 
-        // Pull live lot counts. If it fails / times out we go "degraded".
-        let avail: Map<string, HdbAvailability> | null = null;
-        try {
-          avail = await withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS);
-          lastFetchedAt.current = Date.now();
-        } catch {
-          avail = null;
-        }
-
-        if (requestSeq.current !== seq) return;
-
-        const carparks = nearby.map(({ cp, meters }) =>
-          toCarpark(cp, meters, avail?.get(cp.car_park_no) ?? null),
-        );
+        // Degraded if HDB availability failed AND we have HDB carparks
+        // (lot counts will all read em-dash). LTA-only carparks always show
+        // live availability when the proxy succeeds.
+        const degraded = !avail && hdbCarparks.length > 0;
 
         setResult({
-          state: avail ? 'loaded' : 'degraded',
+          state: degraded ? 'degraded' : 'loaded',
           destination: dest,
-          carparks,
-          refreshedSecondsAgo: avail
+          carparks: merged,
+          refreshedSecondsAgo: avail || ltaSettled
             ? 0
             : lastFetchedAt.current
               ? Math.floor((Date.now() - lastFetchedAt.current) / 1000)
@@ -196,14 +216,14 @@ export function useCarparks() {
   return { result, search, searchAtCoords, retry, expandRadius, trigger };
 }
 
-function toCarpark(
+function hdbToCarpark(
   info: HdbCarparkInfo,
   meters: number,
   avail: HdbAvailability | null,
 ): Carpark {
   const name = displayName(info);
   return {
-    id: info.car_park_no,
+    id: `hdb:${info.car_park_no}`,
     name,
     block: info.address,
     operator: 'HDB',
@@ -214,9 +234,43 @@ function toCarpark(
     walkMeters: Math.round(meters),
     grace: 10,
     coords: { entrance: [info.lat, info.lng] },
-    rates: hdbRates(),
-    estByHours: hdbEstByHours(),
+    rates: ratesFor('HDB'),
+    estByHours: estByHoursFor('HDB'),
   };
+}
+
+function ltaToCarpark(cp: LtaCarpark, meters: number): Carpark {
+  const operator = cp.agency as Operator;
+  const block = cp.area ? `${cp.area} · ${cp.id}` : cp.id;
+  return {
+    id: `${operator.toLowerCase()}:${cp.id}`,
+    name: cp.name,
+    block,
+    operator,
+    lotTypes: lotTypesFor(cp.lotType),
+    lotsAvailable: cp.lotsAvailable,
+    // LTA Datamall's CarParkAvailabilityv2 doesn't return total lots.
+    // The detail screen treats 0 as "unknown" and hides the "of N" line.
+    lotsTotal: 0,
+    walkMin: walkMinutesFromMeters(meters),
+    walkMeters: Math.round(meters),
+    grace: 0,
+    coords: { entrance: [cp.lat, cp.lng] },
+    rates: ratesFor(operator),
+    estByHours: estByHoursFor(operator),
+  };
+}
+
+function lotTypesFor(lt: string): Carpark['lotTypes'] {
+  switch ((lt ?? '').toUpperCase()) {
+    case 'M':
+      return ['M'];
+    case 'H':
+      return ['H'];
+    case 'C':
+    default:
+      return ['C'];
+  }
 }
 
 /** Pull a short, human carpark name out of the HDB address.
