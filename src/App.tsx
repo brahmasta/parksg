@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   Carpark,
   DurationHours,
-  ResultsState,
+  RecentDestination,
   Screen,
   ViewMode,
 } from './lib/types';
-import { CARPARKS, DESTINATION } from './lib/mockData';
 import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { DetailScreen } from './screens/DetailScreen';
 import { IconNavigate } from './components/icons';
+import { useCarparks } from './hooks/useCarparks';
+import { loadRecents, pushRecent } from './lib/recents';
 
 const DURATION_KEY = 'psg.duration';
 const VIEW_MODE_KEY = 'psg.viewMode';
@@ -29,7 +30,7 @@ function readStored<T>(key: string, fallback: T, parse: (raw: string) => T | nul
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
-  const [destination, setDestination] = useState<string>(DESTINATION.label);
+  const [destinationInput, setDestinationInput] = useState<string>('');
 
   const [duration, setDurationState] = useState<DurationHours>(() =>
     readStored<DurationHours>(DURATION_KEY, 1, (raw) => {
@@ -75,26 +76,42 @@ function App() {
     }
   }, []);
 
-  const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
-  const [resultsState, setResultsState] = useState<ResultsState>('loaded');
-  const loadingTimer = useRef<number | null>(null);
+  const [recents, setRecents] = useState<RecentDestination[]>(() => loadRecents());
 
+  const { result, search, searchAtCoords, retry, expandRadius } = useCarparks();
+
+  // Once a destination resolves, remember it.
   useEffect(() => {
-    return () => {
-      if (loadingTimer.current) {
-        clearTimeout(loadingTimer.current);
-      }
-    };
-  }, []);
+    if (result.destination) {
+      setRecents(
+        pushRecent({
+          name: result.destination.label,
+          hint: result.destination.postal || result.destination.address.split(' ')[0] || '',
+        }),
+      );
+    }
+  }, [result.destination]);
+
+  const headerDestination = useMemo(
+    () => result.destination?.label ?? destinationInput,
+    [result.destination, destinationInput],
+  );
+
+  const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
+  // If the result list refreshes (e.g. new lot counts), keep the selected
+  // carpark in sync with the latest data.
+  useEffect(() => {
+    if (!selectedCarpark) return;
+    const updated = result.carparks.find((c) => c.id === selectedCarpark.id);
+    if (updated && updated !== selectedCarpark) setSelectedCarpark(updated);
+  }, [result.carparks, selectedCarpark]);
 
   const goSearch = (q?: string) => {
-    if (q !== undefined) setDestination(q);
-    setResultsState('loading');
+    const query = (q ?? destinationInput).trim();
+    if (!query) return;
+    setDestinationInput(query);
     setScreen('results');
-    if (loadingTimer.current) clearTimeout(loadingTimer.current);
-    loadingTimer.current = window.setTimeout(() => {
-      setResultsState('loaded');
-    }, 650);
+    search(query);
   };
 
   const goDetail = (cp: Carpark) => {
@@ -102,70 +119,84 @@ function App() {
     setScreen('detail');
   };
 
+  const [nearMeBusy, setNearMeBusy] = useState(false);
+  const onNearMe = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not available on this device.');
+      return;
+    }
+    setNearMeBusy(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setNearMeBusy(false);
+        const { latitude, longitude } = pos.coords;
+        setDestinationInput('My location');
+        setScreen('results');
+        searchAtCoords('My location', latitude, longitude);
+      },
+      (err) => {
+        setNearMeBusy(false);
+        alert(`Could not get your location: ${err.message}`);
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
+    );
+  }, [searchAtCoords]);
+
   const [navToast, setNavToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
-  const showNavToast = () => {
+  const showNavToast = useCallback(() => {
+    if (!selectedCarpark) return;
+    const [lat, lng] = selectedCarpark.coords.entrance;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    window.open(url, '_blank', 'noopener');
     setNavToast(true);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setNavToast(false), 2400);
-  };
+  }, [selectedCarpark]);
 
   let body: React.ReactNode = null;
   if (screen === 'home') {
     body = (
       <HomeScreen
-        destination={destination}
-        setDestination={setDestination}
+        destination={destinationInput}
+        setDestination={setDestinationInput}
         duration={duration}
         setDuration={setDuration}
         onSearch={goSearch}
-        onNearMe={() => {
-          setDestination('My location');
-          goSearch('My location');
-        }}
+        onNearMe={onNearMe}
+        recents={recents}
+        nearMeBusy={nearMeBusy}
       />
     );
   } else if (screen === 'results') {
     body = (
       <ResultsScreen
-        destination={destination}
+        destination={headerDestination}
         duration={duration}
         setDuration={setDuration}
-        carparks={CARPARKS}
-        state={resultsState}
+        carparks={result.carparks}
+        state={result.state}
         availableOnly={availableOnly}
         setAvailableOnly={setAvailableOnly}
         viewMode={viewMode}
         onToggleView={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
         onBack={() => setScreen('home')}
         onSelect={goDetail}
-        onRetry={() => {
-          setResultsState('loading');
-          if (loadingTimer.current) clearTimeout(loadingTimer.current);
-          loadingTimer.current = window.setTimeout(
-            () => setResultsState('loaded'),
-            700,
-          );
-        }}
-        onExpandRadius={() => {
-          setResultsState('loading');
-          if (loadingTimer.current) clearTimeout(loadingTimer.current);
-          loadingTimer.current = window.setTimeout(
-            () => setResultsState('loaded'),
-            700,
-          );
-        }}
+        onRetry={retry}
+        onExpandRadius={expandRadius}
       />
     );
-  } else if (screen === 'detail') {
+  } else if (screen === 'detail' && selectedCarpark) {
     body = (
       <DetailScreen
-        cp={selectedCarpark ?? CARPARKS[0]}
-        destination={destination}
+        cp={selectedCarpark}
+        destination={headerDestination}
         duration={duration}
         setDuration={setDuration}
         onBack={() => setScreen('results')}
         onNavigate={showNavToast}
+        refreshedSecondsAgo={result.refreshedSecondsAgo}
+        degraded={result.state === 'degraded'}
       />
     );
   }

@@ -1,8 +1,7 @@
-import type { DurationHours } from '../lib/types';
+import type { DurationHours, RecentDestination } from '../lib/types';
 import { DurationStrip, SearchField } from '../components/atoms';
 import { Wordmark } from '../components/Wordmark';
 import { IconChevronRight, IconHistory, IconLocation, IconPin } from '../components/icons';
-import { RECENT } from '../lib/mockData';
 
 export function HomeScreen({
   destination,
@@ -11,6 +10,8 @@ export function HomeScreen({
   setDuration,
   onSearch,
   onNearMe,
+  recents,
+  nearMeBusy,
 }: {
   destination: string;
   setDestination: (v: string) => void;
@@ -18,6 +19,8 @@ export function HomeScreen({
   setDuration: (v: DurationHours) => void;
   onSearch: (q?: string) => void;
   onNearMe: () => void;
+  recents: RecentDestination[];
+  nearMeBusy?: boolean;
 }) {
   return (
     <div
@@ -150,6 +153,7 @@ export function HomeScreen({
         <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
           <button
             onClick={onNearMe}
+            disabled={nearMeBusy}
             style={{
               appearance: 'none',
               flex: 1,
@@ -164,15 +168,16 @@ export function HomeScreen({
               color: 'var(--text-1)',
               fontSize: 14,
               fontWeight: 500,
-              cursor: 'pointer',
+              cursor: nearMeBusy ? 'wait' : 'pointer',
               whiteSpace: 'nowrap',
               minHeight: 44,
+              opacity: nearMeBusy ? 0.6 : 1,
             }}
           >
             <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
               <IconLocation size={16} stroke={2} />
             </span>
-            Use my location
+            {nearMeBusy ? 'Finding your location…' : 'Use my location'}
           </button>
         </div>
 
@@ -239,7 +244,7 @@ export function HomeScreen({
               overflow: 'hidden',
             }}
           >
-            {RECENT.map((r, i) => (
+            {recents.map((r, i) => (
               <button
                 key={r.name}
                 onClick={() => {

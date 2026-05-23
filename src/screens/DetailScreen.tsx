@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import type { Carpark, DurationHours } from '../lib/types';
 import {
   availabilityStatus,
@@ -18,6 +17,8 @@ export function DetailScreen({
   setDuration,
   onBack,
   onNavigate,
+  refreshedSecondsAgo,
+  degraded,
 }: {
   cp: Carpark;
   destination: string;
@@ -25,11 +26,11 @@ export function DetailScreen({
   setDuration: (v: DurationHours) => void;
   onBack: () => void;
   onNavigate: () => void;
+  refreshedSecondsAgo: number | null;
+  degraded: boolean;
 }) {
-  const status = availabilityStatus(cp.lotsAvailable);
+  const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
   const cost = cp.estByHours[duration];
-  // Stable refresh-age across re-renders within this screen visit
-  const refreshedSecondsAgo = useMemo(() => Math.floor(Math.random() * 50) + 5, [cp.id]);
 
   const rateSource =
     cp.operator === 'HDB'
@@ -214,19 +215,20 @@ export function DetailScreen({
                 fontSize: 30,
                 fontWeight: 600,
                 lineHeight: 1,
-                color:
-                  status === 'full'
-                    ? 'var(--bad)'
-                    : status === 'limited'
-                    ? 'var(--warn)'
-                    : 'var(--text-1)',
+                color: degraded
+                  ? 'var(--text-3)'
+                  : status === 'full'
+                  ? 'var(--bad)'
+                  : status === 'limited'
+                  ? 'var(--warn)'
+                  : 'var(--text-1)',
                 letterSpacing: -0.6,
               }}
             >
-              {cp.lotsAvailable}
+              {degraded ? '—' : cp.lotsAvailable}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              of {cp.lotsTotal} lots
+              {degraded ? 'of ? lots' : `of ${cp.lotsTotal} lots`}
             </div>
           </div>
         </div>
@@ -316,7 +318,9 @@ export function DetailScreen({
             lineHeight: 1.6,
           }}
         >
-          Lot count last refreshed {refreshedSecondsAgo}s ago
+          {refreshedSecondsAgo == null
+            ? 'Lot count refresh pending'
+            : `Lot count last refreshed ${refreshedSecondsAgo}s ago`}
           <br />
           Rates from {rateSource}
         </div>
