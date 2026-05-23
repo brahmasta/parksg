@@ -191,6 +191,11 @@ function App() {
       <DetailScreen
         cp={selectedCarpark}
         destination={headerDestination}
+        destinationCoords={
+          result.destination
+            ? [result.destination.lat, result.destination.lng]
+            : null
+        }
         duration={duration}
         setDuration={setDuration}
         onBack={() => setScreen('results')}

@@ -13,11 +13,13 @@ Singapore parking finder — ranks nearby HDB / URA / LTA carparks by cost for a
 
 | Name | Where set | Notes |
 |---|---|---|
-| `LTA_ACCOUNT_KEY` | Vercel → Settings → Environment Variables | From [datamall.lta.gov.sg](https://datamall.lta.gov.sg). Used server-side only by the `api/lta-availability` Edge function. |
+| `LTA_ACCOUNT_KEY` | Vercel → Settings → Environment Variables | From [datamall.lta.gov.sg](https://datamall.lta.gov.sg). Used server-side only by `api/lta-availability` for URA + LTA carparks. |
+| `ONEMAP_EMAIL` | Vercel → Settings → Environment Variables | Register at [onemap.gov.sg/apidocs/register](https://www.onemap.gov.sg/apidocs/register). Used by `api/onemap-route` for real walking routes. |
+| `ONEMAP_PASSWORD` | Vercel → Settings → Environment Variables | Paired with `ONEMAP_EMAIL`. Bearer token is cached in-memory for ~3 days. |
 
-Local dev works without `LTA_ACCOUNT_KEY` — searches just fall back to
-HDB-only results (the LTA proxy returns 500, the frontend treats it as a
-partial failure).
+Local dev works without any of them — every feature degrades gracefully.
+Without LTA: HDB-only results. Without OneMap: straight-line walk
+distance (haversine) on the detail screen.
 
 ## Run
 
@@ -63,8 +65,8 @@ src/
 
 ## Roadmap
 
-- **Phase 3 (next):** Real URA rate schedules via the URA Data Service (daily token rotation) — currently URA carparks use a flat $1.20/30 min approximation
+- Real URA rate schedules via the URA Data Service (daily token rotation) — currently URA carparks use a flat $1.20/30 min approximation
 - OneMap autocomplete (the search box is plain text for now)
-- OneMap walking-route distance instead of haversine
 - Account / Save flow (UI present, no persistence yet)
 - "Available only" filter (UI present, currently does basic filter on cards with > 0 lots)
+- Render OneMap's `route_geometry` polyline on the detail walk-map

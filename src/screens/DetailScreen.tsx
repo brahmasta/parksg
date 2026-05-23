@@ -9,10 +9,12 @@ import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../
 import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
 import { IconChevronLeft, IconNavigate } from '../components/icons';
+import { useWalkRoute } from '../hooks/useWalkRoute';
 
 export function DetailScreen({
   cp,
   destination,
+  destinationCoords,
   duration,
   setDuration,
   onBack,
@@ -22,6 +24,7 @@ export function DetailScreen({
 }: {
   cp: Carpark;
   destination: string;
+  destinationCoords: [number, number] | null;
   duration: DurationHours;
   setDuration: (v: DurationHours) => void;
   onBack: () => void;
@@ -31,6 +34,15 @@ export function DetailScreen({
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
   const cost = cp.estByHours[duration];
+
+  // Live walking route: starts as haversine, upgrades to OneMap when the
+  // /api/onemap-route proxy returns. Silent fallback on any error.
+  const walk = useWalkRoute(
+    destinationCoords,
+    cp.coords.entrance,
+    cp.walkMeters,
+    cp.walkMin,
+  );
 
   const rateSource =
     cp.operator === 'HDB'
@@ -270,12 +282,15 @@ export function DetailScreen({
                 fontWeight: 500,
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
+                transition: 'opacity 200ms ease',
+                opacity: walk.source === 'onemap' ? 1 : 0.78,
               }}
+              title={walk.source === 'onemap' ? 'Walking route from OneMap' : 'Approximate (straight-line)'}
             >
-              {cp.walkMin} min · {formatDistance(cp.walkMeters)}
+              {walk.minutes} min · {formatDistance(walk.meters)}
             </div>
           </div>
-          <WalkMap walkMin={cp.walkMin} walkMeters={cp.walkMeters} />
+          <WalkMap walkMin={walk.minutes} walkMeters={walk.meters} />
         </div>
 
         {/* Adjust duration */}
@@ -369,7 +384,7 @@ export function DetailScreen({
           }}
         >
           <IconNavigate size={18} stroke={2} />
-          Navigate · {cp.walkMin} min walk after parking
+          Navigate · {walk.minutes} min walk after parking
         </button>
       </div>
     </div>
