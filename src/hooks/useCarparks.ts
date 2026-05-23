@@ -261,8 +261,11 @@ function ltaToCarpark(cp: LtaCarpark, meters: number): Carpark {
   };
 }
 
+// LTA's CarParkAvailabilityv2 uses "Y" for motorcycle (per spec). The brief's
+// internal LotType uses "M" — translate at the boundary.
 function lotTypesFor(lt: string): Carpark['lotTypes'] {
   switch ((lt ?? '').toUpperCase()) {
+    case 'Y':
     case 'M':
       return ['M'];
     case 'H':

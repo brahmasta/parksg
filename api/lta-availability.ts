@@ -60,8 +60,16 @@ export default async function handler(_req: Request): Promise<Response> {
         headers: { AccountKey: key, accept: 'application/json' },
       });
       if (!res.ok) {
+        // Surface what LTA said. The body is usually empty on 401, but if
+        // they ever do return a hint (e.g. "key expired"), we want to see it.
+        const detail = await res.text().catch(() => '');
         return json(
-          { error: `LTA upstream returned ${res.status}` },
+          {
+            error: `LTA upstream returned ${res.status}`,
+            detail: detail.slice(0, 300) || '(empty body)',
+            // Help diagnose "is the key even reaching LTA?" without leaking it.
+            keyShape: `len=${key.length} starts=${key.slice(0, 2)}*** ends=***${key.slice(-2)}`,
+          },
           res.status === 401 ? 500 : 502,
         );
       }
