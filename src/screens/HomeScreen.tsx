@@ -85,27 +85,7 @@ export function HomeScreen({
 
       {/* Top bar */}
       <div style={{ padding: '52px 16px 12px', flexShrink: 0, position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Wordmark size={19} />
-          <button
-            aria-label="Account"
-            style={{
-              appearance: 'none',
-              border: '0.5px solid var(--line-strong)',
-              background: 'var(--bg-1)',
-              color: 'var(--text-2)',
-              width: 36,
-              height: 36,
-              borderRadius: 999,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 13 }}>WL</span>
-          </button>
-        </div>
+        <Wordmark size={19} />
       </div>
 
       {/* Body */}

@@ -33,6 +33,9 @@ export function RealWalkMap({
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  // Same idea as RealResultsMap — only fit-bounds when the route actually
+  // changes; otherwise preserve user zoom/pan.
+  const fittedKey = useRef<string | null>(null);
 
   // Mount the map once.
   useEffect(() => {
@@ -110,8 +113,12 @@ export function RealWalkMap({
       }),
     }).addTo(map);
 
-    // Fit to route with breathing room
-    map.fitBounds(route.getBounds(), { padding: [28, 28], maxZoom: 17 });
+    // Fit to route with breathing room — only when the route key changes.
+    const key = `${origin[0]},${origin[1]}->${destination[0]},${destination[1]}`;
+    if (key !== fittedKey.current) {
+      map.fitBounds(route.getBounds(), { padding: [28, 28], maxZoom: 17 });
+      fittedKey.current = key;
+    }
 
     // Make sure tiles render once the container is sized
     setTimeout(() => map.invalidateSize(), 50);

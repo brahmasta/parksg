@@ -11,13 +11,15 @@ const SG_BOUNDS = L.latLngBounds([1.144, 103.6], [1.494, 104.1]);
 
 type Props = {
   carparks: Carpark[];
+  /** ID of the cheapest carpark in the set, marked with the accent pill */
+  cheapestId: string | null;
   duration: DurationHours;
   onSelect: (cp: Carpark) => void;
   degraded: boolean;
   destinationCoords: [number, number] | null;
 };
 
-export function RealResultsMap({ carparks, duration, onSelect, degraded, destinationCoords }: Props) {
+export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   // We have to keep a stable handler ref because Leaflet markers don't
@@ -27,6 +29,11 @@ export function RealResultsMap({ carparks, duration, onSelect, degraded, destina
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+
+  // Track which destination we've already fit bounds for, so the 60s lot-count
+  // refresh (which recreates the carparks array) doesn't blow away the user's
+  // zoom/pan position.
+  const fittedForDest = useRef<string | null>(null);
 
   // Mount once
   useEffect(() => {
@@ -90,8 +97,8 @@ export function RealResultsMap({ carparks, duration, onSelect, degraded, destina
     }
 
     // Carpark pins — cost label with a small tail
-    carparks.forEach((cp, i) => {
-      const isCheapest = i === 0;
+    carparks.forEach((cp) => {
+      const isCheapest = cp.id === cheapestId;
       const status = availabilityStatus(degraded ? null : cp.lotsAvailable);
       const dotColor = statusColor(status);
       const cost = formatCost(cp.estByHours[duration]);
@@ -143,21 +150,28 @@ export function RealResultsMap({ carparks, duration, onSelect, degraded, destina
       marker.addTo(map);
     });
 
-    // Fit bounds to include all pins + destination
+    // Fit bounds only the first time we render *actual* data for a given
+    // destination. We deliberately skip the fit if there are no points yet
+    // (e.g. mounted during loading) so the next render with real data still
+    // gets a chance to set the viewport. After fitting once, lot-count
+    // refreshes and duration toggles keep the user's pan/zoom intact.
+    const destKey = destinationCoords ? destinationCoords.join(',') : '';
     const points: [number, number][] = [
       ...carparks.map((c) => c.coords.entrance),
       ...(destinationCoords ? [destinationCoords] : []),
     ];
-    if (points.length === 0) return;
-    if (points.length === 1) {
-      map.setView(points[0], 16);
-    } else {
-      map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 17 });
+    if (destKey !== fittedForDest.current && points.length > 0) {
+      if (points.length === 1) {
+        map.setView(points[0], 16);
+      } else {
+        map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 17 });
+      }
+      fittedForDest.current = destKey;
     }
 
     // Make sure tiles render after container layout settles.
     setTimeout(() => map.invalidateSize(), 50);
-  }, [carparks, duration, degraded, destinationCoords]);
+  }, [carparks, cheapestId, duration, degraded, destinationCoords]);
 
   return (
     <div style={{ padding: '0 16px' }}>

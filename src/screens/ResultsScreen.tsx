@@ -43,11 +43,21 @@ export function ResultsScreen({
   onExpandRadius: () => void;
 }) {
   const ranked = useMemo(() => {
-    const arr = [...carparks].sort(
-      (a, b) => a.estByHours[duration] - b.estByHours[duration],
-    );
+    // Primary sort: walking distance (closest first). Cost is shown on each
+    // card; the "CHEAPEST" badge separately marks the lowest-cost option
+    // regardless of where it lands in the distance order.
+    const arr = [...carparks].sort((a, b) => a.walkMeters - b.walkMeters);
     return availableOnly ? arr.filter((c) => c.lotsAvailable > 0) : arr;
-  }, [carparks, duration, availableOnly]);
+  }, [carparks, availableOnly]);
+
+  const cheapestId = useMemo(() => {
+    if (ranked.length === 0) return null;
+    return ranked.reduce(
+      (best, c) =>
+        c.estByHours[duration] < best.estByHours[duration] ? c : best,
+      ranked[0],
+    ).id;
+  }, [ranked, duration]);
 
   return (
     <div
@@ -152,7 +162,7 @@ export function ResultsScreen({
             {state === 'empty' ? '0' : ranked.length} carpark
             {ranked.length === 1 ? '' : 's'}
             <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
-            sorted by cost
+            sorted by distance
           </div>
           <button
             onClick={() => setAvailableOnly(!availableOnly)}
@@ -202,6 +212,7 @@ export function ResultsScreen({
           (viewMode === 'map' ? (
             <RealResultsMap
               carparks={ranked}
+              cheapestId={cheapestId}
               duration={duration}
               onSelect={onSelect}
               degraded={state === 'degraded'}
@@ -223,7 +234,7 @@ export function ResultsScreen({
                   cp={cp}
                   duration={duration}
                   rank={i + 1}
-                  isCheapest={i === 0}
+                  isCheapest={cp.id === cheapestId}
                   degraded={state === 'degraded'}
                   onClick={() => onSelect(cp)}
                 />
