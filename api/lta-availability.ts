@@ -94,6 +94,11 @@ export default async function handler(_req: Request): Promise<Response> {
 
 function normalize(v: LtaValue): Carpark | null {
   if (!v.CarParkID || !v.Location) return null;
+  // The same physical URA carpark appears once per LotType (C, Y, H). We only
+  // surface car lots in the UI right now; motorcycle / heavy are a separate
+  // concern. Filter here so the frontend doesn't need to dedupe.
+  const lotType = (v.LotType ?? 'C').toUpperCase();
+  if (lotType !== 'C') return null;
   const [latStr, lngStr] = v.Location.split(/\s+/);
   const lat = parseFloat(latStr);
   const lng = parseFloat(lngStr);
@@ -103,13 +108,23 @@ function normalize(v: LtaValue): Carpark | null {
   return {
     id: v.CarParkID.trim(),
     agency,
-    name: v.Development?.trim() || v.CarParkID.trim(),
+    name: titleCase(v.Development?.trim() || v.CarParkID.trim()),
     area: v.Area?.trim() || '',
     lat,
     lng,
     lotsAvailable: Number(v.AvailableLots) || 0,
-    lotType: v.LotType ?? 'C',
+    lotType,
   };
+}
+
+// URA / LTA carparks come from LTA in ALL CAPS ("ANGULLIA PARK OFF STREET").
+// Mirror the same title-case rules we use for HDB addresses.
+const ALL_CAPS = /\b(HDB|URA|LTA|MSCP|MRT|SMRT|CBD|JEM|VIP|PIE|BKE|TPE|KPE|ECP|NSE|AYE|CTE|ICA|SAFRA|NTUC|NUS|NTU|SMU|SIM|MBS)\b/gi;
+function titleCase(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (_, c: string) => c.toUpperCase())
+    .replace(ALL_CAPS, (m) => m.toUpperCase());
 }
 
 function json(body: unknown, status: number, cacheAge = 0) {
