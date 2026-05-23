@@ -80,6 +80,7 @@ export default async function handler(req: Request): Promise<Response> {
     }
     const body = (await res.json()) as {
       route_summary?: { total_distance?: number; total_time?: number };
+      route_geometry?: string;
       status?: number;
       status_message?: string;
     };
@@ -94,6 +95,8 @@ export default async function handler(req: Request): Promise<Response> {
         ok: true,
         distance: Math.round(body.route_summary.total_distance ?? 0),
         time: Math.round(body.route_summary.total_time ?? 0),
+        // Raw Google-encoded polyline (precision 5). Client decodes.
+        geometry: body.route_geometry ?? '',
       },
       200,
       // Walking routes don't change. Browser may cache for a day.

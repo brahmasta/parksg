@@ -8,6 +8,7 @@ import {
 import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../components/atoms';
 import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
+import { RealWalkMap } from '../components/RealWalkMap';
 import { IconChevronLeft, IconNavigate } from '../components/icons';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 
@@ -290,7 +291,17 @@ export function DetailScreen({
               {walk.minutes} min · {formatDistance(walk.meters)}
             </div>
           </div>
-          <WalkMap walkMin={walk.minutes} walkMeters={walk.meters} />
+          {destinationCoords && walk.source === 'onemap' && walk.geometry.length >= 2 ? (
+            <RealWalkMap
+              origin={cp.coords.entrance}
+              destination={destinationCoords}
+              geometry={walk.geometry}
+              walkMin={walk.minutes}
+              walkMeters={walk.meters}
+            />
+          ) : (
+            <WalkMap walkMin={walk.minutes} walkMeters={walk.meters} />
+          )}
         </div>
 
         {/* Adjust duration */}
