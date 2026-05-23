@@ -172,6 +172,11 @@ function App() {
     body = (
       <ResultsScreen
         destination={headerDestination}
+        destinationCoords={
+          result.destination
+            ? [result.destination.lat, result.destination.lng]
+            : null
+        }
         duration={duration}
         setDuration={setDuration}
         carparks={result.carparks}

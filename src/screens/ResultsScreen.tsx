@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/types';
-import { availabilityStatus, formatCost } from '../lib/availability';
-import { AvailabilityDot, DurationStrip, Spinner } from '../components/atoms';
+import { DurationStrip, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { DegradedBanner } from '../components/DegradedBanner';
+import { RealResultsMap } from '../components/RealResultsMap';
 import {
   IconChevronLeft,
   IconList,
@@ -13,6 +13,7 @@ import {
 
 export function ResultsScreen({
   destination,
+  destinationCoords,
   duration,
   setDuration,
   carparks,
@@ -27,6 +28,7 @@ export function ResultsScreen({
   onExpandRadius,
 }: {
   destination: string;
+  destinationCoords: [number, number] | null;
   duration: DurationHours;
   setDuration: (v: DurationHours) => void;
   carparks: Carpark[];
@@ -198,12 +200,12 @@ export function ResultsScreen({
 
         {(state === 'loaded' || state === 'degraded') &&
           (viewMode === 'map' ? (
-            <ResultsMapView
+            <RealResultsMap
               carparks={ranked}
               duration={duration}
               onSelect={onSelect}
               degraded={state === 'degraded'}
-              destination={destination}
+              destinationCoords={destinationCoords}
             />
           ) : (
             <div
@@ -387,152 +389,3 @@ function EmptyResults({
   );
 }
 
-const PIN_POSITIONS: { x: number; y: number }[] = [
-  { x: 70, y: 280 },
-  { x: 50, y: 380 },
-  { x: 200, y: 240 },
-  { x: 260, y: 160 },
-  { x: 110, y: 460 },
-];
-
-function ResultsMapView({
-  carparks,
-  duration,
-  onSelect,
-  degraded,
-  destination,
-}: {
-  carparks: Carpark[];
-  duration: DurationHours;
-  onSelect: (cp: Carpark) => void;
-  degraded: boolean;
-  destination: string;
-}) {
-  return (
-    <div style={{ padding: '0 16px' }}>
-      <div
-        style={{
-          position: 'relative',
-          height: 380,
-          borderRadius: 14,
-          overflow: 'hidden',
-          background: 'var(--bg-1)',
-          border: '0.5px solid var(--line)',
-        }}
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 358 380"
-          preserveAspectRatio="xMidYMid slice"
-          style={{ position: 'absolute', inset: 0, display: 'block' }}
-          aria-hidden
-        >
-          <defs>
-            <pattern id="psgMapGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M20 0 H0 V20" fill="none" stroke="var(--line)" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#psgMapGrid)" />
-          <path
-            d="M-20 200 Q 100 180 200 220 T 420 200"
-            stroke="var(--bg-2)"
-            strokeWidth="20"
-            fill="none"
-          />
-          <path d="M120 -20 Q 140 200 120 400" stroke="var(--bg-2)" strokeWidth="14" fill="none" />
-          <path d="M260 -20 Q 280 200 260 400" stroke="var(--bg-2)" strokeWidth="14" fill="none" />
-          <g transform="translate(170 200)">
-            <circle r="20" fill="var(--text-1)" opacity="0.06" />
-            <circle r="10" fill="var(--text-1)" opacity="0.1" />
-            <circle r="4" fill="var(--text-1)" />
-          </g>
-        </svg>
-        {carparks.map((cp, i) => {
-          const pos = PIN_POSITIONS[Math.min(i, PIN_POSITIONS.length - 1)];
-          const status = availabilityStatus(degraded ? null : cp.lotsAvailable);
-          const isCheapest = i === 0;
-          return (
-            <button
-              key={cp.id}
-              onClick={() => onSelect(cp)}
-              aria-label={`${cp.name}, ${formatCost(cp.estByHours[duration])}`}
-              style={{
-                position: 'absolute',
-                left: pos.x,
-                top: pos.y,
-                transform: 'translate(-50%, -100%)',
-                appearance: 'none',
-                border: 0,
-                padding: 0,
-                background: 'transparent',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 10px',
-                  background: isCheapest ? 'var(--accent)' : 'var(--bg-0)',
-                  color: isCheapest ? 'var(--accent-on)' : 'var(--text-1)',
-                  border:
-                    '0.5px solid ' + (isCheapest ? 'var(--accent)' : 'var(--line-strong)'),
-                  borderRadius: 999,
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.18)',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <AvailabilityDot status={status} size={6} />
-                {formatCost(cp.estByHours[duration])}
-              </div>
-              <div
-                style={{
-                  width: 2,
-                  height: 14,
-                  background: isCheapest ? 'var(--accent)' : 'var(--text-1)',
-                  opacity: 0.6,
-                }}
-              />
-            </button>
-          );
-        })}
-        <div
-          style={{
-            position: 'absolute',
-            left: 170,
-            top: 220,
-            transform: 'translateX(-50%)',
-            fontSize: 11,
-            fontFamily: 'var(--font-mono)',
-            color: 'var(--text-2)',
-            textAlign: 'center',
-            padding: '2px 6px',
-            textTransform: 'uppercase',
-            letterSpacing: 1,
-          }}
-        >
-          {destination}
-        </div>
-      </div>
-      <div
-        style={{
-          marginTop: 8,
-          padding: '0 4px',
-          fontSize: 11,
-          color: 'var(--text-3)',
-          textAlign: 'center',
-        }}
-      >
-        Tap a pin to view the carpark
-      </div>
-    </div>
-  );
-}

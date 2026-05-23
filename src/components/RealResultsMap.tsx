@@ -1,0 +1,195 @@
+import { useEffect, useRef } from 'react';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import type { Carpark, DurationHours } from '../lib/types';
+import { availabilityStatus, formatCost } from '../lib/availability';
+
+const ONEMAP_TILE = 'https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png';
+const ONEMAP_ATTRIBUTION =
+  '<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">© OneMap</a>';
+const SG_BOUNDS = L.latLngBounds([1.144, 103.6], [1.494, 104.1]);
+
+type Props = {
+  carparks: Carpark[];
+  duration: DurationHours;
+  onSelect: (cp: Carpark) => void;
+  degraded: boolean;
+  destinationCoords: [number, number] | null;
+};
+
+export function RealResultsMap({ carparks, duration, onSelect, degraded, destinationCoords }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  // We have to keep a stable handler ref because Leaflet markers don't
+  // re-render with React — they're added imperatively. The selector closure
+  // captures the *latest* onSelect via this ref.
+  const onSelectRef = useRef(onSelect);
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
+  // Mount once
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+    const map = L.map(containerRef.current, {
+      attributionControl: true,
+      zoomControl: false,
+      maxBounds: SG_BOUNDS,
+      minZoom: 11,
+      maxZoom: 19,
+    });
+    L.tileLayer(ONEMAP_TILE, {
+      attribution: ONEMAP_ATTRIBUTION,
+      detectRetina: true,
+      bounds: SG_BOUNDS,
+    }).addTo(map);
+    mapRef.current = map;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Redraw markers whenever the data changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.eachLayer((layer) => {
+      if (!(layer instanceof L.TileLayer)) map.removeLayer(layer);
+    });
+
+    const accent = getCssVar('--accent', '#2EE3C2');
+    const text1 = getCssVar('--text-1', '#0E1014');
+    const bg1 = getCssVar('--bg-1', '#FFFFFF');
+    const lineStrong = getCssVar('--line-strong', 'rgba(14,16,20,0.14)');
+    const ok = getCssVar('--ok', '#1F8A4F');
+    const warn = getCssVar('--warn', '#A66B00');
+    const bad = getCssVar('--bad', '#C0392B');
+    const muted = getCssVar('--muted-status', '#6B7280');
+
+    const statusColor = (s: ReturnType<typeof availabilityStatus>) =>
+      s === 'available' ? ok : s === 'limited' ? warn : s === 'full' ? bad : muted;
+
+    // Destination marker — central solid dot
+    if (destinationCoords) {
+      L.marker(destinationCoords, {
+        icon: L.divIcon({
+          className: 'psg-pin-dest',
+          html: `<div style="
+            width:16px;height:16px;border-radius:50%;
+            background:${text1}; border:2px solid #fff;
+            box-shadow:0 2px 6px rgba(0,0,0,0.3);
+          "></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+        }),
+        // Always rendered behind the carpark pins; they tap-target priority.
+        zIndexOffset: -100,
+      }).addTo(map);
+    }
+
+    // Carpark pins — cost label with a small tail
+    carparks.forEach((cp, i) => {
+      const isCheapest = i === 0;
+      const status = availabilityStatus(degraded ? null : cp.lotsAvailable);
+      const dotColor = statusColor(status);
+      const cost = formatCost(cp.estByHours[duration]);
+      const fill = isCheapest ? accent : bg1;
+      const fg = isCheapest ? '#0E1014' : text1;
+      const border = isCheapest ? accent : lineStrong;
+
+      const html = `
+        <div style="
+          display:flex; flex-direction:column; align-items:center;
+          transform: translate(-50%, -100%);
+        ">
+          <div style="
+            display:flex; align-items:center; gap:6px;
+            padding:5px 9px; border-radius:999px;
+            background:${fill}; color:${fg};
+            border:0.5px solid ${border};
+            font-family: var(--font-display);
+            font-size:12.5px; font-weight:600;
+            box-shadow:0 4px 12px rgba(0,0,0,0.2);
+            white-space:nowrap;
+          ">
+            <span style="
+              width:6px;height:6px;border-radius:999px;background:${dotColor};
+            "></span>
+            ${cost}
+          </div>
+          <div style="
+            width:2px; height:10px;
+            background:${isCheapest ? accent : text1};
+            opacity:0.6;
+          "></div>
+        </div>
+      `;
+
+      const marker = L.marker(cp.coords.entrance, {
+        icon: L.divIcon({
+          className: 'psg-pin-cp',
+          html,
+          // Anchor the tail tip at the actual location; the pill floats above.
+          iconSize: [0, 0],
+          iconAnchor: [0, 0],
+        }),
+        zIndexOffset: isCheapest ? 1000 : 0,
+        riseOnHover: true,
+        keyboard: true,
+      });
+      marker.on('click', () => onSelectRef.current(cp));
+      marker.addTo(map);
+    });
+
+    // Fit bounds to include all pins + destination
+    const points: [number, number][] = [
+      ...carparks.map((c) => c.coords.entrance),
+      ...(destinationCoords ? [destinationCoords] : []),
+    ];
+    if (points.length === 0) return;
+    if (points.length === 1) {
+      map.setView(points[0], 16);
+    } else {
+      map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 17 });
+    }
+
+    // Make sure tiles render after container layout settles.
+    setTimeout(() => map.invalidateSize(), 50);
+  }, [carparks, duration, degraded, destinationCoords]);
+
+  return (
+    <div style={{ padding: '0 16px' }}>
+      <div
+        style={{
+          position: 'relative',
+          height: 460,
+          borderRadius: 14,
+          overflow: 'hidden',
+          background: 'var(--bg-1)',
+          border: '0.5px solid var(--line)',
+        }}
+      >
+        <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      </div>
+      <div
+        style={{
+          marginTop: 8,
+          padding: '0 4px',
+          fontSize: 11,
+          color: 'var(--text-3)',
+          textAlign: 'center',
+        }}
+      >
+        Tap a pin to view the carpark
+      </div>
+    </div>
+  );
+}
+
+function getCssVar(name: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
