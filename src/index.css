@@ -1,0 +1,186 @@
+@import 'tailwindcss';
+
+/* ── Design tokens (mirrors the prototype's styles.css) ──────────────────── */
+
+:root {
+  --font-display: 'Space Grotesk', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* Light is the shipped default */
+  --bg-0: #f4f2ec;
+  --bg-1: #ffffff;
+  --bg-2: #faf8f2;
+  --bg-3: #eeeae0;
+  --line: rgba(14, 16, 20, 0.07);
+  --line-strong: rgba(14, 16, 20, 0.14);
+  --text-1: #0e1014;
+  --text-2: rgba(14, 16, 20, 0.65);
+  --text-3: rgba(14, 16, 20, 0.42);
+
+  /* Availability semantics — light */
+  --ok: #1f8a4f;
+  --ok-bg: rgba(34, 160, 80, 0.12);
+  --warn: #a66b00;
+  --warn-bg: rgba(217, 142, 16, 0.14);
+  --bad: #c0392b;
+  --bad-bg: rgba(192, 57, 43, 0.1);
+  --muted-status: #6b7280;
+  --muted-status-bg: rgba(107, 114, 128, 0.1);
+
+  /* Accent — teal (shipped default) */
+  --accent: #2ee3c2;
+  --accent-tint: rgba(46, 227, 194, 0.13);
+  --accent-tint-strong: rgba(46, 227, 194, 0.22);
+  --accent-on: #0e1014;
+}
+
+[data-theme='dark'] {
+  --bg-0: #0e1014;
+  --bg-1: #161a21;
+  --bg-2: #1e232c;
+  --bg-3: #262c37;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --text-1: #f5f6f8;
+  --text-2: rgba(245, 246, 248, 0.68);
+  --text-3: rgba(245, 246, 248, 0.42);
+
+  --ok: #4ade80;
+  --ok-bg: rgba(74, 222, 128, 0.12);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.14);
+  --bad: #f87171;
+  --bad-bg: rgba(248, 113, 113, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+body {
+  font-family: var(--font-body);
+  background: var(--bg-0);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* App shell — every number renders in tabular figures */
+.psg-app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.psg-app * {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stagger-in for list children */
+@keyframes psg-slide-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.psg-stagger > * {
+  animation: psg-slide-up 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.psg-stagger > *:nth-child(1) { animation-delay: 20ms; }
+.psg-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.psg-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.psg-stagger > *:nth-child(4) { animation-delay: 140ms; }
+.psg-stagger > *:nth-child(5) { animation-delay: 180ms; }
+.psg-stagger > *:nth-child(6) { animation-delay: 220ms; }
+.psg-stagger > *:nth-child(7) { animation-delay: 260ms; }
+
+/* Limited-availability dot pulse */
+@keyframes psg-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.85); }
+}
+.psg-pulse {
+  animation: psg-pulse 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .psg-pulse { animation: none; }
+  .psg-stagger > * { animation: none; }
+  .psg-screen { animation: none; }
+}
+
+/* Screen transition */
+@keyframes psg-screen-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.psg-screen {
+  animation: psg-screen-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes psg-spin {
+  to { transform: rotate(360deg); }
+}
+.psg-spin {
+  animation: psg-spin 0.9s linear infinite;
+}
+
+.psg-no-scrollbar::-webkit-scrollbar { display: none; }
+.psg-no-scrollbar { scrollbar-width: none; }
+
+/* Frame around the mobile viewport when shown on larger screens */
+.psg-frame-wrap {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  background: radial-gradient(120% 70% at 50% 0%, #ece7dc 0%, #d9d1be 70%);
+}
+.psg-frame {
+  width: 100%;
+  max-width: 390px;
+  height: min(844px, calc(100dvh - 48px));
+  background: var(--bg-0);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    0 0 0 10px #1a1a1e,
+    0 0 0 11px rgba(255, 255, 255, 0.05);
+}
+
+/* On small mobile screens, drop the frame chrome and go edge-to-edge */
+@media (max-width: 480px) {
+  .psg-frame-wrap {
+    padding: 0;
+    background: var(--bg-0);
+  }
+  .psg-frame {
+    max-width: none;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
