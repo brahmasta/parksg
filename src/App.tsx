@@ -80,13 +80,18 @@ function App() {
 
   const { result, search, searchAtCoords, retry, expandRadius } = useCarparks();
 
-  // Once a destination resolves, remember it.
+  // Once a destination resolves, remember it — coords included so the
+  // next tap on this recent replays the exact same location instead of
+  // re-geocoding the label (which may resolve to a different place).
   useEffect(() => {
     if (result.destination) {
       setRecents(
         pushRecent({
           name: result.destination.label,
           hint: result.destination.postal || result.destination.address.split(' ')[0] || '',
+          lat: result.destination.lat,
+          lng: result.destination.lng,
+          address: result.destination.address,
         }),
       );
     }
@@ -120,7 +125,10 @@ function App() {
     lat: number;
     lng: number;
   }) => {
-    setDestinationInput(place.label);
+    // Intentionally don't setDestinationInput here — for autocomplete picks
+    // the picker already set the value, and for recents taps we don't want
+    // a programmatic value change to trigger another autocomplete fetch.
+    // The results screen header uses result.destination.label anyway.
     setScreen('results');
     searchAtCoords(place.label, place.lat, place.lng, place.address);
   };

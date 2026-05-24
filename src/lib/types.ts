@@ -38,6 +38,12 @@ export type Destination = {
 export type RecentDestination = {
   name: string;
   hint: string;
+  // Resolved coords from the original search. Optional so older entries
+  // (and the seeded list) still work — the caller falls back to a text
+  // search when these are missing.
+  lat?: number;
+  lng?: number;
+  address?: string;
 };
 
 export type DurationOption = { value: DurationHours; label: string };

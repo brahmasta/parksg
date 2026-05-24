@@ -199,8 +199,21 @@ export function HomeScreen({
               <button
                 key={r.name}
                 onClick={() => {
-                  setDestination(r.name);
-                  onSearch(r.name);
+                  if (typeof r.lat === 'number' && typeof r.lng === 'number') {
+                    // Replay using the exact coords captured the first time
+                    // this destination was resolved — avoids OneMap drift.
+                    // Skipping setDestination here keeps the search input
+                    // untouched so no redundant autocomplete fires.
+                    onPickPlace({
+                      label: r.name,
+                      address: r.address ?? r.name,
+                      lat: r.lat,
+                      lng: r.lng,
+                    });
+                  } else {
+                    setDestination(r.name);
+                    onSearch(r.name);
+                  }
                 }}
                 style={{
                   appearance: 'none',
