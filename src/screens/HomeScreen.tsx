@@ -92,28 +92,26 @@ export function HomeScreen({
             style={{
               margin: 0,
               fontFamily: 'var(--font-display)',
-              fontSize: 30,
+              fontSize: 34,
               fontWeight: 600,
               color: 'var(--text-1)',
               letterSpacing: -0.8,
-              lineHeight: 1.08,
+              lineHeight: 1.05,
               textWrap: 'balance',
             }}
           >
-            Find parking before
-            <br />
-            you leave.
+            Skip the circling.
           </h1>
           <p
             style={{
-              margin: '10px 0 0',
+              margin: '12px 0 0',
               fontSize: 14,
               color: 'var(--text-2)',
-              lineHeight: 1.4,
-              maxWidth: 320,
+              lineHeight: 1.45,
+              maxWidth: 340,
             }}
           >
-            Nearest and cheapest HDB, URA and LTA carparks for your stay.
+            Live availability and prices for every HDB, URA and LTA carpark — before you drive.
           </p>
         </div>
 
