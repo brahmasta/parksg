@@ -27,10 +27,10 @@ export function Wordmark({ size = 18 }: { size?: number }) {
           fontFamily: 'var(--font-display)',
         }}
       >
-        P
+        W
       </span>
       <span>
-        park<span style={{ color: 'var(--text-2)', fontWeight: 500 }}>sg</span>
+        wheretopark<span style={{ color: 'var(--text-2)', fontWeight: 500 }}>.sg</span>
       </span>
     </div>
   );

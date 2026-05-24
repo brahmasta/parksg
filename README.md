@@ -1,6 +1,6 @@
-# parksg
+# wheretopark.sg
 
-Singapore parking finder — ranks nearby HDB / URA / LTA carparks by cost for a planned duration. Built from the `Parking Finder.zip` design handoff.
+Singapore parking finder — ranks nearby HDB / URA / LTA carparks by distance, with the cheapest option flagged. Built from the `Parking Finder.zip` design handoff.
 
 ## Stack
 
