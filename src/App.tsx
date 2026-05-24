@@ -160,8 +160,6 @@ function App() {
       <HomeScreen
         destination={destinationInput}
         setDestination={setDestinationInput}
-        duration={duration}
-        setDuration={setDuration}
         onSearch={goSearch}
         onNearMe={onNearMe}
         recents={recents}

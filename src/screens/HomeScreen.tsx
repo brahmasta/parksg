@@ -1,13 +1,11 @@
-import type { DurationHours, RecentDestination } from '../lib/types';
-import { DurationStrip, SearchField } from '../components/atoms';
+import type { RecentDestination } from '../lib/types';
+import { SearchField } from '../components/atoms';
 import { Wordmark } from '../components/Wordmark';
 import { IconChevronRight, IconHistory, IconLocation, IconPin } from '../components/icons';
 
 export function HomeScreen({
   destination,
   setDestination,
-  duration,
-  setDuration,
   onSearch,
   onNearMe,
   recents,
@@ -15,8 +13,6 @@ export function HomeScreen({
 }: {
   destination: string;
   setDestination: (v: string) => void;
-  duration: DurationHours;
-  setDuration: (v: DurationHours) => void;
   onSearch: (q?: string) => void;
   onNearMe: () => void;
   recents: RecentDestination[];
@@ -159,33 +155,6 @@ export function HomeScreen({
             </span>
             {nearMeBusy ? 'Finding your location…' : 'Use my location'}
           </button>
-        </div>
-
-        {/* Planned stay */}
-        <div style={{ marginTop: 22 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              marginBottom: 10,
-              gap: 8,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10.5,
-                color: 'var(--text-3)',
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Planned stay
-            </div>
-          </div>
-          <DurationStrip value={duration} onChange={setDuration} compact />
         </div>
 
         {/* Recent */}

@@ -7,7 +7,7 @@ import type {
 } from '../lib/types';
 import { availabilityBgVar, availabilityColorVar } from '../lib/availability';
 import { DURATIONS } from '../lib/mockData';
-import { IconClose, IconSearch } from './icons';
+import { IconChevronRight, IconClose, IconSearch } from './icons';
 
 /* ── Availability dot ────────────────────────────────────────────────────── */
 export function AvailabilityDot({
@@ -211,27 +211,52 @@ export function SearchField({
         }}
       />
       {value && (
-        <button
-          type="button"
-          onClick={() => onChange('')}
-          aria-label="Clear search"
-          style={{
-            appearance: 'none',
-            border: 0,
-            padding: 0,
-            width: 22,
-            height: 22,
-            borderRadius: 999,
-            background: 'var(--bg-3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--text-2)',
-            cursor: 'pointer',
-          }}
-        >
-          <IconClose size={12} stroke={2.5} />
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            aria-label="Clear search"
+            style={{
+              appearance: 'none',
+              border: 0,
+              padding: 0,
+              width: 22,
+              height: 22,
+              borderRadius: 999,
+              background: 'var(--bg-3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--text-2)',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            <IconClose size={12} stroke={2.5} />
+          </button>
+          <button
+            type="submit"
+            aria-label="Search"
+            style={{
+              appearance: 'none',
+              border: 0,
+              padding: 0,
+              width: 30,
+              height: 30,
+              borderRadius: 999,
+              background: 'var(--accent)',
+              color: 'var(--accent-on)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+              boxShadow: '0 2px 6px rgba(46,227,194,0.35)',
+            }}
+          >
+            <IconChevronRight size={16} stroke={2.5} />
+          </button>
+        </>
       )}
     </form>
   );
