@@ -1,5 +1,6 @@
 import type { RecentDestination } from '../lib/types';
-import { SearchField } from '../components/atoms';
+import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
+import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { Wordmark } from '../components/Wordmark';
 import { IconChevronRight, IconHistory, IconLocation, IconPin } from '../components/icons';
 
@@ -7,6 +8,7 @@ export function HomeScreen({
   destination,
   setDestination,
   onSearch,
+  onPickPlace,
   onNearMe,
   recents,
   nearMeBusy,
@@ -14,6 +16,7 @@ export function HomeScreen({
   destination: string;
   setDestination: (v: string) => void;
   onSearch: (q?: string) => void;
+  onPickPlace: (place: ResolvedPlace) => void;
   onNearMe: () => void;
   recents: RecentDestination[];
   nearMeBusy?: boolean;
@@ -116,10 +119,11 @@ export function HomeScreen({
         </div>
 
         {/* Search */}
-        <SearchField
+        <PlaceAutocomplete
           value={destination}
           onChange={setDestination}
-          onSubmit={onSearch}
+          onSubmitText={onSearch}
+          onPickPlace={onPickPlace}
           placeholder="Search destination, mall or postcode"
         />
 

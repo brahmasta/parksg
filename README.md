@@ -7,7 +7,8 @@ Singapore parking finder — ranks nearby HDB / URA / LTA carparks by distance, 
 - Vite + React 19 + TypeScript
 - Tailwind v4 (CSS-first; design tokens live in `src/index.css`)
 - Live data: data.gov.sg (HDB) + LTA Datamall (URA + LTA) via a Vercel Edge proxy
-- OneMap for geocoding the search box
+- Google Places (New) for the destination search box (typeahead + place details)
+- OneMap fallback geocoder for raw text submits, plus walking-route polylines
 
 ## Required env vars
 
@@ -16,10 +17,12 @@ Singapore parking finder — ranks nearby HDB / URA / LTA carparks by distance, 
 | `LTA_ACCOUNT_KEY` | Vercel → Settings → Environment Variables | From [datamall.lta.gov.sg](https://datamall.lta.gov.sg). Used server-side only by `api/lta-availability` for URA + LTA carparks. |
 | `ONEMAP_EMAIL` | Vercel → Settings → Environment Variables | Register at [onemap.gov.sg/apidocs/register](https://www.onemap.gov.sg/apidocs/register). Used by `api/onemap-route` for real walking routes. |
 | `ONEMAP_PASSWORD` | Vercel → Settings → Environment Variables | Paired with `ONEMAP_EMAIL`. Bearer token is cached in-memory for ~3 days. |
+| `GOOGLE_PLACES_API_KEY` | Vercel → Settings → Environment Variables | Google Cloud → Maps Platform → enable **Places API (New)**. Used server-side by `api/google-places-autocomplete` and `api/google-places-details`. |
 
 Local dev works without any of them — every feature degrades gracefully.
 Without LTA: HDB-only results. Without OneMap: straight-line walk
-distance (haversine) on the detail screen.
+distance (haversine) on the detail screen. Without Google Places: the search
+box loses typeahead but still resolves raw submits via OneMap's geocoder.
 
 ## Run
 
@@ -66,7 +69,6 @@ src/
 ## Roadmap
 
 - Real URA rate schedules via the URA Data Service (daily token rotation) — currently URA carparks use a flat $1.20/30 min approximation
-- OneMap autocomplete (the search box is plain text for now)
 - Account / Save flow (UI present, no persistence yet)
 - "Available only" filter (UI present, currently does basic filter on cards with > 0 lots)
 - Render OneMap's `route_geometry` polyline on the detail walk-map

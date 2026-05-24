@@ -34,7 +34,7 @@ const EMPTY: SearchResult = {
  * (e.g. "Vivocity"), the desired radius, and get back a ranked result. */
 type Trigger =
   | { kind: 'query'; query: string }
-  | { kind: 'coords'; label: string; lat: number; lng: number };
+  | { kind: 'coords'; label: string; lat: number; lng: number; address?: string };
 
 export function useCarparks() {
   const [trigger, setTrigger] = useState<Trigger | null>(null);
@@ -87,7 +87,13 @@ export function useCarparks() {
         const dest: GeocodedPlace | null = isAvailOnly
           ? result.destination
           : t.kind === 'coords'
-            ? { label: t.label, address: t.label, postal: '', lat: t.lat, lng: t.lng }
+            ? {
+                label: t.label,
+                address: t.address ?? t.label,
+                postal: extractSgPostal(t.address) ?? '',
+                lat: t.lat,
+                lng: t.lng,
+              }
             : await geocode(t.query);
         if (!dest) {
           if (requestSeq.current !== seq) return;
@@ -202,8 +208,8 @@ export function useCarparks() {
     [],
   );
   const searchAtCoords = useCallback(
-    (label: string, lat: number, lng: number) =>
-      setTrigger({ kind: 'coords', label, lat, lng }),
+    (label: string, lat: number, lng: number, address?: string) =>
+      setTrigger({ kind: 'coords', label, lat, lng, address }),
     [],
   );
   const retry = useCallback(() => {
@@ -287,6 +293,14 @@ function displayName(info: HdbCarparkInfo): string {
   // Strip trailing "Car Park" / "Basement Car Park" / "Multi-Storey Car Park"
   a = a.replace(/\s+(Basement|Multi[- ]Storey)?\s*Car Park$/i, '').trim();
   return a || info.address;
+}
+
+// Pull the 6-digit SG postal code out of a formatted address, if present.
+// Google's formattedAddress for SG places usually ends "... Singapore 098585".
+function extractSgPostal(address: string | undefined): string | null {
+  if (!address) return null;
+  const m = /\b(\d{6})\b/.exec(address);
+  return m ? m[1] : null;
 }
 
 async function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {

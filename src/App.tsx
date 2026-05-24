@@ -114,6 +114,17 @@ function App() {
     search(query);
   };
 
+  const goPickPlace = (place: {
+    label: string;
+    address: string;
+    lat: number;
+    lng: number;
+  }) => {
+    setDestinationInput(place.label);
+    setScreen('results');
+    searchAtCoords(place.label, place.lat, place.lng, place.address);
+  };
+
   const goDetail = (cp: Carpark) => {
     setSelectedCarpark(cp);
     setScreen('detail');
@@ -161,6 +172,7 @@ function App() {
         destination={destinationInput}
         setDestination={setDestinationInput}
         onSearch={goSearch}
+        onPickPlace={goPickPlace}
         onNearMe={onNearMe}
         recents={recents}
         nearMeBusy={nearMeBusy}
