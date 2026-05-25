@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Carpark } from '../lib/types';
+import { synthesizeCap, synthesizeRate, synthesizeWindow } from '../lib/rateDisplay';
 import { IconChevronDown } from './icons';
 
 type SectionKey = 'weekday' | 'saturday' | 'sundayPH';
@@ -69,54 +70,59 @@ export function RateTable({ rates }: { rates: Carpark['rates'] }) {
             </button>
             {isOpen && (
               <div style={{ padding: '0 14px 12px' }}>
-                {rates[s.key].map((r, j) => (
-                  <div
-                    key={j}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      padding: '7px 0',
-                      borderTop: j > 0 ? '0.5px solid var(--line)' : 'none',
-                      gap: 12,
-                      alignItems: 'flex-start',
-                    }}
-                  >
+                {rates[s.key].map((r, j) => {
+                  const win = synthesizeWindow(r);
+                  const rate = synthesizeRate(r);
+                  const cap = synthesizeCap(r);
+                  return (
                     <div
+                      key={j}
                       style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
-                        color: 'var(--text-2)',
-                        whiteSpace: 'nowrap',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '7px 0',
+                        borderTop: j > 0 ? '0.5px solid var(--line)' : 'none',
+                        gap: 12,
+                        alignItems: 'flex-start',
                       }}
                     >
-                      {r.window}
+                      <div
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 12,
+                          color: 'var(--text-2)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {win}
+                      </div>
+                      <div
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 12.5,
+                          color: 'var(--text-1)',
+                          fontWeight: 500,
+                          textAlign: 'right',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {rate}
+                        {cap && (
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: 'var(--text-3)',
+                              fontWeight: 400,
+                              marginTop: 1,
+                            }}
+                          >
+                            {cap}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12.5,
-                        color: 'var(--text-1)',
-                        fontWeight: 500,
-                        textAlign: 'right',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {r.rate}
-                      {r.cap && (
-                        <div
-                          style={{
-                            fontSize: 11,
-                            color: 'var(--text-3)',
-                            fontWeight: 400,
-                            marginTop: 1,
-                          }}
-                        >
-                          {r.cap}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

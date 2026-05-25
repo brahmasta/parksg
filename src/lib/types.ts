@@ -33,15 +33,34 @@ export type CarparkEV = {
   connectors?: EVConnector[];
 };
 
-export type RateSource = 'URA' | 'HDB' | 'LTA_DATAGOV' | 'MANUAL';
+export type RateSource =
+  | 'URA'
+  | 'HDB'
+  | 'LTA_DATAGOV'
+  | 'CAG'
+  | 'OPERATOR'
+  | 'MANUAL';
+
+/** Day bucket a band applies to. Carpark.rates groups by these for display,
+ * but each row also carries the value explicitly so flatter shapes (e.g.
+ * `RateRow[]` straight off the URA proxy) round-trip without losing
+ * information. */
+export type DayType = 'WEEKDAY' | 'SAT' | 'SUN_PH';
+
+export type RateSystem = 'EPS' | 'COUPON' | 'GANTRY_PRIVATE' | 'FLAT';
+export type VehCat = 'CAR' | 'MOTORCYCLE' | 'HEAVY';
 
 /**
  * A row in a carpark's rate schedule.
  *
  * The cosmetic `window` / `rate` / `cap` fields render the schedule in the
- * UI. The structured fields below are populated for sources the cost
- * calculator can reason about (currently LTA_DATAGOV); when present they
- * let estByHours compute a real estimate instead of a flat fallback.
+ * UI. They're optional — when omitted, RateTable falls back to the
+ * `synthesizeWindow` / `synthesizeRate` helpers in `rateDisplay.ts` which
+ * derive readable strings from the structured fields below.
+ *
+ * The structured fields are populated for sources the cost calculator can
+ * reason about (URA, LTA_DATAGOV, …); when present they let estByHours
+ * compute a real estimate instead of a flat fallback.
  *
  * Time bands use 'HH:mm' (24h). `endTime` may be lexically less than
  * `startTime` to express crossing midnight, e.g. "18:00"–"03:30".
@@ -53,10 +72,15 @@ export type RateSource = 'URA' | 'HDB' | 'LTA_DATAGOV' | 'MANUAL';
  * calculator treats that band as zero contribution.
  */
 export type RateRow = {
-  window: string;
-  rate: string;
+  /** Cosmetic — derived if missing. */
+  window?: string;
+  /** Cosmetic — derived if missing. */
+  rate?: string;
+  /** Cosmetic — derived if missing. */
   cap?: string;
   // ── Structured fields ──────────────────────────────────────────────
+  /** Which day bucket this row applies to. */
+  dayType?: DayType;
   /** 'HH:mm' 24h start of the band, inclusive. */
   startTime?: string;
   /** 'HH:mm' 24h end of the band, exclusive. May be < startTime to express crossing midnight. */
@@ -73,6 +97,12 @@ export type RateRow = {
   perEntryCents?: number;
   /** Daily / session cap in cents. */
   capCents?: number;
+  /** Grace period at entry/exit, in minutes. */
+  graceMinutes?: number;
+  /** Charging mechanism — EPS gantry, paper coupon, private gantry, flat. */
+  system?: RateSystem;
+  /** Vehicle category this row priced for. v1 only renders CAR rows. */
+  vehCat?: VehCat;
   /** Where this row came from — drives "rates may be outdated" hints. */
   source: RateSource;
   /** ISO date the source data was effective (e.g. '2018-11-01'). */
