@@ -81,14 +81,29 @@ export function estimateCostCentsAt(
   const inBand = inDay.filter((r) => bandCovers(r, at.hourOfDay));
   const pickFrom = inBand.length > 0 ? inBand : inDay;
 
-  // Dominant-band heuristic: most expensive applicable row wins.
-  const dominant = [...pickFrom].sort((a, b) => {
-    const aCost = a.perBlockCents ?? a.firstHourCents ?? a.perEntryCents ?? 0;
-    const bCost = b.perBlockCents ?? b.firstHourCents ?? b.perEntryCents ?? 0;
-    return bCost - aCost;
-  })[0];
+  // Dominant-band heuristic: highest cost-per-minute wins. URA encodes
+  // some night caps as a row like "$5.00 / 510 mins" right next to the
+  // "$0.60 / 30 mins" rate row; sorting by perBlockCents alone would pick
+  // the cap (which is wrong — it's the daily ceiling, not the per-block
+  // rate). Per-minute math correctly puts $0.60/30min above $5/510min
+  // (2.0 ¢/min vs ~0.98 ¢/min).
+  const dominant = [...pickFrom].sort(
+    (a, b) => costPerMinute(b) - costPerMinute(a),
+  )[0];
 
   return estimateCostCents([dominant], hours);
+}
+
+function costPerMinute(r: RateRow): number {
+  if (r.perBlockCents != null && r.blockMinutes != null && r.blockMinutes > 0) {
+    return r.perBlockCents / r.blockMinutes;
+  }
+  if (r.firstHourCents != null) {
+    const min = r.firstBlockMinutes ?? 60;
+    return min > 0 ? r.firstHourCents / min : 0;
+  }
+  if (r.perEntryCents != null) return r.perEntryCents / 60; // amortise per hour
+  return 0;
 }
 
 /** True when (startTime <= hour < endTime), with wrap-around at midnight.
