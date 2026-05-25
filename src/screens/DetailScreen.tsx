@@ -9,7 +9,7 @@ import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../
 import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
-import { IconChevronLeft, IconNavigate } from '../components/icons';
+import { IconChevronLeft, IconNavigate, IconWarning } from '../components/icons';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 
 export function DetailScreen({
@@ -45,12 +45,19 @@ export function DetailScreen({
     cp.walkMin,
   );
 
-  const rateSource =
-    cp.operator === 'HDB'
-      ? 'HDB carpark tariff'
-      : cp.operator === 'URA'
-      ? 'URA Car_Park_Details'
-      : 'LTA Datamall';
+  // Pick a representative rate row to determine the source attribution.
+  // (All rows in a schedule come from the same source today.)
+  const firstRateRow =
+    cp.rates.weekday[0] ?? cp.rates.saturday[0] ?? cp.rates.sundayPH[0] ?? null;
+  const isDatagovRates = firstRateRow?.source === 'LTA_DATAGOV';
+
+  const rateSource = isDatagovRates
+    ? 'data.gov.sg LTA Carpark Rates (Nov 2018 snapshot)'
+    : cp.operator === 'HDB'
+    ? 'HDB carpark tariff'
+    : cp.operator === 'URA'
+    ? 'URA Car_Park_Details'
+    : 'LTA Datamall';
 
   return (
     <div
@@ -336,6 +343,34 @@ export function DetailScreen({
             Rate schedule
           </div>
           <RateTable rates={cp.rates} />
+          {isDatagovRates && (
+            <div
+              role="status"
+              style={{
+                marginTop: 10,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 12px',
+                background: 'var(--warn-bg)',
+                border: '0.5px solid var(--warn)',
+                borderRadius: 10,
+                color: 'var(--text-1)',
+                fontSize: 12.5,
+                lineHeight: 1.4,
+              }}
+            >
+              <span
+                style={{ color: 'var(--warn)', display: 'inline-flex', flexShrink: 0 }}
+              >
+                <IconWarning size={16} stroke={2} />
+              </span>
+              <span>
+                Rates may be outdated — sourced from a 2018 LTA snapshot.
+                Check at the gantry before parking.
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Meta */}
