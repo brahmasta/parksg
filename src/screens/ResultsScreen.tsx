@@ -3,8 +3,11 @@ import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/type
 import { DurationStrip, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { DegradedBanner } from '../components/DegradedBanner';
+import { EVEmptyResults } from '../components/EVEmptyResults';
+import { FilterPill } from '../components/FilterPill';
 import { RealResultsMap } from '../components/RealResultsMap';
 import {
+  IconBolt,
   IconChevronLeft,
   IconList,
   IconMap,
@@ -20,6 +23,8 @@ export function ResultsScreen({
   state,
   availableOnly,
   setAvailableOnly,
+  evOnly,
+  setEvOnly,
   viewMode,
   onToggleView,
   onBack,
@@ -35,6 +40,8 @@ export function ResultsScreen({
   state: ResultsState;
   availableOnly: boolean;
   setAvailableOnly: (v: boolean) => void;
+  evOnly: boolean;
+  setEvOnly: (v: boolean) => void;
   viewMode: ViewMode;
   onToggleView: () => void;
   onBack: () => void;
@@ -46,9 +53,16 @@ export function ResultsScreen({
     // Primary sort: walking distance (closest first). Cost is shown on each
     // card; the "CHEAPEST" badge separately marks the lowest-cost option
     // regardless of where it lands in the distance order.
-    const arr = [...carparks].sort((a, b) => a.walkMeters - b.walkMeters);
-    return availableOnly ? arr.filter((c) => c.lotsAvailable > 0) : arr;
-  }, [carparks, availableOnly]);
+    let arr = [...carparks].sort((a, b) => a.walkMeters - b.walkMeters);
+    if (availableOnly) arr = arr.filter((c) => c.lotsAvailable > 0);
+    if (evOnly) arr = arr.filter((c) => c.ev?.hasCharging === true);
+    return arr;
+  }, [carparks, availableOnly, evOnly]);
+
+  // EV filter is on and nothing matches — show a dedicated empty state
+  // (different copy + visual from the "no carparks at all" state).
+  const evFilterEmpty =
+    evOnly && (state === 'loaded' || state === 'degraded') && ranked.length === 0;
 
   const cheapestId = useMemo(() => {
     if (ranked.length === 0) return null;
@@ -164,37 +178,20 @@ export function ResultsScreen({
             <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
             sorted by distance
           </div>
-          <button
-            onClick={() => setAvailableOnly(!availableOnly)}
-            style={{
-              appearance: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '5px 10px',
-              border: availableOnly
-                ? '1px solid var(--accent)'
-                : '0.5px solid var(--line-strong)',
-              background: availableOnly ? 'var(--accent-tint-strong)' : 'transparent',
-              color: availableOnly ? 'var(--accent-on)' : 'var(--text-2)',
-              borderRadius: 999,
-              fontSize: 11.5,
-              fontWeight: 500,
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 999,
-                background: availableOnly ? 'var(--accent)' : 'var(--ok)',
-              }}
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            <FilterPill
+              active={evOnly}
+              onClick={() => setEvOnly(!evOnly)}
+              icon={<IconBolt size={11} stroke={2.25} />}
+              label="EV"
             />
-            Available only
-          </button>
+            <FilterPill
+              active={availableOnly}
+              onClick={() => setAvailableOnly(!availableOnly)}
+              dot
+              label="Available"
+            />
+          </div>
         </div>
       </div>
 
@@ -208,7 +205,14 @@ export function ResultsScreen({
           <EmptyResults destination={destination} onExpandRadius={onExpandRadius} onBack={onBack} />
         )}
 
-        {(state === 'loaded' || state === 'degraded') &&
+        {evFilterEmpty && (
+          <EVEmptyResults
+            destination={destination}
+            onClearFilter={() => setEvOnly(false)}
+          />
+        )}
+
+        {(state === 'loaded' || state === 'degraded') && !evFilterEmpty &&
           (viewMode === 'map' ? (
             <RealResultsMap
               carparks={ranked}

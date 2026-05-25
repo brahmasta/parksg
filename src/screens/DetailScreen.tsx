@@ -6,6 +6,7 @@ import {
   formatDistance,
 } from '../lib/availability';
 import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../components/atoms';
+import { EVSection } from '../components/EVSection';
 import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
@@ -257,6 +258,9 @@ export function DetailScreen({
           </div>
         </div>
 
+        {/* EV charging (between stat cards and walk map per E8 design spec). */}
+        <EVSection ev={cp.ev} />
+
         {/* Walk map */}
         <div style={{ marginTop: 16 }}>
           <div
@@ -388,6 +392,12 @@ export function DetailScreen({
             : `Lot count last refreshed ${refreshedSecondsAgo}s ago`}
           <br />
           Rates from {rateSource}
+          {cp.ev?.hasCharging && (
+            <>
+              <br />
+              EV status refreshes every 5 min · Private chargers not shown
+            </>
+          )}
         </div>
       </div>
 

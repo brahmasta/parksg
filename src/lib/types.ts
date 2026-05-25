@@ -1,6 +1,38 @@
 export type Operator = 'HDB' | 'URA' | 'LTA';
 export type LotType = 'C' | 'M' | 'H';
 
+// ── EV charging ──────────────────────────────────────────────────────
+export type ConnectorStatus = 'Available' | 'Occupied' | 'Not Available';
+export type Current = 'AC' | 'DC';
+export type PlugType = 'Type 2' | 'CCS2' | 'CHAdeMO' | 'GB/T';
+
+export type EVConnector = {
+  /** Stable id per physical connector — used as a React key. */
+  id: string;
+  operator: string;
+  /** Human-readable position, e.g. "L1 Bay A1". */
+  position: string;
+  /** "24/7" or "7am–11pm". */
+  hours: string;
+  plugType: PlugType;
+  current: Current;
+  kw: number;
+  /** SGD, numeric. */
+  price: number;
+  priceType: '/kWh' | '/h';
+  status: ConnectorStatus;
+};
+
+export type CarparkEV = {
+  hasCharging: boolean;
+  /** Age of the LTA snapshot in minutes. >5 → treat feed as stale. */
+  lastUpdatedMin?: number;
+  /** Distinct operators, ordered by connector count desc. */
+  operators?: string[];
+  /** Omit when hasCharging is false. */
+  connectors?: EVConnector[];
+};
+
 export type RateSource = 'URA' | 'HDB' | 'LTA_DATAGOV' | 'MANUAL';
 
 /**
@@ -67,6 +99,8 @@ export type Carpark = {
     sundayPH: RateRow[];
   };
   estByHours: Record<DurationHours, number>;
+  /** EV charging data from LTA /EVCBatch joined by haversine ≤50m. */
+  ev?: CarparkEV;
 };
 
 export type Destination = {

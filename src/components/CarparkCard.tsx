@@ -6,6 +6,7 @@ import {
   formatDistance,
 } from '../lib/availability';
 import { AvailabilityDot, OperatorBadge } from './atoms';
+import { EVChip } from './EVChip';
 import { IconWalk } from './icons';
 
 export function CarparkCard({
@@ -71,6 +72,7 @@ export function CarparkCard({
               #{rank}
             </span>
             <OperatorBadge operator={cp.operator} />
+            <EVChip ev={cp.ev} />
             {isCheapest && (
               <span
                 style={{

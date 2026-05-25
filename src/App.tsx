@@ -16,6 +16,7 @@ import { loadRecents, pushRecent } from './lib/recents';
 const DURATION_KEY = 'psg.duration';
 const VIEW_MODE_KEY = 'psg.viewMode';
 const AVAILABLE_ONLY_KEY = 'psg.availableOnly';
+const EV_ONLY_KEY = 'psg.evOnly';
 
 function readStored<T>(key: string, fallback: T, parse: (raw: string) => T | null): T {
   try {
@@ -71,6 +72,20 @@ function App() {
     setAvailableOnlyState(v);
     try {
       localStorage.setItem(AVAILABLE_ONLY_KEY, String(v));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const [evOnly, setEvOnlyState] = useState<boolean>(() =>
+    readStored<boolean>(EV_ONLY_KEY, false, (raw) =>
+      raw === 'true' ? true : raw === 'false' ? false : null,
+    ),
+  );
+  const setEvOnly = useCallback((v: boolean) => {
+    setEvOnlyState(v);
+    try {
+      localStorage.setItem(EV_ONLY_KEY, String(v));
     } catch {
       /* ignore */
     }
@@ -201,6 +216,8 @@ function App() {
         state={result.state}
         availableOnly={availableOnly}
         setAvailableOnly={setAvailableOnly}
+        evOnly={evOnly}
+        setEvOnly={setEvOnly}
         viewMode={viewMode}
         onToggleView={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
         onBack={() => setScreen('home')}

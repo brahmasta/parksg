@@ -11,6 +11,8 @@ import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
 import { estByHoursFor, ratesFor } from '../lib/cost';
 import { applyLtaRates, logCoverage } from '../lib/data/ltaRatesLookup';
+import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
+import { attachEvData } from '../lib/ev';
 
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
@@ -110,11 +112,13 @@ export function useCarparks() {
         // Fetch HDB info + HDB live availability + LTA (URA+LTA carparks)
         // in parallel. Each is independent; partial failures degrade
         // gracefully rather than blocking the whole result.
-        const [info, ltaSettled, availSettled] = await Promise.all([
+        const [info, ltaSettled, availSettled, evSettled] = await Promise.all([
           getHdbCarparkInfo(),
           // LTA is a serverless proxy call; can be slow on cold start.
           withTimeout(getLtaCarparks(), 8_000).catch(() => null),
           withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
+          // EV proxy follows a signed S3 URL — give it a more generous budget.
+          withTimeout(fetchEvAvailability(), 10_000).catch(() => null),
         ]);
         if (requestSeq.current !== seq) return;
 
@@ -143,7 +147,16 @@ export function useCarparks() {
           .sort((a, b) => a.meters - b.meters)
           .map(({ cp, meters }) => ltaToCarpark(cp, meters));
 
-        const merged = [...hdbCarparks, ...otherCarparks];
+        let merged = [...hdbCarparks, ...otherCarparks];
+
+        // E8: spatial-join LTA EVCBatch to the carpark spine. Carparks
+        // within 50m of an EV location get cp.ev populated. Missing
+        // upstream = silent — every carpark just stays ev-less.
+        if (evSettled) {
+          const ageMin =
+            evSnapshotAgeMinutes(evSettled.lastUpdatedTime) ?? Number.POSITIVE_INFINITY;
+          merged = attachEvData(merged, evSettled.locations, ageMin);
+        }
 
         // E3.1: try to attach 2018 LTA Carpark Rates corpus entries by
         // normalized name. Carparks that miss keep their operator
