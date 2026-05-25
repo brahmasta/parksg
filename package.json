@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "audit:datamall": "ts-node --project scripts/tsconfig.json scripts/audit-datamall.ts",
     "ingest:lta-rates": "tsx scripts/ingest-lta-rates.ts",
-    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts"
+    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts scripts/lib/ura.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
