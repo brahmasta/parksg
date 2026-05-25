@@ -154,5 +154,5 @@ export type DurationOption = { value: DurationHours; label: string };
 
 export type AvailabilityStatus = 'available' | 'limited' | 'full' | 'unknown';
 export type ResultsState = 'loading' | 'loaded' | 'degraded' | 'empty';
-export type Screen = 'home' | 'results' | 'detail';
+export type Screen = 'home' | 'results' | 'detail' | 'about';
 export type ViewMode = 'list' | 'map';

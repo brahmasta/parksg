@@ -9,6 +9,7 @@ import type {
 import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { DetailScreen } from './screens/DetailScreen';
+import { AboutScreen } from './screens/AboutScreen';
 import { IconNavigate } from './components/icons';
 import { useCarparks } from './hooks/useCarparks';
 import { loadRecents, pushRecent } from './lib/recents';
@@ -199,6 +200,14 @@ function App() {
         onNearMe={onNearMe}
         recents={recents}
         nearMeBusy={nearMeBusy}
+        onAbout={() => setScreen('about')}
+      />
+    );
+  } else if (screen === 'about') {
+    body = (
+      <AboutScreen
+        onBack={() => setScreen('home')}
+        onStartSearch={() => setScreen('home')}
       />
     );
   } else if (screen === 'results') {

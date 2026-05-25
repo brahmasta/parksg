@@ -4,7 +4,13 @@ import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { Wordmark } from '../components/Wordmark';
 import { pickHeroCopy } from '../lib/heroCopy';
-import { IconChevronRight, IconHistory, IconLocation, IconPin } from '../components/icons';
+import {
+  IconChevronRight,
+  IconHistory,
+  IconInfo,
+  IconLocation,
+  IconPin,
+} from '../components/icons';
 
 export function HomeScreen({
   destination,
@@ -14,6 +20,7 @@ export function HomeScreen({
   onNearMe,
   recents,
   nearMeBusy,
+  onAbout,
 }: {
   destination: string;
   setDestination: (v: string) => void;
@@ -22,6 +29,7 @@ export function HomeScreen({
   onNearMe: () => void;
   recents: RecentDestination[];
   nearMeBusy?: boolean;
+  onAbout: () => void;
 }) {
   // Pick one hero variant per mount and lock it in — no churn while the
   // user is on the screen. Random on each fresh app load.
@@ -89,8 +97,39 @@ export function HomeScreen({
       </div>
 
       {/* Top bar */}
-      <div style={{ padding: '52px 16px 12px', flexShrink: 0, position: 'relative' }}>
+      <div
+        style={{
+          padding: '52px 16px 12px',
+          flexShrink: 0,
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
         <Wordmark size={19} />
+        <button
+          type="button"
+          onClick={onAbout}
+          aria-label="About"
+          style={{
+            appearance: 'none',
+            width: 32,
+            height: 32,
+            borderRadius: 999,
+            background: 'transparent',
+            border: '0.5px solid var(--line-strong)',
+            color: 'var(--text-2)',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <IconInfo size={16} stroke={2} />
+        </button>
       </div>
 
       {/* Body */}

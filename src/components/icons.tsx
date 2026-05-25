@@ -124,3 +124,10 @@ export const IconBolt = (p: IconProps) => (
     <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />
   </Icon>
 );
+export const IconInfo = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 11v5" />
+    <circle cx="12" cy="8" r="0.6" />
+  </Icon>
+);
