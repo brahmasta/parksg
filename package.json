@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "audit:datamall": "ts-node --project scripts/tsconfig.json scripts/audit-datamall.ts"
+    "audit:datamall": "ts-node --project scripts/tsconfig.json scripts/audit-datamall.ts",
+    "ingest:lta-rates": "tsx scripts/ingest-lta-rates.ts",
+    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",

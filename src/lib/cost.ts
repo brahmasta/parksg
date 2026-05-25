@@ -47,39 +47,39 @@ export function ratesFor(operator: Operator): Carpark['rates'] {
     case 'HDB':
       return {
         weekday: [
-          { window: '7am – 10:30pm', rate: '$0.60 / 30 min' },
-          { window: '10:30pm – 7am', rate: '$2.00 cap' },
+          { window: '7am – 10:30pm', rate: '$0.60 / 30 min', source: 'HDB' },
+          { window: '10:30pm – 7am', rate: '$2.00 cap', source: 'HDB' },
         ],
         saturday: [
-          { window: '7am – 10:30pm', rate: '$0.60 / 30 min' },
-          { window: '10:30pm – 7am', rate: '$2.00 cap' },
+          { window: '7am – 10:30pm', rate: '$0.60 / 30 min', source: 'HDB' },
+          { window: '10:30pm – 7am', rate: '$2.00 cap', source: 'HDB' },
         ],
-        sundayPH: [{ window: 'All day', rate: '$0.60 / 30 min' }],
+        sundayPH: [{ window: 'All day', rate: '$0.60 / 30 min', source: 'HDB' }],
       };
     case 'URA':
       // URA's off-street rates vary by location. Show the canonical peak
       // weekday rate with a note. Real per-carpark schedules come in Phase 3.
       return {
         weekday: [
-          { window: '7am – 5pm', rate: '$1.20 / 30 min', cap: 'varies by carpark' },
-          { window: '5pm – 10pm', rate: '$0.60 / 30 min' },
-          { window: '10pm – 7am', rate: 'Free' },
+          { window: '7am – 5pm', rate: '$1.20 / 30 min', cap: 'varies by carpark', source: 'URA' },
+          { window: '5pm – 10pm', rate: '$0.60 / 30 min', source: 'URA' },
+          { window: '10pm – 7am', rate: 'Free', source: 'URA' },
         ],
         saturday: [
-          { window: '7am – 5pm', rate: '$1.20 / 30 min' },
-          { window: '5pm – 10pm', rate: '$0.60 / 30 min' },
+          { window: '7am – 5pm', rate: '$1.20 / 30 min', source: 'URA' },
+          { window: '5pm – 10pm', rate: '$0.60 / 30 min', source: 'URA' },
         ],
-        sundayPH: [{ window: 'All day', rate: '$0.60 / 30 min' }],
+        sundayPH: [{ window: 'All day', rate: '$0.60 / 30 min', source: 'URA' }],
       };
     case 'LTA':
       // LTA carparks (often commercial / off-street next to MRT or expressways).
       // Rates are very location-specific; surface a placeholder until Phase 3.
       return {
         weekday: [
-          { window: 'Rates vary by operator', rate: '≈ $1.60 / 30 min' },
+          { window: 'Rates vary by operator', rate: '≈ $1.60 / 30 min', source: 'MANUAL' },
         ],
-        saturday: [{ window: 'Rates vary by operator', rate: '≈ $1.60 / 30 min' }],
-        sundayPH: [{ window: 'Rates vary by operator', rate: '≈ $1.60 / 30 min' }],
+        saturday: [{ window: 'Rates vary by operator', rate: '≈ $1.60 / 30 min', source: 'MANUAL' }],
+        sundayPH: [{ window: 'Rates vary by operator', rate: '≈ $1.60 / 30 min', source: 'MANUAL' }],
       };
   }
 }
