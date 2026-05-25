@@ -10,6 +10,7 @@ import { getLtaCarparks, type LtaCarpark } from '../lib/api/lta';
 import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
 import { estByHoursFor, ratesFor } from '../lib/cost';
+import { applyLtaRates, logCoverage } from '../lib/data/ltaRatesLookup';
 
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
@@ -144,7 +145,15 @@ export function useCarparks() {
 
         const merged = [...hdbCarparks, ...otherCarparks];
 
-        if (merged.length === 0) {
+        // E3.1: try to attach 2018 LTA Carpark Rates corpus entries by
+        // normalized name. Carparks that miss keep their operator
+        // fallback rates; matched ones get tiered LTA_DATAGOV rows that
+        // feed the EST.COST ranking.
+        const enriched = applyLtaRates(merged);
+        logCoverage(enriched);
+        const finalCarparks = enriched.carparks;
+
+        if (finalCarparks.length === 0) {
           setResult({
             state: 'empty',
             destination: dest,
@@ -162,7 +171,7 @@ export function useCarparks() {
         setResult({
           state: degraded ? 'degraded' : 'loaded',
           destination: dest,
-          carparks: merged,
+          carparks: finalCarparks,
           refreshedSecondsAgo: avail || ltaSettled
             ? 0
             : lastFetchedAt.current

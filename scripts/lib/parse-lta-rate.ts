@@ -27,6 +27,7 @@
  */
 
 import type { RateRow, RateSource } from '../../src/lib/types';
+export { estimateCostCents } from '../../src/lib/rateMath';
 
 export type ParseDayResult =
   | { ok: true; rows: RateRow[] }
@@ -465,55 +466,6 @@ export function parseDayRate(raw: string | null | undefined): ParseDayResult {
   return { ok: true, rows };
 }
 
-// ────────────────────────────────────────────────────────────────────
-// Cost estimation from structured rows
-// ────────────────────────────────────────────────────────────────────
-
-/**
- * Compute an estimated cost in cents for a stay of `hours` starting at
- * the band's startTime (or at 09:00 if unbanded). Used by the runtime
- * cost calculator to rank LTA_DATAGOV carparks alongside HDB/URA.
- *
- * Heuristic: pick the first row whose band covers a typical daytime
- * arrival; charge first-hour + remaining-minutes/blockMinutes blocks;
- * or perEntryCents flat; or 0 if free. Cap at capCents if present.
- *
- * This is intentionally simple — the data has too many edge cases
- * (multi-tier with different blocks per tier, holiday surcharges, etc.)
- * to be exact. We over-estimate slightly so users aren't surprised at
- * the gantry.
- */
-export function estimateCostCents(rows: RateRow[], hours: number): number | null {
-  if (rows.length === 0) return null;
-  // Prefer the first row that has structured rate info; otherwise use the first row.
-  const row =
-    rows.find(
-      (r) =>
-        r.perBlockCents != null ||
-        r.perEntryCents != null ||
-        r.firstHourCents != null,
-    ) ?? rows[0];
-
-  let cents = 0;
-  if (row.perEntryCents != null && row.perBlockCents == null && row.firstHourCents == null) {
-    cents = row.perEntryCents;
-  } else if (row.perBlockCents != null && row.blockMinutes != null) {
-    const totalMinutes = Math.ceil(hours * 60);
-    if (row.firstHourCents != null) {
-      const firstBlockMin = row.firstBlockMinutes ?? 60;
-      cents += row.firstHourCents;
-      const remain = Math.max(0, totalMinutes - firstBlockMin);
-      cents += Math.ceil(remain / row.blockMinutes) * row.perBlockCents;
-    } else {
-      cents += Math.ceil(totalMinutes / row.blockMinutes) * row.perBlockCents;
-    }
-  } else if (row.firstHourCents != null) {
-    // First hour rate only — extrapolate for longer stays.
-    cents = row.firstHourCents * Math.max(1, Math.ceil(hours));
-  } else {
-    // No structured info — can't estimate.
-    return null;
-  }
-  if (row.capCents != null && cents > row.capCents) cents = row.capCents;
-  return cents;
-}
+// estimateCostCents lives in src/lib/rateMath.ts and is re-exported at the
+// top of this file so the runtime app and the parser tests share the same
+// implementation.
