@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import type { RecentDestination } from '../lib/types';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { Wordmark } from '../components/Wordmark';
+import { pickHeroCopy } from '../lib/heroCopy';
 import { IconChevronRight, IconHistory, IconLocation, IconPin } from '../components/icons';
 
 export function HomeScreen({
@@ -21,6 +23,10 @@ export function HomeScreen({
   recents: RecentDestination[];
   nearMeBusy?: boolean;
 }) {
+  // Pick one hero variant per mount and lock it in — no churn while the
+  // user is on the screen. Random on each fresh app load.
+  const hero = useMemo(() => pickHeroCopy(), []);
+
   return (
     <div
       className="psg-screen"
@@ -103,7 +109,7 @@ export function HomeScreen({
               textWrap: 'balance',
             }}
           >
-            Skip the circling.
+            {hero.header}
           </h1>
           <p
             style={{
@@ -114,7 +120,7 @@ export function HomeScreen({
               maxWidth: 340,
             }}
           >
-            Live availability and prices for every HDB, URA and LTA carpark — before you drive.
+            {hero.sub}
           </p>
         </div>
 
