@@ -18,7 +18,7 @@ export const HERO_COPY: HeroCopy[] = [
     sub: 'Live availability and real prices for carparks across Singapore — before you drive.',
   },
   {
-    header: 'Cheapest spot, sorted.',
+    header: 'Cheapest spot first.',
     sub: 'We rank nearby carparks by true cost and walk time, the moment you search.',
   },
   {
