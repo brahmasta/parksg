@@ -1,4 +1,4 @@
-import type { RateRow } from './types';
+import type { DayType, RateRow } from './types';
 
 /**
  * Estimate the total cost (in cents) of parking for `hours` using the
@@ -48,4 +48,66 @@ export function estimateCostCents(rows: RateRow[], hours: number): number | null
 
   if (row.capCents != null && cents > row.capCents) cents = row.capCents;
   return cents;
+}
+
+/**
+ * Day + time-of-day-aware variant.
+ *
+ * Filters `rows` to those whose `dayType` matches and whose time band
+ * (startTime, endTime) covers `hourOfDay`. From the matching rows, picks
+ * the one with the highest `perBlockCents` (dominant-band heuristic) and
+ * delegates to `estimateCostCents`. A row with no startTime/endTime is
+ * treated as applying all day.
+ *
+ * v1 deliberately does NOT stitch costs across bands — a long stay that
+ * spans peak + off-peak pays the peak rate for the whole duration. We
+ * over-estimate on purpose so users aren't surprised at the gantry, per
+ * the same philosophy the flat URA fallback was using.
+ *
+ * Falls back to `estimateCostCents(rows, hours)` when no row matches the
+ * given day/hour — better to return something approximate than null.
+ */
+export function estimateCostCentsAt(
+  rows: RateRow[],
+  hours: number,
+  at: { dayType: DayType; hourOfDay: number },
+): number | null {
+  if (rows.length === 0) return null;
+  const inDay = rows.filter(
+    (r) => r.dayType == null || r.dayType === at.dayType,
+  );
+  if (inDay.length === 0) return estimateCostCents(rows, hours);
+
+  const inBand = inDay.filter((r) => bandCovers(r, at.hourOfDay));
+  const pickFrom = inBand.length > 0 ? inBand : inDay;
+
+  // Dominant-band heuristic: most expensive applicable row wins.
+  const dominant = [...pickFrom].sort((a, b) => {
+    const aCost = a.perBlockCents ?? a.firstHourCents ?? a.perEntryCents ?? 0;
+    const bCost = b.perBlockCents ?? b.firstHourCents ?? b.perEntryCents ?? 0;
+    return bCost - aCost;
+  })[0];
+
+  return estimateCostCents([dominant], hours);
+}
+
+/** True when (startTime <= hour < endTime), with wrap-around at midnight.
+ * Undefined start/end means "all day". */
+function bandCovers(row: RateRow, hour: number): boolean {
+  const start = parseHour(row.startTime);
+  const end = parseHour(row.endTime);
+  if (start == null && end == null) return true;
+  if (start == null || end == null) return true;
+  if (start <= end) {
+    return hour >= start && hour < end;
+  }
+  // Crosses midnight, e.g. 18:00 → 03:30 → covers 18..23 + 0..3.
+  return hour >= start || hour < end;
+}
+
+function parseHour(hhmm: string | undefined): number | null {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(':').map(Number);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return null;
+  return h + m / 60;
 }

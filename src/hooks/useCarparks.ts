@@ -13,6 +13,9 @@ import { estByHoursFor, ratesFor } from '../lib/cost';
 import { applyLtaRates, logCoverage } from '../lib/data/ltaRatesLookup';
 import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
 import { attachEvData } from '../lib/ev';
+import { fetchUraDetails } from '../lib/api/uraDetails';
+import { parseUraRows } from '../lib/ura';
+import { applyUraRates, logUraCoverage } from '../lib/uraJoin';
 
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
@@ -112,13 +115,16 @@ export function useCarparks() {
         // Fetch HDB info + HDB live availability + LTA (URA+LTA carparks)
         // in parallel. Each is independent; partial failures degrade
         // gracefully rather than blocking the whole result.
-        const [info, ltaSettled, availSettled, evSettled] = await Promise.all([
+        const [info, ltaSettled, availSettled, evSettled, uraSettled] = await Promise.all([
           getHdbCarparkInfo(),
           // LTA is a serverless proxy call; can be slow on cold start.
           withTimeout(getLtaCarparks(), 8_000).catch(() => null),
           withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
           // EV proxy follows a signed S3 URL — give it a more generous budget.
           withTimeout(fetchEvAvailability(), 10_000).catch(() => null),
+          // URA Data Service is cached server-side for 6h, but cold start
+          // still needs to mint a token then call upstream. 10s budget.
+          withTimeout(fetchUraDetails(), 10_000).catch(() => null),
         ]);
         if (requestSeq.current !== seq) return;
 
@@ -164,7 +170,18 @@ export function useCarparks() {
         // feed the EST.COST ranking.
         const enriched = applyLtaRates(merged);
         logCoverage(enriched);
-        const finalCarparks = enriched.carparks;
+        let finalCarparks = enriched.carparks;
+
+        // URA: replace flat fallback rates on URA-operator carparks with
+        // live tiered weekday/Sat/Sun-PH bands from Car_Park_Details.
+        // Runs AFTER the LTA corpus so URA wins for URA carparks (the
+        // corpus is 2018-stale and URA is live).
+        if (uraSettled) {
+          const uraMap = parseUraRows(uraSettled.items);
+          const result = applyUraRates(finalCarparks, uraMap);
+          finalCarparks = result.carparks;
+          logUraCoverage(result.matchedCount, uraMap.size, result.unmatchedUraIds);
+        }
 
         if (finalCarparks.length === 0) {
           setResult({
