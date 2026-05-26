@@ -1,21 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Carpark, Operator, ResultsState } from '../lib/types';
+import type {
+  Carpark,
+  DurationHours,
+  LotType,
+  Operator,
+  RateRow,
+  ResultsState,
+} from '../lib/types';
 import {
-  getHdbAvailability,
-  getHdbCarparkInfo,
-  type HdbAvailability,
-  type HdbCarparkInfo,
-} from '../lib/api/hdb';
+  fetchNearbyCarparks,
+  type DbCarparkRaw,
+  type DbRateRowRaw,
+} from '../lib/api/dbCarparks';
+import { getHdbAvailability, type HdbAvailability } from '../lib/api/hdb';
 import { getLtaCarparks, type LtaCarpark } from '../lib/api/lta';
 import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
+import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
-import { applyLtaRates, logCoverage } from '../lib/data/ltaRatesLookup';
 import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
 import { attachEvData } from '../lib/ev';
-import { fetchUraDetails } from '../lib/api/uraDetails';
-import { parseUraRows } from '../lib/ura';
-import { applyUraRates, logUraCoverage } from '../lib/uraJoin';
+import { currentDayType } from '../lib/uraJoin';
 
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
@@ -112,80 +117,24 @@ export function useCarparks() {
           return;
         }
 
-        // Fetch HDB info + HDB live availability + LTA (URA+LTA carparks)
-        // in parallel. Each is independent; partial failures degrade
-        // gracefully rather than blocking the whole result.
-        const [info, ltaSettled, availSettled, evSettled, uraSettled] = await Promise.all([
-          getHdbCarparkInfo(),
-          // LTA is a serverless proxy call; can be slow on cold start.
-          withTimeout(getLtaCarparks(), 8_000).catch(() => null),
+        // Static (carparks + rate_rows) comes from the Supabase DB; live
+        // (HDB lots / URA+LTA lots / EV connectors) still comes from the
+        // upstream APIs because those values change every minute. Each is
+        // independent — a failed availability call yields a degraded
+        // result rather than blocking the whole search.
+        const [dbCarparks, hdbAvail, ltaAvail, evSettled] = await Promise.all([
+          fetchNearbyCarparks(dest, radius).catch(() => null),
           withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
-          // EV proxy follows a signed S3 URL — give it a more generous budget.
+          withTimeout(getLtaCarparks(), 8_000).catch(() => null),
           withTimeout(fetchEvAvailability(), 10_000).catch(() => null),
-          // URA Data Service is cached server-side for 6h, but cold start
-          // still needs to mint a token then call upstream. 10s budget.
-          withTimeout(fetchUraDetails(), 10_000).catch(() => null),
         ]);
         if (requestSeq.current !== seq) return;
 
-        const avail = availSettled;
-        if (avail) lastFetchedAt.current = Date.now();
+        if (hdbAvail || ltaAvail) lastFetchedAt.current = Date.now();
 
-        // ── HDB carparks (data.gov.sg) ────────────────────────────────────
-        const hdbIds = new Set<string>();
-        const hdbNearby = info
-          .map((cp) => ({ cp, meters: haversineMeters(dest, cp) }))
-          .filter((x) => x.meters <= radius)
-          .sort((a, b) => a.meters - b.meters);
-
-        const hdbCarparks = hdbNearby.map(({ cp, meters }) => {
-          hdbIds.add(cp.car_park_no);
-          return hdbToCarpark(cp, meters, avail?.get(cp.car_park_no) ?? null);
-        });
-
-        // ── URA + LTA carparks (LTA Datamall) ────────────────────────────
-        // Skip any LTA entry whose ID matches an HDB entry we already have —
-        // HDB metadata is richer (proper name, total lots).
-        const otherCarparks = (ltaSettled ?? [])
-          .filter((c) => c.agency !== 'HDB' && !hdbIds.has(c.id))
-          .map((cp) => ({ cp, meters: haversineMeters(dest, cp) }))
-          .filter((x) => x.meters <= radius)
-          .sort((a, b) => a.meters - b.meters)
-          .map(({ cp, meters }) => ltaToCarpark(cp, meters));
-
-        let merged = [...hdbCarparks, ...otherCarparks];
-
-        // E8: spatial-join LTA EVCBatch to the carpark spine. Carparks
-        // within 50m of an EV location get cp.ev populated. Missing
-        // upstream = silent — every carpark just stays ev-less.
-        if (evSettled) {
-          const ageMin =
-            evSnapshotAgeMinutes(evSettled.lastUpdatedTime) ?? Number.POSITIVE_INFINITY;
-          merged = attachEvData(merged, evSettled.locations, ageMin);
-        }
-
-        // E3.1: try to attach 2018 LTA Carpark Rates corpus entries by
-        // normalized name. Carparks that miss keep their operator
-        // fallback rates; matched ones get tiered LTA_DATAGOV rows that
-        // feed the EST.COST ranking.
-        const enriched = applyLtaRates(merged);
-        logCoverage(enriched);
-        let finalCarparks = enriched.carparks;
-
-        // URA: replace flat fallback rates on URA-operator carparks with
-        // live tiered weekday/Sat/Sun-PH bands from Car_Park_Details.
-        // Runs AFTER the LTA corpus so URA wins for URA carparks (the
-        // corpus is 2018-stale and URA is live).
-        if (uraSettled) {
-          const uraMap = parseUraRows(uraSettled.items);
-          const result = applyUraRates(finalCarparks, uraMap);
-          finalCarparks = result.carparks;
-          logUraCoverage(result.matchedCount, uraMap.size, result.unmatchedUraIds);
-        }
-
-        if (finalCarparks.length === 0) {
+        if (!dbCarparks || dbCarparks.length === 0) {
           setResult({
-            state: 'empty',
+            state: dbCarparks ? 'empty' : 'degraded',
             destination: dest,
             carparks: [],
             refreshedSecondsAgo: null,
@@ -193,31 +142,52 @@ export function useCarparks() {
           return;
         }
 
-        // Degraded if HDB availability failed AND we have HDB carparks
-        // (lot counts will all read em-dash). LTA-only carparks always show
-        // live availability when the proxy succeeds.
-        const degraded = !avail && hdbCarparks.length > 0;
+        // Index live lots by DB carpark id so we can merge in O(1).
+        const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail);
+
+        const now = new Date();
+        const dayType = currentDayType(now);
+        const hourOfDay = now.getHours();
+
+        let carparks: Carpark[] = dbCarparks
+          .map((row) => dbRowToCarpark(row, dest, lotsByDbId, dayType, hourOfDay))
+          .sort((a, b) => a.walkMeters - b.walkMeters);
+
+        // EV spatial join — unchanged from the pre-DB flow.
+        if (evSettled) {
+          const ageMin =
+            evSnapshotAgeMinutes(evSettled.lastUpdatedTime) ?? Number.POSITIVE_INFINITY;
+          carparks = attachEvData(carparks, evSettled.locations, ageMin);
+        }
+
+        // Degraded if BOTH live-lot sources failed and we have carparks
+        // that needed them. Either source returning is enough — the other
+        // just leaves a subset of carparks showing em-dashes, which is the
+        // existing behaviour.
+        const degraded = !hdbAvail && !ltaAvail;
 
         setResult({
           state: degraded ? 'degraded' : 'loaded',
           destination: dest,
-          carparks: finalCarparks,
-          refreshedSecondsAgo: avail || ltaSettled
-            ? 0
-            : lastFetchedAt.current
-              ? Math.floor((Date.now() - lastFetchedAt.current) / 1000)
-              : null,
+          carparks,
+          refreshedSecondsAgo:
+            hdbAvail || ltaAvail
+              ? 0
+              : lastFetchedAt.current
+                ? Math.floor((Date.now() - lastFetchedAt.current) / 1000)
+                : null,
         });
 
-        // Schedule periodic availability refresh.
+        // Schedule the next live-lot refresh.
         if (refreshTimer.current) clearTimeout(refreshTimer.current);
-        if (avail) {
+        if (hdbAvail || ltaAvail) {
           refreshTimer.current = window.setTimeout(() => {
             void run(t, { radius, availabilityOnly: true });
           }, REFRESH_MS);
         }
       } catch (err) {
         if (requestSeq.current !== seq) return;
+        // eslint-disable-next-line no-console
         console.error('useCarparks failed', err);
         setResult({
           state: 'empty',
@@ -261,81 +231,134 @@ export function useCarparks() {
   return { result, search, searchAtCoords, retry, expandRadius, trigger };
 }
 
-function hdbToCarpark(
-  info: HdbCarparkInfo,
-  meters: number,
-  avail: HdbAvailability | null,
+// ──────────────────────────────────────────────────────────────────────
+// DB row → app Carpark
+// ──────────────────────────────────────────────────────────────────────
+
+const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
+
+function dbRowToCarpark(
+  row: DbCarparkRaw,
+  dest: { lat: number; lng: number },
+  lotsByDbId: Map<string, { lotsAvailable: number; lotsTotal?: number }>,
+  dayType: 'WEEKDAY' | 'SAT' | 'SUN_PH',
+  hourOfDay: number,
 ): Carpark {
-  const name = displayName(info);
+  const meters = haversineMeters(dest, { lat: row.lat!, lng: row.lng! });
+
+  // Group rate_rows into the three day-type buckets the runtime expects.
+  const rates = bucketRateRows(row.rate_rows);
+  const allRows = row.rate_rows.map(dbToRateRow);
+
+  // Compute estByHours from the structured rate rows. If the DB carpark
+  // has no usable rate (e.g. an LTA-CSV standalone with all-zero stub rows),
+  // fall back to the operator default so the cost cell never reads $0.
+  const op = (row.agency === 'HDB' || row.agency === 'URA' || row.agency === 'LTA'
+    ? row.agency
+    : 'LTA') as Operator;
+  const estByHours = computeEstByHours(allRows, dayType, hourOfDay) ?? estByHoursFor(op);
+  const fallbackRates =
+    rates.weekday.length === 0 && rates.saturday.length === 0 && rates.sundayPH.length === 0
+      ? ratesFor(op)
+      : rates;
+
+  const live = lotsByDbId.get(row.id);
+
   return {
-    id: `hdb:${info.car_park_no}`,
-    name,
-    block: info.address,
-    operator: 'HDB',
-    lotTypes: ['C'],
-    lotsAvailable: avail?.lots_available ?? 0,
-    lotsTotal: avail?.total_lots ?? 0,
+    id: row.id.toLowerCase(),
+    name: row.name,
+    block: row.address ?? row.source_code,
+    operator: op,
+    lotTypes: ['C'] satisfies LotType[],
+    lotsAvailable: live?.lotsAvailable ?? 0,
+    lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),
     walkMeters: Math.round(meters),
-    grace: 10,
-    coords: { entrance: [info.lat, info.lng] },
-    rates: ratesFor('HDB'),
-    estByHours: estByHoursFor('HDB'),
+    grace: row.rate_rows[0]?.grace_minutes ?? (row.agency === 'HDB' ? 10 : 0),
+    coords: { entrance: [row.lat!, row.lng!] },
+    rates: fallbackRates,
+    estByHours,
   };
 }
 
-function ltaToCarpark(cp: LtaCarpark, meters: number): Carpark {
-  const operator = cp.agency as Operator;
-  const block = cp.area ? `${cp.area} · ${cp.id}` : cp.id;
-  return {
-    id: `${operator.toLowerCase()}:${cp.id}`,
-    name: cp.name,
-    block,
-    operator,
-    lotTypes: lotTypesFor(cp.lotType),
-    lotsAvailable: cp.lotsAvailable,
-    // LTA Datamall's CarParkAvailabilityv2 doesn't return total lots.
-    // The detail screen treats 0 as "unknown" and hides the "of N" line.
-    lotsTotal: 0,
-    walkMin: walkMinutesFromMeters(meters),
-    walkMeters: Math.round(meters),
-    grace: 0,
-    coords: { entrance: [cp.lat, cp.lng] },
-    rates: ratesFor(operator),
-    estByHours: estByHoursFor(operator),
-  };
-}
-
-// LTA's CarParkAvailabilityv2 uses "Y" for motorcycle (per spec). The brief's
-// internal LotType uses "M" — translate at the boundary.
-function lotTypesFor(lt: string): Carpark['lotTypes'] {
-  switch ((lt ?? '').toUpperCase()) {
-    case 'Y':
-    case 'M':
-      return ['M'];
-    case 'H':
-      return ['H'];
-    case 'C':
-    default:
-      return ['C'];
+function bucketRateRows(rows: DbRateRowRaw[]): Carpark['rates'] {
+  const out: Carpark['rates'] = { weekday: [], saturday: [], sundayPH: [] };
+  for (const r of rows) {
+    // Skip parser-stub rows the migration emits for unparseable CSV cells
+    // (per_block_cents=0, block_minutes=0) — they'd add noise to the schedule.
+    if (r.per_block_cents === 0 && r.block_minutes === 0 && r.per_entry_cents == null) {
+      continue;
+    }
+    const target =
+      r.day_type === 'WEEKDAY' ? out.weekday : r.day_type === 'SAT' ? out.saturday : out.sundayPH;
+    target.push(dbToRateRow(r));
   }
+  return out;
 }
 
-/** Pull a short, human carpark name out of the HDB address.
- * Addresses look like "Blk 270/271 Albert Centre Basement Car Park" or
- * "Blk 175/183 To 185 Toa Payoh Town Centre" or "Blk 98a Aljunied Crescent". */
-function displayName(info: HdbCarparkInfo): string {
-  let a = info.address;
-  // Strip the leading block reference, including range forms
-  // like "Blk 175/183 To 185" or "Blk 175 To 185a".
-  a = a.replace(/^Blk\s+\S+(\s+To\s+\S+)?\s*/i, '').trim();
-  // Strip trailing "Car Park" / "Basement Car Park" / "Multi-Storey Car Park"
-  a = a.replace(/\s+(Basement|Multi[- ]Storey)?\s*Car Park$/i, '').trim();
-  return a || info.address;
+function dbToRateRow(r: DbRateRowRaw): RateRow {
+  return {
+    dayType: r.day_type,
+    startTime: r.start_time ? r.start_time.slice(0, 5) : undefined, // 'HH:mm:ss' → 'HH:mm'
+    endTime: r.end_time ? r.end_time.slice(0, 5) : undefined,
+    perBlockCents: r.per_block_cents,
+    blockMinutes: r.block_minutes,
+    firstHourCents: r.first_hour_cents ?? undefined,
+    perEntryCents: r.per_entry_cents ?? undefined,
+    capCents: r.cap_cents ?? undefined,
+    graceMinutes: r.grace_minutes ?? undefined,
+    system: r.system,
+    vehCat: r.veh_cat,
+    source: r.source,
+    effectiveFrom: r.effective_from ?? undefined,
+  };
 }
 
-// Pull the 6-digit SG postal code out of a formatted address, if present.
-// Google's formattedAddress for SG places usually ends "... Singapore 098585".
+function computeEstByHours(
+  rows: RateRow[],
+  dayType: 'WEEKDAY' | 'SAT' | 'SUN_PH',
+  hourOfDay: number,
+): Carpark['estByHours'] | null {
+  if (rows.length === 0) return null;
+  const out: Partial<Record<DurationHours, number>> = {};
+  for (const d of DURATION_VALUES) {
+    const cents = estimateCostCentsAt(rows, d, { dayType, hourOfDay });
+    if (cents == null) return null;
+    out[d] = +(cents / 100).toFixed(2);
+  }
+  return out as Carpark['estByHours'];
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Live availability merge
+// ──────────────────────────────────────────────────────────────────────
+
+function buildLiveLotsIndex(
+  hdb: Map<string, HdbAvailability> | null | undefined,
+  lta: LtaCarpark[] | null | undefined,
+): Map<string, { lotsAvailable: number; lotsTotal?: number }> {
+  const out = new Map<string, { lotsAvailable: number; lotsTotal?: number }>();
+  if (hdb) {
+    for (const [carParkNo, a] of hdb.entries()) {
+      out.set(`HDB:${carParkNo}`, {
+        lotsAvailable: a.lots_available,
+        lotsTotal: a.total_lots,
+      });
+    }
+  }
+  if (lta) {
+    for (const cp of lta) {
+      // LTA's id is the bare source code; DB id is "AGENCY:id".
+      out.set(`${cp.agency}:${cp.id}`, { lotsAvailable: cp.lotsAvailable });
+    }
+  }
+  return out;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Misc
+// ──────────────────────────────────────────────────────────────────────
+
 function extractSgPostal(address: string | undefined): string | null {
   if (!address) return null;
   const m = /\b(\d{6})\b/.exec(address);

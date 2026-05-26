@@ -455,6 +455,111 @@ async function migrateUra(
 }
 
 // ──────────────────────────────────────────────────────────────────────
+// LTA DataMall — agency=LTA carparks (Vivocity P2/P3, Harbourfront
+// Centre, etc.) These are the ~40 LTA-managed off-street lots that come
+// only from the DataMall feed, not from data.gov.sg or URA Data Service.
+// We import metadata only — DataMall doesn't ship rate schedules.
+// ──────────────────────────────────────────────────────────────────────
+
+const DATAMALL_URL =
+  'https://datamall2.mytransport.sg/ltaodataservice/CarParkAvailabilityv2';
+
+type DataMallValue = {
+  CarParkID?: string;
+  Area?: string;
+  Development?: string;
+  Location?: string;
+  AvailableLots?: number;
+  LotType?: string;
+  Agency?: string;
+};
+
+async function fetchDataMallLtaCarparks(
+  accountKey: string,
+): Promise<DataMallValue[]> {
+  const all: DataMallValue[] = [];
+  for (let skip = 0; skip < 10_000; skip += 500) {
+    const url = skip === 0 ? DATAMALL_URL : `${DATAMALL_URL}?$skip=${skip}`;
+    const res = await fetch(url, {
+      headers: { AccountKey: accountKey, accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`DataMall ${res.status}`);
+    const body = (await res.json()) as { value?: DataMallValue[] };
+    const page = body.value ?? [];
+    if (page.length === 0) break;
+    all.push(...page);
+    if (page.length < 500) break;
+  }
+  return all;
+}
+
+async function migrateLtaDataMall(
+  supabase: SupabaseClient,
+  accountKey: string,
+): Promise<SourceResult> {
+  const result = makeResult();
+  process.stderr.write('\n== LTA DataMall (agency=LTA only) ==\n');
+  const raw = await fetchDataMallLtaCarparks(accountKey);
+  process.stderr.write(`  fetched ${raw.length} DataMall rows\n`);
+
+  // Dedupe by CarParkID and keep only Agency=LTA car-lot rows.
+  const seen = new Set<string>();
+  const carparks: DbCarpark[] = [];
+  const today = new Date().toISOString();
+  for (const v of raw) {
+    if ((v.Agency ?? '').toUpperCase() !== 'LTA') continue;
+    if ((v.LotType ?? 'C').toUpperCase() !== 'C') continue; // car lots only
+    const code = (v.CarParkID ?? '').trim();
+    if (!code || seen.has(code)) continue;
+    seen.add(code);
+
+    const loc = (v.Location ?? '').split(/\s+/);
+    const lat = parseFloat(loc[0]);
+    const lng = parseFloat(loc[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      result.errors += 1;
+      continue;
+    }
+
+    carparks.push({
+      id: `LTA:${code}`,
+      agency: 'LTA',
+      source_code: code,
+      name: titleCase(v.Development?.trim() || code),
+      address: v.Area ? `${titleCase(v.Area)} · ${code}` : null,
+      lat,
+      lng,
+      car_park_type: null,
+      parking_system: 'GANTRY_PRIVATE',
+      central_area: false,
+      total_lots: null, // DataMall doesn't expose total
+      source: 'LTA_DATAMALL',
+      last_synced: today,
+      raw: v,
+    });
+  }
+
+  // Batch upsert. No rate_rows — the runtime falls back to the operator
+  // default ($1.60/30min) for carparks with no schedule, which is the
+  // existing behaviour for these LTA-agency lots.
+  const chunkSize = 200;
+  for (let i = 0; i < carparks.length; i += chunkSize) {
+    const chunk = carparks.slice(i, i + chunkSize);
+    const { error } = await supabase
+      .from('carparks')
+      .upsert(chunk, { onConflict: 'id' });
+    if (error) {
+      process.stderr.write(`  DataMall upsert (chunk ${i}) failed: ${error.message}\n`);
+      result.errors += chunk.length;
+    } else {
+      result.carparks += chunk.length;
+    }
+  }
+  process.stderr.write(`  upserted ${result.carparks} LTA-agency carparks\n`);
+  return result;
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // LTA 2018 CSV (data.gov.sg)
 // ──────────────────────────────────────────────────────────────────────
 
@@ -512,14 +617,44 @@ async function migrateLtaCsv(
 ): Promise<SourceResult> {
   const result = makeResult();
   process.stderr.write('\n== LTA Carpark Rates (2018 CSV) ==\n');
+
+  // Wipe prior CSV standalones so this run can re-attach to the more
+  // authoritative HDB / URA / LTA_DATAMALL carparks. Without this, a CSV
+  // row exact-matches its own previous insertion (e.g. "Vivocity" →
+  // "LTA:vivocity") and never bubbles up to the better "Vivocity P3" match.
+  const wiped = await wipeLtaDataGovCarparks(supabase);
+  if (wiped > 0) {
+    process.stderr.write(`  cleared ${wiped} previous LTA_DATAGOV standalones\n`);
+  }
+  // Re-load the existing-names map AFTER wiping so we don't match against
+  // anything we just deleted.
+  const existingAfterWipe = await loadExistingCarparkNames(supabase);
+  void existingNamesById;
+
   const records = await fetchLtaCsvRecords();
   process.stderr.write(`  fetched ${records.length} CSV rows\n`);
 
-  // Build name → existing carpark id lookup for matching.
+  // Build name → existing carpark id lookup for matching. Same algorithm
+  // the runtime corpus lookup used: try exact normalised match first, then
+  // word-boundary substring (corpus key starts with existing + " " or vice
+  // versa). Handles "Vivocity P3 Carpark" ↔ "Vivocity P3" cleanly.
   const existingByName = new Map<string, string>();
-  for (const [id, n] of existingNamesById.entries()) {
+  for (const [id, n] of existingAfterWipe.entries()) {
     existingByName.set(normaliseName(n), id);
   }
+  const findMatches = (rawName: string): string[] => {
+    const norm = normaliseName(rawName);
+    if (!norm) return [];
+    const exact = existingByName.get(norm);
+    if (exact) return [exact];
+    // Word-boundary substring match in either direction. "Vivocity" CSV
+    // legitimately covers both "Vivocity P2" and "Vivocity P3" — fan out.
+    const out: string[] = [];
+    for (const [k, id] of existingByName.entries()) {
+      if (k.startsWith(norm + ' ') || norm.startsWith(k + ' ')) out.push(id);
+    }
+    return out;
+  };
 
   const today = new Date().toISOString();
   for (const r of records) {
@@ -530,10 +665,14 @@ async function migrateLtaCsv(
     }
     const normKey = normaliseName(name);
 
-    // Try to match an existing carpark by normalised name; otherwise insert
-    // a new LTA-agency carpark with no coords (CSV has none).
-    const matchedId = existingByName.get(normKey);
-    const carparkId = matchedId ?? `LTA:${slugifyId(name)}`;
+    // Try to match an existing carpark by normalised name (exact or
+    // word-boundary substring); otherwise insert a new standalone LTA
+    // carpark with no coords (the CSV has none).
+    void normKey; // unused now — matcher takes the raw name
+    const matchedIds = findMatches(name);
+    // Pick a primary id for the rate_rows that ARE going to a specific
+    // carpark vs the fallback standalone insert.
+    const carparkId = matchedIds[0] ?? `LTA:${slugifyId(name)}`;
 
     // Parse each day-type rate; collect any unparseable strings for the raw note.
     const dbRows: DbRateRow[] = [];
@@ -580,17 +719,21 @@ async function migrateLtaCsv(
       }
     }
 
-    // If we matched an existing HDB or URA carpark, SKIP. HDB has live-rule
-    // inferred rates and URA has live Data Service bands — both beat the
-    // 2018 CSV snapshot. Only attach LTA rate_rows when the match is itself
-    // another LTA-prefixed carpark (rare: a same-name LTA CSV row re-import).
-    if (matchedId) {
-      if (matchedId.startsWith('LTA:')) {
-        const ok = await replaceRateRows(supabase, matchedId, dbRows);
-        if (ok) result.rateRows += dbRows.length;
+    // If we matched existing carparks, fan out:
+    //  - HDB/URA matches: SKIP (HDB inferred + URA live > 2018 CSV stale).
+    //  - LTA matches: replace rate_rows on each (multi-match is intentional;
+    //    "Vivocity" CSV legitimately covers both LTA:16 and LTA:50).
+    if (matchedIds.length > 0) {
+      const ltaTargets = matchedIds.filter((id) => id.startsWith('LTA:'));
+      let attached = 0;
+      for (const id of ltaTargets) {
+        // Rebuild dbRows with the target's carpark_id so the FK is right.
+        const rowsForTarget = dbRows.map((r) => ({ ...r, carpark_id: id }));
+        const ok = await replaceRateRows(supabase, id, rowsForTarget);
+        if (ok) attached += rowsForTarget.length;
         else result.errors += 1;
       }
-      // Else: leave HDB/URA rates intact, don't touch.
+      result.rateRows += attached;
       continue;
     }
 
@@ -722,6 +865,22 @@ async function main(): Promise<void> {
     }
   }
 
+  // LTA DataMall — carparks with Agency='LTA' (URA/LTA from this feed are
+  // metadata-only; we only need the LTA-agency ones since HDB+URA are
+  // already in the DB from richer sources).
+  const dataMall = makeResult();
+  const dataMallKey = process.env.LTA_ACCOUNT_KEY;
+  if (!dataMallKey) {
+    process.stderr.write('\n== LTA DataMall == (skipped — LTA_ACCOUNT_KEY not set)\n');
+  } else {
+    try {
+      Object.assign(dataMall, await migrateLtaDataMall(supabase, dataMallKey));
+    } catch (err) {
+      dataMall.errors += 1;
+      process.stderr.write(`LTA DataMall failed: ${err instanceof Error ? err.message : String(err)}\n`);
+    }
+  }
+
   // LTA CSV — needs the existing names already in the DB for matching.
   try {
     const existing = await loadExistingCarparkNames(supabase);
@@ -743,13 +902,45 @@ async function main(): Promise<void> {
   const fmt = (n: number) => String(n).padStart(7);
   console.log('');
   console.log('=== Migration summary ===');
-  console.log('source       | carparks | rate_rows | errors');
-  console.log('-------------+----------+-----------+-------');
-  console.log(`HDB          |${fmt(hdb.carparks)}  |${fmt(hdb.rateRows)}   |${fmt(hdb.errors)}`);
-  console.log(`URA          |${fmt(ura.carparks)}  |${fmt(ura.rateRows)}   |${fmt(ura.errors)}`);
-  console.log(`LTA_DATAGOV  |${fmt(lta.carparks)}  |${fmt(lta.rateRows)}   |${fmt(lta.errors)}`);
+  console.log('source        | carparks | rate_rows | errors');
+  console.log('--------------+----------+-----------+-------');
+  console.log(`HDB           |${fmt(hdb.carparks)}  |${fmt(hdb.rateRows)}   |${fmt(hdb.errors)}`);
+  console.log(`URA           |${fmt(ura.carparks)}  |${fmt(ura.rateRows)}   |${fmt(ura.errors)}`);
+  console.log(`LTA_DATAMALL  |${fmt(dataMall.carparks)}  |${fmt(dataMall.rateRows)}   |${fmt(dataMall.errors)}`);
+  console.log(`LTA_DATAGOV   |${fmt(lta.carparks)}  |${fmt(lta.rateRows)}   |${fmt(lta.errors)}`);
   console.log('');
   console.log(`Unique SVY21 coords converted (local svy21ToWgs84): ${coordCache.size}`);
+}
+
+async function wipeLtaDataGovCarparks(
+  supabase: SupabaseClient,
+): Promise<number> {
+  // Get the ids first so we can delete child rate_rows in one call,
+  // then drop the carpark rows. Two-step keeps the FK happy.
+  const { data, error } = await supabase
+    .from('carparks')
+    .select('id')
+    .eq('source', 'LTA_DATAGOV');
+  if (error) {
+    process.stderr.write(`  wipeLtaDataGovCarparks: select failed: ${error.message}\n`);
+    return 0;
+  }
+  if (!data || data.length === 0) return 0;
+  const ids = (data as Array<{ id: string }>).map((r) => r.id);
+
+  const chunkSize = 500;
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize);
+    await supabase.from('rate_rows').delete().in('carpark_id', chunk);
+    const { error: delErr } = await supabase
+      .from('carparks')
+      .delete()
+      .in('id', chunk);
+    if (delErr) {
+      process.stderr.write(`  wipeLtaDataGovCarparks: delete failed: ${delErr.message}\n`);
+    }
+  }
+  return ids.length;
 }
 
 async function deleteShadowedLtaOrphans(

@@ -37,6 +37,7 @@ export type RateSource =
   | 'URA'
   | 'HDB'
   | 'LTA_DATAGOV'
+  | 'LTA_DATAMALL'
   | 'CAG'
   | 'OPERATOR'
   | 'MANUAL';
