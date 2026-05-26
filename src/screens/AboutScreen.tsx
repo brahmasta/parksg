@@ -34,8 +34,8 @@ const STEPS: { icon: ReactNode; title: string; body: string }[] = [
 ];
 
 const ROADMAP = [
-  'Accurate URA rate schedules',
-  'EV charger availability',
+  'Plan before you drive',
+  'Season parking calculator',
   'Save favourite destinations',
 ];
 
