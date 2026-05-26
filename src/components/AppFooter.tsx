@@ -34,7 +34,7 @@ export function AppFooter() {
         rel="noopener noreferrer"
         aria-label="Send feedback on X (@wheretoparksg)"
         style={{
-          color: 'var(--accent)',
+          color: 'var(--ok)',
           textDecoration: 'none',
           fontWeight: 600,
           whiteSpace: 'nowrap',
