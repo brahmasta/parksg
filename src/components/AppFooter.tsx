@@ -19,32 +19,29 @@ export function AppFooter() {
       style={{
         marginTop: 18,
         padding: '0 4px',
-        fontSize: 10.5,
+        fontSize: 10,
         color: 'var(--text-3)',
-        fontFamily: 'var(--font-mono)',
-        letterSpacing: 0.2,
-        lineHeight: 1.55,
+        fontFamily: 'var(--font-body)',
+        lineHeight: 1.6,
         textAlign: 'center',
       }}
     >
-      <div>Built by Bram, a Singapore driver who tired of circling.</div>
-      <div>
-        Spotted a wrong rate or a missing carpark?{' '}
-        <a
-          href={FEEDBACK_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Send feedback on X (@wheretoparksg)"
-          style={{
-            color: 'var(--accent-on)',
-            textDecoration: 'none',
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Let me know →
-        </a>
-      </div>
+      Built by Bram, a Singapore driver who tired of circling. Spotted a
+      wrong rate or a missing carpark?{' '}
+      <a
+        href={FEEDBACK_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Send feedback on X (@wheretoparksg)"
+        style={{
+          color: 'var(--accent)',
+          textDecoration: 'none',
+          fontWeight: 600,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        Let me know →
+      </a>
     </footer>
   );
 }
