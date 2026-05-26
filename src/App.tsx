@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Analytics, track } from '@vercel/analytics/react';
 import type {
   Carpark,
   DurationHours,
@@ -33,6 +34,15 @@ function readStored<T>(key: string, fallback: T, parse: (raw: string) => T | nul
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const [destinationInput, setDestinationInput] = useState<string>('');
+
+  // Vercel Analytics — fire a custom event on every screen change. The
+  // app is a single-page state-machine router so the URL never changes;
+  // tracking screen transitions as events lets us see the home → results
+  // → detail funnel in the Vercel dashboard. In dev this logs to the
+  // console and never leaves the browser.
+  useEffect(() => {
+    track('screen_view', { screen });
+  }, [screen]);
 
   const [duration, setDurationState] = useState<DurationHours>(() =>
     readStored<DurationHours>(DURATION_KEY, 1, (raw) => {
@@ -257,6 +267,7 @@ function App() {
 
   return (
     <div className="psg-frame-wrap">
+      <Analytics />
       <div className="psg-frame">
         <div className="psg-app" data-screen={screen}>
           {body}
