@@ -1,7 +1,7 @@
 import type { RecentDestination } from './types';
 
 const KEY = 'psg.recents';
-const MAX = 6;
+const MAX = 5;
 
 const SEED: RecentDestination[] = [
   { name: 'Vivocity', hint: 'HarbourFront' },
@@ -15,7 +15,11 @@ export function loadRecents(): RecentDestination[] {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as RecentDestination[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Defensive cap so a user with an over-capacity list from an
+        // earlier build sees the new limit without needing a fresh search.
+        return parsed.slice(0, MAX);
+      }
     }
   } catch {
     /* ignore */
