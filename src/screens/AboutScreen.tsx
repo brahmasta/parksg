@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { AppFooter } from '../components/AppFooter';
 import { Wordmark } from '../components/Wordmark';
 import {
   IconChevronLeft,
@@ -294,7 +293,6 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           >
             Find parking near me
           </button>
-          <AppFooter />
         </div>
       </div>
     </div>
