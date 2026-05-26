@@ -5,6 +5,7 @@ import {
   formatCost,
   formatDistance,
 } from '../lib/availability';
+import { AppFooter } from '../components/AppFooter';
 import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../components/atoms';
 import { EVSection } from '../components/EVSection';
 import { RateTable } from '../components/RateTable';
@@ -399,6 +400,8 @@ export function DetailScreen({
             </>
           )}
         </div>
+
+        <AppFooter />
       </div>
 
       {/* Sticky navigate CTA */}

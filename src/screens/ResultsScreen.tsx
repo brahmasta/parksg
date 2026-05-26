@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/types';
+import { AppFooter } from '../components/AppFooter';
 import { DurationStrip, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { DegradedBanner } from '../components/DegradedBanner';
@@ -253,6 +254,9 @@ export function ResultsScreen({
                 }}
               >
                 Lot counts refresh every 60s · Private mall carparks not shown
+              </div>
+              <div style={{ padding: '0 16px' }}>
+                <AppFooter />
               </div>
             </div>
           ))}

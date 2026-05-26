@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { RecentDestination } from '../lib/types';
+import { AppFooter } from '../components/AppFooter';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { Wordmark } from '../components/Wordmark';
@@ -293,6 +294,8 @@ export function HomeScreen({
             ))}
           </div>
         </div>
+
+        <AppFooter />
       </div>
     </div>
   );

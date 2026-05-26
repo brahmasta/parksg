@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { AppFooter } from '../components/AppFooter';
 import { Wordmark } from '../components/Wordmark';
 import {
   IconChevronLeft,
@@ -293,18 +294,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           >
             Find parking near me
           </button>
-          <p
-            style={{
-              margin: '12px 0 0',
-              textAlign: 'center',
-              fontSize: 11,
-              color: 'var(--text-3)',
-              fontFamily: 'var(--font-mono)',
-              letterSpacing: 0.4,
-            }}
-          >
-            Made in Singapore · v1.0
-          </p>
+          <AppFooter />
         </div>
       </div>
     </div>
