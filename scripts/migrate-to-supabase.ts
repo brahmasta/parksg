@@ -20,6 +20,7 @@
  */
 
 import 'dotenv/config';
+import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import dotenv from 'dotenv';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -28,7 +29,28 @@ import { svy21ToWgs84 } from '../src/lib/geo';
 import { parseUraRows } from '../src/lib/ura';
 import type { UraRawRow } from '../src/lib/api/uraDetails';
 import { parseDayRate } from './lib/parse-lta-rate';
+import { inferHdbRateRows as ruleEngineHdbRows, type PeakBand } from './lib/hdb-rates';
 import type { RateRow } from '../src/lib/types';
+
+// ──────────────────────────────────────────────────────────────────────
+// Curated HDB reference data (loaded once at startup).
+// ──────────────────────────────────────────────────────────────────────
+
+const centralJson = JSON.parse(
+  readFileSync(resolve(__dirname, 'data/hdb-central-codes.json'), 'utf8'),
+) as { centralCodes: string[] };
+const HDB_CENTRAL_CODES = new Set<string>(centralJson.centralCodes);
+
+type PeakRestructuredEntry = { code: string; bands: PeakBand[] };
+const peakJson = JSON.parse(
+  readFileSync(resolve(__dirname, 'data/hdb-peak-restructured-codes.json'), 'utf8'),
+) as { carparks: PeakRestructuredEntry[] };
+const HDB_PEAK_RESTRUCTURED_CODES = new Set<string>(
+  (peakJson.carparks ?? []).map((c) => c.code),
+);
+const HDB_PEAK_BANDS_BY_CODE = new Map<string, PeakBand[]>(
+  (peakJson.carparks ?? []).map((c) => [c.code, c.bands]),
+);
 
 // Load .env.local explicitly (in addition to the root .env that dotenv/config picks up).
 dotenv.config({ path: resolve(process.cwd(), '.env.local') });
@@ -158,13 +180,6 @@ function makeResult(): SourceResult {
 // ──────────────────────────────────────────────────────────────────────
 
 const HDB_DATASET_ID = 'd_23f946fa557947f93a8043bbef41dd09';
-// Carparks whose car_park_no prefix indicates Central Business District
-// pricing tier (per spec).
-const CENTRAL_PREFIXES = [
-  'ACB', 'BBB', 'BRB', 'CY', 'DCB', 'DCM', 'ESB', 'HBB', 'HLM', 'KAB',
-  'KAM', 'KAS', 'MP14', 'SE21', 'SE22', 'SK1', 'SK2', 'SK4', 'SK5', 'SK6',
-  'SK7', 'SR1', 'SR2', 'TPM', 'TP1', 'UCS', 'WCB',
-];
 
 type HdbRecord = {
   car_park_no?: string;
@@ -182,8 +197,7 @@ type HdbRecord = {
 };
 
 function isCentralArea(carParkNo: string): boolean {
-  const up = carParkNo.toUpperCase();
-  return CENTRAL_PREFIXES.some((p) => up.startsWith(p));
+  return HDB_CENTRAL_CODES.has(carParkNo);
 }
 
 function hdbParkingSystem(s: string | undefined): ParkingSystem {
@@ -193,27 +207,34 @@ function hdbParkingSystem(s: string | undefined): ParkingSystem {
   return 'EPS';
 }
 
-function inferHdbRateRows(carParkId: string, central: boolean, system: ParkingSystem): DbRateRow[] {
-  const perBlockCents = central ? 120 : 60;
-  const capCents = central ? 2000 : 1200;
-  const today = new Date().toISOString().slice(0, 10);
-  const dayTypes: DayType[] = ['WEEKDAY', 'SAT', 'SUN_PH'];
-  return dayTypes.map((day) => ({
-    carpark_id: carParkId,
-    day_type: day,
-    start_time: '07:00:00',
-    end_time: '22:30:00',
-    per_block_cents: perBlockCents,
-    block_minutes: 30,
-    first_hour_cents: null,
-    per_entry_cents: null,
-    cap_cents: capCents,
-    grace_minutes: 15,
-    system,
-    veh_cat: 'CAR',
-    source: 'HDB',
-    effective_from: today,
-  }));
+/** Wrap the rule engine in this file's row shape so the migration sees
+ * `DbRateRow[]` regardless of where the rules live. */
+function inferHdbRateRows(
+  carParkId: string,
+  central: boolean,
+  parkingSystem: ParkingSystem,
+  raw: HdbRecord,
+  effectiveFrom: string,
+): DbRateRow[] {
+  // The rule engine only ever returns EPS or COUPON; treat anything else as EPS.
+  const system: 'EPS' | 'COUPON' = parkingSystem === 'COUPON' ? 'COUPON' : 'EPS';
+  const code = carParkId.replace(/^HDB:/, '');
+  return ruleEngineHdbRows({
+    carparkId: carParkId,
+    parkingSystem: system,
+    centralArea: central,
+    raw: {
+      car_park_no: raw.car_park_no,
+      address: raw.address,
+      type_of_parking_system: raw.type_of_parking_system,
+      free_parking: raw.free_parking,
+      night_parking: raw.night_parking,
+      short_term_parking: raw.short_term_parking,
+    },
+    peakRestructuredCodes: HDB_PEAK_RESTRUCTURED_CODES,
+    peakBands: HDB_PEAK_BANDS_BY_CODE.get(code),
+    effectiveFrom,
+  });
 }
 
 async function fetchHdbRecords(): Promise<HdbRecord[]> {
@@ -269,7 +290,10 @@ async function migrateHdb(supabase: SupabaseClient): Promise<SourceResult> {
       last_synced: today,
       raw: r,
     });
-    rateRowsByCp.set(carparkId, inferHdbRateRows(carparkId, central, parkingSystem));
+    rateRowsByCp.set(
+      carparkId,
+      inferHdbRateRows(carparkId, central, parkingSystem, r, today.slice(0, 10)),
+    );
   }
 
   // Batched carpark upsert.
@@ -286,14 +310,19 @@ async function migrateHdb(supabase: SupabaseClient): Promise<SourceResult> {
     }
   }
 
-  // Wipe-and-reinsert rate_rows in batches keyed by carpark_id list.
+  // Wipe-and-reinsert rate_rows. Restrict the delete to source IN
+  // ('HDB','MANUAL') so a future hand-curated row attached to an HDB
+  // carpark (e.g. a peak-restructured override the rule engine doesn't
+  // know about) stays put. URA/LTA-sourced rows on HDB carparks (none
+  // today, but defensive) are also preserved.
   const allIds = Array.from(rateRowsByCp.keys());
   for (let i = 0; i < allIds.length; i += chunkSize) {
     const idChunk = allIds.slice(i, i + chunkSize);
     const { error: delErr } = await supabase
       .from('rate_rows')
       .delete()
-      .in('carpark_id', idChunk);
+      .in('carpark_id', idChunk)
+      .in('source', ['HDB', 'MANUAL']);
     if (delErr) {
       process.stderr.write(`  HDB rate_rows delete (chunk ${i}) failed: ${delErr.message}\n`);
       continue;
@@ -305,6 +334,127 @@ async function migrateHdb(supabase: SupabaseClient): Promise<SourceResult> {
     const { error } = await supabase.from('rate_rows').insert(chunk);
     if (error) {
       process.stderr.write(`  HDB rate_rows insert (chunk ${i}) failed: ${error.message}\n`);
+      result.errors += chunk.length;
+    } else {
+      result.rateRows += chunk.length;
+    }
+  }
+  process.stderr.write(`  inserted ${result.rateRows} HDB rate_rows\n`);
+  return result;
+}
+
+async function migrateHdbRatesOnly(
+  supabase: SupabaseClient,
+): Promise<SourceResult> {
+  const result = makeResult();
+  process.stderr.write('\n== HDB rate hydration (no fetch) ==\n');
+
+  // Load every HDB carpark the DB already knows about.
+  const existing: Array<{
+    id: string;
+    source_code: string;
+    parking_system: ParkingSystem;
+    central_area: boolean;
+    raw: HdbRecord | null;
+  }> = [];
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('carparks')
+      .select('id, source_code, parking_system, central_area, raw')
+      .eq('agency', 'HDB')
+      .range(from, from + pageSize - 1);
+    if (error) throw new Error(`load HDB carparks: ${error.message}`);
+    if (!data || data.length === 0) break;
+    for (const row of data as Array<{
+      id: string;
+      source_code: string;
+      parking_system: ParkingSystem;
+      central_area: boolean;
+      raw: HdbRecord | null;
+    }>) {
+      existing.push(row);
+    }
+    if (data.length < pageSize) break;
+  }
+  process.stderr.write(`  loaded ${existing.length} HDB carparks\n`);
+
+  // Recompute central_area from the curated list and surface deltas.
+  const toUpdateCentral: Array<{ id: string; central_area: boolean }> = [];
+  let demoted = 0;
+  let promoted = 0;
+  for (const cp of existing) {
+    const want = HDB_CENTRAL_CODES.has(cp.source_code);
+    if (want !== cp.central_area) {
+      toUpdateCentral.push({ id: cp.id, central_area: want });
+      if (cp.central_area && !want) demoted += 1;
+      if (!cp.central_area && want) promoted += 1;
+    }
+  }
+
+  // UPDATE central_area in chunks (upsert with onConflict so we only touch
+  // the changed column — but minimal write only needs id + new value).
+  const chunkSize = 500;
+  for (let i = 0; i < toUpdateCentral.length; i += chunkSize) {
+    const chunk = toUpdateCentral.slice(i, i + chunkSize);
+    // Supabase REST batch update: do one row at a time inside a parallel
+    // wave. Plain upsert wants the full row; we use update().eq() instead.
+    await Promise.all(
+      chunk.map(({ id, central_area }) =>
+        supabase
+          .from('carparks')
+          .update({ central_area })
+          .eq('id', id)
+          .then(({ error }) => {
+            if (error) {
+              process.stderr.write(`  central_area update ${id} failed: ${error.message}\n`);
+              result.errors += 1;
+            }
+          }),
+      ),
+    );
+  }
+  process.stderr.write(
+    `  central_area: ${promoted} promoted → true, ${demoted} demoted → false\n`,
+  );
+
+  const today = new Date().toISOString();
+  const effective = today.slice(0, 10);
+
+  // Generate fresh rate_rows from the rule engine for every HDB carpark.
+  const allRows: DbRateRow[] = [];
+  for (const cp of existing) {
+    const central = HDB_CENTRAL_CODES.has(cp.source_code); // post-update truth
+    const rows = inferHdbRateRows(
+      cp.id,
+      central,
+      cp.parking_system,
+      cp.raw ?? { car_park_no: cp.source_code },
+      effective,
+    );
+    allRows.push(...rows);
+    result.carparks += 1;
+  }
+
+  // Wipe HDB+MANUAL rate_rows for every HDB carpark, then bulk-insert.
+  const allIds = existing.map((cp) => cp.id);
+  for (let i = 0; i < allIds.length; i += chunkSize) {
+    const idChunk = allIds.slice(i, i + chunkSize);
+    const { error: delErr } = await supabase
+      .from('rate_rows')
+      .delete()
+      .in('carpark_id', idChunk)
+      .in('source', ['HDB', 'MANUAL']);
+    if (delErr) {
+      process.stderr.write(`  rate_rows delete (chunk ${i}) failed: ${delErr.message}\n`);
+      result.errors += 1;
+    }
+  }
+  for (let i = 0; i < allRows.length; i += chunkSize) {
+    const chunk = allRows.slice(i, i + chunkSize);
+    const { error } = await supabase.from('rate_rows').insert(chunk);
+    if (error) {
+      process.stderr.write(`  rate_rows insert (chunk ${i}) failed: ${error.message}\n`);
       result.errors += chunk.length;
     } else {
       result.rateRows += chunk.length;
@@ -839,6 +989,20 @@ async function main(): Promise<void> {
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false },
   });
+
+  // CLI flag: `--hdb-rates-only` skips the data.gov.sg fetch and the
+  // URA/LTA passes. Reruns the HDB rate hydration against existing DB
+  // carparks (also resyncs central_area from the curated list).
+  if (process.argv.includes('--hdb-rates-only')) {
+    const r = await migrateHdbRatesOnly(supabase);
+    const fmt = (n: number) => String(n).padStart(7);
+    console.log('');
+    console.log('=== HDB rate hydration (only) ===');
+    console.log(`Carparks touched:  ${r.carparks}`);
+    console.log(`Rate rows written: ${r.rateRows}`);
+    console.log(`Errors:            ${r.errors}`);
+    return;
+  }
 
   const hdb = makeResult();
   const ura = makeResult();

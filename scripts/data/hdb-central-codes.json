@@ -1,0 +1,24 @@
+{
+  "_note": "HDB carpark codes in the Central Area pricing tier ($1.20 / 30min EPS, $20 day cap).",
+  "_source": "v1 hand-audit, derived from the migration's prefix heuristic minus its false positives. SK*, TPM2..TPMU, TP10..TP18, SE21/22, MP14 were Sengkang/Toa Payoh/Serangoon/Marine Parade — not Central. The remaining 15 are CBD-cluster (Bras Basah / Chinatown / Tanjong Pagar / Selegie / Albert / Waterloo / Cheng Yan / Buffalo / Hong Lim / Kreta Ayer / Upper Cross).",
+  "_todo": "Audit against HDB's authoritative Short Term Parking Charges page (https://www.hdb.gov.sg/car-parks/short-term-parking/short-term-parking-charges/). Likely missing: Outram, Tanjong Pagar Plaza, Cantonment, Bukit Ho Swee, parts of Tiong Bahru. Adding codes here is enough — the migration will pick them up on next run.",
+  "_lastReviewed": "2026-05-26",
+
+  "centralCodes": [
+    "ACB",
+    "BBB",
+    "BRB1",
+    "BRBL",
+    "CY",
+    "HLM",
+    "KAB",
+    "KAM",
+    "KAML",
+    "KAS",
+    "SR1",
+    "SR2",
+    "TPM",
+    "UCS",
+    "WCB"
+  ]
+}
