@@ -8,12 +8,19 @@ export type AddDestPrefill = {
   name?: string;
   address?: string;
   icon?: DestIcon;
+  /** Coords from the original search. Persisted on save so chip-tap can
+   * re-open the exact same location with the user's friendly name as the
+   * header label — no second geocode round-trip. */
+  lat?: number;
+  lng?: number;
 };
 
 export type AddDestPayload = {
   name: string;
   address: string;
   icon: DestIcon;
+  lat?: number;
+  lng?: number;
 };
 
 export function AddDestSheet({
@@ -83,7 +90,16 @@ export function AddDestSheet({
           <button
             type="button"
             onClick={() =>
-              canSave && onSave({ name: name.trim(), address: address.trim(), icon })
+              canSave &&
+              onSave({
+                name: name.trim(),
+                address: address.trim(),
+                icon,
+                // Forward prefill coords (hot-path save) so the saved record
+                // round-trips back to the original location on chip tap.
+                lat: prefill?.lat,
+                lng: prefill?.lng,
+              })
             }
             disabled={!canSave}
             style={{

@@ -286,7 +286,16 @@ function App() {
   }, [signOut, pop]);
 
   const handleAddDest = useCallback(
-    (d: { name: string; address: string; icon: SavedDestination['icon'] }) => {
+    (d: {
+      name: string;
+      address: string;
+      icon: SavedDestination['icon'];
+      lat?: number;
+      lng?: number;
+    }) => {
+      // Persist coords when the sheet forwarded them (hot-path save).
+      // Chip tap later uses searchAtCoords with d.name as the header label,
+      // so the friendly name survives and the exact location is preserved.
       saves.addDestination(d);
       setAddDestOpen(false);
       setDestPrefill(null);
@@ -353,6 +362,11 @@ function App() {
       name: result.destination.label,
       address: result.destination.address,
       icon: 'star',
+      // Capture coords so the saved record round-trips back to the exact
+      // location on chip tap (rather than re-geocoding the address, which
+      // can drift if the address string isn't a perfect OneMap match).
+      lat: result.destination.lat,
+      lng: result.destination.lng,
     });
     setAddDestOpen(true);
   }, [result.destination]);
