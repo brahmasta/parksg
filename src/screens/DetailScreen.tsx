@@ -433,7 +433,7 @@ export function DetailScreen({
             {saved ? (
               <>
                 Saved to your account. Find it any time under{' '}
-                <strong style={{ fontWeight: 600 }}>Saved carparks</strong>.
+                <strong style={{ fontWeight: 600 }}>Saved</strong>.
               </>
             ) : (
               <>

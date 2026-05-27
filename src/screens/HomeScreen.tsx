@@ -1,11 +1,16 @@
 import { useMemo } from 'react';
-import type { RecentDestination, SavedDestination, User } from '../lib/types';
+import type {
+  MergedSaveItem,
+  RecentDestination,
+  User,
+} from '../lib/types';
 import { AppFooter } from '../components/AppFooter';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { Wordmark } from '../components/Wordmark';
 import { pickHeroCopy } from '../lib/heroCopy';
-import { DestinationIcon } from '../components/DestinationIcon';
+import { HomeSavedDestChip } from '../components/HomeSavedDestChip';
+import { HomeSavedCarparkChip } from '../components/HomeSavedCarparkChip';
 import {
   IconBookmark,
   IconChevronRight,
@@ -29,9 +34,10 @@ export function HomeScreen({
   onAbout,
   user,
   onOpenAccount,
-  savedDestinations,
-  onOpenSavedDestinations,
+  merged,
+  onOpenSaved,
   onSearchSavedDestination,
+  onOpenSavedCarpark,
 }: {
   destination: string;
   setDestination: (v: string) => void;
@@ -43,9 +49,15 @@ export function HomeScreen({
   onAbout: () => void;
   user: User | null;
   onOpenAccount: () => void;
-  savedDestinations: SavedDestination[];
-  onOpenSavedDestinations: () => void;
-  onSearchSavedDestination: (d: SavedDestination) => void;
+  /** Merged Saved feed, latest-first. */
+  merged: MergedSaveItem[];
+  onOpenSaved: () => void;
+  onSearchSavedDestination: (
+    item: MergedSaveItem & { kind: 'destination' },
+  ) => void;
+  onOpenSavedCarpark: (
+    item: MergedSaveItem & { kind: 'carpark' },
+  ) => void;
 }) {
   // Pick one hero variant per mount and lock it in — no churn while the
   // user is on the screen. Random on each fresh app load.
@@ -260,8 +272,10 @@ export function HomeScreen({
           </button>
         </div>
 
-        {/* Saved destinations chip strip — signed in & populated */}
-        {user && savedDestinations.length > 0 && (
+        {/* Merged Saved chip strip — destinations + carparks, latest-first.
+            Capped at 8; tap a chip → either a destination search or a Detail
+            view, depending on item kind. */}
+        {user && merged.length > 0 && (
           <div style={{ marginTop: 22 }}>
             <div
               style={{
@@ -291,7 +305,7 @@ export function HomeScreen({
               </div>
               <button
                 type="button"
-                onClick={onOpenSavedDestinations}
+                onClick={onOpenSaved}
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -305,7 +319,7 @@ export function HomeScreen({
                   textTransform: 'uppercase',
                 }}
               >
-                Edit
+                View all
               </button>
             </div>
             <div
@@ -321,50 +335,21 @@ export function HomeScreen({
                 paddingRight: 16,
               }}
             >
-              {savedDestinations.map((d) => (
-                <button
-                  key={d.id}
-                  type="button"
-                  onClick={() => onSearchSavedDestination(d)}
-                  style={{
-                    appearance: 'none',
-                    flexShrink: 0,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '10px 14px 10px 12px',
-                    background: 'var(--bg-1)',
-                    border: '0.5px solid var(--line-strong)',
-                    borderRadius: 999,
-                    color: 'var(--text-1)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 999,
-                      background: 'var(--accent-tint)',
-                      color: 'var(--accent)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <DestinationIcon name={d.icon} size={12} />
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 13.5,
-                      fontWeight: 500,
-                      letterSpacing: -0.1,
-                    }}
-                  >
-                    {d.name}
-                  </span>
-                </button>
-              ))}
+              {merged.slice(0, 8).map((item) =>
+                item.kind === 'destination' ? (
+                  <HomeSavedDestChip
+                    key={`d-${item.id}`}
+                    d={item.destination}
+                    onClick={() => onSearchSavedDestination(item)}
+                  />
+                ) : (
+                  <HomeSavedCarparkChip
+                    key={`c-${item.id}`}
+                    cp={item.carpark}
+                    onClick={() => onOpenSavedCarpark(item)}
+                  />
+                ),
+              )}
             </div>
           </div>
         )}

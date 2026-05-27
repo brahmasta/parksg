@@ -1,40 +1,48 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { Carpark, DestIcon, Operator, SavedDestination } from './types';
+import type {
+  Carpark,
+  DestIcon,
+  MergedSaveItem,
+  Operator,
+  SavedCarpark,
+  SavedCarparkSnapshot,
+  SavedDestination,
+} from './types';
 
 const CARPARKS_KEY = 'psg.savedCarparks';
 const SNAPSHOTS_KEY = 'psg.savedCarparkSnapshots';
 const DESTINATIONS_KEY = 'psg.savedDestinations';
 
-/**
- * Lightweight snapshot of a carpark, persisted so the Saved Carparks list
- * can render even when the user has never visited Results / Detail in the
- * current session. Live lot counts and EV state come back when they open
- * the carpark's Detail screen.
- */
-export type SavedCarparkSnapshot = {
-  id: string;
-  name: string;
-  block: string;
-  area: string;
-  operator: Operator;
-  lastCost: number;
-  savedAt: number;
-};
+// Re-export so callers don't need to drill into types.
+export type { SavedCarparkSnapshot };
 
-function readCarparks(): string[] {
+// ────────────────────────────────────────────────────────────────────
+// Persistence helpers
+// ────────────────────────────────────────────────────────────────────
+
+function readCarparks(): SavedCarpark[] {
   try {
     const raw = localStorage.getItem(CARPARKS_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((x) => typeof x === 'string') : [];
+    if (!Array.isArray(parsed)) return [];
+    // Migrate legacy shape (string[] of ids) → SavedCarpark[].
+    if (parsed.every((x) => typeof x === 'string')) {
+      const now = Date.now();
+      return parsed.map((id, i) => ({ id, savedAt: now - i * 1000 }));
+    }
+    return parsed.filter(
+      (x): x is SavedCarpark =>
+        x && typeof x === 'object' && typeof x.id === 'string' && typeof x.savedAt === 'number',
+    );
   } catch {
     return [];
   }
 }
 
-function writeCarparks(ids: string[]) {
+function writeCarparks(list: SavedCarpark[]) {
   try {
-    localStorage.setItem(CARPARKS_KEY, JSON.stringify(ids));
+    localStorage.setItem(CARPARKS_KEY, JSON.stringify(list));
   } catch {
     /* ignore */
   }
@@ -59,9 +67,39 @@ function writeSnapshots(s: SavedCarparkSnapshot[]) {
   }
 }
 
+function readDestinations(): SavedDestination[] {
+  try {
+    const raw = localStorage.getItem(DESTINATIONS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Migrate legacy shape (createdAt → savedAt).
+    return parsed.map((d) => {
+      if (d && typeof d === 'object' && !('savedAt' in d) && 'createdAt' in d) {
+        return { ...d, savedAt: d.createdAt };
+      }
+      return d;
+    }) as SavedDestination[];
+  } catch {
+    return [];
+  }
+}
+
+function writeDestinations(ds: SavedDestination[]) {
+  try {
+    localStorage.setItem(DESTINATIONS_KEY, JSON.stringify(ds));
+  } catch {
+    /* ignore */
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Snapshot builder + area derivation
+// ────────────────────────────────────────────────────────────────────
+
 /** Derive a coarse area label from a carpark when the data model doesn't
  * carry one. Pulls a postal-district hint from `block` first, then falls
- * back to the operator. Keeps the Saved Carparks groupings stable. */
+ * back to the operator. Keeps the Saved feed groupings stable. */
 function deriveArea(cp: { block: string; operator: Operator; name: string }): string {
   const block = cp.block ?? '';
   if (/blk\s*\d+/i.test(block)) {
@@ -76,10 +114,7 @@ function deriveArea(cp: { block: string; operator: Operator; name: string }): st
   return 'LTA carparks';
 }
 
-export function snapshotFromCarpark(
-  cp: Carpark,
-  lastCost: number,
-): SavedCarparkSnapshot {
+export function snapshotFromCarpark(cp: Carpark, lastCost: number): SavedCarparkSnapshot {
   return {
     id: cp.id,
     name: cp.name,
@@ -91,38 +126,43 @@ export function snapshotFromCarpark(
   };
 }
 
-function readDestinations(): SavedDestination[] {
-  try {
-    const raw = localStorage.getItem(DESTINATIONS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as SavedDestination[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+// ────────────────────────────────────────────────────────────────────
+// Merge helper
+// ────────────────────────────────────────────────────────────────────
+
+/** Build the unified Saved feed: destinations + saved-carpark records,
+ * decorated with a `kind` discriminator and the resolved snapshot for
+ * "carpark" rows. Sorted latest-first. */
+export function mergeSaves(
+  savedCarparks: SavedCarpark[],
+  snapshots: SavedCarparkSnapshot[],
+  destinations: SavedDestination[],
+): MergedSaveItem[] {
+  const items: MergedSaveItem[] = [];
+  for (const d of destinations) {
+    items.push({ kind: 'destination', id: d.id, savedAt: d.savedAt, destination: d });
   }
+  for (const sc of savedCarparks) {
+    const snap = snapshots.find((s) => s.id === sc.id);
+    if (!snap) continue;
+    items.push({ kind: 'carpark', id: sc.id, savedAt: sc.savedAt, carpark: snap });
+  }
+  return items.sort((a, b) => b.savedAt - a.savedAt);
 }
 
-function writeDestinations(ds: SavedDestination[]) {
-  try {
-    localStorage.setItem(DESTINATIONS_KEY, JSON.stringify(ds));
-  } catch {
-    /* ignore */
-  }
-}
+// ────────────────────────────────────────────────────────────────────
+// Hook
+// ────────────────────────────────────────────────────────────────────
 
 export function useSaves() {
-  const [carparkIds, setCarparkIds] = useState<string[]>(() => readCarparks());
-  const [snapshots, setSnapshots] = useState<SavedCarparkSnapshot[]>(() =>
-    readSnapshots(),
-  );
-  const [destinations, setDestinations] = useState<SavedDestination[]>(() =>
-    readDestinations(),
-  );
+  const [savedCarparks, setSavedCarparks] = useState<SavedCarpark[]>(() => readCarparks());
+  const [snapshots, setSnapshots] = useState<SavedCarparkSnapshot[]>(() => readSnapshots());
+  const [destinations, setDestinations] = useState<SavedDestination[]>(() => readDestinations());
 
   // Cross-tab sync.
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === CARPARKS_KEY) setCarparkIds(readCarparks());
+      if (e.key === CARPARKS_KEY) setSavedCarparks(readCarparks());
       if (e.key === SNAPSHOTS_KEY) setSnapshots(readSnapshots());
       if (e.key === DESTINATIONS_KEY) setDestinations(readDestinations());
     };
@@ -130,21 +170,22 @@ export function useSaves() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const savedCarparks = useMemo(() => new Set(carparkIds), [carparkIds]);
-
-  const isCarparkSaved = useCallback(
-    (id: string) => savedCarparks.has(id),
+  const savedSet = useMemo(
+    () => new Set(savedCarparks.map((s) => s.id)),
     [savedCarparks],
   );
 
+  const isCarparkSaved = useCallback((id: string) => savedSet.has(id), [savedSet]);
+
   const toggleCarpark = useCallback(
     (id: string, snapshot?: SavedCarparkSnapshot) => {
-      setCarparkIds((prev) => {
-        const has = prev.includes(id);
-        const next = has ? prev.filter((x) => x !== id) : [...prev, id];
+      setSavedCarparks((prev) => {
+        const has = prev.some((s) => s.id === id);
+        const next = has
+          ? prev.filter((s) => s.id !== id)
+          : [...prev, { id, savedAt: Date.now() }];
         writeCarparks(next);
-        // Mirror the snapshot list. Add when saving (need a snapshot), drop
-        // when unsaving so we don't keep stale entries around.
+        // Mirror the snapshot list.
         if (has) {
           setSnapshots((prevSnaps) => {
             const nextSnaps = prevSnaps.filter((s) => s.id !== id);
@@ -173,7 +214,7 @@ export function useSaves() {
         d.name.toLowerCase().replace(/\s+/g, '-') +
         '-' +
         Math.random().toString(36).slice(2, 6);
-      const entry: SavedDestination = { ...d, id, createdAt: Date.now() };
+      const entry: SavedDestination = { ...d, id, savedAt: Date.now() };
       setDestinations((prev) => {
         const next = [...prev, entry];
         writeDestinations(next);
@@ -206,9 +247,14 @@ export function useSaves() {
     [destinations],
   );
 
+  const merged = useMemo(
+    () => mergeSaves(savedCarparks, snapshots, destinations),
+    [savedCarparks, snapshots, destinations],
+  );
+
   return {
     savedCarparks,
-    savedCarparkIds: carparkIds,
+    savedCarparkIds: savedCarparks.map((s) => s.id),
     savedCarparkSnapshots: snapshots,
     isCarparkSaved,
     toggleCarpark,
@@ -216,5 +262,22 @@ export function useSaves() {
     addDestination,
     removeDestination,
     isDestinationSaved,
+    merged,
   };
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Time-ago helper
+// ────────────────────────────────────────────────────────────────────
+
+export function savedAgo(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return 'just now';
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  const d = Math.floor(diff / 86_400_000);
+  if (d === 1) return 'yesterday';
+  if (d < 7) return `${d}d ago`;
+  if (d < 30) return `${Math.floor(d / 7)}w ago`;
+  return `${Math.floor(d / 30)}mo ago`;
 }

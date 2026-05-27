@@ -3,6 +3,7 @@ import { Analytics, track } from '@vercel/analytics/react';
 import type {
   Carpark,
   DurationHours,
+  MergedSaveItem,
   RecentDestination,
   SavedDestination,
   Screen,
@@ -13,8 +14,7 @@ import { ResultsScreen } from './screens/ResultsScreen';
 import { DetailScreen } from './screens/DetailScreen';
 import { AboutScreen } from './screens/AboutScreen';
 import { AccountScreen } from './screens/AccountScreen';
-import { SavedCarparksScreen } from './screens/SavedCarparksScreen';
-import { SavedDestinationsScreen } from './screens/SavedDestinationsScreen';
+import { SavedScreen } from './screens/SavedScreen';
 import {
   IconBookmark,
   IconCheck,
@@ -324,6 +324,29 @@ function App() {
     [search, searchAtCoords],
   );
 
+  /** From the Home merged strip or the Saved feed: try to open the carpark's
+   * Detail screen. If we already have it in the current Results window we
+   * jump straight there; otherwise pop a toast asking the user to search
+   * first. Live-fetching a single carpark by id off the destination grid is
+   * out-of-scope for this epic — the snapshot covers the recent-cost +
+   * area display until they re-search. */
+  const handleOpenSavedCarpark = useCallback(
+    (item: MergedSaveItem & { kind: 'carpark' }) => {
+      const existing = result.carparks.find((c) => c.id === item.id);
+      if (existing) {
+        setSelectedCarpark(existing);
+        setScreen('detail');
+      } else {
+        pop({
+          icon: <IconBookmark filled size={15} stroke={2} />,
+          title: 'Search to open this carpark',
+          sub: item.carpark.name,
+        });
+      }
+    },
+    [result.carparks, pop],
+  );
+
   const openSaveDestSheet = useCallback(() => {
     if (!result.destination) return;
     setDestPrefill({
@@ -356,9 +379,12 @@ function App() {
         onAbout={() => setScreen('about')}
         user={user}
         onOpenAccount={() => setScreen('account')}
-        savedDestinations={saves.destinations}
-        onOpenSavedDestinations={() => setScreen('saved-destinations')}
-        onSearchSavedDestination={handleSearchSavedDestination}
+        merged={saves.merged}
+        onOpenSaved={() => setScreen('saved')}
+        onSearchSavedDestination={(item) =>
+          handleSearchSavedDestination(item.destination)
+        }
+        onOpenSavedCarpark={handleOpenSavedCarpark}
       />
     );
   } else if (screen === 'about') {
@@ -421,47 +447,31 @@ function App() {
     body = (
       <AccountScreen
         user={user}
-        savedCarparksCount={saves.savedCarparkIds.length}
-        savedDestCount={saves.destinations.length}
+        savedItemCount={saves.merged.length}
         onBack={() => setScreen('home')}
         onSignIn={handleSignIn}
-        onOpenSavedCarparks={() => setScreen('saved-carparks')}
-        onOpenSavedDestinations={() => setScreen('saved-destinations')}
+        onOpenSaved={() => setScreen('saved')}
         onRequestSignOut={() => setSignOutOpen(true)}
       />
     );
-  } else if (screen === 'saved-carparks') {
+  } else if (screen === 'saved') {
     body = (
-      <SavedCarparksScreen
-        snapshots={saves.savedCarparkSnapshots}
-        onUnsave={(id) => saves.toggleCarpark(id)}
-        onBack={() => setScreen('account')}
-        onSelect={(snap) => {
-          // Open Detail by triggering a fresh fetch for this carpark via
-          // searchAtCoords — we don't have coords in the snapshot, so fall
-          // back to going home. (Phase 2: cache coords in the snapshot.)
-          const existing = result.carparks.find((c) => c.id === snap.id);
-          if (existing) {
-            setSelectedCarpark(existing);
-            setScreen('detail');
-          } else {
-            setScreen('home');
-          }
-        }}
-        onGoHome={() => setScreen('home')}
-      />
-    );
-  } else if (screen === 'saved-destinations') {
-    body = (
-      <SavedDestinationsScreen
-        destinations={saves.destinations}
+      <SavedScreen
+        merged={saves.merged}
+        destinationCount={saves.destinations.length}
+        carparkCount={saves.savedCarparks.length}
         onBack={() => setScreen(user ? 'account' : 'home')}
-        onSearchDestination={(d) => handleSearchSavedDestination(d)}
-        onAdd={() => {
+        onSearchDestination={(item) =>
+          handleSearchSavedDestination(item.destination)
+        }
+        onOpenCarpark={(item) => handleOpenSavedCarpark(item)}
+        onRemoveDestination={handleRemoveDest}
+        onUnsaveCarpark={(id) => saves.toggleCarpark(id)}
+        onAddDestination={() => {
           setDestPrefill(null);
           setAddDestOpen(true);
         }}
-        onRemove={handleRemoveDest}
+        onGoFindCarpark={() => setScreen('home')}
       />
     );
   }

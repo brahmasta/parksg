@@ -15,21 +15,18 @@ const APP_VERSION = 'v0.4.2';
 
 export function AccountScreen({
   user,
-  savedCarparksCount,
-  savedDestCount,
+  savedItemCount,
   onBack,
   onSignIn,
-  onOpenSavedCarparks,
-  onOpenSavedDestinations,
+  onOpenSaved,
   onRequestSignOut,
 }: {
   user: User | null;
-  savedCarparksCount: number;
-  savedDestCount: number;
+  /** Combined count: saved destinations + saved carparks. */
+  savedItemCount: number;
   onBack: () => void;
   onSignIn: () => void;
-  onOpenSavedCarparks: () => void;
-  onOpenSavedDestinations: () => void;
+  onOpenSaved: () => void;
   onRequestSignOut: () => void;
 }) {
   return (
@@ -47,10 +44,8 @@ export function AccountScreen({
         {user ? (
           <SignedInBody
             user={user}
-            savedCarparksCount={savedCarparksCount}
-            savedDestCount={savedDestCount}
-            onOpenSavedCarparks={onOpenSavedCarparks}
-            onOpenSavedDestinations={onOpenSavedDestinations}
+            savedItemCount={savedItemCount}
+            onOpenSaved={onOpenSaved}
             onRequestSignOut={onRequestSignOut}
           />
         ) : (
@@ -271,17 +266,13 @@ function SignedOutBody({ onSignIn }: { onSignIn: () => void }) {
 
 function SignedInBody({
   user,
-  savedCarparksCount,
-  savedDestCount,
-  onOpenSavedCarparks,
-  onOpenSavedDestinations,
+  savedItemCount,
+  onOpenSaved,
   onRequestSignOut,
 }: {
   user: { name: string; email: string; initials: string };
-  savedCarparksCount: number;
-  savedDestCount: number;
-  onOpenSavedCarparks: () => void;
-  onOpenSavedDestinations: () => void;
+  savedItemCount: number;
+  onOpenSaved: () => void;
   onRequestSignOut: () => void;
 }) {
   return (
@@ -387,27 +378,15 @@ function SignedInBody({
         >
           <NavRow
             icon={<IconBookmark filled size={16} />}
-            title="Saved carparks"
+            title="Saved"
             sub={
-              savedCarparksCount === 0
-                ? 'Bookmark a carpark from any results page'
-                : `${savedCarparksCount} carpark${
-                    savedCarparksCount === 1 ? '' : 's'
-                  }`
+              savedItemCount === 0
+                ? 'Bookmark carparks and name destinations to find them here'
+                : `${savedItemCount} item${
+                    savedItemCount === 1 ? '' : 's'
+                  } · destinations + carparks`
             }
-            onClick={onOpenSavedCarparks}
-          />
-          <NavRow
-            icon={<IconStar size={16} />}
-            title="Saved destinations"
-            sub={
-              savedDestCount === 0
-                ? 'Add named favourites for one-tap search'
-                : `${savedDestCount} destination${
-                    savedDestCount === 1 ? '' : 's'
-                  }`
-            }
-            onClick={onOpenSavedDestinations}
+            onClick={onOpenSaved}
             last
           />
         </div>

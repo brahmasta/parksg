@@ -161,8 +161,7 @@ export type Screen =
   | 'detail'
   | 'about'
   | 'account'
-  | 'saved-carparks'
-  | 'saved-destinations';
+  | 'saved';
 export type ViewMode = 'list' | 'map';
 
 // ── Accounts & Save ─────────────────────────────────────────────────
@@ -203,5 +202,50 @@ export type SavedDestination = {
   lat?: number;
   lng?: number;
   icon: DestIcon;
-  createdAt: number;
+  /** Epoch ms — drives the latest-first sort on the merged Saved feed. */
+  savedAt: number;
+};
+
+export type SavedCarpark = {
+  /** Carpark id. */
+  id: string;
+  /** Epoch ms — drives the latest-first sort on the merged Saved feed. */
+  savedAt: number;
+};
+
+/**
+ * Merged Saved feed item — destinations and carparks share a row layout
+ * but carry kind-specific payload for tap targets and trailing affordances.
+ * The "carpark" branch carries the lightweight snapshot we cache at save
+ * time so the screen can render without a live carpark fetch.
+ */
+export type MergedSaveItem =
+  | {
+      kind: 'destination';
+      id: string;
+      savedAt: number;
+      destination: SavedDestination;
+    }
+  | {
+      kind: 'carpark';
+      id: string;
+      savedAt: number;
+      carpark: SavedCarparkSnapshot;
+    };
+
+/**
+ * Lightweight snapshot of a carpark, persisted so the Saved Carparks list
+ * can render even when the user has never visited Results / Detail in the
+ * current session. Live lot counts and EV state come back when they open
+ * the carpark's Detail screen. (Mirrored in lib/saves.ts but re-exported
+ * here so the type can be referenced without importing the module.)
+ */
+export type SavedCarparkSnapshot = {
+  id: string;
+  name: string;
+  block: string;
+  area: string;
+  operator: Operator;
+  lastCost: number;
+  savedAt: number;
 };
