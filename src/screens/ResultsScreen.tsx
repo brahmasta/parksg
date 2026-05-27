@@ -12,6 +12,7 @@ import {
   IconList,
   IconMap,
   IconRefresh,
+  IconStar,
 } from '../components/icons';
 
 export function ResultsScreen({
@@ -31,6 +32,10 @@ export function ResultsScreen({
   onSelect,
   onRetry,
   onExpandRadius,
+  isCarparkSaved,
+  onToggleSaveCarpark,
+  destinationSaved,
+  onSaveDestination,
 }: {
   destination: string;
   destinationCoords: [number, number] | null;
@@ -48,6 +53,10 @@ export function ResultsScreen({
   onSelect: (cp: Carpark) => void;
   onRetry: () => void;
   onExpandRadius: () => void;
+  isCarparkSaved: (id: string) => boolean;
+  onToggleSaveCarpark: (cp: Carpark) => void;
+  destinationSaved: boolean;
+  onSaveDestination: () => void;
 }) {
   const ranked = useMemo(() => {
     // Primary sort: walking distance (closest first). Cost is shown on each
@@ -129,6 +138,43 @@ export function ResultsScreen({
               {destination}
             </div>
           </div>
+          <button
+            type="button"
+            onClick={onSaveDestination}
+            disabled={destinationSaved}
+            aria-pressed={destinationSaved}
+            aria-label={
+              destinationSaved
+                ? 'Destination already saved'
+                : 'Save destination'
+            }
+            style={{
+              appearance: 'none',
+              cursor: destinationSaved ? 'default' : 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '7px 11px 7px 9px',
+              borderRadius: 999,
+              background: destinationSaved
+                ? 'var(--accent-tint)'
+                : 'var(--bg-1)',
+              border: destinationSaved
+                ? '1px solid var(--accent)'
+                : '0.5px solid var(--line-strong)',
+              color: destinationSaved ? 'var(--accent)' : 'var(--text-2)',
+              fontSize: 11.5,
+              fontWeight: 600,
+              letterSpacing: -0.05,
+              fontFamily: 'var(--font-body)',
+              flexShrink: 0,
+              transition: 'all 140ms ease',
+              minHeight: 32,
+            }}
+          >
+            <IconStar size={13} stroke={2} />
+            {destinationSaved ? 'Saved' : 'Save'}
+          </button>
           <button
             onClick={onToggleView}
             aria-label="Toggle map view"
@@ -241,6 +287,8 @@ export function ResultsScreen({
                   isCheapest={cp.id === cheapestId}
                   degraded={state === 'degraded'}
                   onClick={() => onSelect(cp)}
+                  saved={isCarparkSaved(cp.id)}
+                  onToggleSave={() => onToggleSaveCarpark(cp)}
                 />
               ))}
               <div

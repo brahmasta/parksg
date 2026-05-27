@@ -7,6 +7,7 @@ import {
 } from '../lib/availability';
 import { AvailabilityDot, OperatorBadge } from './atoms';
 import { EVChip } from './EVChip';
+import { BookmarkToggle } from './BookmarkToggle';
 import { IconWalk } from './icons';
 
 export function CarparkCard({
@@ -16,6 +17,8 @@ export function CarparkCard({
   isCheapest,
   degraded,
   onClick,
+  saved,
+  onToggleSave,
 }: {
   cp: Carpark;
   duration: DurationHours;
@@ -23,6 +26,8 @@ export function CarparkCard({
   isCheapest: boolean;
   degraded: boolean;
   onClick: () => void;
+  saved?: boolean;
+  onToggleSave?: () => void;
 }) {
   const lots = degraded ? null : cp.lotsAvailable;
   const status = availabilityStatus(lots);
@@ -30,10 +35,17 @@ export function CarparkCard({
   const cost = cp.estByHours[duration];
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       style={{
-        appearance: 'none',
         textAlign: 'left',
         display: 'block',
         width: '100%',
@@ -144,6 +156,12 @@ export function CarparkCard({
             Est · {durationLabel(duration)}
           </div>
         </div>
+
+        {onToggleSave && (
+          <div style={{ marginTop: -4, marginRight: -8 }}>
+            <BookmarkToggle saved={!!saved} onToggle={onToggleSave} />
+          </div>
+        )}
       </div>
 
       {/* Divider */}
@@ -199,6 +217,6 @@ export function CarparkCard({
           </span>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

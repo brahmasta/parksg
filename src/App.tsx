@@ -4,6 +4,7 @@ import type {
   Carpark,
   DurationHours,
   RecentDestination,
+  SavedDestination,
   Screen,
   ViewMode,
 } from './lib/types';
@@ -11,9 +12,24 @@ import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { DetailScreen } from './screens/DetailScreen';
 import { AboutScreen } from './screens/AboutScreen';
-import { IconNavigate } from './components/icons';
+import { AccountScreen } from './screens/AccountScreen';
+import { SavedCarparksScreen } from './screens/SavedCarparksScreen';
+import { SavedDestinationsScreen } from './screens/SavedDestinationsScreen';
+import {
+  IconBookmark,
+  IconCheck,
+  IconNavigate,
+  IconSignOut,
+  IconTrash,
+  IconWarning,
+} from './components/icons';
 import { useCarparks } from './hooks/useCarparks';
 import { loadRecents, pushRecent } from './lib/recents';
+import { useSession } from './lib/auth';
+import { snapshotFromCarpark, useSaves } from './lib/saves';
+import { SignOutSheet } from './components/SignOutSheet';
+import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
+import { Toast, useToast } from './components/Toast';
 
 const DURATION_KEY = 'psg.duration';
 const VIEW_MODE_KEY = 'psg.viewMode';
@@ -199,6 +215,133 @@ function App() {
     toastTimer.current = window.setTimeout(() => setNavToast(false), 2400);
   }, [selectedCarpark]);
 
+  // ── Accounts & Save ──────────────────────────────────────────────
+  const { user, signIn, signOut, error: authError } = useSession();
+  const saves = useSaves();
+  const { toast, pop } = useToast();
+
+  // Surface OAuth errors (missing client ID, popup blocked, user cancelled)
+  // as a toast so the user gets actionable feedback.
+  useEffect(() => {
+    if (authError) {
+      pop({
+        icon: <IconWarning size={15} stroke={2} />,
+        title: "Couldn't sign in",
+        sub: authError,
+      });
+    }
+  }, [authError, pop]);
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [addDestOpen, setAddDestOpen] = useState(false);
+  const [destPrefill, setDestPrefill] = useState<AddDestPrefill | null>(null);
+
+  const toggleSaveCarpark = useCallback(
+    (cp: Carpark) => {
+      const isSaved = saves.isCarparkSaved(cp.id);
+      const snapshot = snapshotFromCarpark(cp, cp.estByHours[duration] ?? 0);
+      saves.toggleCarpark(cp.id, snapshot);
+      pop({
+        icon: <IconBookmark filled={!isSaved} size={15} stroke={2} />,
+        title: isSaved ? 'Removed from saved' : 'Saved to your account',
+        sub: cp.name,
+      });
+    },
+    [saves, duration, pop],
+  );
+
+  const handleSignIn = useCallback(() => {
+    // Triggers the Google popup; the user state lands asynchronously when
+    // the userinfo fetch resolves. The "Welcome back" toast fires from the
+    // useEffect below — once we have a real name to greet.
+    signIn();
+  }, [signIn]);
+
+  // After sign-in resolves, route the user to the Account screen and pop
+  // a greeting with their real first name.
+  const prevUserId = useRef<string | null>(null);
+  useEffect(() => {
+    if (user && user.id !== prevUserId.current) {
+      prevUserId.current = user.id;
+      const firstName = user.name.split(/\s+/)[0] || user.name;
+      setScreen('account');
+      pop({
+        icon: <IconCheck size={15} stroke={2.5} />,
+        title: `Welcome back, ${firstName}`,
+        sub: 'Saves synced',
+      });
+    } else if (!user) {
+      prevUserId.current = null;
+    }
+  }, [user, pop]);
+
+  const handleSignOut = useCallback(() => {
+    signOut();
+    setSignOutOpen(false);
+    setScreen('home');
+    pop({
+      icon: <IconSignOut size={15} stroke={2} />,
+      title: 'Signed out',
+      sub: 'Your saves are kept on your account',
+    });
+  }, [signOut, pop]);
+
+  const handleAddDest = useCallback(
+    (d: { name: string; address: string; icon: SavedDestination['icon'] }) => {
+      saves.addDestination(d);
+      setAddDestOpen(false);
+      setDestPrefill(null);
+      pop({
+        icon: <IconCheck size={15} stroke={2.5} />,
+        title: 'Destination saved',
+        sub: d.name,
+      });
+    },
+    [saves, pop],
+  );
+
+  const handleRemoveDest = useCallback(
+    (id: string) => {
+      saves.removeDestination(id);
+      pop({
+        icon: <IconTrash size={14} stroke={2} />,
+        title: 'Destination removed',
+      });
+    },
+    [saves, pop],
+  );
+
+  const handleSearchSavedDestination = useCallback(
+    (d: SavedDestination) => {
+      if (typeof d.lat === 'number' && typeof d.lng === 'number') {
+        setScreen('results');
+        searchAtCoords(d.name, d.lat, d.lng, d.address);
+      } else {
+        setDestinationInput(d.name);
+        setScreen('results');
+        search(d.address || d.name);
+      }
+    },
+    [search, searchAtCoords],
+  );
+
+  const openSaveDestSheet = useCallback(() => {
+    if (!result.destination) return;
+    setDestPrefill({
+      name: result.destination.label,
+      address: result.destination.address,
+      icon: 'star',
+    });
+    setAddDestOpen(true);
+  }, [result.destination]);
+
+  const destAlreadySaved = useMemo(() => {
+    if (!result.destination) return false;
+    return (
+      saves.isDestinationSaved(result.destination.label) ||
+      saves.isDestinationSaved(result.destination.address)
+    );
+  }, [result.destination, saves]);
+
   let body: React.ReactNode = null;
   if (screen === 'home') {
     body = (
@@ -211,6 +354,11 @@ function App() {
         recents={recents}
         nearMeBusy={nearMeBusy}
         onAbout={() => setScreen('about')}
+        user={user}
+        onOpenAccount={() => setScreen('account')}
+        savedDestinations={saves.destinations}
+        onOpenSavedDestinations={() => setScreen('saved-destinations')}
+        onSearchSavedDestination={handleSearchSavedDestination}
       />
     );
   } else if (screen === 'about') {
@@ -243,6 +391,10 @@ function App() {
         onSelect={goDetail}
         onRetry={retry}
         onExpandRadius={expandRadius}
+        isCarparkSaved={(id) => saves.isCarparkSaved(id)}
+        onToggleSaveCarpark={toggleSaveCarpark}
+        destinationSaved={destAlreadySaved}
+        onSaveDestination={openSaveDestSheet}
       />
     );
   } else if (screen === 'detail' && selectedCarpark) {
@@ -261,6 +413,55 @@ function App() {
         onNavigate={showNavToast}
         refreshedSecondsAgo={result.refreshedSecondsAgo}
         degraded={result.state === 'degraded'}
+        saved={saves.isCarparkSaved(selectedCarpark.id)}
+        onToggleSave={() => toggleSaveCarpark(selectedCarpark)}
+      />
+    );
+  } else if (screen === 'account') {
+    body = (
+      <AccountScreen
+        user={user}
+        savedCarparksCount={saves.savedCarparkIds.length}
+        savedDestCount={saves.destinations.length}
+        onBack={() => setScreen('home')}
+        onSignIn={handleSignIn}
+        onOpenSavedCarparks={() => setScreen('saved-carparks')}
+        onOpenSavedDestinations={() => setScreen('saved-destinations')}
+        onRequestSignOut={() => setSignOutOpen(true)}
+      />
+    );
+  } else if (screen === 'saved-carparks') {
+    body = (
+      <SavedCarparksScreen
+        snapshots={saves.savedCarparkSnapshots}
+        onUnsave={(id) => saves.toggleCarpark(id)}
+        onBack={() => setScreen('account')}
+        onSelect={(snap) => {
+          // Open Detail by triggering a fresh fetch for this carpark via
+          // searchAtCoords — we don't have coords in the snapshot, so fall
+          // back to going home. (Phase 2: cache coords in the snapshot.)
+          const existing = result.carparks.find((c) => c.id === snap.id);
+          if (existing) {
+            setSelectedCarpark(existing);
+            setScreen('detail');
+          } else {
+            setScreen('home');
+          }
+        }}
+        onGoHome={() => setScreen('home')}
+      />
+    );
+  } else if (screen === 'saved-destinations') {
+    body = (
+      <SavedDestinationsScreen
+        destinations={saves.destinations}
+        onBack={() => setScreen(user ? 'account' : 'home')}
+        onSearchDestination={(d) => handleSearchSavedDestination(d)}
+        onAdd={() => {
+          setDestPrefill(null);
+          setAddDestOpen(true);
+        }}
+        onRemove={handleRemoveDest}
       />
     );
   }
@@ -316,6 +517,22 @@ function App() {
               </div>
             </div>
           )}
+
+          <SignOutSheet
+            open={signOutOpen}
+            onClose={() => setSignOutOpen(false)}
+            onConfirm={handleSignOut}
+          />
+          <AddDestSheet
+            open={addDestOpen}
+            onClose={() => {
+              setAddDestOpen(false);
+              setDestPrefill(null);
+            }}
+            onSave={handleAddDest}
+            prefill={destPrefill}
+          />
+          <Toast toast={toast} bottomOffset={screen === 'detail' ? 90 : 28} />
         </div>
       </div>
     </div>

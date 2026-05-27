@@ -10,7 +10,12 @@ import { EVSection } from '../components/EVSection';
 import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
-import { IconChevronLeft, IconNavigate, IconWarning } from '../components/icons';
+import {
+  IconBookmark,
+  IconChevronLeft,
+  IconNavigate,
+  IconWarning,
+} from '../components/icons';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 
 export function DetailScreen({
@@ -23,6 +28,8 @@ export function DetailScreen({
   onNavigate,
   refreshedSecondsAgo,
   degraded,
+  saved,
+  onToggleSave,
 }: {
   cp: Carpark;
   destination: string;
@@ -33,6 +40,8 @@ export function DetailScreen({
   onNavigate: () => void;
   refreshedSecondsAgo: number | null;
   degraded: boolean;
+  saved: boolean;
+  onToggleSave: () => void;
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
   const cost = cp.estByHours[duration];
@@ -96,21 +105,34 @@ export function DetailScreen({
         </button>
         <div style={{ flex: 1 }} />
         <button
-          aria-label="Save carpark"
+          type="button"
+          onClick={onToggleSave}
+          aria-pressed={saved}
+          aria-label={saved ? 'Remove from saved' : 'Save carpark'}
           style={{
             appearance: 'none',
-            padding: '7px 12px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '7px 12px 7px 10px',
             borderRadius: 999,
-            background: 'var(--bg-1)',
-            border: '0.5px solid var(--line-strong)',
-            color: 'var(--text-2)',
+            background: saved
+              ? 'var(--accent-tint-strong)'
+              : 'var(--bg-1)',
+            border: saved
+              ? '1px solid var(--accent)'
+              : '0.5px solid var(--line-strong)',
+            color: saved ? 'var(--accent)' : 'var(--text-2)',
             cursor: 'pointer',
             fontSize: 12.5,
-            fontWeight: 500,
+            fontWeight: 600,
+            letterSpacing: -0.1,
             minHeight: 32,
+            transition: 'all 140ms ease',
           }}
         >
-          Save
+          <IconBookmark filled={saved} size={14} stroke={2} />
+          {saved ? 'Saved' : 'Save'}
         </button>
       </div>
 
@@ -375,6 +397,55 @@ export function DetailScreen({
               </span>
             </div>
           )}
+        </div>
+
+        {/* Save reassurance — explains where the save lives */}
+        <div
+          style={{
+            marginTop: 18,
+            padding: '12px 14px',
+            background: saved ? 'var(--accent-tint)' : 'var(--bg-2)',
+            border: '0.5px solid ' + (saved ? 'var(--accent)' : 'var(--line)'),
+            borderRadius: 12,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 10,
+            transition: 'all 180ms ease',
+          }}
+        >
+          <span
+            style={{
+              color: saved ? 'var(--accent)' : 'var(--text-3)',
+              display: 'inline-flex',
+              flexShrink: 0,
+              marginTop: 1,
+            }}
+          >
+            <IconBookmark filled={saved} size={15} stroke={1.75} />
+          </span>
+          <div
+            style={{
+              fontSize: 12.5,
+              color: saved ? 'var(--text-1)' : 'var(--text-2)',
+              lineHeight: 1.45,
+            }}
+          >
+            {saved ? (
+              <>
+                Saved to your account. Find it any time under{' '}
+                <strong style={{ fontWeight: 600 }}>Saved carparks</strong>.
+              </>
+            ) : (
+              <>
+                Tap{' '}
+                <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>
+                  Save
+                </strong>{' '}
+                to keep this carpark on your account — it'll show up here on
+                every device.
+              </>
+            )}
+          </div>
         </div>
 
         {/* Meta */}

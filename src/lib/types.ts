@@ -155,5 +155,53 @@ export type DurationOption = { value: DurationHours; label: string };
 
 export type AvailabilityStatus = 'available' | 'limited' | 'full' | 'unknown';
 export type ResultsState = 'loading' | 'loaded' | 'degraded' | 'empty';
-export type Screen = 'home' | 'results' | 'detail' | 'about';
+export type Screen =
+  | 'home'
+  | 'results'
+  | 'detail'
+  | 'about'
+  | 'account'
+  | 'saved-carparks'
+  | 'saved-destinations';
 export type ViewMode = 'list' | 'map';
+
+// ── Accounts & Save ─────────────────────────────────────────────────
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  initials: string;
+  avatarUrl?: string;
+};
+
+export type Session = {
+  user: User | null;
+  syncedAt: number | null;
+};
+
+export type DestIcon =
+  | 'briefcase'
+  | 'home'
+  | 'star'
+  | 'heart'
+  | 'pin'
+  | 'building';
+
+export const DESTINATION_ICONS: DestIcon[] = [
+  'briefcase',
+  'home',
+  'star',
+  'heart',
+  'pin',
+  'building',
+];
+
+export type SavedDestination = {
+  id: string;
+  name: string;
+  address: string;
+  lat?: number;
+  lng?: number;
+  icon: DestIcon;
+  createdAt: number;
+};
