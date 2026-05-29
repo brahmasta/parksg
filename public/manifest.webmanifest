@@ -1,0 +1,28 @@
+{
+  "name": "wheretopark.sg — Find parking before you leave",
+  "short_name": "wheretopark",
+  "description": "Live availability and real prices for HDB, URA and LTA carparks across Singapore — ranked by cost before you drive.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F2EC",
+  "theme_color": "#F4F2EC",
+  "categories": ["navigation", "travel", "utilities"],
+  "lang": "en-SG",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

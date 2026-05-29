@@ -19,3 +19,15 @@ createRoot(document.getElementById('root')!).render(
     </GoogleOAuthProvider>
   </StrictMode>,
 );
+
+// Register the service worker so the app is installable as a PWA. Prod-only
+// — in dev the SW would shadow Vite's HMR. Registered after load so it never
+// competes with first paint.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      /* non-fatal: app still works without offline support */
+    });
+  });
+}
+

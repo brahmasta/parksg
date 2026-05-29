@@ -224,6 +224,16 @@ export const IconBuilding = (p: IconProps) => (
   </Icon>
 );
 
+// iOS share glyph — box with an arrow rising out of the top. Used in the
+// PWA install instructions on iOS Safari.
+export const IconShare = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 4v12" />
+    <path d="m8 8 4-4 4 4" />
+    <path d="M6 12v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6" />
+  </Icon>
+);
+
 // Google's "G" — uses brand colors directly (not in the design system).
 export const IconGoogleG = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden>

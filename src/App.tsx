@@ -30,6 +30,7 @@ import { snapshotFromCarpark, useSaves } from './lib/saves';
 import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
+import { InstallPrompt } from './components/InstallPrompt';
 
 const DURATION_KEY = 'psg.duration';
 const VIEW_MODE_KEY = 'psg.viewMode';
@@ -557,6 +558,9 @@ function App() {
             prefill={destPrefill}
           />
           <Toast toast={toast} bottomOffset={screen === 'detail' ? 90 : 28} />
+          {/* PWA install banner — only on the Home landing surface so it
+              never collides with the Detail sticky CTA or results flow. */}
+          {screen === 'home' && <InstallPrompt />}
         </div>
       </div>
     </div>
