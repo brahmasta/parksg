@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type {
   MergedSaveItem,
   RecentDestination,
@@ -13,7 +13,6 @@ import { HomeSavedDestChip } from '../components/HomeSavedDestChip';
 import { HomeSavedCarparkChip } from '../components/HomeSavedCarparkChip';
 import {
   IconBookmark,
-  IconChevronRight,
   IconCloud,
   IconGoogleG,
   IconHistory,
@@ -62,6 +61,9 @@ export function HomeScreen({
   // Pick one hero variant per mount and lock it in — no churn while the
   // user is on the screen. Random on each fresh app load.
   const hero = useMemo(() => pickHeroCopy(), []);
+
+  // Recent list shows the freshest 3 by default; "See all" reveals the rest.
+  const [recentsExpanded, setRecentsExpanded] = useState(false);
 
   return (
     <div
@@ -276,52 +278,20 @@ export function HomeScreen({
             Capped at 8; tap a chip → either a destination search or a Detail
             view, depending on item kind. */}
         {user && merged.length > 0 && (
-          <div style={{ marginTop: 22 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 10,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span
-                  style={{ color: 'var(--accent)', display: 'inline-flex' }}
-                >
-                  <IconBookmark filled size={11} stroke={1.75} />
+          <div style={{ marginTop: 24 }}>
+            <SectionHeader
+              icon={
+                <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
+                  <IconBookmark filled size={14} stroke={2} />
                 </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 10.5,
-                    color: 'var(--text-3)',
-                    letterSpacing: 1,
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Saved
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={onOpenSaved}
-                style={{
-                  appearance: 'none',
-                  border: 0,
-                  background: 'transparent',
-                  color: 'var(--accent)',
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: 0.4,
-                  cursor: 'pointer',
-                  textTransform: 'uppercase',
-                }}
-              >
-                View all
-              </button>
-            </div>
+              }
+              label="Saved"
+              link={
+                <SectionLink color="var(--accent)" onClick={onOpenSaved}>
+                  View all
+                </SectionLink>
+              }
+            />
             <div
               className="psg-no-scrollbar"
               style={{
@@ -357,29 +327,22 @@ export function HomeScreen({
         {/* Recent — signed-in shows synced recents; signed-out shows a sync prompt. */}
         {user ? (
           <div style={{ marginTop: 22 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                marginBottom: 10,
-              }}
-            >
-              <span style={{ color: 'var(--text-3)', display: 'inline-flex' }}>
-                <IconHistory size={13} stroke={2} />
-              </span>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10.5,
-                  color: 'var(--text-3)',
-                  letterSpacing: 1,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Recent · synced
-              </span>
-            </div>
+            <SectionHeader
+              icon={
+                <span style={{ color: 'var(--text-2)', display: 'inline-flex' }}>
+                  <IconHistory size={14} stroke={2} />
+                </span>
+              }
+              label="Recent · synced"
+              link={
+                <SectionLink
+                  color="var(--text-3)"
+                  onClick={() => setRecentsExpanded((v) => !v)}
+                >
+                  See all
+                </SectionLink>
+              }
+            />
             {recents.length > 0 && (
               <div
                 style={{
@@ -392,12 +355,11 @@ export function HomeScreen({
                   overflow: 'hidden',
                 }}
               >
-                {recents.map((r, i) => (
+                {(recentsExpanded ? recents : recents.slice(0, 3)).map((r, i) => (
                   <RecentRow
                     key={r.name}
                     r={r}
                     isFirst={i === 0}
-                    showDevice
                     onClick={() => {
                       if (
                         typeof r.lat === 'number' &&
@@ -541,12 +503,10 @@ export function HomeScreen({
 function RecentRow({
   r,
   isFirst,
-  showDevice,
   onClick,
 }: {
   r: RecentDestination;
   isFirst: boolean;
-  showDevice: boolean;
   onClick: () => void;
 }) {
   return (
@@ -559,38 +519,130 @@ function RecentRow({
         display: 'flex',
         alignItems: 'center',
         gap: 10,
-        padding: '12px 14px',
+        padding: '9px 14px',
         background: 'transparent',
         border: 0,
         borderTop: isFirst ? 'none' : '0.5px solid var(--line)',
         color: 'var(--text-1)',
         cursor: 'pointer',
-        minHeight: 44,
         width: '100%',
       }}
     >
-      <span style={{ color: 'var(--text-3)', display: 'inline-flex' }}>
-        <IconPin size={15} stroke={2} />
+      <span style={{ color: 'var(--text-3)', display: 'inline-flex', flexShrink: 0 }}>
+        <IconPin size={12} stroke={2} />
       </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 500 }}>{r.name}</div>
-        <div
+      {/* Name + meta on one baseline-aligned row; name takes width priority. */}
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 8,
+        }}
+      >
+        <span
           style={{
-            fontSize: 11.5,
-            color: 'var(--text-3)',
-            marginTop: 1,
-            fontFamily: showDevice ? 'var(--font-mono)' : 'var(--font-body)',
-            letterSpacing: showDevice ? 0.1 : 0,
+            fontSize: 13.5,
+            fontWeight: 500,
+            color: 'var(--text-1)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            minWidth: 0,
           }}
         >
-          {r.hint}
-        </div>
+          {r.name}
+        </span>
+        {r.hint && (
+          <span
+            style={{
+              fontSize: 11,
+              color: 'var(--text-3)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: 0.1,
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '45%',
+            }}
+          >
+            {r.hint}
+          </span>
+        )}
       </div>
-      <IconChevronRight
-        size={14}
-        stroke={2}
-        style={{ color: 'var(--text-3)' }}
-      />
+    </button>
+  );
+}
+
+// ── Shared section header pieces (Saved + Recent are peers) ──────────
+function SectionHeader({
+  icon,
+  label,
+  link,
+}: {
+  icon: ReactNode;
+  label: string;
+  link: ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {icon}
+        <span
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: 12,
+            fontWeight: 600,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            color: 'var(--text-2)',
+          }}
+        >
+          {label}
+        </span>
+      </div>
+      {link}
+    </div>
+  );
+}
+
+function SectionLink({
+  color,
+  onClick,
+  children,
+}: {
+  color: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        appearance: 'none',
+        border: 0,
+        background: 'transparent',
+        padding: 0,
+        cursor: 'pointer',
+        fontFamily: 'var(--font-mono)',
+        fontSize: 12,
+        fontWeight: 600,
+        letterSpacing: 1.2,
+        textTransform: 'uppercase',
+        color,
+      }}
+    >
+      {children}
     </button>
   );
 }

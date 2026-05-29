@@ -54,19 +54,6 @@ export function HomeSavedCarparkChip({
       >
         {cp.name}
       </span>
-      <span
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          color: 'var(--text-3)',
-          letterSpacing: 0.2,
-          paddingLeft: 6,
-          borderLeft: '0.5px solid var(--line)',
-          marginLeft: 2,
-        }}
-      >
-        ${cp.lastCost.toFixed(2)}
-      </span>
     </button>
   );
 }
