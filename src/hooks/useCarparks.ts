@@ -8,6 +8,7 @@ import type {
   ResultsState,
 } from '../lib/types';
 import {
+  fetchCarparkById,
   fetchNearbyCarparks,
   type DbCarparkRaw,
   type DbRateRowRaw,
@@ -228,7 +229,44 @@ export function useCarparks() {
     if (trigger) void run(trigger, { radius: 1000 });
   }, [trigger, run]);
 
-  return { result, search, searchAtCoords, retry, expandRadius, trigger };
+  // Load a single carpark by id — used to open a saved carpark straight to
+  // its Detail screen, without a surrounding destination search. Static data
+  // (rates) comes from the DB row; live lots + EV are merged best-effort so a
+  // slow upstream just leaves those fields blank rather than blocking the open.
+  const loadCarparkById = useCallback(
+    async (id: string): Promise<Carpark | null> => {
+      const row = await fetchCarparkById(id).catch(() => null);
+      if (!row) return null;
+
+      const wantHdb = row.agency === 'HDB';
+      const [hdbAvail, ltaAvail, evSettled] = await Promise.all([
+        wantHdb
+          ? withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null)
+          : Promise.resolve(null),
+        !wantHdb
+          ? withTimeout(getLtaCarparks(), AVAIL_TIMEOUT_MS).catch(() => null)
+          : Promise.resolve(null),
+        withTimeout(fetchEvAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
+      ]);
+
+      const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail);
+      const now = new Date();
+      // No destination context here, so anchor distance math on the carpark
+      // itself (walk ≈ 0). The Detail screen receives destinationCoords=null
+      // and falls back to its non-routed walk card.
+      const self = { lat: row.lat!, lng: row.lng! };
+      let cp = dbRowToCarpark(row, self, lotsByDbId, currentDayType(now), now.getHours());
+      if (evSettled) {
+        const ageMin =
+          evSnapshotAgeMinutes(evSettled.lastUpdatedTime) ?? Number.POSITIVE_INFINITY;
+        cp = attachEvData([cp], evSettled.locations, ageMin)[0] ?? cp;
+      }
+      return cp;
+    },
+    [],
+  );
+
+  return { result, search, searchAtCoords, retry, expandRadius, loadCarparkById, trigger };
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -121,7 +121,8 @@ function App() {
 
   const [recents, setRecents] = useState<RecentDestination[]>(() => loadRecents());
 
-  const { result, search, searchAtCoords, retry, expandRadius } = useCarparks();
+  const { result, search, searchAtCoords, retry, expandRadius, loadCarparkById } =
+    useCarparks();
 
   // Once a destination resolves, remember it — coords included so the
   // next tap on this recent replays the exact same location instead of
@@ -258,8 +259,10 @@ function App() {
   }, [signIn]);
 
   // After sign-in resolves, route the user to the Account screen and pop
-  // a greeting with their real first name.
-  const prevUserId = useRef<string | null>(null);
+  // a greeting with their real first name. Seed the ref with the already
+  // persisted session id so a cold load of an existing session is a no-op —
+  // only a *fresh* sign-in (user transitions from null) redirects + greets.
+  const prevUserId = useRef<string | null>(user ? user.id : null);
   useEffect(() => {
     if (user && user.id !== prevUserId.current) {
       prevUserId.current = user.id;
@@ -334,27 +337,32 @@ function App() {
     [search, searchAtCoords],
   );
 
-  /** From the Home merged strip or the Saved feed: try to open the carpark's
-   * Detail screen. If we already have it in the current Results window we
-   * jump straight there; otherwise pop a toast asking the user to search
-   * first. Live-fetching a single carpark by id off the destination grid is
-   * out-of-scope for this epic — the snapshot covers the recent-cost +
-   * area display until they re-search. */
+  /** From the Home merged strip or the Saved feed: open the carpark's Detail
+   * screen directly. If it's already in the current Results window we reuse
+   * that (live lots already attached); otherwise we fetch it by id from the
+   * DB — anchored on its own coords, so walk distance is ~0 and Detail runs
+   * without a surrounding destination search. */
   const handleOpenSavedCarpark = useCallback(
-    (item: MergedSaveItem & { kind: 'carpark' }) => {
+    async (item: MergedSaveItem & { kind: 'carpark' }) => {
       const existing = result.carparks.find((c) => c.id === item.id);
       if (existing) {
         setSelectedCarpark(existing);
         setScreen('detail');
+        return;
+      }
+      const loaded = await loadCarparkById(item.id).catch(() => null);
+      if (loaded) {
+        setSelectedCarpark(loaded);
+        setScreen('detail');
       } else {
         pop({
-          icon: <IconBookmark filled size={15} stroke={2} />,
-          title: 'Search to open this carpark',
+          icon: <IconWarning size={15} stroke={2} />,
+          title: "Couldn't open this carpark",
           sub: item.carpark.name,
         });
       }
     },
-    [result.carparks, pop],
+    [result.carparks, loadCarparkById, pop],
   );
 
   const openSaveDestSheet = useCallback(() => {

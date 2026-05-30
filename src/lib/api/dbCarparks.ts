@@ -92,6 +92,9 @@ function boundingBox(
 
 // ── Fetcher ────────────────────────────────────────────────────────────
 
+const CARPARK_SELECT =
+  'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
+
 /**
  * Returns every carpark within `radiusM` of `centre`, with its rate_rows
  * embedded. Result is unsorted; caller ranks (by distance or cost).
@@ -108,8 +111,7 @@ export async function fetchNearbyCarparks(
   // bounding box. We over-fetch slightly (box vs circle), then refine
   // by haversine below.
   const params = new URLSearchParams({
-    select:
-      'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)',
+    select: CARPARK_SELECT,
     'lat': `gte.${bb.minLat}`,
     'lng': `gte.${bb.minLng}`,
   });
@@ -138,4 +140,40 @@ export async function fetchNearbyCarparks(
     const d = haversineMeters(centre, { lat: r.lat, lng: r.lng });
     return d <= radiusM;
   });
+}
+
+/**
+ * Fetch a single carpark (with rate_rows) by its id, e.g. opening a saved
+ * carpark straight to its Detail screen without a surrounding search.
+ *
+ * Saved ids are lower-cased app ids (`hdb:u57`) while the DB stores the
+ * original case (`HDB:U57`), so we match case-insensitively. Wildcard
+ * characters in the id are escaped so `ilike` behaves as an exact match.
+ */
+export async function fetchCarparkById(
+  id: string,
+  signal?: AbortSignal,
+): Promise<DbCarparkRaw | null> {
+  if (!URL_BASE || !ANON_KEY) return null;
+
+  const escaped = id.replace(/[\\%_]/g, '\\$&');
+  const params = new URLSearchParams({
+    select: CARPARK_SELECT,
+    id: `ilike.${escaped}`,
+    limit: '1',
+  });
+
+  const res = await fetch(`${URL_BASE}/rest/v1/carparks?${params.toString()}`, {
+    signal,
+    headers: {
+      apikey: ANON_KEY,
+      Authorization: `Bearer ${ANON_KEY}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!res.ok) return null;
+  const rows = (await res.json()) as DbCarparkRaw[];
+  const row = rows[0];
+  if (!row || row.lat == null || row.lng == null) return null;
+  return row;
 }

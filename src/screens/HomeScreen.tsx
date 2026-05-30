@@ -276,8 +276,9 @@ export function HomeScreen({
 
         {/* Merged Saved chip strip — destinations + carparks, latest-first.
             Capped at 8; tap a chip → either a destination search or a Detail
-            view, depending on item kind. */}
-        {user && merged.length > 0 && (
+            view, depending on item kind. Saves persist locally, so this shows
+            whether or not the user is signed in. */}
+        {merged.length > 0 && (
           <div style={{ marginTop: 24 }}>
             <SectionHeader
               icon={
@@ -324,8 +325,11 @@ export function HomeScreen({
           </div>
         )}
 
-        {/* Recent — signed-in shows synced recents; signed-out shows a sync prompt. */}
-        {user ? (
+        {/* Recent — persisted locally on the device, so it shows whether or not
+            the user is signed in. The label notes sync state; signed-out users
+            with recents get a slim nudge to sync. A signed-out user with no
+            recents instead sees the full sync upsell card below. */}
+        {recents.length > 0 ? (
           <div style={{ marginTop: 22 }}>
             <SectionHeader
               icon={
@@ -333,7 +337,7 @@ export function HomeScreen({
                   <IconHistory size={14} stroke={2} />
                 </span>
               }
-              label="Recent · synced"
+              label={user ? 'Recent · synced' : 'Recent'}
               link={
                 <SectionLink
                   color="var(--text-3)"
@@ -343,45 +347,72 @@ export function HomeScreen({
                 </SectionLink>
               }
             />
-            {recents.length > 0 && (
-              <div
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0,
+                background: 'var(--bg-1)',
+                border: '0.5px solid var(--line)',
+                borderRadius: 12,
+                overflow: 'hidden',
+              }}
+            >
+              {(recentsExpanded ? recents : recents.slice(0, 3)).map((r, i) => (
+                <RecentRow
+                  key={r.name}
+                  r={r}
+                  isFirst={i === 0}
+                  onClick={() => {
+                    if (
+                      typeof r.lat === 'number' &&
+                      typeof r.lng === 'number'
+                    ) {
+                      onPickPlace({
+                        label: r.name,
+                        address: r.address ?? r.name,
+                        lat: r.lat,
+                        lng: r.lng,
+                      });
+                    } else {
+                      setDestination(r.name);
+                      onSearch(r.name);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+            {!user && (
+              <button
+                type="button"
+                onClick={onOpenAccount}
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0,
-                  background: 'var(--bg-1)',
+                  appearance: 'none',
                   border: '0.5px solid var(--line)',
-                  borderRadius: 12,
-                  overflow: 'hidden',
+                  width: '100%',
+                  marginTop: 8,
+                  padding: '9px 12px',
+                  background: 'var(--bg-1)',
+                  color: 'var(--text-2)',
+                  borderRadius: 10,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 7,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-body)',
                 }}
               >
-                {(recentsExpanded ? recents : recents.slice(0, 3)).map((r, i) => (
-                  <RecentRow
-                    key={r.name}
-                    r={r}
-                    isFirst={i === 0}
-                    onClick={() => {
-                      if (
-                        typeof r.lat === 'number' &&
-                        typeof r.lng === 'number'
-                      ) {
-                        onPickPlace({
-                          label: r.name,
-                          address: r.address ?? r.name,
-                          lat: r.lat,
-                          lng: r.lng,
-                        });
-                      } else {
-                        setDestination(r.name);
-                        onSearch(r.name);
-                      }
-                    }}
-                  />
-                ))}
-              </div>
+                <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
+                  <IconCloud size={14} stroke={1.75} />
+                </span>
+                Sign in to sync recents across devices
+              </button>
             )}
           </div>
-        ) : (
+        ) : !user ? (
           <div style={{ marginTop: 22 }}>
             <div
               style={{
@@ -492,7 +523,7 @@ export function HomeScreen({
               </button>
             </div>
           </div>
-        )}
+        ) : null}
 
         <AppFooter />
       </div>
