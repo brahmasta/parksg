@@ -26,8 +26,7 @@ export function AppFooter() {
         textAlign: 'center',
       }}
     >
-      Built by Bram, a Singapore driver who tired of circling. Spotted a
-      wrong rate or a missing carpark?{' '}
+      Spotted a wrong rate or a missing carpark?{' '}
       <a
         href={FEEDBACK_URL}
         target="_blank"
