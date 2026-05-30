@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/carpark/:slug", "destination": "/api/carpark?slug=:slug" },
+    { "source": "/parking-near/:area", "destination": "/api/parking-near?area=:area" },
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

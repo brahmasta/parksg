@@ -8,6 +8,19 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 // In local dev, mount /api/<name> on the Vite server so the Vercel Edge
 // functions in /api can run without `vercel dev`. Reads env vars from
 // .env / .env.local the same way Vite already does for the client.
+// Rewrite the pretty SEO URLs to their /api handler + query string, mirroring
+// the production vercel.json rewrites. Returns the input unchanged for any
+// path that isn't an SEO route.
+function seoRewrite(rawUrl: string): string {
+  const [pathOnly] = rawUrl.split('?')
+  const cp = pathOnly.match(/^\/carpark\/([^/]+)\/?$/)
+  if (cp) return `/api/carpark?slug=${encodeURIComponent(decodeURIComponent(cp[1]))}`
+  const area = pathOnly.match(/^\/parking-near\/([^/]+)\/?$/)
+  if (area) return `/api/parking-near?area=${encodeURIComponent(decodeURIComponent(area[1]))}`
+  if (pathOnly === '/sitemap.xml') return '/api/sitemap'
+  return rawUrl
+}
+
 function localVercelApi(env: Record<string, string>): Plugin {
   return {
     name: 'local-vercel-api',
@@ -18,7 +31,10 @@ function localVercelApi(env: Record<string, string>): Plugin {
       }
 
       server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next) => {
-        const rawUrl = req.url ?? ''
+        // Map the pretty SEO routes to their edge handlers in dev. Production
+        // does this with vercel.json rewrites; here we do it by hand so a
+        // plain `npm run dev` can serve /carpark/:slug etc.
+        const rawUrl = seoRewrite(req.url ?? '')
         if (!rawUrl.startsWith('/api/')) return next()
 
         const [pathOnly] = rawUrl.split('?')

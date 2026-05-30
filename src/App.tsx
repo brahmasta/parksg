@@ -383,6 +383,32 @@ function App() {
     [result.carparks, loadCarparkById, pop],
   );
 
+  // Deep link from the SSR landing pages: `/?cp=<id>` opens that carpark's
+  // Detail directly on cold load. Runs once; strips the param afterwards so a
+  // refresh or share of the resulting URL doesn't re-trigger it.
+  const deepLinkDone = useRef(false);
+  useEffect(() => {
+    if (deepLinkDone.current) return;
+    deepLinkDone.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const cp = params.get('cp');
+    if (!cp) return;
+    void (async () => {
+      const loaded = await loadCarparkById(cp).catch(() => null);
+      if (loaded) {
+        setSelectedCarpark(loaded);
+        setScreen('detail');
+      }
+      params.delete('cp');
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + (qs ? `?${qs}` : ''),
+      );
+    })();
+  }, [loadCarparkById]);
+
   const openSaveDestSheet = useCallback(() => {
     if (!result.destination) return;
     setDestPrefill({

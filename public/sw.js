@@ -13,8 +13,21 @@
  *
  * Bump CACHE_VERSION to invalidate everything on the next activation.
  */
-const CACHE_VERSION = 'wtp-v1';
+const CACHE_VERSION = 'wtp-v2';
 const SHELL_URL = '/';
+
+// Server-rendered SEO pages live at these paths. They must never be cached to
+// the app-shell key (an offline '/' should show the SPA shell, not a stale
+// carpark page), so we treat them as network-only passthrough. Googlebot
+// doesn't run the SW, so this only affects installed-PWA users.
+function isSeoRoute(pathname) {
+  return (
+    pathname.startsWith('/carpark/') ||
+    pathname.startsWith('/parking-near/') ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/robots.txt'
+  );
+}
 const PRECACHE = [SHELL_URL, '/icon.svg', '/icon-maskable.svg', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
@@ -45,6 +58,8 @@ self.addEventListener('fetch', (event) => {
   // Only handle same-origin; never touch API calls or third-party requests.
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return;
+  // SEO pages are server-rendered and must stay fresh — never cache them.
+  if (isSeoRoute(url.pathname)) return;
 
   // Navigations → network-first so a new deploy is picked up immediately.
   if (req.mode === 'navigate') {
