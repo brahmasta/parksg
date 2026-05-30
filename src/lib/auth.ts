@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import type { Session, User } from './types';
+import { recordSignIn } from './api/analytics';
 
 const KEY = 'psg.session';
 
@@ -81,6 +82,9 @@ export function useSession() {
         writeSession(next);
         setSession(next);
         setError(null);
+        // Best-effort: record the sign-in to Supabase (upsert profile +
+        // bump count). Never blocks or throws into the auth flow.
+        recordSignIn({ id: user.id, name: user.name, email: user.email });
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Google sign-in failed',

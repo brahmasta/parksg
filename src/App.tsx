@@ -26,6 +26,7 @@ import {
 import { useCarparks } from './hooks/useCarparks';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
+import { recordSearch } from './lib/api/analytics';
 import { snapshotFromCarpark, useSaves } from './lib/saves';
 import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
@@ -221,6 +222,23 @@ function App() {
   const { user, signIn, signOut, error: authError } = useSession();
   const saves = useSaves();
   const { toast, pop } = useToast();
+
+  // Best-effort: log every resolved destination search to Supabase so the
+  // owner can query top searches. Fires once per resolved destination (the
+  // object identity changes on each search); attaches the user id when known.
+  useEffect(() => {
+    if (result.destination) {
+      recordSearch({
+        query: result.destination.label,
+        lat: result.destination.lat,
+        lng: result.destination.lng,
+        userId: user?.id ?? null,
+      });
+    }
+    // Intentionally keyed only on the resolved destination so re-renders
+    // (e.g. a later sign-in) don't double-count the same search.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result.destination]);
 
   // Surface OAuth errors (missing client ID, popup blocked, user cancelled)
   // as a toast so the user gets actionable feedback.
