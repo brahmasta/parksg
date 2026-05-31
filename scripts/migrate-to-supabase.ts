@@ -70,7 +70,8 @@ type Source =
   | 'LTA_DATAMALL'
   | 'CAG'
   | 'OPERATOR'
-  | 'MANUAL';
+  | 'MANUAL'
+  | 'JTC';
 
 type DbCarpark = {
   id: string;
@@ -461,6 +462,96 @@ async function migrateHdbRatesOnly(
     }
   }
   process.stderr.write(`  inserted ${result.rateRows} HDB rate_rows\n`);
+  return result;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// JTC — industrial-estate carparks (data.gov.sg).
+//
+// Same CKAN record shape as the HDB feed (car_park_no, SVY21 x/y,
+// type_of_parking_system, …) — ~28 carparks in JTC estates (Ang Mo Kio
+// Industrial Park, etc.) that the HDB feed doesn't carry. We import
+// metadata + coords only: JTC's short-term rate card isn't in this
+// dataset, and most rows are season-parking-only (short_term_parking=NO),
+// so we don't fabricate rate_rows. Carparks with no schedule fall back to
+// the runtime operator default — same as the LTA_DATAMALL lots.
+// ──────────────────────────────────────────────────────────────────────
+
+const JTC_DATASET_ID = 'd_3b0c377cde41041c93f893d0a92e9fe7';
+
+/** JTC reuses the HDB CKAN record shape exactly. */
+type JtcRecord = HdbRecord;
+
+function jtcParkingSystem(s: string | undefined): ParkingSystem | null {
+  const v = (s ?? '').toUpperCase();
+  if (v.includes('ELECTRONIC')) return 'EPS';
+  if (v.includes('COUPON')) return 'COUPON';
+  return null; // unknown / season-only — leave nullable
+}
+
+async function fetchJtcRecords(): Promise<JtcRecord[]> {
+  const url = `https://data.gov.sg/api/action/datastore_search?resource_id=${JTC_DATASET_ID}&limit=10000`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`JTC datastore ${res.status}`);
+  const body = (await res.json()) as { result?: { records?: JtcRecord[] } };
+  return body.result?.records ?? [];
+}
+
+async function migrateJtc(supabase: SupabaseClient): Promise<SourceResult> {
+  const result = makeResult();
+  process.stderr.write('\n== JTC ==\n');
+  const records = await fetchJtcRecords();
+  process.stderr.write(`  fetched ${records.length} JTC records\n`);
+
+  const today = new Date().toISOString();
+  const carparks: DbCarpark[] = [];
+
+  for (const r of records) {
+    const carParkNo = (r.car_park_no ?? '').trim();
+    if (!carParkNo) {
+      result.errors += 1;
+      continue;
+    }
+    const x = typeof r.x_coord === 'string' ? parseFloat(r.x_coord) : r.x_coord;
+    const y = typeof r.y_coord === 'string' ? parseFloat(r.y_coord) : r.y_coord;
+    const coords =
+      typeof x === 'number' && typeof y === 'number'
+        ? convertSvy21(x, y)
+        : null;
+
+    carparks.push({
+      id: `JTC:${carParkNo}`,
+      agency: 'JTC',
+      source_code: carParkNo,
+      name: titleCase(r.address ?? carParkNo),
+      address: r.address ?? null,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
+      car_park_type: r.car_park_type ?? null,
+      parking_system: jtcParkingSystem(r.type_of_parking_system) ?? 'COUPON',
+      central_area: false,
+      total_lots: null, // dataset doesn't expose lot counts
+      source: 'JTC',
+      last_synced: today,
+      raw: r,
+    });
+  }
+
+  // Metadata-only: batch upsert carparks, no rate_rows.
+  const chunkSize = 200;
+  for (let i = 0; i < carparks.length; i += chunkSize) {
+    const chunk = carparks.slice(i, i + chunkSize);
+    const { error } = await supabase
+      .from('carparks')
+      .upsert(chunk, { onConflict: 'id' });
+    if (error) {
+      process.stderr.write(`  JTC upsert (chunk ${i}) failed: ${error.message}\n`);
+      result.errors += chunk.length;
+    } else {
+      result.carparks += chunk.length;
+    }
+  }
+  process.stderr.write(`  upserted ${result.carparks} JTC carparks\n`);
   return result;
 }
 
@@ -1010,6 +1101,17 @@ async function main(): Promise<void> {
     return;
   }
 
+  // CLI flag: `--jtc-only` ingests just the JTC industrial-estate carparks
+  // (metadata + coords), leaving HDB/URA/LTA untouched.
+  if (process.argv.includes('--jtc-only')) {
+    const r = await migrateJtc(supabase);
+    console.log('');
+    console.log('=== JTC ingest (only) ===');
+    console.log(`Carparks upserted: ${r.carparks}`);
+    console.log(`Errors:            ${r.errors}`);
+    return;
+  }
+
   const hdb = makeResult();
   const ura = makeResult();
   const lta = makeResult();
@@ -1020,6 +1122,17 @@ async function main(): Promise<void> {
   } catch (err) {
     hdb.errors += 1;
     process.stderr.write(`HDB failed: ${err instanceof Error ? err.message : String(err)}\n`);
+  }
+
+  // JTC — industrial-estate carparks (data.gov.sg, no auth). Isolated by
+  // its own `JTC:` id namespace, so the LTA CSV name-match / orphan sweep
+  // never touch these rows.
+  const jtc = makeResult();
+  try {
+    Object.assign(jtc, await migrateJtc(supabase));
+  } catch (err) {
+    jtc.errors += 1;
+    process.stderr.write(`JTC failed: ${err instanceof Error ? err.message : String(err)}\n`);
   }
 
   // URA — skip if no key.
@@ -1075,6 +1188,7 @@ async function main(): Promise<void> {
   console.log('source        | carparks | rate_rows | errors');
   console.log('--------------+----------+-----------+-------');
   console.log(`HDB           |${fmt(hdb.carparks)}  |${fmt(hdb.rateRows)}   |${fmt(hdb.errors)}`);
+  console.log(`JTC           |${fmt(jtc.carparks)}  |${fmt(jtc.rateRows)}   |${fmt(jtc.errors)}`);
   console.log(`URA           |${fmt(ura.carparks)}  |${fmt(ura.rateRows)}   |${fmt(ura.errors)}`);
   console.log(`LTA_DATAMALL  |${fmt(dataMall.carparks)}  |${fmt(dataMall.rateRows)}   |${fmt(dataMall.errors)}`);
   console.log(`LTA_DATAGOV   |${fmt(lta.carparks)}  |${fmt(lta.rateRows)}   |${fmt(lta.errors)}`);
