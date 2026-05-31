@@ -33,6 +33,7 @@ These are done and in production — some weren't in the original README.
 | **Availability "no data" handling** | `api/lta-availability.ts` no longer coerces a missing `AvailableLots` to `0` (which rendered a false "Full"); missing → `null` → UI shows "—", distinct from a genuine `0`/"Full" |
 | **Saves cloud sync** | Supabase `saved_carparks` + `saved_destinations` tables (RLS-locked, SECURITY DEFINER RPCs keyed by Google `sub`); `src/lib/api/saves-sync.ts` mirrors toggles cloud-side and `merge_saves` hydrates on sign-in (last-write-wins by `saved_at`). `Session.syncedAt` now reflects a real merge — the "Saves synced" toast is no longer a stub |
 | **Public-holiday-aware pricing** | `src/lib/data/sgPublicHolidays.json` (MOM-gazetted 2025–2026 dates incl. in-lieu Mondays); `currentDayType()` returns `SUN_PH` on any gazetted PH so carparks bill at the Sunday/PH rate instead of the wrong weekday rate. Covered by `src/lib/uraJoin.test.ts` (6 cases) |
+| **JTC industrial carparks** | `migrateJtc` in `migrate-to-supabase.ts` (`npm run ingest:jtc`) ingests the 28-carpark JTC Carpark Information dataset (`data.gov.sg`), reusing the HDB SVY21 + upsert path. `agency='JTC'`, `source='JTC'` (new enum label), all geocoded; metadata + coords only (no fabricated rates). Adds industrial-estate coverage (AMK / Bukit Merah / Aljunied / Depot Lane) the HDB feed lacks |
 
 ---
 
@@ -88,17 +89,28 @@ workflow as the curated-50 pass (`curated-malls.json` + `npm run migrate:malls`)
 
 ---
 
-### 2. JTC + NParks datasets ingest
+### 2. JTC + NParks datasets ingest — ✅ JTC SHIPPED · ⏸ NParks deferred (2026-05-31)
 
-**Status:** DB schema already supports `agency: 'JTC' | 'NPARKS'`. No ingest script yet.
+**JTC — done.** `scripts/migrate-to-supabase.ts` gained a `migrateJtc` pass
+(`npm run ingest:jtc`, or part of a full sync). The JTC Carpark Information dataset
+(`data.gov.sg` `d_3b0c377cde41041c93f893d0a92e9fe7`) shares the HDB CKAN record
+shape, so it reuses the SVY21→WGS84 conversion + `titleCase` + batch upsert.
+**28 industrial-estate carparks** ingested (`agency='JTC'`, `source='JTC'`), all
+geocoded, in the Ang Mo Kio / Bukit Merah / Aljunied / Depot Lane estates. The
+`rate_source` enum gained a `JTC` label (the `agency` enum already had `JTC`).
 
-**Data sources:**
-- JTC Carpark Information — `data.gov.sg` dataset `d_3b0c377cde41041c93f893d0a92e9fe7`. Adds ~30–50 industrial estate carparks missing from HDB feed. No auth.
-- NParks Car Park Lots — `data.gov.sg`. Adds park-carpark geometries (Bishan, East Coast, etc.). Static only.
+Metadata + coords only — JTC's short-term rate card isn't in the dataset and most
+rows are season-parking-only (`short_term_parking=NO`), so no rate_rows are
+fabricated; these carparks use the runtime operator fallback (same as the
+`LTA_DATAMALL` lots). The runtime needed no change: `dbRowToCarpark` already maps
+any non-HDB/URA/LTA agency to the `LTA` operator fallback.
 
-**What's needed:** Extend `scripts/migrate-to-supabase.ts` with a JTC + NParks ingest pass.
-
-**Effort:** ~1 day
+**NParks — deferred.** No open *tabular* carpark dataset is discoverable on
+data.gov.sg (the dataset-search API surfaces nothing matching "NParks car park
+lots"; the reference in this ROADMAP was optimistic). NParks park-carpark data
+appears to exist only as geospatial/KML layers, which need a different ingest path
+(GeoJSON poll-download + geometry centroid) than the CKAN `datastore_search` used
+here. Revisit if/when a tabular source or the geospatial layer is confirmed.
 
 ---
 
