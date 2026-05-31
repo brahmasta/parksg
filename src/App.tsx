@@ -219,8 +219,10 @@ function App() {
   }, [selectedCarpark]);
 
   // ── Accounts & Save ──────────────────────────────────────────────
-  const { user, signIn, signOut, error: authError } = useSession();
-  const saves = useSaves();
+  const { user, signIn, signOut, markSynced, error: authError } = useSession();
+  const saves = useSaves(user?.id ?? null, {
+    onSynced: (ts) => markSynced(ts),
+  });
   const { toast, pop } = useToast();
 
   // Best-effort: log every resolved destination search to Supabase so the

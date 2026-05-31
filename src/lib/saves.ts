@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   Carpark,
   DestIcon,
@@ -8,6 +8,14 @@ import type {
   SavedCarparkSnapshot,
   SavedDestination,
 } from './types';
+import {
+  mergeCloudSaves,
+  pushCarparkDelete,
+  pushCarparkIdUpsert,
+  pushCarparkUpsert,
+  pushDestinationDelete,
+  pushDestinationUpsert,
+} from './api/saves-sync';
 
 const CARPARKS_KEY = 'psg.savedCarparks';
 const SNAPSHOTS_KEY = 'psg.savedCarparkSnapshots';
@@ -154,10 +162,24 @@ export function mergeSaves(
 // Hook
 // ────────────────────────────────────────────────────────────────────
 
-export function useSaves() {
+export function useSaves(
+  userId: string | null = null,
+  opts: { onSynced?: (ts: number, count: number) => void } = {},
+) {
   const [savedCarparks, setSavedCarparks] = useState<SavedCarpark[]>(() => readCarparks());
   const [snapshots, setSnapshots] = useState<SavedCarparkSnapshot[]>(() => readSnapshots());
   const [destinations, setDestinations] = useState<SavedDestination[]>(() => readDestinations());
+
+  // Latest userId / onSynced for the memoized callbacks, which keep `[]` deps
+  // so their identity stays stable across renders. Synced in an effect (not
+  // during render) — the callbacks only read these on user interaction, and
+  // the merge effect reads onSyncedRef async, both well after commit.
+  const userIdRef = useRef<string | null>(userId);
+  const onSyncedRef = useRef(opts.onSynced);
+  useEffect(() => {
+    userIdRef.current = userId;
+    onSyncedRef.current = opts.onSynced;
+  });
 
   // Cross-tab sync.
   useEffect(() => {
@@ -170,6 +192,39 @@ export function useSaves() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // Cloud hydration on sign-in: push the local copy up (last-write-wins) and
+  // adopt the merged authoritative set into both state and localStorage. Runs
+  // once per distinct signed-in user; resets on sign-out so re-sign-in re-syncs.
+  const lastSyncedUser = useRef<string | null>(null);
+  useEffect(() => {
+    if (!userId) {
+      lastSyncedUser.current = null;
+      return;
+    }
+    if (lastSyncedUser.current === userId) return;
+    lastSyncedUser.current = userId;
+
+    let cancelled = false;
+    void mergeCloudSaves(userId, readCarparks(), readSnapshots(), readDestinations()).then(
+      (merged) => {
+        if (cancelled || !merged) return;
+        writeCarparks(merged.savedCarparks);
+        writeSnapshots(merged.snapshots);
+        writeDestinations(merged.destinations);
+        setSavedCarparks(merged.savedCarparks);
+        setSnapshots(merged.snapshots);
+        setDestinations(merged.destinations);
+        onSyncedRef.current?.(
+          Date.now(),
+          merged.savedCarparks.length + merged.destinations.length,
+        );
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
   const savedSet = useMemo(
     () => new Set(savedCarparks.map((s) => s.id)),
     [savedCarparks],
@@ -179,11 +234,13 @@ export function useSaves() {
 
   const toggleCarpark = useCallback(
     (id: string, snapshot?: SavedCarparkSnapshot) => {
+      const uid = userIdRef.current;
       setSavedCarparks((prev) => {
         const has = prev.some((s) => s.id === id);
+        const savedAt = Date.now();
         const next = has
           ? prev.filter((s) => s.id !== id)
-          : [...prev, { id, savedAt: Date.now() }];
+          : [...prev, { id, savedAt }];
         writeCarparks(next);
         // Mirror the snapshot list.
         if (has) {
@@ -201,6 +258,12 @@ export function useSaves() {
             writeSnapshots(nextSnaps);
             return nextSnaps;
           });
+        }
+        // Best-effort cloud mirror (no-op when signed out).
+        if (uid) {
+          if (has) pushCarparkDelete(uid, id);
+          else if (snapshot) pushCarparkUpsert(uid, { ...snapshot, savedAt });
+          else pushCarparkIdUpsert(uid, id, savedAt);
         }
         return next;
       });
@@ -220,17 +283,21 @@ export function useSaves() {
         writeDestinations(next);
         return next;
       });
+      const uid = userIdRef.current;
+      if (uid) pushDestinationUpsert(uid, entry);
       return entry;
     },
     [],
   );
 
   const removeDestination = useCallback((id: string) => {
+    const uid = userIdRef.current;
     setDestinations((prev) => {
       const next = prev.filter((d) => d.id !== id);
       writeDestinations(next);
       return next;
     });
+    if (uid) pushDestinationDelete(uid, id);
   }, []);
 
   const isDestinationSaved = useCallback(

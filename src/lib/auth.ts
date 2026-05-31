@@ -119,5 +119,16 @@ export function useSession() {
     setError(null);
   }, []);
 
-  return { session, user: session.user, signIn, signOut, error };
+  // Stamp the session once the cloud-saves merge actually completes, so
+  // `syncedAt` reflects real sync state rather than just sign-in time.
+  const markSynced = useCallback((ts: number = Date.now()) => {
+    setSession((prev) => {
+      if (!prev.user) return prev;
+      const next: Session = { ...prev, syncedAt: ts };
+      writeSession(next);
+      return next;
+    });
+  }, []);
+
+  return { session, user: session.user, signIn, signOut, markSynced, error };
 }
