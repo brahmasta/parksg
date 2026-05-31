@@ -19,35 +19,57 @@ export function estimateCostCents(rows: RateRow[], hours: number): number | null
   const row =
     rows.find(
       (r) =>
-        r.perBlockCents != null ||
+        usablePerBlock(r) ||
         r.perEntryCents != null ||
         r.firstHourCents != null,
     ) ?? rows[0];
 
   let cents = 0;
-  if (row.perEntryCents != null && row.perBlockCents == null && row.firstHourCents == null) {
+  if (!usablePerBlock(row) && row.firstHourCents == null && row.perEntryCents != null) {
+    // Flat per-entry row (one charge for the whole stay). Note: a corrupted
+    // row may carry perBlockCents/blockMinutes of 0 alongside perEntryCents —
+    // usablePerBlock() screens those out so we don't divide by zero below.
     cents = row.perEntryCents;
-  } else if (row.perBlockCents != null && row.blockMinutes != null) {
+  } else if (usablePerBlock(row)) {
     const totalMinutes = Math.ceil(hours * 60);
     if (row.firstHourCents != null) {
       const firstBlockMin = row.firstBlockMinutes ?? 60;
       cents += row.firstHourCents;
       const remain = Math.max(0, totalMinutes - firstBlockMin);
-      cents += Math.ceil(remain / row.blockMinutes) * row.perBlockCents;
+      cents += Math.ceil(remain / row.blockMinutes!) * row.perBlockCents!;
     } else {
-      cents += Math.ceil(totalMinutes / row.blockMinutes) * row.perBlockCents;
+      cents += Math.ceil(totalMinutes / row.blockMinutes!) * row.perBlockCents!;
     }
   } else if (row.firstHourCents != null) {
     // First-tier-only row — extrapolate per tier-block for longer stays.
     const firstBlockMin = row.firstBlockMinutes ?? 60;
     const tiers = Math.max(1, Math.ceil((hours * 60) / firstBlockMin));
     cents = row.firstHourCents * tiers;
+  } else if (row.perEntryCents != null) {
+    // Last resort: per-entry present but with unusable block fields.
+    cents = row.perEntryCents;
   } else {
     return null;
   }
 
   if (row.capCents != null && cents > row.capCents) cents = row.capCents;
   return cents;
+}
+
+/**
+ * True only when a row carries a *usable* per-block rate: a positive cost and a
+ * positive block size. Curated mall rows that are flat-rate for one time window
+ * can arrive with perBlockCents/blockMinutes of 0 (an ingest artefact) — those
+ * must NOT be treated as per-block, or we'd divide by a zero block size and emit
+ * NaN. Callers fall through to the per-entry / first-hour branches instead.
+ */
+function usablePerBlock(r: RateRow): boolean {
+  return (
+    r.perBlockCents != null &&
+    r.perBlockCents > 0 &&
+    r.blockMinutes != null &&
+    r.blockMinutes > 0
+  );
 }
 
 /**
@@ -107,10 +129,12 @@ export function estimateCostCentsAt(
     const band = pickDominantCovering(inDay, tod) ?? pickDominant(inDay);
     if (!band) break;
 
-    // Flat per-entry row (no per-block / first-hour): one charge for the stay.
+    // Flat per-entry row (no usable per-block / first-hour): one charge for the
+    // stay. usablePerBlock() (not `== null`) so a corrupted 0/0 per-block row
+    // that also carries perEntryCents is still billed flat, not divided.
     if (
       band.perEntryCents != null &&
-      band.perBlockCents == null &&
+      !usablePerBlock(band) &&
       band.firstHourCents == null
     ) {
       addCharge(band.perEntryCents, band.capCents ?? null);
@@ -128,10 +152,10 @@ export function estimateCostCentsAt(
     }
 
     // Per-block rate.
-    if (band.perBlockCents != null && band.blockMinutes != null && band.blockMinutes > 0) {
-      addCharge(band.perBlockCents, band.capCents ?? null);
-      cursor += band.blockMinutes;
-      remaining -= band.blockMinutes;
+    if (usablePerBlock(band)) {
+      addCharge(band.perBlockCents!, band.capCents ?? null);
+      cursor += band.blockMinutes!;
+      remaining -= band.blockMinutes!;
       firstTierCharged = true;
       continue;
     }
@@ -144,6 +168,13 @@ export function estimateCostCentsAt(
       remaining -= firstBlock;
       firstTierCharged = true;
       continue;
+    }
+
+    // Trailing flat per-entry (e.g. an evening flat window with no usable
+    // per-block rate): charge once and stop — there's nothing to iterate.
+    if (band.perEntryCents != null) {
+      addCharge(band.perEntryCents, band.capCents ?? null);
+      break;
     }
 
     break; // band carries no priceable figure
@@ -188,16 +219,23 @@ function costPerMinute(r: RateRow): number {
 }
 
 /** True when (startTime <= tod < endTime) in minutes-from-midnight, with
- * wrap-around at midnight. Undefined start/end means "all day". */
+ * wrap-around at midnight. A *single* missing bound is treated as the edge of
+ * the day so a half-open band still covers a real window: start-only ⇒
+ * [start, 24:00), end-only ⇒ [00:00, end). Only when BOTH bounds are absent is
+ * the row "all day". (Ingest can drop an end_time of "24:00" to null — without
+ * this, that evening row would falsely read as all-day and bleed into the
+ * morning, hijacking band dominance.) */
 function bandCoversMinute(row: RateRow, tod: number): boolean {
   const start = parseMinutes(row.startTime);
   const end = parseMinutes(row.endTime);
-  if (start == null || end == null) return true;
-  if (start <= end) {
-    return tod >= start && tod < end;
+  if (start == null && end == null) return true; // genuinely all day
+  if (start != null && end == null) return tod >= start; // [start, 24:00)
+  if (start == null && end != null) return tod < end; // [00:00, end)
+  if (start! <= end!) {
+    return tod >= start! && tod < end!;
   }
   // Crosses midnight, e.g. 22:30 → 07:00 → covers 1350..1439 + 0..419.
-  return tod >= start || tod < end;
+  return tod >= start! || tod < end!;
 }
 
 function parseMinutes(hhmm: string | undefined): number | null {
