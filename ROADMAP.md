@@ -52,19 +52,39 @@ These are done and in production — some weren't in the original README.
 
 ## Short-term (P2)
 
-### 1. DataMall audit — finish the long tail
+### 1. DataMall audit — finish the long tail ✅ AUDITED (2026-05-31)
 
-**Status:** Largely addressed. The curated-malls pass confirmed the high-traffic LTA-managed malls already in the DataMall feed (VivoCity `LTA:16`, ION `LTA:23`, Marina Square `LTA:2`, Raffles City `LTA:3`, IMM `LTA:53`, etc. — 28 in total) and now carries verified rates + `Development` names + capacity for them. The remaining work is the long tail beyond the curated 51:
+**Audit result (`npm run audit:datamall`, 2026-05-31):** the live
+`CarParkAvailabilityv2` feed carries **only 39 LTA-managed carparks** — there is
+no large hidden long tail. All 39 already exist in the DB (`source='LTA_DATAMALL'`)
+with real `Development` names (not bare `CarParkID`s), geocoded coords, and live
+availability, so they all render on the map today. Breakdown:
 
-**What's left:**
-- Run `npm run audit:datamall` to enumerate the *other* `Agency: LTA` malls not yet curated
-- Surface their `Development` name (not the bare `CarParkID`) in the UI
-- Update any stale Results footer copy ("Private mall carparks not shown") now that malls do appear
-- Decide whether the 23 "full" curated malls (e.g. Causeway Point `LTA:causeway_point`, NEX) can be matched to a DataMall `CarParkID` to recover **live availability** (currently they only have static rates + capacity, never a live count)
+- **27 / 39** are curated `ratesOnly` malls → verified 2025 rates + capacity **and**
+  live counts. (One curated mapping, `LTA:8` The Heeren, has dropped out of the
+  live feed — DataMall no longer returns it; rates still serve, no live count.)
+- **12 / 39 uncurated** (still on stale 2018 / fallback rates, `total_lots` null):
+  Ngee Ann City `LTA:13`, VivoCity P2 `LTA:50`, Esplanade `LTA:4`, Resorts World
+  `LTA:26`, Sentosa `LTA:17`, Singapore Flyer `LTA:6`, National Gallery `LTA:56`,
+  CQ @ Clarke Quay `LTA:59`, Cineleisure `LTA:11`, Hilton Orchard `LTA:12`,
+  Concorde Hotel `LTA:22`, Orchard Point `LTA:7`. Mostly hotels/attractions, not
+  high-traffic shopping malls — low curation priority. (Two have title-case-mangled
+  names from the ingest transform: "Vivocity P2", "Cq @ Clarke Quay" — cosmetic.)
 
-**Impact:** Closes more of the apparent "private carpark gap"; recovers live availability for malls now showing only "—".
+**Sub-tasks closed:**
+- *Enumerate the uncurated LTA malls* → done (12 above).
+- *Surface `Development` not bare `CarParkID`* → already true for all 39; nothing to fix.
+- *Stale Results footer copy* → updated "Private mall carparks not shown" → "Some
+  mall carparks show rates only, no live count" (`ResultsScreen.tsx`).
+- *Can the 23 "full" curated malls (Causeway Point, NEX, …) recover live
+  availability?* → **No.** They are not in the DataMall feed at all (the feed is
+  the 39 LTA carparks, all accounted for); DataMall simply doesn't carry these
+  operator-run malls. They keep static rates + capacity and show "—" for live count.
+  Live availability for them would need the JustPark scraper (P2 #3) or operator APIs.
 
-**Effort:** ~half a day
+**Remaining (optional, low priority):** hand-curate verified 2025 rates + capacity
+for the 12 uncurated above (Ngee Ann City is the most notable, 516 lots). Same
+workflow as the curated-50 pass (`curated-malls.json` + `npm run migrate:malls`).
 
 ---
 

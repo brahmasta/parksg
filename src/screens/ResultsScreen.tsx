@@ -300,7 +300,7 @@ export function ResultsScreen({
                   lineHeight: 1.5,
                 }}
               >
-                Lot counts refresh every 60s · Private mall carparks not shown
+                Lot counts refresh every 60s · Some mall carparks show rates only, no live count
               </div>
             </div>
           ))}
