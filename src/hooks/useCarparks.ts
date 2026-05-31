@@ -21,7 +21,8 @@ import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
 import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
 import { attachEvData } from '../lib/ev';
-import { currentDayType } from '../lib/uraJoin';
+import { applyUraRates, currentDayType } from '../lib/uraJoin';
+import type { UraCarparkRates } from '../lib/ura';
 
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
@@ -154,6 +155,12 @@ export function useCarparks() {
           .map((row) => dbRowToCarpark(row, dest, lotsByDbId, dayType, hourOfDay))
           .sort((a, b) => a.walkMeters - b.walkMeters);
 
+        // URA carparks: swap the flat fallback for the real tiered schedule
+        // now living in rate_rows (source='URA'). If the daily cron hasn't
+        // populated any URA rows yet the index is empty and applyUraRates is
+        // a no-op — the $1.20/30min fallback from dbRowToCarpark stands.
+        carparks = applyUraRates(carparks, buildUraRatesIndex(dbCarparks)).carparks;
+
         // EV spatial join — unchanged from the pre-DB flow.
         if (evSettled) {
           const ageMin =
@@ -256,6 +263,7 @@ export function useCarparks() {
       // and falls back to its non-routed walk card.
       const self = { lat: row.lat!, lng: row.lng! };
       let cp = dbRowToCarpark(row, self, lotsByDbId, currentDayType(now), now.getHours());
+      cp = applyUraRates([cp], buildUraRatesIndex([row])).carparks[0] ?? cp;
       if (evSettled) {
         const ageMin =
           evSnapshotAgeMinutes(evSettled.lastUpdatedTime) ?? Number.POSITIVE_INFINITY;
@@ -278,7 +286,7 @@ const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
 function dbRowToCarpark(
   row: DbCarparkRaw,
   dest: { lat: number; lng: number },
-  lotsByDbId: Map<string, { lotsAvailable: number; lotsTotal?: number }>,
+  lotsByDbId: Map<string, { lotsAvailable: number | null; lotsTotal?: number }>,
   dayType: 'WEEKDAY' | 'SAT' | 'SUN_PH',
   hourOfDay: number,
 ): Carpark {
@@ -308,7 +316,7 @@ function dbRowToCarpark(
     block: row.address ?? row.source_code,
     operator: op,
     lotTypes: ['C'] satisfies LotType[],
-    lotsAvailable: live?.lotsAvailable ?? 0,
+    lotsAvailable: live?.lotsAvailable ?? null,
     lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),
     walkMeters: Math.round(meters),
@@ -317,6 +325,39 @@ function dbRowToCarpark(
     rates: fallbackRates,
     estByHours,
   };
+}
+
+/**
+ * Reconstruct the per-ppCode UraCarparkRates shape that applyUraRates expects
+ * from the URA-source rate_rows embedded on each DB carpark. Keyed by the
+ * lowercased ppCode so it matches `cp.id.replace(/^ura:/, '')` inside the join.
+ * Carparks with no URA rows are omitted, leaving them on the flat fallback.
+ */
+function buildUraRatesIndex(rows: DbCarparkRaw[]): Map<string, UraCarparkRates> {
+  const out = new Map<string, UraCarparkRates>();
+  for (const row of rows) {
+    if (row.agency !== 'URA') continue;
+    const uraRows = row.rate_rows.filter((r) => r.source === 'URA');
+    if (uraRows.length === 0) continue;
+
+    const ppCode = row.id.toLowerCase().replace(/^ura:/, '');
+    const entry: UraCarparkRates = {
+      ppCode,
+      ppName: row.name,
+      parkCapacity: row.total_lots ?? 0,
+      weekday: [],
+      saturday: [],
+      sundayPH: [],
+    };
+    for (const r of uraRows) {
+      const rr = dbToRateRow(r);
+      if (r.day_type === 'WEEKDAY') entry.weekday.push(rr);
+      else if (r.day_type === 'SAT') entry.saturday.push(rr);
+      else entry.sundayPH.push(rr);
+    }
+    out.set(ppCode, entry);
+  }
+  return out;
 }
 
 function bucketRateRows(rows: DbRateRowRaw[]): Carpark['rates'] {
@@ -374,8 +415,8 @@ function computeEstByHours(
 function buildLiveLotsIndex(
   hdb: Map<string, HdbAvailability> | null | undefined,
   lta: LtaCarpark[] | null | undefined,
-): Map<string, { lotsAvailable: number; lotsTotal?: number }> {
-  const out = new Map<string, { lotsAvailable: number; lotsTotal?: number }>();
+): Map<string, { lotsAvailable: number | null; lotsTotal?: number }> {
+  const out = new Map<string, { lotsAvailable: number | null; lotsTotal?: number }>();
   if (hdb) {
     for (const [carParkNo, a] of hdb.entries()) {
       out.set(`HDB:${carParkNo}`, {

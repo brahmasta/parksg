@@ -118,7 +118,7 @@ export type Carpark = {
   block: string;
   operator: Operator;
   lotTypes: LotType[];
-  lotsAvailable: number;
+  lotsAvailable: number | null;
   lotsTotal: number;
   walkMin: number;
   walkMeters: number;

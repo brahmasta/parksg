@@ -63,7 +63,7 @@ export function ResultsScreen({
     // card; the "CHEAPEST" badge separately marks the lowest-cost option
     // regardless of where it lands in the distance order.
     let arr = [...carparks].sort((a, b) => a.walkMeters - b.walkMeters);
-    if (availableOnly) arr = arr.filter((c) => c.lotsAvailable > 0);
+    if (availableOnly) arr = arr.filter((c) => (c.lotsAvailable ?? 0) > 0);
     if (evOnly) arr = arr.filter((c) => c.ev?.hasCharging === true);
     return arr;
   }, [carparks, availableOnly, evOnly]);

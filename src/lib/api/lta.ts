@@ -9,7 +9,8 @@ export type LtaCarpark = {
   area: string;
   lat: number;
   lng: number;
-  lotsAvailable: number;
+  // null = LTA gave no figure (unknown); 0 = genuinely full.
+  lotsAvailable: number | null;
   lotType: string;
 };
 

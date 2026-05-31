@@ -36,7 +36,9 @@ type Carpark = {
   area: string;
   lat: number;
   lng: number;
-  lotsAvailable: number;
+  // null = LTA reported no availability figure for this carpark (unknown),
+  // which is distinct from 0 (genuinely full). The UI renders null as "—".
+  lotsAvailable: number | null;
   lotType: string;
 };
 
@@ -112,9 +114,18 @@ function normalize(v: LtaValue): Carpark | null {
     area: v.Area?.trim() || '',
     lat,
     lng,
-    lotsAvailable: Number(v.AvailableLots) || 0,
+    // Preserve the distinction between "0 lots (full)" and "no figure given".
+    // `Number(undefined)` is NaN and `NaN || 0` used to swallow unknowns as 0,
+    // which the UI then rendered as "Full". Map a missing/NaN figure to null.
+    lotsAvailable: availableLots(v.AvailableLots),
     lotType,
   };
+}
+
+function availableLots(raw: number | undefined): number | null {
+  if (raw == null) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
 }
 
 // URA / LTA carparks come from LTA in ALL CAPS ("ANGULLIA PARK OFF STREET").

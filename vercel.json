@@ -4,5 +4,11 @@
     { "source": "/parking-near/:area", "destination": "/api/parking-near?area=:area" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/ura-rates-ingest",
+      "schedule": "0 18 * * *"
+    }
   ]
 }

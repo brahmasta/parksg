@@ -268,7 +268,7 @@ export function DetailScreen({
                 letterSpacing: -0.6,
               }}
             >
-              {degraded ? '—' : cp.lotsAvailable}
+              {degraded || cp.lotsAvailable == null ? '—' : cp.lotsAvailable}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
               {degraded

@@ -31,7 +31,7 @@ export function CarparkCard({
 }) {
   const lots = degraded ? null : cp.lotsAvailable;
   const status = availabilityStatus(lots);
-  const lotsLabel = degraded ? '—' : lots === 0 ? 'Full' : `${lots} lots`;
+  const lotsLabel = lots == null ? '—' : lots === 0 ? 'Full' : `${lots} lots`;
   const cost = cp.estByHours[duration];
 
   return (
