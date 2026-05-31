@@ -781,6 +781,10 @@ async function migrateLtaCsv(
   const existingAfterWipe = await loadExistingCarparkNames(supabase);
   void existingNamesById;
 
+  // Curated MANUAL carparks must not have their fresh rates overwritten by the
+  // stale 2018 CSV (even when the CSV name matches a reused "LTA:" id).
+  const manualIds = await loadManualCarparkIds(supabase);
+
   const records = await fetchLtaCsvRecords();
   process.stderr.write(`  fetched ${records.length} CSV rows\n`);
 
@@ -874,7 +878,9 @@ async function migrateLtaCsv(
     //  - LTA matches: replace rate_rows on each (multi-match is intentional;
     //    "Vivocity" CSV legitimately covers both LTA:16 and LTA:50).
     if (matchedIds.length > 0) {
-      const ltaTargets = matchedIds.filter((id) => id.startsWith('LTA:'));
+      const ltaTargets = matchedIds.filter(
+        (id) => id.startsWith('LTA:') && !manualIds.has(id),
+      );
       let attached = 0;
       for (const id of ltaTargets) {
         // Rebuild dbRows with the target's carpark_id so the FK is right.
@@ -1111,6 +1117,7 @@ async function deleteShadowedLtaOrphans(
   supabase: SupabaseClient,
 ): Promise<number> {
   const all = await loadExistingCarparkIds(supabase);
+  const manualIds = await loadManualCarparkIds(supabase);
   const hdbUraByName = new Map<string, string>();
   for (const row of all) {
     if (row.id.startsWith('HDB:') || row.id.startsWith('URA:')) {
@@ -1120,6 +1127,7 @@ async function deleteShadowedLtaOrphans(
   const toDelete: string[] = [];
   for (const row of all) {
     if (!row.id.startsWith('LTA:')) continue;
+    if (manualIds.has(row.id)) continue; // never delete curated carparks
     const match = hdbUraByName.get(normaliseName(row.name));
     if (match) toDelete.push(row.id);
   }
@@ -1147,6 +1155,29 @@ async function loadExistingCarparkIds(
     if (error) throw new Error(`load carpark ids: ${error.message}`);
     if (!data || data.length === 0) break;
     out.push(...(data as Array<{ id: string; name: string }>));
+    if (data.length < pageSize) break;
+  }
+  return out;
+}
+
+// Curated mall carparks (source='MANUAL') are hand-maintained by
+// scripts/migrate-curated-malls.ts. They must survive a full sync: the LTA CSV
+// pass must not overwrite their rates with stale 2018 data, and the orphan
+// sweep must not delete them. Load their ids once so both passes can skip them.
+async function loadManualCarparkIds(
+  supabase: SupabaseClient,
+): Promise<Set<string>> {
+  const out = new Set<string>();
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('carparks')
+      .select('id')
+      .eq('source', 'MANUAL')
+      .range(from, from + pageSize - 1);
+    if (error) throw new Error(`load MANUAL ids: ${error.message}`);
+    if (!data || data.length === 0) break;
+    for (const row of data as Array<{ id: string }>) out.add(row.id);
     if (data.length < pageSize) break;
   }
   return out;

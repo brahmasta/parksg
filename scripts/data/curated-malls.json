@@ -1,0 +1,168 @@
+[
+  {
+    "id": "LTA:causeway_point",
+    "name": "Causeway Point",
+    "address": "1 Woodlands Square, Singapore 738099",
+    "lat": 1.43607,
+    "lng": 103.785982,
+    "operator": "Frasers Property",
+    "provenance": { "url": "https://www.motorist.sg/parking/causeway-point-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "firstHourCents": 140, "perBlockCents": 80, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 150, "perBlockCents": 80, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 150, "perBlockCents": 80, "blockMinutes": 30, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:city_square_mall",
+    "name": "City Square Mall",
+    "address": "180 Kitchener Road, Singapore 208539",
+    "lat": 1.311421,
+    "lng": 103.856624,
+    "operator": "City Developments",
+    "provenance": { "url": "https://www.motorist.sg/parking/city-square-mall-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "06:00", "end": "18:00", "firstHourCents": 218, "perBlockCents": 109, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "06:00", "perEntryCents": 327, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "06:00", "end": "18:00", "firstHourCents": 218, "perBlockCents": 109, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "18:00", "end": "06:00", "perEntryCents": 382, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "06:00", "end": "18:00", "firstHourCents": 218, "perBlockCents": 109, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "06:00", "perEntryCents": 382, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:ang_mo_kio_hub",
+    "name": "AMK Hub",
+    "address": "53 Ang Mo Kio Avenue 3, Singapore 569933",
+    "lat": 1.369389,
+    "lng": 103.848478,
+    "provenance": { "url": "https://www.motorist.sg/parking/amk-hub-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "firstHourCents": 170, "perBlockCents": 85, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 185, "perBlockCents": 95, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 185, "perBlockCents": 95, "blockMinutes": 30, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:suntec_city",
+    "name": "Suntec City",
+    "address": "3 Temasek Boulevard, Singapore 038983",
+    "lat": 1.29486,
+    "lng": 103.860334,
+    "operator": "Suntec REIT",
+    "provenance": { "url": "https://www.motorist.sg/parking/suntec-city-mall-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "04:00", "end": "17:00", "firstHourCents": 260, "perBlockCents": 130, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "17:00", "end": "04:00", "perEntryCents": 300 },
+      { "dayType": "SAT", "firstHourCents": 260, "perBlockCents": 130, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "firstHourCents": 260, "perBlockCents": 130, "blockMinutes": 30 }
+    ]
+  },
+  {
+    "id": "LTA:great_world_city",
+    "name": "Great World",
+    "address": "1 Kim Seng Promenade, Singapore 237994",
+    "lat": 1.293423,
+    "lng": 103.832022,
+    "operator": "CapitaLand",
+    "provenance": { "url": "https://www.motorist.sg/parking/great-world-city-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "06:00", "end": "17:00", "perBlockCents": 166, "blockMinutes": 60, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "17:00", "end": "06:00", "perEntryCents": 353, "graceMinutes": 10 },
+      { "dayType": "SAT", "perBlockCents": 177, "blockMinutes": 60, "capCents": 642, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "perBlockCents": 166, "blockMinutes": 60, "capCents": 642, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:tampines_1",
+    "name": "Tampines 1",
+    "address": "10 Tampines Central 1, Singapore 529536",
+    "lat": 1.354256,
+    "lng": 103.945072,
+    "provenance": { "url": "https://www.motorist.sg/parking/tampines-1-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "06:00", "end": "18:00", "firstHourCents": 140, "perBlockCents": 95, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "22:30", "perEntryCents": 270, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "06:00", "end": "18:00", "firstHourCents": 140, "perBlockCents": 95, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "18:00", "end": "22:30", "perEntryCents": 270, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "06:00", "end": "18:00", "firstHourCents": 140, "perBlockCents": 95, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "22:30", "perEntryCents": 270, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:parkway_parade",
+    "name": "Parkway Parade",
+    "address": "80 Marine Parade Road, Singapore 449269",
+    "lat": 1.30107,
+    "lng": 103.905279,
+    "operator": "Lendlease",
+    "provenance": { "url": "https://www.motorist.sg/parking/parkway-parade-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "02:00", "end": "18:00", "firstHourCents": 173, "perBlockCents": 43, "blockMinutes": 15 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "02:00", "perEntryCents": 346 },
+      { "dayType": "SAT", "start": "02:00", "end": "18:00", "firstHourCents": 173, "perBlockCents": 43, "blockMinutes": 15 },
+      { "dayType": "SAT", "start": "18:00", "end": "02:00", "perEntryCents": 346 },
+      { "dayType": "SUN_PH", "start": "02:00", "end": "18:00", "firstHourCents": 173, "perBlockCents": 43, "blockMinutes": 15 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "02:00", "perEntryCents": 346 }
+    ]
+  },
+  {
+    "id": "LTA:tiong_bahru_plaza",
+    "name": "Tiong Bahru Plaza",
+    "address": "302 Tiong Bahru Road, Singapore 168732",
+    "lat": 1.286459,
+    "lng": 103.827015,
+    "provenance": { "url": "https://www.motorist.sg/parking/tiong-bahru-plaza-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "06:00", "end": "18:00", "firstHourCents": 128, "perBlockCents": 100, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "06:00", "perEntryCents": 320, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "06:00", "end": "18:00", "firstHourCents": 128, "perBlockCents": 100, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "18:00", "end": "06:00", "perEntryCents": 320, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "06:00", "end": "18:00", "firstHourCents": 128, "perBlockCents": 100, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "06:00", "perEntryCents": 320, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:the_clementi_mall",
+    "name": "The Clementi Mall",
+    "address": "3155 Commonwealth Avenue West, Singapore 129588",
+    "lat": 1.314896,
+    "lng": 103.764423,
+    "provenance": { "url": "https://www.motorist.sg/parking/the-clementi-mall-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "firstHourCents": 170, "perBlockCents": 84, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 170, "perBlockCents": 84, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 170, "perBlockCents": 84, "blockMinutes": 30, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:jurong_point_shopping_centre",
+    "name": "Jurong Point",
+    "address": "1 Jurong West Central 2, Singapore 648886",
+    "lat": 1.339452,
+    "lng": 103.706685,
+    "provenance": { "url": "https://www.motorist.sg/parking/jurong-point-shopping-centre-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "07:00", "end": "22:00", "firstHourCents": 150, "perBlockCents": 75, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "22:00", "end": "07:00", "firstHourCents": 120, "perBlockCents": 60, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "07:00", "end": "22:00", "firstHourCents": 180, "perBlockCents": 90, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "22:00", "end": "07:00", "firstHourCents": 120, "perBlockCents": 60, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "07:00", "end": "22:00", "firstHourCents": 180, "perBlockCents": 90, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "22:00", "end": "07:00", "firstHourCents": 120, "perBlockCents": 60, "blockMinutes": 30, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:nex_mall",
+    "name": "NEX",
+    "address": "23 Serangoon Central, Singapore 556083",
+    "lat": 1.350769,
+    "lng": 103.872296,
+    "operator": "Frasers / Mercatus",
+    "provenance": { "url": "https://www.motorist.sg/parking/nex-mall-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "firstHourCents": 150, "perBlockCents": 75, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 160, "perBlockCents": 80, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 160, "perBlockCents": 80, "blockMinutes": 30, "graceMinutes": 10 }
+    ]
+  }
+]

@@ -11,6 +11,8 @@
     "audit:datamall": "ts-node --project scripts/tsconfig.json scripts/audit-datamall.ts",
     "ingest:lta-rates": "tsx scripts/ingest-lta-rates.ts",
     "migrate:hdb-rates": "tsx scripts/migrate-to-supabase.ts --hdb-rates-only",
+    "migrate:malls": "tsx scripts/migrate-curated-malls.ts",
+    "geocode:malls": "tsx scripts/geocode-malls.ts",
     "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts scripts/lib/ura.test.ts scripts/lib/hdb-rates.test.ts"
   },
   "dependencies": {
