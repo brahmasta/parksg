@@ -15,6 +15,7 @@ import {
 } from '../lib/api/dbCarparks';
 import { getHdbAvailability, type HdbAvailability } from '../lib/api/hdb';
 import { getLtaCarparks, type LtaCarpark } from '../lib/api/lta';
+import { getJustParkLots, type JustParkLot } from '../lib/api/justpark';
 import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
 import { estimateCostCentsAt } from '../lib/rateMath';
@@ -124,10 +125,11 @@ export function useCarparks() {
         // upstream APIs because those values change every minute. Each is
         // independent — a failed availability call yields a degraded
         // result rather than blocking the whole search.
-        const [dbCarparks, hdbAvail, ltaAvail, evSettled] = await Promise.all([
+        const [dbCarparks, hdbAvail, ltaAvail, jpAvail, evSettled] = await Promise.all([
           fetchNearbyCarparks(dest, radius).catch(() => null),
           withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
           withTimeout(getLtaCarparks(), 8_000).catch(() => null),
+          withTimeout(getJustParkLots(), 8_000).catch(() => null),
           withTimeout(fetchEvAvailability(), 10_000).catch(() => null),
         ]);
         if (requestSeq.current !== seq) return;
@@ -145,7 +147,7 @@ export function useCarparks() {
         }
 
         // Index live lots by DB carpark id so we can merge in O(1).
-        const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail);
+        const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail, jpAvail);
 
         const now = new Date();
         const dayType = currentDayType(now);
@@ -246,17 +248,20 @@ export function useCarparks() {
       if (!row) return null;
 
       const wantHdb = row.agency === 'HDB';
-      const [hdbAvail, ltaAvail, evSettled] = await Promise.all([
+      const [hdbAvail, ltaAvail, jpAvail, evSettled] = await Promise.all([
         wantHdb
           ? withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null)
           : Promise.resolve(null),
         !wantHdb
           ? withTimeout(getLtaCarparks(), AVAIL_TIMEOUT_MS).catch(() => null)
           : Promise.resolve(null),
+        !wantHdb
+          ? withTimeout(getJustParkLots(), AVAIL_TIMEOUT_MS).catch(() => null)
+          : Promise.resolve(null),
         withTimeout(fetchEvAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
       ]);
 
-      const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail);
+      const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail, jpAvail);
       const now = new Date();
       // No destination context here, so anchor distance math on the carpark
       // itself (walk ≈ 0). The Detail screen receives destinationCoords=null
@@ -415,6 +420,7 @@ function computeEstByHours(
 function buildLiveLotsIndex(
   hdb: Map<string, HdbAvailability> | null | undefined,
   lta: LtaCarpark[] | null | undefined,
+  justpark?: JustParkLot[] | null | undefined,
 ): Map<string, { lotsAvailable: number | null; lotsTotal?: number }> {
   const out = new Map<string, { lotsAvailable: number | null; lotsTotal?: number }>();
   // LTA first: DataMall also reports HDB-agency carparks but only carries an
@@ -432,6 +438,19 @@ function buildLiveLotsIndex(
       out.set(`HDB:${carParkNo}`, {
         lotsAvailable: a.lots_available,
         lotsTotal: a.total_lots,
+      });
+    }
+  }
+  // JustPark last and authoritative for CapitaLand malls: these are curated
+  // LTA: carparks that previously showed "rates only, no live count". The proxy
+  // already keys each entry by the full DB id (e.g. "LTA:65"), and the feed
+  // carries both a live available count and a capacity, so it wins over any
+  // stale DataMall figure for the same id.
+  if (justpark) {
+    for (const cp of justpark) {
+      out.set(cp.id, {
+        lotsAvailable: cp.lotsAvailable,
+        lotsTotal: cp.lotsTotal ?? undefined,
       });
     }
   }

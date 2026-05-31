@@ -34,6 +34,7 @@ These are done and in production — some weren't in the original README.
 | **Saves cloud sync** | Supabase `saved_carparks` + `saved_destinations` tables (RLS-locked, SECURITY DEFINER RPCs keyed by Google `sub`); `src/lib/api/saves-sync.ts` mirrors toggles cloud-side and `merge_saves` hydrates on sign-in (last-write-wins by `saved_at`). `Session.syncedAt` now reflects a real merge — the "Saves synced" toast is no longer a stub |
 | **Public-holiday-aware pricing** | `src/lib/data/sgPublicHolidays.json` (MOM-gazetted 2025–2026 dates incl. in-lieu Mondays); `currentDayType()` returns `SUN_PH` on any gazetted PH so carparks bill at the Sunday/PH rate instead of the wrong weekday rate. Covered by `src/lib/uraJoin.test.ts` (6 cases) |
 | **JTC industrial carparks** | `migrateJtc` in `migrate-to-supabase.ts` (`npm run ingest:jtc`) ingests the 28-carpark JTC Carpark Information dataset (`data.gov.sg`), reusing the HDB SVY21 + upsert path. `agency='JTC'`, `source='JTC'` (new enum label), all geocoded; metadata + coords only (no fabricated rates). Adds industrial-estate coverage (AMK / Bukit Merah / Aljunied / Depot Lane) the HDB feed lacks |
+| **CapitaLand JustPark live availability** | `api/justpark-availability.ts` (Node runtime, 60s cache) performs the reverse-engineered antiforgery handshake against `justpark.capitaland.com` and returns live lot counts keyed by DB carpark id for **11 CapitaLand malls** (Bedok Mall, Bugis+, Funan, IMM, Junction 8, Lot One, Plaza Singapura, Raffles City, Tampines Mall, The Atrium@Orchard, Westgate) that previously showed rates only. Pure parser + mapping in `src/lib/server/justpark.ts` (7 fixture-backed tests); merged authoritatively in `useCarparks.ts` `buildLiveLotsIndex` |
 
 ---
 
@@ -81,7 +82,8 @@ availability, so they all render on the map today. Breakdown:
   availability?* → **No.** They are not in the DataMall feed at all (the feed is
   the 39 LTA carparks, all accounted for); DataMall simply doesn't carry these
   operator-run malls. They keep static rates + capacity and show "—" for live count.
-  Live availability for them would need the JustPark scraper (P2 #3) or operator APIs.
+  Live availability for them would need operator APIs. (The 11 CapitaLand malls
+  among the curated set now get live counts via the shipped JustPark scraper, P2 #3.)
 
 **Remaining (optional, low priority):** hand-curate verified 2025 rates + capacity
 for the 12 uncurated above (Ngee Ann City is the most notable, 516 lots). Same
@@ -114,16 +116,45 @@ here. Revisit if/when a tabular source or the geospatial layer is confirmed.
 
 ---
 
-### 3. CapitaLand JustPark scraper (biggest private availability win)
+### 3. CapitaLand JustPark scraper ✅ SHIPPED
 
-**Data source:** `justpark.capitaland.com/LotsAvail` — semi-real-time lots (1–5 min lag) for Lot One, IMM, Westgate, CapitaGreen, Capital Tower, Six Battery Road, CapitaSpring, Asia Square Tower 2, Raffles City.
+**Live availability for 11 CapitaLand malls** that previously showed "rates only,
+no live count": Bedok Mall, Bugis+, Funan, IMM, Junction 8, Lot One, Plaza
+Singapura, Raffles City, Tampines Mall, The Atrium@Orchard, Westgate.
 
-**What's needed:**
-- Vercel cron job scraping the endpoint every 2 min → store in Edge KV or Supabase
-- Merge into the availability feed alongside HDB/LTA in `useCarparks.ts`
-- Add carpark records to Supabase for any JustPark sites not already in the DB
+**Reverse-engineered contract** (`src/lib/server/justpark.ts`): the page tunnels
+every data call through a single generic proxy — `POST /AjaxNoAuth/OnHttpPost`
+with the real target action in the `X-APIAction: SelectSiteNoAuth/OnSelectSite`
+header, `x-ModID: FELotAvail`, and the antiforgery `__RequestVerificationToken`
+header. The antiforgery handshake needs a real session: GET `/Lot-Availability`
+first for the session cookies (`__RequestVerificationToken` HttpOnly + Azure
+`ARRAffinity`) **and** the hidden form token, then replay both on the POST. Body:
+multipart `JData={"DisplayType":"LotAvail","LotType":null}`. Response envelope
+`{HasError, Message, Result}` where `Result` is a *stringified* JSON array of
+sites (`SiteCode, SiteDesc, BusinessUnitDesc, LotBalance, LotTotal, IsFull`).
+Posting straight to `/SelectSiteNoAuth/OnSelectSite` (no proxy) 302s to `/Error`.
 
-**Effort:** ~3–5 days
+**Implementation:**
+- `src/lib/server/justpark.ts` — pure parser (`parseJustParkResponse`,
+  `toCarparkLots`, `SITE_TO_CARPARK_ID` mapping) + `fetchJustParkLive()`
+  handshake. 7 unit tests against a captured fixture
+  (`scripts/data/justpark-sample.json`), incl. a guard that every mapped
+  SiteCode still resolves against the live feed (catches stale codes).
+- `api/justpark-availability.ts` — Node-runtime serverless proxy (Node, not edge,
+  for `Headers.getSetCookie()` cookie round-trip), 60s module cache + stale
+  fallback, returns lots already keyed by DB carpark id. No API key/secret.
+- `src/lib/api/justpark.ts` + `useCarparks.ts` merge — JustPark written last and
+  authoritative in `buildLiveLotsIndex` (overrides any stale DataMall figure for
+  the same id). Wired into the search, periodic-refresh, and load-by-id paths.
+
+**Feed has 91 sites total** (13 Retail malls, 8 Commercial towers, 70 business
+parks/industrial). Only the 11 curated malls are mapped; Clarke Quay (CQ) and
+Sengkang Grand Mall (SGM) appear in the feed but aren't curated in the DB yet —
+add a row + an entry to `SITE_TO_CARPARK_ID` to surface them. The Commercial
+towers (Asia Square T2, 21 Collyer Quay, …) are future candidates too.
+
+**Fragility:** scrape-only, no API contract — if CapitaLand changes the proxy
+shape the parser test's "site code resolves" assertion will start failing.
 
 ---
 
@@ -148,7 +179,7 @@ here. Revisit if/when a tabular source or the geospatial layer is confirmed.
 - **EV stale threshold** — `EV_STALE_MINUTES = 5` in `ev.ts`. DataMall refreshes every ~5 min, so the "stale" banner fires aggressively. Bump to 8 min.
 - **Stale-rates banner scope** — `isDatagovRates` in `DetailScreen` checks `source === 'LTA_DATAGOV'`. Correct, but double-check it doesn't fire for URA or HDB rows if those share the same source field in edge cases.
 - **`deriveArea()` in `saves.ts`** — falls back to generic "HDB carparks". Improve with a postal-district lookup to get real area names in the Saved feed.
-- **Results footer copy** — "Private mall carparks not shown" should be updated once JustPark scraper and DataMall audit land.
+- ~~**Results footer copy** — "Private mall carparks not shown" should be updated once JustPark scraper and DataMall audit land.~~ ✅ Both landed; copy now reads "Some mall carparks show rates only, no live count" — still accurate since non-CapitaLand malls (Wilson/Mapletree/etc.) remain rates-only.
 
 ---
 
@@ -209,7 +240,7 @@ If Phase 3 operator scrapers prove too fragile, license Parkopedia Singapore as 
 | URA Data Service | `eservice.ura.gov.sg/uraDataService/...` | `URA_ACCESS_KEY` + daily `Token` | ~2,000 URA carparks | Daily token rotation required |
 | OneMap | `www.onemap.gov.sg/api/` | `ONEMAP_EMAIL` + `ONEMAP_PASSWORD` | National geocoding + routing | Bearer token cached ~3 days |
 | Google Places (New) | Proxied via `api/google-places-*` | `GOOGLE_PLACES_API_KEY` | Global | Typeahead + place details |
-| CapitaLand JustPark | `justpark.capitaland.com/LotsAvail` | None (public HTML) | ~10 CBD malls + towers | 1–5 min lag; scrape-only |
+| CapitaLand JustPark ✅ | `justpark.capitaland.com` → `POST /AjaxNoAuth/OnHttpPost` (`X-APIAction: SelectSiteNoAuth/OnSelectSite`) | None (public, antiforgery handshake) | 11 malls live (13 retail + 8 commercial + 70 biz-park in feed) | near-real-time; scrape-only |
 
 ---
 
