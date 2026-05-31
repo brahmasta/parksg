@@ -1,0 +1,38 @@
+{
+  "_note": "Observed Singapore public holidays. On these dates carparks bill at the Sunday/PH (SUN_PH) day-type. Includes in-lieu Mondays (when a holiday falls on a Sunday, the next Monday is itself a public holiday). Update annually when MOM gazettes the next year.",
+  "_source": "Ministry of Manpower — https://www.mom.gov.sg/employment-practices/public-holidays (official gazette; the page currently lists 2024–2026 only).",
+  "_lastReviewed": "2026-05-31",
+  "_todo": "Add 2027 once MOM gazettes it (not yet published as of 2026-05). Lunar-calendar holidays (CNY, Hari Raya Puasa/Haji, Vesak, Deepavali) MUST come from the gazette — do not extrapolate.",
+  "_notes": {
+    "2025-05-03": "Polling Day for the 2025 General Election — a one-off gazetted PH tied to that election, not a recurring holiday."
+  },
+  "holidays": {
+    "2025-01-01": "New Year's Day",
+    "2025-01-29": "Chinese New Year",
+    "2025-01-30": "Chinese New Year",
+    "2025-03-31": "Hari Raya Puasa",
+    "2025-04-18": "Good Friday",
+    "2025-05-01": "Labour Day",
+    "2025-05-03": "Polling Day (2025 GE)",
+    "2025-05-12": "Vesak Day",
+    "2025-06-07": "Hari Raya Haji",
+    "2025-08-09": "National Day",
+    "2025-10-20": "Deepavali",
+    "2025-12-25": "Christmas Day",
+
+    "2026-01-01": "New Year's Day",
+    "2026-02-17": "Chinese New Year",
+    "2026-02-18": "Chinese New Year",
+    "2026-03-21": "Hari Raya Puasa",
+    "2026-04-03": "Good Friday",
+    "2026-05-01": "Labour Day",
+    "2026-05-27": "Hari Raya Haji",
+    "2026-05-31": "Vesak Day",
+    "2026-06-01": "Vesak Day (in lieu)",
+    "2026-08-09": "National Day",
+    "2026-08-10": "National Day (in lieu)",
+    "2026-11-08": "Deepavali",
+    "2026-11-09": "Deepavali (in lieu)",
+    "2026-12-25": "Christmas Day"
+  }
+}

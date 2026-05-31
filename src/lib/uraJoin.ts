@@ -15,8 +15,26 @@
 import type { Carpark, DurationHours } from './types';
 import { estimateCostCentsAt } from './rateMath';
 import type { UraCarparkRates } from './ura';
+import publicHolidaysJson from './data/sgPublicHolidays.json';
 
 const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
+
+/** Observed SG public-holiday dates (YYYY-MM-DD, incl. in-lieu Mondays). On
+ * these the carpark bills at the Sunday/PH rate. Sourced from MOM — see
+ * `data/sgPublicHolidays.json`. */
+const PUBLIC_HOLIDAYS = new Set<string>(
+  Object.keys((publicHolidaysJson as { holidays: Record<string, string> }).holidays),
+);
+
+/** Local calendar date as YYYY-MM-DD. Uses the same local-time basis as the
+ * `getDay()`/`getHours()` reads elsewhere, so an SG user (SGT) gets the right
+ * SG calendar date. */
+function localDateKey(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
 
 export function applyUraRates(
   carparks: Carpark[],
@@ -80,9 +98,11 @@ export function applyUraRates(
   return { carparks: out, matchedCount, unmatchedUraIds: unmatched };
 }
 
-/** Pick today's day bucket. v1 has no public-holiday calendar — Sunday
- * maps to SUN_PH, every other weekday to WEEKDAY, Saturday to SAT. */
+/** Pick today's day bucket. Public holidays (incl. in-lieu Mondays) bill at
+ * the Sunday/PH rate, so they map to SUN_PH regardless of weekday; otherwise
+ * Sunday → SUN_PH, Saturday → SAT, and every other day → WEEKDAY. */
 export function currentDayType(d: Date): 'WEEKDAY' | 'SAT' | 'SUN_PH' {
+  if (PUBLIC_HOLIDAYS.has(localDateKey(d))) return 'SUN_PH';
   const day = d.getDay();
   if (day === 0) return 'SUN_PH'; // Sunday
   if (day === 6) return 'SAT';

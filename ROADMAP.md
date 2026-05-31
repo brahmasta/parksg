@@ -32,6 +32,7 @@ These are done and in production — some weren't in the original README.
 | **Mall capacity (`total_lots`)** | Hand-sourced for 30 of the 51 curated malls (operator sites / parkopedia / parkaholic); ingest patches `total_lots` for both full + `ratesOnly` malls. Detail shows "X of N lots" |
 | **Availability "no data" handling** | `api/lta-availability.ts` no longer coerces a missing `AvailableLots` to `0` (which rendered a false "Full"); missing → `null` → UI shows "—", distinct from a genuine `0`/"Full" |
 | **Saves cloud sync** | Supabase `saved_carparks` + `saved_destinations` tables (RLS-locked, SECURITY DEFINER RPCs keyed by Google `sub`); `src/lib/api/saves-sync.ts` mirrors toggles cloud-side and `merge_saves` hydrates on sign-in (last-write-wins by `saved_at`). `Session.syncedAt` now reflects a real merge — the "Saves synced" toast is no longer a stub |
+| **Public-holiday-aware pricing** | `src/lib/data/sgPublicHolidays.json` (MOM-gazetted 2025–2026 dates incl. in-lieu Mondays); `currentDayType()` returns `SUN_PH` on any gazetted PH so carparks bill at the Sunday/PH rate instead of the wrong weekday rate. Covered by `src/lib/uraJoin.test.ts` (6 cases) |
 
 ---
 
@@ -43,24 +44,15 @@ These are done and in production — some weren't in the original README.
 > hydration refinements** (Central-Area $1.20 premium time-banded to Mon–Sat
 > 07:00–17:00; $12/$20/$5 caps + 15-min grace + EPS/COUPON branching verified;
 > authoritative 16-carpark Central allowlist; post-2022 "peak restructuring"
-> confirmed N/A for normal car lots) — all three items that were here are now in
-> production. See the "What's shipped" table.
-
-### 1. Public holiday calendar for `SUN_PH` day-type
-
-**Status:** `currentDayType()` in `uraJoin.ts` maps Sunday → `SUN_PH`, all other weekdays → `WEEKDAY`. Public holidays are priced at wrong (weekday) rates.
-
-**What's needed:**
-- Add `src/lib/data/sgPublicHolidays.json` — MOM list of SG public holidays (small, update annually)
-- Patch `currentDayType(date)` to return `SUN_PH` when the date matches a PH entry
-
-**Effort:** ~half a day
+> confirmed N/A for normal car lots), plus the **public-holiday calendar**
+> (`sgPublicHolidays.json` + PH-aware `currentDayType`) — all now in production.
+> See the "What's shipped" table.
 
 ---
 
 ## Short-term (P2)
 
-### 2. DataMall audit — finish the long tail
+### 1. DataMall audit — finish the long tail
 
 **Status:** Largely addressed. The curated-malls pass confirmed the high-traffic LTA-managed malls already in the DataMall feed (VivoCity `LTA:16`, ION `LTA:23`, Marina Square `LTA:2`, Raffles City `LTA:3`, IMM `LTA:53`, etc. — 28 in total) and now carries verified rates + `Development` names + capacity for them. The remaining work is the long tail beyond the curated 51:
 
@@ -76,7 +68,7 @@ These are done and in production — some weren't in the original README.
 
 ---
 
-### 3. JTC + NParks datasets ingest
+### 2. JTC + NParks datasets ingest
 
 **Status:** DB schema already supports `agency: 'JTC' | 'NPARKS'`. No ingest script yet.
 
@@ -90,7 +82,7 @@ These are done and in production — some weren't in the original README.
 
 ---
 
-### 4. CapitaLand JustPark scraper (biggest private availability win)
+### 3. CapitaLand JustPark scraper (biggest private availability win)
 
 **Data source:** `justpark.capitaland.com/LotsAvail` — semi-real-time lots (1–5 min lag) for Lot One, IMM, Westgate, CapitaGreen, Capital Tower, Six Battery Road, CapitaSpring, Asia Square Tower 2, Raffles City.
 
@@ -100,6 +92,21 @@ These are done and in production — some weren't in the original README.
 - Add carpark records to Supabase for any JustPark sites not already in the DB
 
 **Effort:** ~3–5 days
+
+---
+
+### 4. Cross-band cost stitching for long stays
+
+**Status:** Known, intentional limitation. The runtime computes each estimate for the *current* day/hour (`currentDayType(now)` + `now.getHours()` in `useCarparks.ts`/`uraJoin.ts`), so the correct band surfaces as time passes. But `estimateCostCentsAt` (`rateMath.ts`) picks a single **dominant band** and applies its per-block rate for the *entire* stay — it does not stitch costs across bands a long stay actually spans (e.g. an HDB Central stay from 15:00 → 19:00 is billed at the $1.20 peak rate for all 4h rather than $1.20 until 17:00 then $0.60). This deliberately **over-estimates** (so users aren't surprised at the gantry) and is **bounded by the daily cap**, so the error is capped and never under-quotes.
+
+**What's needed (if we want exact multi-band totals):**
+- Walk the stay minute-window across consecutive matching bands (per `dayType`), summing each band's prorated cost, instead of picking one dominant band
+- Handle the day→night→next-day rollover and the daily-cap interaction across bands
+- Keep the over-estimate fallback for rows lacking time bands
+
+**Why it's low priority:** affects only multi-hour stays that cross a band boundary at the 16 HDB Central carparks + URA time-banded carparks; the cap ceilings most of the divergence, and over-estimating is the safe direction.
+
+**Effort:** ~1 day
 
 ---
 
@@ -117,7 +124,7 @@ These are done and in production — some weren't in the original README.
 
 ### Private operator scrapers
 
-No code yet. Assess after DataMall audit (P2 #2) confirms true gap.
+No code yet. Assess after DataMall audit (P2 #1) confirms true gap.
 
 | Operator | Approach |
 |---|---|
