@@ -26,7 +26,7 @@ These are done and in production — some weren't in the original README.
 | PWA install prompt | `InstallPrompt` component, Home screen only |
 | Deep-link `?cp=<id>` | Opens carpark Detail on cold load |
 | **URA live rate schedules** | `api/ura-token.ts` (token cache) + `api/ura-carpark-details.ts` + `src/lib/api/uraDetails.ts`; daily ingest cron `api/cron/ura-rates-ingest.ts` (18:00) → 3,905 `rate_rows` (`source='URA'`); `applyUraRates()` wired into `useCarparks.ts`. Replaces the flat $1.20/30min fallback for URA carparks |
-| **HDB rate ingest** | `scripts/lib/hdb-rates.ts` parser + `npm run migrate:hdb-rates` → 12,225 `rate_rows` (`source='HDB'`). Runtime uses these via `computeEstByHours` instead of the flat fallback (refinements still open — see P1 #1) |
+| **HDB rate ingest + Central-Area refinements** | `scripts/lib/hdb-rates.ts` rule engine + `npm run migrate:hdb-rates` → 12,257 `rate_rows` (`source='HDB'`), priced at runtime via `computeEstByHours`. Encodes the $12/$20 day caps + $5 night cap + 15-min EPS grace + EPS/COUPON branching. The Central $1.20/30min premium is correctly time-banded to **Mon–Sat 07:00–17:00 only** (reverts to $0.60 evenings/Sun/PH/night — fixing a ~2× evening/weekend over-charge). Central-Area allowlist corrected to HDB's authoritative 16 carparks (dropped 2 loading-bay false positives, added DUXM/PRM/SLS) |
 | **SSR / SEO routes** | `api/carpark.ts` + `api/parking-near.ts` server-render Detail + area pages with JSON-LD; `api/sitemap.ts`; shared helpers in `api/_seo/` (`db.ts`, `areas.ts`, `render.ts`). Uses generated `slug` column |
 | **Curated mall rates (verified 2025)** | `scripts/data/curated-malls.json` (51 top malls) + idempotent `npm run migrate:malls` → 270 `rate_rows` (`source='MANUAL'`). 23 malls also get correct coords (fixes "invisible on map"); 28 DataMall malls get fresh rates via `ratesOnly` while keeping live availability. `migrate-to-supabase.ts` guards MANUAL ids from full-sync clobber |
 | **Mall capacity (`total_lots`)** | Hand-sourced for 30 of the 51 curated malls (operator sites / parkopedia / parkaholic); ingest patches `total_lots` for both full + `ratesOnly` malls. Detail shows "X of N lots" |
@@ -38,24 +38,15 @@ These are done and in production — some weren't in the original README.
 ## Immediate priorities (P1)
 
 > ✅ **Shipped since last rev:** URA live rate schedules (token endpoint + daily
-> ingest cron + `applyUraRates` wiring) and **Saves cloud sync** (Supabase tables +
-> RPCs, `saves-sync.ts`, `merge_saves` hydration, real `syncedAt`) — both entire
-> items that were here are now in production. See the "What's shipped" table.
+> ingest cron + `applyUraRates` wiring), **Saves cloud sync** (Supabase tables +
+> RPCs, `saves-sync.ts`, `merge_saves` hydration, real `syncedAt`), and **HDB rate
+> hydration refinements** (Central-Area $1.20 premium time-banded to Mon–Sat
+> 07:00–17:00; $12/$20/$5 caps + 15-min grace + EPS/COUPON branching verified;
+> authoritative 16-carpark Central allowlist; post-2022 "peak restructuring"
+> confirmed N/A for normal car lots) — all three items that were here are now in
+> production. See the "What's shipped" table.
 
-### 1. HDB rate hydration — refinements (central area caps, EPS rules)
-
-**Status:** ⏫ Upgraded. The `scripts/lib/hdb-rates.ts` parser is now wired — `npm run migrate:hdb-rates` has ingested **12,225 HDB `rate_rows`**, and the runtime prices off those via `computeEstByHours` instead of the flat fallback. What remains are the accuracy refinements:
-
-**What's still needed:**
-- Hydrate the 15-min grace EPS cap ($12 non-central / $20 central daily max) into `RateRow.cap_cents` for EPS carparks
-- Add explicit `RateRow` overrides for post-2022 peak-restructured CBD carparks (HDB publishes that list)
-- Verify `parking_system: 'EPS' | 'COUPON'` correctly branches the proration logic, and that `central_area` is reflected in the ingested bands
-
-**Effort:** ~1 day
-
----
-
-### 2. Public holiday calendar for `SUN_PH` day-type
+### 1. Public holiday calendar for `SUN_PH` day-type
 
 **Status:** `currentDayType()` in `uraJoin.ts` maps Sunday → `SUN_PH`, all other weekdays → `WEEKDAY`. Public holidays are priced at wrong (weekday) rates.
 
@@ -69,7 +60,7 @@ These are done and in production — some weren't in the original README.
 
 ## Short-term (P2)
 
-### 3. DataMall audit — finish the long tail
+### 2. DataMall audit — finish the long tail
 
 **Status:** Largely addressed. The curated-malls pass confirmed the high-traffic LTA-managed malls already in the DataMall feed (VivoCity `LTA:16`, ION `LTA:23`, Marina Square `LTA:2`, Raffles City `LTA:3`, IMM `LTA:53`, etc. — 28 in total) and now carries verified rates + `Development` names + capacity for them. The remaining work is the long tail beyond the curated 51:
 
@@ -85,7 +76,7 @@ These are done and in production — some weren't in the original README.
 
 ---
 
-### 4. JTC + NParks datasets ingest
+### 3. JTC + NParks datasets ingest
 
 **Status:** DB schema already supports `agency: 'JTC' | 'NPARKS'`. No ingest script yet.
 
@@ -99,7 +90,7 @@ These are done and in production — some weren't in the original README.
 
 ---
 
-### 5. CapitaLand JustPark scraper (biggest private availability win)
+### 4. CapitaLand JustPark scraper (biggest private availability win)
 
 **Data source:** `justpark.capitaland.com/LotsAvail` — semi-real-time lots (1–5 min lag) for Lot One, IMM, Westgate, CapitaGreen, Capital Tower, Six Battery Road, CapitaSpring, Asia Square Tower 2, Raffles City.
 
@@ -126,7 +117,7 @@ These are done and in production — some weren't in the original README.
 
 ### Private operator scrapers
 
-No code yet. Assess after DataMall audit (P2 #3) confirms true gap.
+No code yet. Assess after DataMall audit (P2 #2) confirms true gap.
 
 | Operator | Approach |
 |---|---|
