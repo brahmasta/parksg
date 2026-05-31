@@ -226,3 +226,49 @@ describe('end-to-end cost via estimateCostCentsAt', () => {
     assert.equal(cents, 800);
   });
 });
+
+describe('cross-band cost stitching', () => {
+  // These exercise stays that span a band boundary — the case the old
+  // single-dominant-band estimator over-charged.
+
+  it('Central EPS, 2h from 16:00 weekday → 1h peak + 1h off-peak = $3.60', () => {
+    // 16:00–17:00 peak: 2 × $1.20 = $2.40; 17:00–18:00 base: 2 × $0.60 = $1.20.
+    // Old behaviour billed $1.20 for the whole 2h → $4.80; stitched = $3.60.
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'WEEKDAY', hourOfDay: 16 });
+    assert.equal(cents, 360);
+  });
+
+  it('Central EPS, 3h from 15:00 weekday → 2h peak + 1h off-peak = $6.00', () => {
+    // 15:00–17:00 peak: 4 × $1.20 = $4.80; 17:00–18:00 base: 2 × $0.60 = $1.20.
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 3, { dayType: 'WEEKDAY', hourOfDay: 15 });
+    assert.equal(cents, 600);
+  });
+
+  it('Central Coupon, 2h from 16:00 weekday → stitches with no cap = $3.60', () => {
+    const rows = inferHdbRateRows(base({ parkingSystem: 'COUPON', centralArea: true })).map(
+      toRateRow,
+    );
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'WEEKDAY', hourOfDay: 16 });
+    assert.equal(cents, 360);
+  });
+
+  it('day cap and night cap are independent sessions across a day→night stay', () => {
+    // Central, 12h from 18:00: 18:00–22:30 off-peak (9 × $0.60 = $5.40, under the
+    // $20 day cap) + 22:30–06:00 night (15 × $0.60 = $9.00, capped at the $5
+    // night cap). Total = $5.40 + $5.00 = $10.40. The two caps must NOT merge.
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 12, { dayType: 'WEEKDAY', hourOfDay: 18 });
+    assert.equal(cents, 1040);
+  });
+
+  it('entering off-peak then walking into peak still charges each portion', () => {
+    // 06:00 start, 2h: 06:00–07:00 is night band ($0.60, 2 blocks = $1.20),
+    // 07:00–08:00 peak ($1.20, 2 blocks = $2.40). Total $3.60. Confirms the
+    // walk re-evaluates the band each block in both directions.
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'WEEKDAY', hourOfDay: 6 });
+    assert.equal(cents, 360);
+  });
+});

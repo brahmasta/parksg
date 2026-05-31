@@ -35,6 +35,7 @@ These are done and in production — some weren't in the original README.
 | **Public-holiday-aware pricing** | `src/lib/data/sgPublicHolidays.json` (MOM-gazetted 2025–2026 dates incl. in-lieu Mondays); `currentDayType()` returns `SUN_PH` on any gazetted PH so carparks bill at the Sunday/PH rate instead of the wrong weekday rate. Covered by `src/lib/uraJoin.test.ts` (6 cases) |
 | **JTC industrial carparks** | `migrateJtc` in `migrate-to-supabase.ts` (`npm run ingest:jtc`) ingests the 28-carpark JTC Carpark Information dataset (`data.gov.sg`), reusing the HDB SVY21 + upsert path. `agency='JTC'`, `source='JTC'` (new enum label), all geocoded; metadata + coords only (no fabricated rates). Adds industrial-estate coverage (AMK / Bukit Merah / Aljunied / Depot Lane) the HDB feed lacks |
 | **CapitaLand JustPark live availability** | `api/justpark-availability.ts` (Node runtime, 60s cache) performs the reverse-engineered antiforgery handshake against `justpark.capitaland.com` and returns live lot counts keyed by DB carpark id for **11 CapitaLand malls** (Bedok Mall, Bugis+, Funan, IMM, Junction 8, Lot One, Plaza Singapura, Raffles City, Tampines Mall, The Atrium@Orchard, Westgate) that previously showed rates only. Pure parser + mapping in `src/lib/server/justpark.ts` (7 fixture-backed tests); merged authoritatively in `useCarparks.ts` `buildLiveLotsIndex` |
+| **Cross-band cost stitching** | `estimateCostCentsAt` (`rateMath.ts`) walks the stay block-by-block, charging each block at the band covering its start time, so a stay spanning peak + off-peak pays each portion at its real rate (HDB Central 16:00→18:00 now $3.60 not $4.80). Caps are session-scoped (grouped by cap value), so HDB's $12/$20 day cap and $5 night cap apply to their own sessions independently. Reduces to the old single-band behaviour when rows have no time bands; 5 new tests + all 16 prior cases green |
 
 ---
 
@@ -158,18 +159,31 @@ shape the parser test's "site code resolves" assertion will start failing.
 
 ---
 
-### 4. Cross-band cost stitching for long stays
+### 4. Cross-band cost stitching for long stays ✅ SHIPPED
 
-**Status:** Known, intentional limitation. The runtime computes each estimate for the *current* day/hour (`currentDayType(now)` + `now.getHours()` in `useCarparks.ts`/`uraJoin.ts`), so the correct band surfaces as time passes. But `estimateCostCentsAt` (`rateMath.ts`) picks a single **dominant band** and applies its per-block rate for the *entire* stay — it does not stitch costs across bands a long stay actually spans (e.g. an HDB Central stay from 15:00 → 19:00 is billed at the $1.20 peak rate for all 4h rather than $1.20 until 17:00 then $0.60). This deliberately **over-estimates** (so users aren't surprised at the gantry) and is **bounded by the daily cap**, so the error is capped and never under-quotes.
+`estimateCostCentsAt` (`rateMath.ts`) now **walks the stay block by block** from
+the entry hour, charging each block at the band covering that block's start time
+(within the matching `dayType`). A stay that spans peak + off-peak pays each
+portion at its real rate instead of the entry band's rate for the whole duration
+(e.g. HDB Central 16:00 → 18:00 is now $1.20/30min until 17:00 then $0.60/30min →
+$3.60, vs the old $4.80).
 
-**What's needed (if we want exact multi-band totals):**
-- Walk the stay minute-window across consecutive matching bands (per `dayType`), summing each band's prorated cost, instead of picking one dominant band
-- Handle the day→night→next-day rollover and the daily-cap interaction across bands
-- Keep the over-estimate fallback for rows lacking time bands
+**Cap handling is session-scoped, not per-band.** HDB's $12/$20 *day* cap is
+attached to both the peak and off-peak rows (equal `cap_cents` — together they
+are the one 07:00–22:30 session), while the $5 night cap sits on the night row.
+The estimator groups accumulated charges by cap *value* and applies each distinct
+cap once to its group's subtotal — so a 12h Central stay correctly sums its day
+session against $20 and its night session against $5 independently, rather than
+double-capping. Rows with no cap (Coupon, peak-restructured MANUAL) sum uncapped.
 
-**Why it's low priority:** affects only multi-hour stays that cross a band boundary at the 16 HDB Central carparks + URA time-banded carparks; the cap ceilings most of the divergence, and over-estimating is the safe direction.
+**Reduces exactly to the old single-dominant-band behaviour** when the matching
+rows have no time bands (one all-day band is picked for every block), so all 16
+prior `estimateCostCentsAt` cases still pass; 5 new stitching tests cover the
+peak→off-peak crossing, day→night cap independence, and the off-peak→peak walk.
+Handles midnight wrap (minutes-from-midnight cursor `% 1440`). Falls back to
+`estimateCostCents` when no row matches the day or nothing is priceable.
 
-**Effort:** ~1 day
+**Affected:** the 16 HDB Central carparks + any URA/mall rows with time bands.
 
 ---
 
