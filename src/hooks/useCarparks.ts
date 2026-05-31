@@ -291,7 +291,7 @@ const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
 function dbRowToCarpark(
   row: DbCarparkRaw,
   dest: { lat: number; lng: number },
-  lotsByDbId: Map<string, { lotsAvailable: number | null; lotsTotal?: number }>,
+  lotsByDbId: Map<string, LiveLots>,
   dayType: 'WEEKDAY' | 'SAT' | 'SUN_PH',
   hourOfDay: number,
 ): Carpark {
@@ -320,7 +320,9 @@ function dbRowToCarpark(
     name: row.name,
     block: row.address ?? row.source_code,
     operator: op,
-    lotTypes: ['C'] satisfies LotType[],
+    // Real per-vehicle types when the live feed carries them (HDB); otherwise
+    // car-only, since other agencies don't break availability out by type.
+    lotTypes: live?.lotTypes ?? (['C'] satisfies LotType[]),
     lotsAvailable: live?.lotsAvailable ?? null,
     lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),
@@ -417,12 +419,21 @@ function computeEstByHours(
 // Live availability merge
 // ──────────────────────────────────────────────────────────────────────
 
+/** One carpark's live figures, merged from whichever feed is authoritative.
+ * `lotTypes` is only known for HDB carparks (the live feed lists a row per
+ * vehicle type); other agencies fall back to car-only in dbRowToCarpark. */
+type LiveLots = {
+  lotsAvailable: number | null;
+  lotsTotal?: number;
+  lotTypes?: LotType[];
+};
+
 function buildLiveLotsIndex(
   hdb: Map<string, HdbAvailability> | null | undefined,
   lta: LtaCarpark[] | null | undefined,
   justpark?: JustParkLot[] | null | undefined,
-): Map<string, { lotsAvailable: number | null; lotsTotal?: number }> {
-  const out = new Map<string, { lotsAvailable: number | null; lotsTotal?: number }>();
+): Map<string, LiveLots> {
+  const out = new Map<string, LiveLots>();
   // LTA first: DataMall also reports HDB-agency carparks but only carries an
   // available count, no capacity. The HDB feed below is authoritative for
   // HDB carparks (it has total_lots too), so it must overwrite these — write
@@ -438,6 +449,7 @@ function buildLiveLotsIndex(
       out.set(`HDB:${carParkNo}`, {
         lotsAvailable: a.lots_available,
         lotsTotal: a.total_lots,
+        lotTypes: a.lotTypes.length ? a.lotTypes : undefined,
       });
     }
   }

@@ -8,6 +8,10 @@
 //      by `CarParkID` (matches `car_park_no`).
 
 import { svy21ToWgs84 } from '../geo';
+import type { LotType } from '../types';
+
+/** HDB availability feed codes → our LotType. "Y" is HDB's motorcycle code. */
+const FEED_LOT_TYPE: Record<string, LotType> = { C: 'C', Y: 'M', H: 'H' };
 
 export type HdbCarparkInfo = {
   car_park_no: string;
@@ -30,8 +34,11 @@ export type HdbAvailability = {
   car_park_no: string;
   total_lots: number;
   lots_available: number;
-  /** Vehicle category: "C" car, "Y" motorcycle, "H" heavy */
+  /** Vehicle category of the row the counts came from — always "C" here. */
   lot_type: string;
+  /** Every vehicle lot type this carpark reports (C car, M motorcycle, H heavy),
+   * in display order. The live feed lists a row per type; we surface them all. */
+  lotTypes: LotType[];
   updated: string;
 };
 
@@ -147,14 +154,24 @@ export async function getHdbAvailability(): Promise<Map<string, HdbAvailability>
   const items = body.items?.[0]?.carpark_data ?? [];
   const map = new Map<string, HdbAvailability>();
   for (const it of items) {
-    // Pick the car-lot row (lot_type "C"). Some carparks list multiple rows.
-    const carRow = it.carpark_info?.find((r) => r.lot_type === 'C');
+    const rows = it.carpark_info ?? [];
+    // Availability counts come from the car-lot row (lot_type "C"). Some
+    // carparks list multiple rows (one per vehicle type).
+    const carRow = rows.find((r) => r.lot_type === 'C');
     if (!carRow) continue;
+    // Collect every vehicle type the carpark reports, in a stable C→M→H order.
+    const present = new Set<LotType>();
+    for (const r of rows) {
+      const t = FEED_LOT_TYPE[r.lot_type];
+      if (t) present.add(t);
+    }
+    const lotTypes = (['C', 'M', 'H'] as LotType[]).filter((t) => present.has(t));
     map.set(it.carpark_number, {
       car_park_no: it.carpark_number,
       total_lots: parseInt(carRow.total_lots, 10) || 0,
       lots_available: parseInt(carRow.lots_available, 10) || 0,
       lot_type: carRow.lot_type,
+      lotTypes,
       updated: it.update_datetime,
     });
   }

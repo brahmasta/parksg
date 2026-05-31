@@ -189,10 +189,12 @@ Handles midnight wrap (minutes-from-midnight cursor `% 1440`). Falls back to
 
 ## Quick wins (under half a day each)
 
-- **LotType coverage** — `dbRowToCarpark` hardcodes `lotTypes: ['C']`. Motorcycle and heavy types are in the DB but dropped. Surface them with `LotTypeChips` in Detail.
-- **EV stale threshold** — `EV_STALE_MINUTES = 5` in `ev.ts`. DataMall refreshes every ~5 min, so the "stale" banner fires aggressively. Bump to 8 min.
-- **Stale-rates banner scope** — `isDatagovRates` in `DetailScreen` checks `source === 'LTA_DATAGOV'`. Correct, but double-check it doesn't fire for URA or HDB rows if those share the same source field in edge cases.
-- **`deriveArea()` in `saves.ts`** — falls back to generic "HDB carparks". Improve with a postal-district lookup to get real area names in the Saved feed.
+> ✅ **All shipped (2026-05-31).** See per-item notes below.
+
+- ~~**LotType coverage** — `dbRowToCarpark` hardcodes `lotTypes: ['C']`. Motorcycle and heavy types are in the DB but dropped. Surface them with `LotTypeChips` in Detail.~~ ✅ The HDB availability feed lists a `carpark_info` row per vehicle type; `getHdbAvailability` (`hdb.ts`) now collects all of them (`C`/`Y→M`/`H`) into `HdbAvailability.lotTypes`, threaded through `buildLiveLotsIndex` → `dbRowToCarpark` so Detail's `LotTypeChips` shows real Car/Motorcycle/Heavy chips. Non-HDB agencies (which don't break availability out by type) stay car-only.
+- ~~**EV stale threshold** — `EV_STALE_MINUTES = 5` in `ev.ts`. DataMall refreshes every ~5 min, so the "stale" banner fires aggressively. Bump to 8 min.~~ ✅ Bumped to 8 (one refresh cycle of headroom past the ~5-min `/EVCBatch` cadence + proxy/poll latency).
+- ~~**Stale-rates banner scope** — `isDatagovRates` in `DetailScreen` checks `source === 'LTA_DATAGOV'`.~~ ✅ **Verified safe — no false-positives.** A carpark's rows are single-source (`migrate-curated-malls` deletes by `carpark_id` before insert) and the runtime fallbacks (`ratesFor`) only emit `HDB`/`URA`/`MANUAL`, never `LTA_DATAGOV`. So the exact-match can't fire on a URA/HDB/JTC/curated carpark. Documented inline.
+- ~~**`deriveArea()` in `saves.ts`** — falls back to generic "HDB carparks". Improve with a postal-district lookup to get real area names in the Saved feed.~~ ✅ New `src/lib/postalArea.ts` maps the SG postal *sector* (first 2 digits of the 6-digit code, URA district guide) → a recognizable locality ("Orchard", "Tampines", …). `deriveArea` tries the postal locality first (works for malls/URA/LTA addresses carrying a postal), then the HDB block-name hint, then the operator. 8 unit tests (`postalArea.test.ts`).
 - ~~**Results footer copy** — "Private mall carparks not shown" should be updated once JustPark scraper and DataMall audit land.~~ ✅ Both landed; copy now reads "Some mall carparks show rates only, no live count" — still accurate since non-CapitaLand malls (Wilson/Mapletree/etc.) remain rates-only.
 
 ---

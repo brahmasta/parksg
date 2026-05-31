@@ -11,8 +11,13 @@ import type { Carpark, CarparkEV, EVConnector } from './types';
 import { haversineMeters } from './geo';
 import type { EvLocation } from './api/ltaEv';
 
-/** LTA /EVCBatch refreshes every ~5 min. Anything older → treat as stale. */
-export const EV_STALE_MINUTES = 5;
+/**
+ * LTA /EVCBatch refreshes every ~5 min, but the snapshot age routinely lands a
+ * couple of minutes past that by the time it reaches us (proxy cache + client
+ * poll interval), so a 5-min threshold flagged fresh data as stale. 8 min gives
+ * one refresh cycle of headroom before we warn.
+ */
+export const EV_STALE_MINUTES = 8;
 
 export type ConnectorGroup = {
   plugType: EVConnector['plugType'];

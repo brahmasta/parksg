@@ -16,6 +16,7 @@ import {
   pushDestinationDelete,
   pushDestinationUpsert,
 } from './api/saves-sync';
+import { areaFromPostal } from './postalArea';
 
 const CARPARKS_KEY = 'psg.savedCarparks';
 const SNAPSHOTS_KEY = 'psg.savedCarparkSnapshots';
@@ -106,10 +107,14 @@ function writeDestinations(ds: SavedDestination[]) {
 // ────────────────────────────────────────────────────────────────────
 
 /** Derive a coarse area label from a carpark when the data model doesn't
- * carry one. Pulls a postal-district hint from `block` first, then falls
- * back to the operator. Keeps the Saved feed groupings stable. */
+ * carry one. Tries a postal-sector locality from `block` first (real area
+ * names for malls/URA/LTA addresses that carry a 6-digit code), then an HDB
+ * block-name hint, then falls back to the operator. Keeps the Saved feed
+ * groupings stable. */
 function deriveArea(cp: { block: string; operator: Operator; name: string }): string {
   const block = cp.block ?? '';
+  const byPostal = areaFromPostal(block);
+  if (byPostal) return byPostal;
   if (/blk\s*\d+/i.test(block)) {
     const m = block.match(/[A-Za-z][A-Za-z\s]{2,}/);
     if (m) {
