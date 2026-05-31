@@ -193,6 +193,7 @@ async function ingestOne(
   id: string,
   carpark: DbCarpark | null,
   rateRows: DbRateRow[],
+  ratesOnlyTotalLots: number | null = null,
 ): Promise<boolean> {
   // carpark === null → ratesOnly: leave the existing carpark row untouched
   // (preserves LTA_DATAMALL identity + live availability) and only swap rates.
@@ -202,6 +203,18 @@ async function ingestOne(
       .upsert(carpark, { onConflict: 'id' });
     if (upErr) {
       process.stderr.write(`  upsert carpark ${id} failed: ${upErr.message}\n`);
+      return false;
+    }
+  } else if (ratesOnlyTotalLots != null) {
+    // ratesOnly malls keep their LTA_DATAMALL row, but DataMall never provides
+    // capacity (total_lots is null). Patch ONLY total_lots so the detail view
+    // can show "X of N lots" without touching source / identity / coords.
+    const { error: patchErr } = await supabase
+      .from('carparks')
+      .update({ total_lots: ratesOnlyTotalLots })
+      .eq('id', id);
+    if (patchErr) {
+      process.stderr.write(`  patch total_lots ${id} failed: ${patchErr.message}\n`);
       return false;
     }
   }
@@ -276,11 +289,13 @@ async function main(): Promise<void> {
 
     const carpark = entry.ratesOnly ? null : toDbCarpark(entry, id, today);
     const rows = toDbRateRows(entry, id);
-    const ok = await ingestOne(supabase, id, carpark, rows);
+    const ratesOnlyLots = entry.ratesOnly ? entry.totalLots ?? null : null;
+    const ok = await ingestOne(supabase, id, carpark, rows, ratesOnlyLots);
     if (ok) {
       if (carpark) okCarparks += 1;
       okRows += rows.length;
-      process.stderr.write(`  ok ${id}${carpark ? '' : ' (rates-only)'} (${rows.length} rate rows)\n`);
+      const lotsNote = ratesOnlyLots != null ? `, total_lots=${ratesOnlyLots}` : '';
+      process.stderr.write(`  ok ${id}${carpark ? '' : ' (rates-only)'} (${rows.length} rate rows${lotsNote})\n`);
     } else {
       errors += 1;
     }

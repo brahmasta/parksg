@@ -15,6 +15,7 @@
   },
   {
     "id": "LTA:city_square_mall",
+    "totalLots": 500,
     "name": "City Square Mall",
     "address": "180 Kitchener Road, Singapore 208539",
     "lat": 1.311421,
@@ -32,6 +33,7 @@
   },
   {
     "id": "LTA:ang_mo_kio_hub",
+    "totalLots": 415,
     "name": "AMK Hub",
     "address": "53 Ang Mo Kio Avenue 3, Singapore 569933",
     "lat": 1.369389,
@@ -45,6 +47,7 @@
   },
   {
     "id": "LTA:suntec_city",
+    "totalLots": 3000,
     "name": "Suntec City",
     "address": "3 Temasek Boulevard, Singapore 038983",
     "lat": 1.29486,
@@ -91,6 +94,7 @@
   },
   {
     "id": "LTA:parkway_parade",
+    "totalLots": 1184,
     "name": "Parkway Parade",
     "address": "80 Marine Parade Road, Singapore 449269",
     "lat": 1.30107,
@@ -137,6 +141,7 @@
   },
   {
     "id": "LTA:jurong_point_shopping_centre",
+    "totalLots": 1467,
     "name": "Jurong Point",
     "address": "1 Jurong West Central 2, Singapore 648886",
     "lat": 1.339452,
@@ -167,6 +172,7 @@
   },
   {
     "id": "LTA:16",
+    "totalLots": 2000,
     "name": "VivoCity",
     "ratesOnly": true,
     "operator": "Mapletree",
@@ -182,6 +188,7 @@
   },
   {
     "id": "LTA:23",
+    "totalLots": 500,
     "name": "ION Orchard",
     "ratesOnly": true,
     "operator": "CapitaLand",
@@ -200,6 +207,7 @@
   },
   {
     "id": "LTA:9",
+    "totalLots": 600,
     "name": "Plaza Singapura",
     "ratesOnly": true,
     "operator": "CapitaLand",
@@ -230,6 +238,7 @@
   },
   {
     "id": "LTA:3",
+    "totalLots": 1000,
     "name": "Raffles City",
     "ratesOnly": true,
     "operator": "CapitaLand",
@@ -258,6 +267,7 @@
   },
   {
     "id": "LTA:63",
+    "totalLots": 650,
     "name": "Tampines Mall",
     "ratesOnly": true,
     "operator": "CapitaLand",
@@ -288,6 +298,7 @@
   },
   {
     "id": "LTA:14",
+    "totalLots": 290,
     "name": "Wisma Atria",
     "ratesOnly": true,
     "operator": "Wisma Atria",
@@ -316,6 +327,7 @@
   },
   {
     "id": "LTA:24",
+    "totalLots": 220,
     "name": "313@Somerset",
     "ratesOnly": true,
     "operator": "Lendlease",
@@ -343,6 +355,7 @@
   },
   {
     "id": "LTA:62",
+    "totalLots": 307,
     "name": "Lot One",
     "ratesOnly": true,
     "operator": "CapitaLand",
@@ -358,6 +371,7 @@
   },
   {
     "id": "LTA:2",
+    "totalLots": 1900,
     "name": "Marina Square",
     "ratesOnly": true,
     "provenance": { "url": "https://www.motorist.sg/parking/marina-square-parking-rates", "verified": "2026-05" },
@@ -373,6 +387,7 @@
   },
   {
     "id": "LTA:27",
+    "totalLots": 280,
     "name": "Orchard Central",
     "ratesOnly": true,
     "operator": "Far East Organization",
@@ -403,6 +418,7 @@
   },
   {
     "id": "LTA:53",
+    "totalLots": 1324,
     "name": "IMM",
     "ratesOnly": true,
     "operator": "CapitaLand",
@@ -433,6 +449,7 @@
   },
   {
     "id": "LTA:10",
+    "totalLots": 210,
     "name": "The Cathay",
     "ratesOnly": true,
     "provenance": { "url": "https://www.motorist.sg/parking/the-cathay-parking-rates", "verified": "2026-05" },
@@ -447,6 +464,7 @@
   },
   {
     "id": "LTA:21",
+    "totalLots": 350,
     "name": "The Centrepoint",
     "ratesOnly": true,
     "operator": "Frasers Property",
@@ -474,6 +492,7 @@
   },
   {
     "id": "LTA:15",
+    "totalLots": 260,
     "name": "Wheelock Place",
     "ratesOnly": true,
     "operator": "Wheelock Properties",
@@ -489,6 +508,7 @@
   },
   {
     "id": "LTA:20",
+    "totalLots": 494,
     "name": "Far East Plaza",
     "ratesOnly": true,
     "operator": "Far East Organization",
@@ -534,6 +554,7 @@
   },
   {
     "id": "LTA:compass_point",
+    "totalLots": 700,
     "name": "Compass One",
     "address": "1 Sengkang Square, Compass One, Singapore 545078",
     "lat": 1.392053,
@@ -548,6 +569,7 @@
   },
   {
     "id": "LTA:century_square",
+    "totalLots": 298,
     "name": "Century Square",
     "address": "2 Tampines Central 5, Century Square, Singapore 529509",
     "lat": 1.352368,
@@ -565,6 +587,7 @@
   },
   {
     "id": "LTA:west_mall",
+    "totalLots": 219,
     "name": "West Mall",
     "address": "1 Bukit Batok Central Link, West Mall, Singapore 658713",
     "lat": 1.350021,
@@ -598,6 +621,7 @@
   },
   {
     "id": "LTA:sun_plaza",
+    "totalLots": 260,
     "name": "Sun Plaza",
     "address": "30 Sembawang Drive, Sun Plaza, Singapore 757713",
     "lat": 1.448195,
@@ -618,6 +642,7 @@
   },
   {
     "id": "LTA:the_star_vista",
+    "totalLots": 800,
     "name": "The Star Vista",
     "address": "1 Vista Exchange Green, The Star Vista, Singapore 138617",
     "lat": 1.30697,
@@ -632,6 +657,7 @@
   },
   {
     "id": "LTA:thomson_plaza",
+    "totalLots": 410,
     "name": "Thomson Plaza",
     "address": "301 Upper Thomson Road, Thomson Plaza, Singapore 574408",
     "lat": 1.354669,
@@ -666,6 +692,7 @@
   },
   {
     "id": "LTA:8",
+    "totalLots": 160,
     "name": "The Heeren",
     "ratesOnly": true,
     "provenance": { "url": "https://www.motorist.sg/parking/the-heeren-parking-rates", "verified": "2026-05" },
@@ -678,6 +705,7 @@
   },
   {
     "id": "LTA:52",
+    "totalLots": 250,
     "name": "Orchard Gateway",
     "ratesOnly": true,
     "operator": "Far East Organization",
@@ -691,6 +719,7 @@
   },
   {
     "id": "LTA:18",
+    "totalLots": 323,
     "name": "Tangs",
     "ratesOnly": true,
     "operator": "C.K. Tang",
@@ -706,6 +735,7 @@
   },
   {
     "id": "LTA:57",
+    "totalLots": 200,
     "name": "The Atrium@Orchard",
     "ratesOnly": true,
     "operator": "CapitaLand",
