@@ -63,11 +63,18 @@ type CuratedMall = {
   id?: string;
   name: string;
   address?: string | null;
-  lat: number;
-  lng: number;
+  lat?: number | null;
+  lng?: number | null;
   operator?: string;
   totalLots?: number | null;
   provenance?: { url?: string; verified?: string };
+  /**
+   * When true, only the rate_rows are replaced — the carpark row is left
+   * untouched. Use for malls that already exist (e.g. LTA_DATAMALL entries with
+   * coordinates + live availability): we add fresh rates without flipping their
+   * source or overwriting their identity. Requires `id`.
+   */
+  ratesOnly?: boolean;
   rates: CuratedRate[];
 };
 
@@ -147,8 +154,8 @@ function toDbCarpark(entry: CuratedMall, id: string, today: string): DbCarpark {
     source_code: entry.name,
     name: entry.name,
     address: entry.address ?? null,
-    lat: entry.lat,
-    lng: entry.lng,
+    lat: entry.lat ?? null,
+    lng: entry.lng ?? null,
     car_park_type: 'MALL',
     parking_system: 'EPS',
     central_area: false,
@@ -183,30 +190,35 @@ function toDbRateRows(entry: CuratedMall, id: string): DbRateRow[] {
 
 async function ingestOne(
   supabase: SupabaseClient,
-  carpark: DbCarpark,
+  id: string,
+  carpark: DbCarpark | null,
   rateRows: DbRateRow[],
 ): Promise<boolean> {
-  const { error: upErr } = await supabase
-    .from('carparks')
-    .upsert(carpark, { onConflict: 'id' });
-  if (upErr) {
-    process.stderr.write(`  upsert carpark ${carpark.id} failed: ${upErr.message}\n`);
-    return false;
+  // carpark === null → ratesOnly: leave the existing carpark row untouched
+  // (preserves LTA_DATAMALL identity + live availability) and only swap rates.
+  if (carpark) {
+    const { error: upErr } = await supabase
+      .from('carparks')
+      .upsert(carpark, { onConflict: 'id' });
+    if (upErr) {
+      process.stderr.write(`  upsert carpark ${id} failed: ${upErr.message}\n`);
+      return false;
+    }
   }
   // Replace rate_rows by carpark_id (NOT by source) so stale LTA_DATAGOV rows —
   // including the 2018 duplicates — are cleared regardless of their source.
   const { error: delErr } = await supabase
     .from('rate_rows')
     .delete()
-    .eq('carpark_id', carpark.id);
+    .eq('carpark_id', id);
   if (delErr) {
-    process.stderr.write(`  delete rate_rows ${carpark.id} failed: ${delErr.message}\n`);
+    process.stderr.write(`  delete rate_rows ${id} failed: ${delErr.message}\n`);
     return false;
   }
   if (rateRows.length === 0) return true;
   const { error: insErr } = await supabase.from('rate_rows').insert(rateRows);
   if (insErr) {
-    process.stderr.write(`  insert rate_rows ${carpark.id} failed: ${insErr.message}\n`);
+    process.stderr.write(`  insert rate_rows ${id} failed: ${insErr.message}\n`);
     return false;
   }
   return true;
@@ -238,8 +250,19 @@ async function main(): Promise<void> {
   const seen = new Set<string>();
 
   for (const entry of entries) {
-    if (!entry.name || !Number.isFinite(entry.lat) || !Number.isFinite(entry.lng)) {
-      process.stderr.write(`  SKIP (missing name/lat/lng): ${entry.name ?? '?'}\n`);
+    if (!entry.name) {
+      process.stderr.write(`  SKIP (missing name)\n`);
+      errors += 1;
+      continue;
+    }
+    // ratesOnly entries must reference an existing carpark by id and need no coords.
+    if (entry.ratesOnly && !entry.id) {
+      process.stderr.write(`  SKIP (ratesOnly requires id): ${entry.name}\n`);
+      errors += 1;
+      continue;
+    }
+    if (!entry.ratesOnly && (!Number.isFinite(entry.lat) || !Number.isFinite(entry.lng))) {
+      process.stderr.write(`  SKIP (missing lat/lng): ${entry.name}\n`);
       errors += 1;
       continue;
     }
@@ -251,13 +274,13 @@ async function main(): Promise<void> {
     }
     seen.add(id);
 
-    const carpark = toDbCarpark(entry, id, today);
+    const carpark = entry.ratesOnly ? null : toDbCarpark(entry, id, today);
     const rows = toDbRateRows(entry, id);
-    const ok = await ingestOne(supabase, carpark, rows);
+    const ok = await ingestOne(supabase, id, carpark, rows);
     if (ok) {
-      okCarparks += 1;
+      if (carpark) okCarparks += 1;
       okRows += rows.length;
-      process.stderr.write(`  ok ${id} (${rows.length} rate rows)\n`);
+      process.stderr.write(`  ok ${id}${carpark ? '' : ' (rates-only)'} (${rows.length} rate rows)\n`);
     } else {
       errors += 1;
     }

@@ -1160,10 +1160,13 @@ async function loadExistingCarparkIds(
   return out;
 }
 
-// Curated mall carparks (source='MANUAL') are hand-maintained by
+// Carparks carrying hand-curated rates are maintained by
 // scripts/migrate-curated-malls.ts. They must survive a full sync: the LTA CSV
 // pass must not overwrite their rates with stale 2018 data, and the orphan
-// sweep must not delete them. Load their ids once so both passes can skip them.
+// sweep must not delete them. We key off rate_rows.source='MANUAL' (not
+// carparks.source) so this also protects "rates-only" malls whose carpark row
+// stays LTA_DATAMALL (kept intact so live availability keeps matching) but whose
+// rate_rows were curated.
 async function loadManualCarparkIds(
   supabase: SupabaseClient,
 ): Promise<Set<string>> {
@@ -1171,13 +1174,13 @@ async function loadManualCarparkIds(
   const pageSize = 1000;
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await supabase
-      .from('carparks')
-      .select('id')
+      .from('rate_rows')
+      .select('carpark_id')
       .eq('source', 'MANUAL')
       .range(from, from + pageSize - 1);
     if (error) throw new Error(`load MANUAL ids: ${error.message}`);
     if (!data || data.length === 0) break;
-    for (const row of data as Array<{ id: string }>) out.add(row.id);
+    for (const row of data as Array<{ carpark_id: string }>) out.add(row.carpark_id);
     if (data.length < pageSize) break;
   }
   return out;
