@@ -417,18 +417,22 @@ function buildLiveLotsIndex(
   lta: LtaCarpark[] | null | undefined,
 ): Map<string, { lotsAvailable: number | null; lotsTotal?: number }> {
   const out = new Map<string, { lotsAvailable: number | null; lotsTotal?: number }>();
+  // LTA first: DataMall also reports HDB-agency carparks but only carries an
+  // available count, no capacity. The HDB feed below is authoritative for
+  // HDB carparks (it has total_lots too), so it must overwrite these — write
+  // LTA first so the HDB pass wins and never loses the total.
+  if (lta) {
+    for (const cp of lta) {
+      // LTA's id is the bare source code; DB id is "AGENCY:id".
+      out.set(`${cp.agency}:${cp.id}`, { lotsAvailable: cp.lotsAvailable });
+    }
+  }
   if (hdb) {
     for (const [carParkNo, a] of hdb.entries()) {
       out.set(`HDB:${carParkNo}`, {
         lotsAvailable: a.lots_available,
         lotsTotal: a.total_lots,
       });
-    }
-  }
-  if (lta) {
-    for (const cp of lta) {
-      // LTA's id is the bare source code; DB id is "AGENCY:id".
-      out.set(`${cp.agency}:${cp.id}`, { lotsAvailable: cp.lotsAvailable });
     }
   }
   return out;
