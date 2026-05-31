@@ -52,13 +52,36 @@ describe('inferHdbRateRows — row shape', () => {
     assert.ok(day.every((r) => r.system === 'EPS' && r.source === 'HDB'));
   });
 
-  it('Central EPS → 6 rows, day cap $20, night cap $5, 120¢/30min', () => {
+  it('Central EPS with night → 8 rows: Mon–Sat peak split, Sun flat, $0.60 night', () => {
+    // WEEKDAY: 07–17 @120 + 17–22:30 @60 ; SAT: same (2) ; SUN_PH: 07–22:30 @60 (1)
+    // night: 3 day_types @60 cap $5 ⇒ 2+2+1+3 = 8.
     const rows = inferHdbRateRows(base({ parkingSystem: 'EPS', centralArea: true }));
-    assert.equal(rows.length, 6);
-    const wd = rows.find((r) => r.day_type === 'WEEKDAY' && r.start_time === '07:00:00')!;
-    assert.equal(wd.per_block_cents, 120);
-    assert.equal(wd.cap_cents, 2000);
+    assert.equal(rows.length, 8);
+
+    // Mon–Sat peak band is the $1.20 rate, capped at $20.
+    const wdPeak = rows.find((r) => r.day_type === 'WEEKDAY' && r.start_time === '07:00:00')!;
+    assert.equal(wdPeak.end_time, '17:00:00');
+    assert.equal(wdPeak.per_block_cents, 120);
+    assert.equal(wdPeak.cap_cents, 2000);
+
+    // …then $0.60 from 17:00 to 22:30.
+    const wdOffPeak = rows.find((r) => r.day_type === 'WEEKDAY' && r.start_time === '17:00:00')!;
+    assert.equal(wdOffPeak.end_time, '22:30:00');
+    assert.equal(wdOffPeak.per_block_cents, 60);
+
+    // Saturday is still peak.
+    const satPeak = rows.find((r) => r.day_type === 'SAT' && r.start_time === '07:00:00')!;
+    assert.equal(satPeak.per_block_cents, 120);
+
+    // Sunday/PH has no peak split — a single $0.60 day band.
+    const sunDay = rows.filter((r) => r.day_type === 'SUN_PH' && r.start_time === '07:00:00');
+    assert.equal(sunDay.length, 1);
+    assert.equal(sunDay[0].per_block_cents, 60);
+    assert.equal(sunDay[0].end_time, '22:30:00');
+
+    // Night is the $0.60 base rate (not the Central premium) with the $5 cap.
     const wdNight = rows.find((r) => r.day_type === 'WEEKDAY' && r.start_time === '22:30:00')!;
+    assert.equal(wdNight.per_block_cents, 60);
     assert.equal(wdNight.cap_cents, 500);
   });
 
@@ -110,8 +133,8 @@ describe('inferHdbRateRows — row shape', () => {
         peakBands: [],
       }),
     );
-    // Falls through → 6 standard Central rows
-    assert.equal(rows.length, 6);
+    // Falls through → 8 standard Central rows (Mon–Sat peak split + night)
+    assert.equal(rows.length, 8);
     assert.equal(rows[0].source, 'HDB');
   });
 });
@@ -129,6 +152,32 @@ describe('end-to-end cost via estimateCostCentsAt', () => {
     const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
     const cents = estimateCostCentsAt(rows, 12, { dayType: 'WEEKDAY', hourOfDay: 9 });
     assert.equal(cents, 2000);
+  });
+
+  it('Central EPS, 2h at 09:00 weekday → peak $1.20 rate → $4.80', () => {
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'WEEKDAY', hourOfDay: 9 });
+    assert.equal(cents, 480);
+  });
+
+  it('Central EPS, 2h at 18:00 weekday (evening) → base $0.60 rate → $2.40', () => {
+    // After 17:00 the Central premium no longer applies — used to over-charge $4.80.
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'WEEKDAY', hourOfDay: 18 });
+    assert.equal(cents, 240);
+  });
+
+  it('Central EPS, 2h at 10:00 Sunday/PH → base $0.60 rate → $2.40', () => {
+    // Sundays + public holidays are $0.60 all day at Central carparks too.
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'SUN_PH', hourOfDay: 10 });
+    assert.equal(cents, 240);
+  });
+
+  it('Central EPS, 2h at 10:00 Saturday → still peak $1.20 → $4.80', () => {
+    const rows = inferHdbRateRows(base({ centralArea: true })).map(toRateRow);
+    const cents = estimateCostCentsAt(rows, 2, { dayType: 'SAT', hourOfDay: 10 });
+    assert.equal(cents, 480);
   });
 
   it('Coupon non-Central, 35min stay (≈ 0.583 hr) → 2 blocks × 60¢ = $1.20', () => {

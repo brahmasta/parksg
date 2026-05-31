@@ -5,18 +5,26 @@
  * payload + the two curated reference lists, returns the list of RateRow
  * shapes to insert into Supabase. No I/O, no DB — testable in isolation.
  *
- * Rules encoded (per HDB Short Term Parking Charges):
- *   - Non-Central:  $0.60 / 30 min   day cap $12     night cap $5
- *   - Central:      $1.20 / 30 min   day cap $20     night cap $5
- *   - EPS only:     15-minute grace at entry
- *   - Coupon:       whole 30-min blocks. NO grace, NO cap, never night-coupon.
- *   - Day band:     07:00 – 22:30   (matches HDB's posted hours)
+ * Rules encoded (per HDB Short Term Parking Charges, verified 2024-05 capture
+ * of hdb.gov.sg/car-parks/short-term-parking/short-term-parking-charges):
+ *   - Base rate:    $0.60 / 30 min   everywhere and at all times, EXCEPT…
+ *   - Central peak: $1.20 / 30 min   ONLY at the 16 enumerated Central-Area
+ *                   carparks, and ONLY Mon–Sat 07:00–17:00. Outside that band
+ *                   (evenings, Sundays, public holidays, nights) Central
+ *                   carparks revert to the $0.60 base rate.
+ *   - Day cap:      $12 non-Central / $20 Central, over the 07:00–22:30 window
  *   - Night band:   22:30 – 07:00   (only emitted when night parking is offered)
- *   - Night cap:    $5 at participating EPS carparks
+ *   - Night rate:   $0.60 / 30 min everywhere (the Central premium is daytime-
+ *                   only) with a $5 night cap at participating carparks
+ *   - EPS only:     15-minute grace at entry; per-minute proration + caps
+ *   - Coupon:       whole 30-min blocks, same band structure, NO grace, NO cap,
+ *                   never night-coupon
  *   - raw.night_parking === "NO" → no night row at all
- *   - Peak-restructured carparks (post-2022 Central hike): emit MANUAL rows
- *     from the override file and DISABLE the cap. Empty override list →
- *     fall through to the standard Central treatment.
+ *   - Peak-restructured branch: HDB has NO general short-term peak/time-of-day
+ *     restructuring for normal car lots (the only time-differentiated scheme is
+ *     Loading/Unloading Bay pricing, which this app does not model). The override
+ *     file stays empty; this branch is dormant infrastructure kept for the day
+ *     such a list ever materialises. Empty override → standard treatment.
  */
 
 import type { DayType, ParkingSystem, Source, VehCat } from './hdb-rates.types';
@@ -76,16 +84,34 @@ const DAY_TYPES: DayType[] = ['WEEKDAY', 'SAT', 'SUN_PH'];
 
 const DAY_START = '07:00:00';
 const DAY_END = '22:30:00';
+const CENTRAL_PEAK_END = '17:00:00'; // $1.20 applies 07:00–17:00 Mon–Sat only
 const NIGHT_START = '22:30:00';
 const NIGHT_END = '07:00:00'; // wraps midnight — runtime estimator handles this
 
-const CENTRAL_PER_BLOCK_CENTS = 120;
-const NON_CENTRAL_PER_BLOCK_CENTS = 60;
+const CENTRAL_PEAK_PER_BLOCK_CENTS = 120; // $1.20/30min — Central, Mon–Sat 07:00–17:00
+const BASE_PER_BLOCK_CENTS = 60; // $0.60/30min — everywhere/everywhen else
 const BLOCK_MINUTES = 30;
 const CENTRAL_DAY_CAP_CENTS = 2000;
 const NON_CENTRAL_DAY_CAP_CENTS = 1200;
 const NIGHT_CAP_CENTS = 500;
 const EPS_GRACE_MINUTES = 15;
+
+/** Day-band segments for a given day-type + tier. Central carparks charge the
+ * $1.20 peak rate only Mon–Sat 07:00–17:00, then drop to the $0.60 base for the
+ * rest of the day band; on Sun/PH they are $0.60 all day. Everyone else is a
+ * single flat $0.60 band. */
+function dayBands(
+  dayType: DayType,
+  centralArea: boolean,
+): Array<{ start: string; end: string; perBlock: number }> {
+  if (centralArea && dayType !== 'SUN_PH') {
+    return [
+      { start: DAY_START, end: CENTRAL_PEAK_END, perBlock: CENTRAL_PEAK_PER_BLOCK_CENTS },
+      { start: CENTRAL_PEAK_END, end: DAY_END, perBlock: BASE_PER_BLOCK_CENTS },
+    ];
+  }
+  return [{ start: DAY_START, end: DAY_END, perBlock: BASE_PER_BLOCK_CENTS }];
+}
 
 export function inferHdbRateRows(input: HdbRuleInput): HdbRateRow[] {
   const {
@@ -98,24 +124,27 @@ export function inferHdbRateRows(input: HdbRuleInput): HdbRateRow[] {
     effectiveFrom,
   } = input;
 
-  // Coupon carparks are simple: 1 day row per day_type, no cap, no grace, no night.
+  // Coupon carparks: same band structure (incl. the Central Mon–Sat peak split),
+  // but no cap, no grace, no night.
   if (parkingSystem === 'COUPON') {
-    return DAY_TYPES.map((day) => ({
-      carpark_id: carparkId,
-      day_type: day,
-      start_time: DAY_START,
-      end_time: DAY_END,
-      per_block_cents: centralArea ? CENTRAL_PER_BLOCK_CENTS : NON_CENTRAL_PER_BLOCK_CENTS,
-      block_minutes: BLOCK_MINUTES,
-      first_hour_cents: null,
-      per_entry_cents: null,
-      cap_cents: null,
-      grace_minutes: null,
-      system: 'COUPON',
-      veh_cat: 'CAR',
-      source: 'HDB',
-      effective_from: effectiveFrom,
-    }));
+    return DAY_TYPES.flatMap((day) =>
+      dayBands(day, centralArea).map<HdbRateRow>((b) => ({
+        carpark_id: carparkId,
+        day_type: day,
+        start_time: b.start,
+        end_time: b.end,
+        per_block_cents: b.perBlock,
+        block_minutes: BLOCK_MINUTES,
+        first_hour_cents: null,
+        per_entry_cents: null,
+        cap_cents: null,
+        grace_minutes: null,
+        system: 'COUPON',
+        veh_cat: 'CAR',
+        source: 'HDB',
+        effective_from: effectiveFrom,
+      })),
+    );
   }
 
   // EPS — Peak-restructured Central: emit MANUAL bands, cap disabled.
@@ -144,30 +173,33 @@ export function inferHdbRateRows(input: HdbRuleInput): HdbRateRow[] {
     }));
   }
 
-  // EPS — standard tier (Central or non-Central).
-  const perBlock = centralArea ? CENTRAL_PER_BLOCK_CENTS : NON_CENTRAL_PER_BLOCK_CENTS;
+  // EPS — standard tier (Central or non-Central). Central carparks get a
+  // peak/off-peak split on Mon–Sat (see dayBands); everyone else is one flat band.
   const dayCap = centralArea ? CENTRAL_DAY_CAP_CENTS : NON_CENTRAL_DAY_CAP_CENTS;
 
-  const dayRows: HdbRateRow[] = DAY_TYPES.map((day) => ({
-    carpark_id: carparkId,
-    day_type: day,
-    start_time: DAY_START,
-    end_time: DAY_END,
-    per_block_cents: perBlock,
-    block_minutes: BLOCK_MINUTES,
-    first_hour_cents: null,
-    per_entry_cents: null,
-    cap_cents: dayCap,
-    grace_minutes: EPS_GRACE_MINUTES,
-    system: 'EPS',
-    veh_cat: 'CAR',
-    source: 'HDB',
-    effective_from: effectiveFrom,
-  }));
+  const dayRows: HdbRateRow[] = DAY_TYPES.flatMap((day) =>
+    dayBands(day, centralArea).map<HdbRateRow>((b) => ({
+      carpark_id: carparkId,
+      day_type: day,
+      start_time: b.start,
+      end_time: b.end,
+      per_block_cents: b.perBlock,
+      block_minutes: BLOCK_MINUTES,
+      first_hour_cents: null,
+      per_entry_cents: null,
+      cap_cents: dayCap,
+      grace_minutes: EPS_GRACE_MINUTES,
+      system: 'EPS',
+      veh_cat: 'CAR',
+      source: 'HDB',
+      effective_from: effectiveFrom,
+    })),
+  );
 
   // Night rows — only at carparks that explicitly offer night parking.
   // raw.night_parking is "YES"/"NO" in the data.gov.sg payload; default to
-  // YES when missing because most carparks offer it.
+  // YES when missing because most carparks offer it. The Central premium is
+  // daytime-only, so night is always the $0.60 base rate.
   const nightFlag = (raw?.night_parking ?? 'YES').toUpperCase();
   if (nightFlag === 'NO') return dayRows;
 
@@ -176,7 +208,7 @@ export function inferHdbRateRows(input: HdbRuleInput): HdbRateRow[] {
     day_type: day,
     start_time: NIGHT_START,
     end_time: NIGHT_END,
-    per_block_cents: perBlock,
+    per_block_cents: BASE_PER_BLOCK_CENTS,
     block_minutes: BLOCK_MINUTES,
     first_hour_cents: null,
     per_entry_cents: null,

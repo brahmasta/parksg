@@ -1,8 +1,8 @@
 {
-  "_note": "HDB Central Area carparks that received the post-2022 peak-period rate restructuring. These get explicit time-banded MANUAL rate_rows from this file and have the daily $20 cap DISABLED (per HDB).",
-  "_source": "Curate from the HDB press-release annex announcing the restructured tier (Sep 2022 onward). The annex lists specific carpark codes and the peak rate per band (typically a higher $/30min during 07:00–22:30 weekdays).",
-  "_todo": "Populate from the HDB.gov.sg press release annex. Until this is non-empty, no carpark gets MANUAL rows — peak-restructured carparks will temporarily fall back to the standard Central tier (correct 07:00–22:30 rate, $20 cap kept). Audit when you can.",
-  "_lastReviewed": "2026-05-26",
+  "_note": "Override file for HDB carparks with explicit time-banded MANUAL rate_rows (cap disabled). Intentionally EMPTY.",
+  "_status": "CONFIRMED NOT APPLICABLE (2026-05-31). Web-verified against HDB's current Short Term Parking pages: HDB has NO general short-term peak/time-of-day rate restructuring for normal car lots. The only HDB time-differentiated scheme is Loading/Unloading Bay (LUB) pricing (first 15 min free, then $2 / $4 per ½hr) at selected bays — which this app does not model. The earlier 'post-2022 Central hike' note conflated this with URA's separate changes and/or the long-standing Central-Area Mon–Sat 07:00–17:00 $1.20 band (now correctly modelled in hdb-rates.ts directly).",
+  "_keptBecause": "Dormant infrastructure: if HDB ever publishes a per-carpark peak-rate annex, populate `carparks` here and the rule engine picks it up on the next `npm run migrate:hdb-rates` run. Empty list → all carparks use the standard tier.",
+  "_lastReviewed": "2026-05-31",
 
   "carparks": []
 }
