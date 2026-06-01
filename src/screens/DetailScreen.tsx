@@ -1,5 +1,17 @@
+import { useCallback, useState } from 'react';
+import { track } from '@vercel/analytics/react';
 import type { Carpark, DurationHours } from '../lib/types';
 import { isStaleRates } from '../lib/rateSource';
+import {
+  MAPS_PROVIDER_LABELS,
+  availableProviders,
+  getLastProvider,
+  mapsDirectionsUrl,
+  setLastProvider,
+  type MapsProvider,
+} from '../lib/maps';
+import { isApplePlatform } from '../lib/platform';
+import { NavigateSheet } from '../components/NavigateSheet';
 import {
   availabilityColorVar,
   availabilityStatus,
@@ -15,6 +27,7 @@ import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
 import {
   IconBookmark,
+  IconChevronDown,
   IconChevronLeft,
   IconNavigate,
   IconWarning,
@@ -28,7 +41,6 @@ export function DetailScreen({
   duration,
   setDuration,
   onBack,
-  onNavigate,
   refreshedSecondsAgo,
   degraded,
   saved,
@@ -40,13 +52,37 @@ export function DetailScreen({
   duration: DurationHours;
   setDuration: (v: DurationHours) => void;
   onBack: () => void;
-  onNavigate: () => void;
   refreshedSecondsAgo: number | null;
   degraded: boolean;
   saved: boolean;
   onToggleSave: () => void;
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
+
+  // Navigation: open the carpark entrance in a maps app. First time shows the
+  // provider picker; after that the primary button repeats the last-used app
+  // (the chevron always re-opens the picker). See src/lib/maps.ts.
+  const [navSheetOpen, setNavSheetOpen] = useState(false);
+  const [lastProvider, setLastProviderState] = useState<MapsProvider | null>(() => getLastProvider());
+
+  const openProvider = useCallback(
+    (provider: MapsProvider) => {
+      const [lat, lng] = cp.coords.entrance;
+      window.open(mapsDirectionsUrl(provider, lat, lng), '_blank', 'noopener');
+      setLastProvider(provider);
+      setLastProviderState(provider);
+      track('navigate', { provider, carpark: cp.id });
+    },
+    [cp],
+  );
+
+  const onNavigatePrimary = useCallback(() => {
+    if (lastProvider && availableProviders(isApplePlatform()).includes(lastProvider)) {
+      openProvider(lastProvider);
+    } else {
+      setNavSheetOpen(true);
+    }
+  }, [lastProvider, openProvider]);
   const lotsInfo = lotsDisplay(cp.lotsAvailable, cp.lotsTotal, degraded);
   const cost = cp.estByHours[duration];
 
@@ -507,35 +543,66 @@ export function DetailScreen({
           pointerEvents: 'none',
         }}
       >
-        <button
-          onClick={onNavigate}
-          style={{
-            pointerEvents: 'auto',
-            appearance: 'none',
-            border: 0,
-            width: '100%',
-            padding: '15px 18px',
-            background: 'var(--accent)',
-            color: 'var(--accent-on)',
-            borderRadius: 14,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            fontFamily: 'var(--font-display)',
-            fontSize: 16,
-            fontWeight: 600,
-            letterSpacing: -0.1,
-            cursor: 'pointer',
-            boxShadow:
-              '0 10px 28px rgba(46,227,194,0.30), 0 2px 6px rgba(0,0,0,0.10)',
-            minHeight: 50,
-          }}
-        >
-          <IconNavigate size={18} stroke={2} />
-          Navigate · {walk.minutes} min walk after parking
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={onNavigatePrimary}
+            style={{
+              pointerEvents: 'auto',
+              appearance: 'none',
+              border: 0,
+              flex: 1,
+              padding: '15px 18px',
+              background: 'var(--accent)',
+              color: 'var(--accent-on)',
+              borderRadius: 14,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              fontFamily: 'var(--font-display)',
+              fontSize: 16,
+              fontWeight: 600,
+              letterSpacing: -0.1,
+              cursor: 'pointer',
+              boxShadow:
+                '0 10px 28px rgba(46,227,194,0.30), 0 2px 6px rgba(0,0,0,0.10)',
+              minHeight: 50,
+            }}
+          >
+            <IconNavigate size={18} stroke={2} />
+            {lastProvider ? `Navigate · ${MAPS_PROVIDER_LABELS[lastProvider]}` : 'Navigate'}
+          </button>
+          <button
+            type="button"
+            aria-label="Choose navigation app"
+            onClick={() => setNavSheetOpen(true)}
+            style={{
+              pointerEvents: 'auto',
+              appearance: 'none',
+              width: 50,
+              flexShrink: 0,
+              borderRadius: 14,
+              border: '0.5px solid var(--line-strong)',
+              background: 'var(--bg-1)',
+              color: 'var(--text-1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              minHeight: 50,
+            }}
+          >
+            <IconChevronDown size={18} stroke={2} />
+          </button>
+        </div>
       </div>
+
+      <NavigateSheet
+        open={navSheetOpen}
+        onClose={() => setNavSheetOpen(false)}
+        carparkName={cp.name}
+        onPick={openProvider}
+      />
     </div>
   );
 }

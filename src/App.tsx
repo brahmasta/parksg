@@ -18,7 +18,6 @@ import { SavedScreen } from './screens/SavedScreen';
 import {
   IconBookmark,
   IconCheck,
-  IconNavigate,
   IconSignOut,
   IconTrash,
   IconWarning,
@@ -213,18 +212,6 @@ function App() {
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
     );
   }, [searchAtCoords]);
-
-  const [navToast, setNavToast] = useState(false);
-  const toastTimer = useRef<number | null>(null);
-  const showNavToast = useCallback(() => {
-    if (!selectedCarpark) return;
-    const [lat, lng] = selectedCarpark.coords.entrance;
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-    window.open(url, '_blank', 'noopener');
-    setNavToast(true);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setNavToast(false), 2400);
-  }, [selectedCarpark]);
 
   // ── Accounts & Save ──────────────────────────────────────────────
   const { user, signIn, signOut, markSynced, error: authError } = useSession();
@@ -517,7 +504,6 @@ function App() {
         duration={duration}
         setDuration={setDuration}
         onBack={() => setScreen('results')}
-        onNavigate={showNavToast}
         refreshedSecondsAgo={result.refreshedSecondsAgo}
         degraded={result.state === 'degraded'}
         saved={saves.isCarparkSaved(selectedCarpark.id)}
@@ -563,51 +549,6 @@ function App() {
       <div className="psg-frame">
         <div className="psg-app" data-screen={screen}>
           {body}
-          {navToast && (
-            <div
-              role="status"
-              style={{
-                position: 'absolute',
-                left: 16,
-                right: 16,
-                bottom: 90,
-                background: 'var(--bg-2)',
-                border: '0.5px solid var(--line-strong)',
-                borderRadius: 12,
-                padding: '12px 14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
-                zIndex: 100,
-                animation: 'psg-slide-up 200ms cubic-bezier(0.22,1,0.36,1) both',
-                fontSize: 13,
-                color: 'var(--text-1)',
-              }}
-            >
-              <span
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 7,
-                  background: 'var(--accent-tint-strong)',
-                  color: 'var(--accent-on)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <IconNavigate size={15} stroke={2} />
-              </span>
-              <div style={{ flex: 1, lineHeight: 1.35 }}>
-                <div style={{ fontWeight: 600 }}>Opening Google Maps</div>
-                <div style={{ fontSize: 11.5, color: 'var(--text-3)' }}>
-                  Carpark entrance pre-loaded
-                </div>
-              </div>
-            </div>
-          )}
 
           <SignOutSheet
             open={signOutOpen}
