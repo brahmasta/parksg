@@ -46,3 +46,43 @@ export function formatDistance(meters: number): string {
 export function formatCost(cost: number): string {
   return `$${cost.toFixed(2)}`;
 }
+
+export type LotsDisplay = {
+  /** Hero count — the live available lots, or '—' when there's no live count. */
+  count: string;
+  /**
+   * Honest secondary line. Known capacity → "of 1,200 lots"; live count but no
+   * known capacity (e.g. an uncurated LTA DataMall lot) → "lots free" rather
+   * than a "total unknown" that reads like a pipeline bug; no live data → a
+   * plain status.
+   */
+  secondary: string;
+  /** Percent of capacity free (0–100), or null when capacity is unknown. */
+  pctFree: number | null;
+};
+
+/**
+ * Single source of truth for how available/total lots are presented (DATA-1).
+ *
+ * LTA DataMall reports available lots but no capacity, so many carparks have a
+ * live count with no total. Pairing "763" with "total unknown" read as a bug;
+ * instead we show the bare count honestly and only compute a percentage when a
+ * real capacity exists (URA/HDB live/curated malls/JustPark all carry totals).
+ */
+export function lotsDisplay(
+  lotsAvailable: number | null,
+  lotsTotal: number,
+  degraded: boolean,
+): LotsDisplay {
+  if (degraded) return { count: '—', secondary: 'live count updating', pctFree: null };
+  if (lotsAvailable == null) return { count: '—', secondary: 'no live count', pctFree: null };
+  if (lotsTotal > 0) {
+    const pctFree = Math.max(0, Math.min(100, Math.round((lotsAvailable / lotsTotal) * 100)));
+    return { count: String(lotsAvailable), secondary: `of ${lotsTotal.toLocaleString()} lots`, pctFree };
+  }
+  return {
+    count: String(lotsAvailable),
+    secondary: lotsAvailable === 0 ? 'no lots free' : 'lots free',
+    pctFree: null,
+  };
+}

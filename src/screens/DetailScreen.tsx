@@ -1,10 +1,12 @@
 import type { Carpark, DurationHours } from '../lib/types';
 import { isStaleRates } from '../lib/rateSource';
 import {
+  availabilityColorVar,
   availabilityStatus,
   durationLabel,
   formatCost,
   formatDistance,
+  lotsDisplay,
 } from '../lib/availability';
 import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../components/atoms';
 import { EVSection } from '../components/EVSection';
@@ -45,6 +47,7 @@ export function DetailScreen({
   onToggleSave: () => void;
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
+  const lotsInfo = lotsDisplay(cp.lotsAvailable, cp.lotsTotal, degraded);
   const cost = cp.estByHours[duration];
 
   // Live walking route: starts as haversine, upgrades to OneMap when the
@@ -267,15 +270,35 @@ export function DetailScreen({
                 letterSpacing: -0.6,
               }}
             >
-              {degraded || cp.lotsAvailable == null ? '—' : cp.lotsAvailable}
+              {lotsInfo.count}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              {degraded
-                ? 'of ? lots'
-                : cp.lotsTotal > 0
-                  ? `of ${cp.lotsTotal} lots`
-                  : 'total lots unknown'}
+              {lotsInfo.secondary}
+              {lotsInfo.pctFree != null && ` · ${lotsInfo.pctFree}% free`}
             </div>
+            {lotsInfo.pctFree != null && (
+              // Capacity bar — a quick sanity-check on the live count against
+              // the known total. Filled portion = free fraction, status-tinted.
+              <div
+                aria-hidden
+                style={{
+                  marginTop: 8,
+                  height: 4,
+                  borderRadius: 2,
+                  background: 'var(--bg-3)',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${lotsInfo.pctFree}%`,
+                    height: '100%',
+                    background: availabilityColorVar(status),
+                    transition: 'width 200ms ease',
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
