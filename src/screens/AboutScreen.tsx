@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Wordmark } from '../components/Wordmark';
 import {
+  IconCheck,
   IconChevronLeft,
   IconList,
   IconNavigate,
@@ -33,10 +34,13 @@ const STEPS: { icon: ReactNode; title: string; body: string }[] = [
   },
 ];
 
-const ROADMAP = [
-  'Plan before you drive',
-  'Season parking calculator',
-  'Save favourite destinations',
+const WHATS_NEW = [
+  'Live lot counts for malls, not just public carparks',
+  'Verified 2025 rates + map pins for 50+ top malls',
+  'Live EV charger availability beside the cheapest lot',
+  'Real per-carpark rates with public-holiday pricing',
+  'Open directions in Google Maps, Waze or Apple Maps',
+  'Save carparks & destinations, synced across devices',
 ];
 
 export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
@@ -248,9 +252,9 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           </p>
         </Section>
 
-        <Section title="What's coming">
+        <Section title="What's new">
           <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-            {ROADMAP.map((item) => (
+            {WHATS_NEW.map((item) => (
               <li
                 key={item}
                 style={{
@@ -262,7 +266,21 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
                   color: 'var(--text-2)',
                 }}
               >
-                <DashedCircleGlyph />
+                <span
+                  style={{
+                    flexShrink: 0,
+                    width: 18,
+                    height: 18,
+                    borderRadius: 999,
+                    background: 'var(--accent-tint)',
+                    color: 'var(--accent-on)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <IconCheck size={11} stroke={2.5} />
+                </span>
                 {item}
               </li>
             ))}
@@ -364,23 +382,5 @@ function Section({
       </h2>
       {children}
     </section>
-  );
-}
-
-function DashedCircleGlyph() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeDasharray="3 3"
-      aria-hidden
-      style={{ color: 'var(--text-3)', flexShrink: 0 }}
-    >
-      <circle cx="12" cy="12" r="9" />
-    </svg>
   );
 }
