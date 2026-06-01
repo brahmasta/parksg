@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { BottomSheet } from './BottomSheet';
-import { IconChevronRight, IconGoogleG, IconMap, IconNavigate } from './icons';
+import { IconAppleMaps, IconChevronRight, IconGoogleMaps, IconWaze } from './icons';
 import {
   MAPS_PROVIDER_LABELS,
   availableProviders,
@@ -8,20 +8,11 @@ import {
 } from '../lib/maps';
 import { isApplePlatform } from '../lib/platform';
 
-/** Per-provider icon tile (brand-tinted, monochrome to match the icon set). */
-const PROVIDER_VISUAL: Record<MapsProvider, { icon: ReactNode; tile: CSSProperties }> = {
-  google: {
-    icon: <IconGoogleG size={20} />,
-    tile: { background: 'var(--bg-3)', border: '0.5px solid var(--line-strong)' },
-  },
-  waze: {
-    icon: <IconNavigate size={19} stroke={2} />,
-    tile: { background: 'rgba(51,178,224,0.14)', color: '#1aa0d8' },
-  },
-  apple: {
-    icon: <IconMap size={19} stroke={2} />,
-    tile: { background: 'var(--bg-3)', color: 'var(--text-2)', border: '0.5px solid var(--line-strong)' },
-  },
+/** Official brand app icon per provider. */
+const PROVIDER_ICON: Record<MapsProvider, ReactNode> = {
+  google: <IconGoogleMaps size={38} />,
+  waze: <IconWaze size={38} />,
+  apple: <IconAppleMaps size={38} />,
 };
 
 export function NavigateSheet({
@@ -68,7 +59,6 @@ export function NavigateSheet({
 
       <div style={{ padding: '6px 16px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {providers.map((p) => {
-          const v = PROVIDER_VISUAL[p];
           return (
             <button
               key={p}
@@ -92,19 +82,8 @@ export function NavigateSheet({
                 minHeight: 56,
               }}
             >
-              <span
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 10,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  ...v.tile,
-                }}
-              >
-                {v.icon}
+              <span style={{ display: 'inline-flex', flexShrink: 0 }}>
+                {PROVIDER_ICON[p]}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span
