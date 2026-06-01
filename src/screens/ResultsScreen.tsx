@@ -1,8 +1,10 @@
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/types';
+import { selectResultsView } from '../lib/resultsView';
 import { DurationStrip, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { DegradedBanner } from '../components/DegradedBanner';
+import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
 import { FilterPill } from '../components/FilterPill';
 import { RealResultsMap } from '../components/RealResultsMap';
@@ -36,6 +38,8 @@ export function ResultsScreen({
   onToggleSaveCarpark,
   destinationSaved,
   onSaveDestination,
+  initialScrollTop = 0,
+  onScrollChange,
 }: {
   destination: string;
   destinationCoords: [number, number] | null;
@@ -57,21 +61,29 @@ export function ResultsScreen({
   onToggleSaveCarpark: (cp: Carpark) => void;
   destinationSaved: boolean;
   onSaveDestination: () => void;
+  /** Scroll offset to restore on mount (preserved across Detail→back). */
+  initialScrollTop?: number;
+  /** Report the live scroll offset so the parent can preserve it. */
+  onScrollChange?: (y: number) => void;
 }) {
-  const ranked = useMemo(() => {
-    // Primary sort: walking distance (closest first). Cost is shown on each
-    // card; the "CHEAPEST" badge separately marks the lowest-cost option
-    // regardless of where it lands in the distance order.
-    let arr = [...carparks].sort((a, b) => a.walkMeters - b.walkMeters);
-    if (availableOnly) arr = arr.filter((c) => (c.lotsAvailable ?? 0) > 0);
-    if (evOnly) arr = arr.filter((c) => c.ev?.hasCharging === true);
-    return arr;
-  }, [carparks, availableOnly, evOnly]);
+  // Ranking (nearest-first) + which filter, if any, emptied the list. Pure so
+  // it's unit-tested in resultsView.test.ts; see selectResultsView for why the
+  // EV vs Available empty-states must be attributed rather than guessed from a
+  // bare length===0.
+  const { ranked, evFilterEmpty, availFilterEmpty } = useMemo(
+    () => selectResultsView({ carparks, state, availableOnly, evOnly }),
+    [carparks, state, availableOnly, evOnly],
+  );
 
-  // EV filter is on and nothing matches — show a dedicated empty state
-  // (different copy + visual from the "no carparks at all" state).
-  const evFilterEmpty =
-    evOnly && (state === 'loaded' || state === 'degraded') && ranked.length === 0;
+  // Preserve the list's scroll position across Detail→back. The screen
+  // unmounts when Detail opens, so we restore on mount and report changes up.
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (el && initialScrollTop > 0) el.scrollTop = initialScrollTop;
+    // Restore once on mount; not on every prop change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const cheapestId = useMemo(() => {
     if (ranked.length === 0) return null;
@@ -242,7 +254,11 @@ export function ResultsScreen({
       </div>
 
       {/* Body */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '4px 0 30px' }}>
+      <div
+        ref={bodyRef}
+        onScroll={(e) => onScrollChange?.((e.target as HTMLDivElement).scrollTop)}
+        style={{ flex: 1, overflow: 'auto', padding: '4px 0 30px' }}
+      >
         {state === 'degraded' && <DegradedBanner onRetry={onRetry} />}
 
         {state === 'loading' && <ResultsLoading />}
@@ -258,7 +274,15 @@ export function ResultsScreen({
           />
         )}
 
-        {(state === 'loaded' || state === 'degraded') && !evFilterEmpty &&
+        {availFilterEmpty && (
+          <AvailableEmptyResults
+            destination={destination}
+            onClearFilter={() => setAvailableOnly(false)}
+            onExpandRadius={onExpandRadius}
+          />
+        )}
+
+        {(state === 'loaded' || state === 'degraded') && !evFilterEmpty && !availFilterEmpty &&
           (viewMode === 'map' ? (
             <RealResultsMap
               carparks={ranked}

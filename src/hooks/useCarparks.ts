@@ -95,6 +95,16 @@ export function useCarparks() {
         });
       }
 
+      // Arm the next 60s live-lot refresh. Pulled out so the failure paths below
+      // can keep the loop alive without first wiping the list (see isAvailOnly
+      // guards): a background refresh must never blank an already-loaded result.
+      const scheduleRefresh = (trig: Trigger, rad: number) => {
+        if (refreshTimer.current) clearTimeout(refreshTimer.current);
+        refreshTimer.current = window.setTimeout(() => {
+          void run(trig, { radius: rad, availabilityOnly: true });
+        }, REFRESH_MS);
+      };
+
       try {
         // For an availability-only refresh we keep the current destination
         // and just re-pull the lot counts.
@@ -111,6 +121,12 @@ export function useCarparks() {
             : await geocode(t.query);
         if (!dest) {
           if (requestSeq.current !== seq) return;
+          // Preserve the loaded list on a background refresh; only a fresh
+          // search with no resolvable destination should show the empty state.
+          if (isAvailOnly) {
+            scheduleRefresh(t, radius);
+            return;
+          }
           setResult({
             state: 'empty',
             destination: null,
@@ -137,6 +153,15 @@ export function useCarparks() {
         if (hdbAvail || ltaAvail) lastFetchedAt.current = Date.now();
 
         if (!dbCarparks || dbCarparks.length === 0) {
+          // A background availability refresh must never wipe an already-loaded
+          // list. A transient DB-fetch failure here (dbCarparks === null) would
+          // otherwise blank the very results the user navigates back to from
+          // Detail — the reported "back shows 0 carparks, must Search wider"
+          // bug. Keep the current list and re-arm the loop so it self-heals.
+          if (isAvailOnly) {
+            scheduleRefresh(t, radius);
+            return;
+          }
           setResult({
             state: dbCarparks ? 'empty' : 'degraded',
             destination: dest,
@@ -189,16 +214,18 @@ export function useCarparks() {
         });
 
         // Schedule the next live-lot refresh.
-        if (refreshTimer.current) clearTimeout(refreshTimer.current);
-        if (hdbAvail || ltaAvail) {
-          refreshTimer.current = window.setTimeout(() => {
-            void run(t, { radius, availabilityOnly: true });
-          }, REFRESH_MS);
-        }
+        if (hdbAvail || ltaAvail) scheduleRefresh(t, radius);
       } catch (err) {
         if (requestSeq.current !== seq) return;
         // eslint-disable-next-line no-console
         console.error('useCarparks failed', err);
+        // Same rule as above: a thrown error during a background refresh must
+        // not blank a good list — preserve it and keep retrying. Only a fresh
+        // search failure surfaces the empty state.
+        if (isAvailOnly) {
+          scheduleRefresh(t, radius);
+          return;
+        }
         setResult({
           state: 'empty',
           destination: null,

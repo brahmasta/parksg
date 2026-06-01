@@ -125,6 +125,11 @@ function App() {
   const { result, search, searchAtCoords, retry, expandRadius, loadCarparkById } =
     useCarparks();
 
+  // Results scroll offset, preserved across Detail→back (the Results screen
+  // unmounts when Detail opens). Reset on a fresh search so a new destination
+  // starts at the top. See BUG-1.
+  const resultsScrollRef = useRef(0);
+
   // Once a destination resolves, remember it — coords included so the
   // next tap on this recent replays the exact same location instead of
   // re-geocoding the label (which may resolve to a different place).
@@ -160,6 +165,7 @@ function App() {
     const query = (q ?? destinationInput).trim();
     if (!query) return;
     setDestinationInput(query);
+    resultsScrollRef.current = 0;
     setScreen('results');
     search(query);
   };
@@ -174,6 +180,7 @@ function App() {
     // the picker already set the value, and for recents taps we don't want
     // a programmatic value change to trigger another autocomplete fetch.
     // The results screen header uses result.destination.label anyway.
+    resultsScrollRef.current = 0;
     setScreen('results');
     searchAtCoords(place.label, place.lat, place.lng, place.address);
   };
@@ -195,6 +202,7 @@ function App() {
         setNearMeBusy(false);
         const { latitude, longitude } = pos.coords;
         setDestinationInput('My location');
+        resultsScrollRef.current = 0;
         setScreen('results');
         searchAtCoords('My location', latitude, longitude);
       },
@@ -490,6 +498,10 @@ function App() {
         onToggleSaveCarpark={toggleSaveCarpark}
         destinationSaved={destAlreadySaved}
         onSaveDestination={openSaveDestSheet}
+        initialScrollTop={resultsScrollRef.current}
+        onScrollChange={(y) => {
+          resultsScrollRef.current = y;
+        }}
       />
     );
   } else if (screen === 'detail' && selectedCarpark) {
