@@ -5,7 +5,8 @@ import {
   formatCost,
   formatDistance,
 } from '../lib/availability';
-import { AvailabilityDot, OperatorBadge } from './atoms';
+import { isStaleRates } from '../lib/rateSource';
+import { AvailabilityDot, OperatorBadge, StaleRatesBadge } from './atoms';
 import { EVChip } from './EVChip';
 import { BookmarkToggle } from './BookmarkToggle';
 import { IconWalk } from './icons';
@@ -33,6 +34,7 @@ export function CarparkCard({
   const status = availabilityStatus(lots);
   const lotsLabel = lots == null ? '—' : lots === 0 ? 'Full' : `${lots} lots`;
   const cost = cp.estByHours[duration];
+  const stale = isStaleRates(cp);
 
   return (
     <div
@@ -85,6 +87,7 @@ export function CarparkCard({
             </span>
             <OperatorBadge operator={cp.operator} />
             <EVChip ev={cp.ev} />
+            {stale && <StaleRatesBadge />}
             {isCheapest && (
               <span
                 style={{
@@ -146,14 +149,14 @@ export function CarparkCard({
           <div
             style={{
               fontSize: 10.5,
-              color: 'var(--text-3)',
+              color: stale ? 'var(--warn)' : 'var(--text-3)',
               marginTop: 4,
               fontFamily: 'var(--font-mono)',
               letterSpacing: 0.2,
               textTransform: 'uppercase',
             }}
           >
-            Est · {durationLabel(duration)}
+            Est · {stale ? '2018' : durationLabel(duration)}
           </div>
         </div>
 

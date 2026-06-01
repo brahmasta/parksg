@@ -61,6 +61,37 @@ export function OperatorBadge({
   return <span style={styles}>{operator}</span>;
 }
 
+/**
+ * Small amber chip marking a carpark whose price comes from the stale 2018 LTA
+ * snapshot — so a 2018 figure isn't mistaken for a live, comparable rate on the
+ * Results card. Mirrors the Detail screen's stale-rates banner copy. (TRUST-1)
+ */
+export function StaleRatesBadge() {
+  return (
+    <span
+      title="Rates from a 2018 LTA snapshot — verify at the gantry"
+      style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: 9.5,
+        fontWeight: 600,
+        letterSpacing: 0.4,
+        padding: '2px 6px',
+        borderRadius: 4,
+        background: 'var(--warn-bg)',
+        color: 'var(--warn)',
+        border: '0.5px solid var(--warn)',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        display: 'inline-flex',
+        alignItems: 'center',
+        lineHeight: 1,
+      }}
+    >
+      2018 rate
+    </span>
+  );
+}
+
 /* ── Lot-type chips ──────────────────────────────────────────────────────── */
 const LOT_LABELS: Record<LotType, [string, string]> = {
   C: ['C', 'Car'],

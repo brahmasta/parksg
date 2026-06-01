@@ -1,4 +1,5 @@
-import type { Carpark, ResultsState } from './types';
+import type { Carpark, DurationHours, ResultsState } from './types';
+import { isStaleRates } from './rateSource';
 
 /**
  * Pure ranking + filter-empty classification for the Results screen.
@@ -48,4 +49,23 @@ export function selectResultsView(input: {
     settled && availableOnly && afterEv.length > 0 && ranked.length === 0;
 
   return { ranked, evFilterEmpty, availFilterEmpty };
+}
+
+/**
+ * Pick the carpark to award the CHEAPEST badge for the chosen duration.
+ *
+ * A stale 2018 figure must not beat a live, accurate price unchallenged
+ * (TRUST-1), so we award the badge among trustworthy (non-stale) carparks
+ * first. Only when *every* option is stale — an apples-to-apples comparison
+ * where the caveat applies equally to all — do we fall back to the full list.
+ * Returns null for an empty list.
+ */
+export function pickCheapestId(ranked: Carpark[], duration: DurationHours): string | null {
+  if (ranked.length === 0) return null;
+  const fresh = ranked.filter((c) => !isStaleRates(c));
+  const field = fresh.length > 0 ? fresh : ranked;
+  return field.reduce(
+    (best, c) => (c.estByHours[duration] < best.estByHours[duration] ? c : best),
+    field[0],
+  ).id;
 }

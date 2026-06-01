@@ -1,4 +1,5 @@
 import type { Carpark, DurationHours } from '../lib/types';
+import { isStaleRates } from '../lib/rateSource';
 import {
   availabilityStatus,
   durationLabel,
@@ -55,14 +56,9 @@ export function DetailScreen({
     cp.walkMin,
   );
 
-  // Pick a representative rate row to determine the source attribution.
-  // A carpark's rows are single-source: the curated ingest deletes rows by
-  // carpark_id before inserting, and the runtime fallbacks (ratesFor) only emit
-  // HDB/URA/MANUAL — never LTA_DATAGOV — so this exact-match can't false-positive
-  // the stale-2018 banner on a URA/HDB/JTC/curated carpark.
-  const firstRateRow =
-    cp.rates.weekday[0] ?? cp.rates.saturday[0] ?? cp.rates.sundayPH[0] ?? null;
-  const isDatagovRates = firstRateRow?.source === 'LTA_DATAGOV';
+  // Source attribution for the rate schedule. Shared with the Results card +
+  // CHEAPEST ranking via isStaleRates so all three agree on what's "stale 2018".
+  const isDatagovRates = isStaleRates(cp);
 
   const rateSource = isDatagovRates
     ? 'data.gov.sg LTA Carpark Rates (Nov 2018 snapshot)'

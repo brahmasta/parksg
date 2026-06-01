@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/types';
-import { selectResultsView } from '../lib/resultsView';
+import { pickCheapestId, selectResultsView } from '../lib/resultsView';
 import { DurationStrip, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { DegradedBanner } from '../components/DegradedBanner';
@@ -85,14 +85,9 @@ export function ResultsScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const cheapestId = useMemo(() => {
-    if (ranked.length === 0) return null;
-    return ranked.reduce(
-      (best, c) =>
-        c.estByHours[duration] < best.estByHours[duration] ? c : best,
-      ranked[0],
-    ).id;
-  }, [ranked, duration]);
+  // CHEAPEST is awarded among trustworthy (non-stale) carparks so a 2018 figure
+  // can't beat a live price unchallenged — see pickCheapestId (TRUST-1).
+  const cheapestId = useMemo(() => pickCheapestId(ranked, duration), [ranked, duration]);
 
   return (
     <div

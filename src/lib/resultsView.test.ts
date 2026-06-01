@@ -1,13 +1,20 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectResultsView } from './resultsView';
-import type { Carpark, ResultsState } from './types';
+import { pickCheapestId, selectResultsView } from './resultsView';
+import type { Carpark, RateSource, ResultsState } from './types';
 
-/** Minimal Carpark for the fields selectResultsView reads. */
+/** Minimal Carpark for the fields selectResultsView / pickCheapestId read. */
 function cp(
   id: string,
-  opts: { walkMeters?: number; lotsAvailable?: number | null; ev?: boolean } = {},
+  opts: {
+    walkMeters?: number;
+    lotsAvailable?: number | null;
+    ev?: boolean;
+    cost?: number;
+    source?: RateSource;
+  } = {},
 ): Carpark {
+  const cost = opts.cost ?? 0;
   return {
     id,
     name: id,
@@ -20,8 +27,10 @@ function cp(
     walkMeters: opts.walkMeters ?? 100,
     grace: 0,
     coords: { entrance: [0, 0] },
-    rates: { weekday: [], saturday: [], sundayPH: [] },
-    estByHours: { 0.5: 0, 1: 0, 1.5: 0, 2: 0, 3: 0, 4: 0 },
+    rates: opts.source
+      ? { weekday: [{ source: opts.source }], saturday: [], sundayPH: [] }
+      : { weekday: [], saturday: [], sundayPH: [] },
+    estByHours: { 0.5: cost, 1: cost, 1.5: cost, 2: cost, 3: cost, 4: cost },
     ...(opts.ev ? { ev: { hasCharging: true, lastUpdatedMin: 0, operators: [], connectors: [] } } : {}),
   } as Carpark;
 }
@@ -75,6 +84,39 @@ describe('selectResultsView — EV empty state takes priority', () => {
     const v = run([cp('a', { lotsAvailable: 0 }), cp('b', { lotsAvailable: 0 })], true, true);
     assert.equal(v.evFilterEmpty, true);
     assert.equal(v.availFilterEmpty, false);
+  });
+});
+
+describe('pickCheapestId — stale rates never win unchallenged (TRUST-1)', () => {
+  it('returns null for an empty list', () => {
+    assert.equal(pickCheapestId([], 1), null);
+  });
+
+  it('picks the lowest cost when all are fresh', () => {
+    const list = [cp('a', { cost: 300 }), cp('b', { cost: 200 }), cp('c', { cost: 500 })];
+    assert.equal(pickCheapestId(list, 1), 'b');
+  });
+
+  it('does NOT award a stale 2018 carpark over a fresh one, even if cheaper', () => {
+    const list = [
+      cp('stale-cheap', { cost: 100, source: 'LTA_DATAGOV' }),
+      cp('fresh-mid', { cost: 250, source: 'URA' }),
+      cp('fresh-high', { cost: 400, source: 'HDB' }),
+    ];
+    assert.equal(pickCheapestId(list, 1), 'fresh-mid'); // cheapest *fresh*
+  });
+
+  it('falls back to the full list when every option is stale (apples-to-apples)', () => {
+    const list = [
+      cp('s1', { cost: 300, source: 'LTA_DATAGOV' }),
+      cp('s2', { cost: 180, source: 'LTA_DATAGOV' }),
+    ];
+    assert.equal(pickCheapestId(list, 1), 's2');
+  });
+
+  it('treats a no-rates carpark (fallback rates) as fresh', () => {
+    const list = [cp('stale', { cost: 100, source: 'LTA_DATAGOV' }), cp('fallback', { cost: 260 })];
+    assert.equal(pickCheapestId(list, 1), 'fallback');
   });
 });
 
