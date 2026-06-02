@@ -4,8 +4,8 @@ import { Wordmark } from '../components/atoms';
 import { IconInfo, IconUser } from '../components/icons';
 import { FindParkingDesktop, type FindParkingDesktopProps } from './FindParkingDesktop';
 import { CoverageScreen } from '../screens/CoverageScreen';
-import { AboutScreen } from '../screens/AboutScreen';
-import { AccountScreen } from '../screens/AccountScreen';
+import { AboutDesktop } from './AboutDesktop';
+import { AccountDesktop } from './AccountDesktop';
 
 type DesktopRoute = 'find' | 'coverage' | 'about' | 'account';
 
@@ -39,16 +39,15 @@ export function DesktopShell({ find, user, savedItemCount, onSignIn, onRequestSi
 
       {route === 'about' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <AboutScreen onBack={() => setRoute('find')} onStartSearch={() => setRoute('find')} />
+          <AboutDesktop onFindParking={() => setRoute('find')} onCoverage={() => setRoute('coverage')} />
         </div>
       )}
 
       {route === 'account' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <AccountScreen
+          <AccountDesktop
             user={user}
             savedItemCount={savedItemCount}
-            onBack={() => setRoute('find')}
             onSignIn={onSignIn}
             onOpenSaved={() => setRoute('find')}
             onRequestSignOut={onRequestSignOut}
