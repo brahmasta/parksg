@@ -208,24 +208,20 @@ export function useCarparks() {
 
         if (hdbAvail || ltaAvail) lastFetchedAt.current = Date.now();
 
-        if (!dbCarparks || dbCarparks.length === 0) {
-          // A background availability refresh must never wipe an already-loaded
-          // list. A transient DB-fetch failure here (dbCarparks === null) would
-          // otherwise blank the very results the user navigates back to from
-          // Detail — the reported "back shows 0 carparks, must Search wider"
-          // bug. Keep the current list and re-arm the loop so it self-heals.
-          if (isAvailOnly) {
-            scheduleRefresh(t, radius);
-            return;
-          }
-          setResult({
-            state: dbCarparks ? 'empty' : 'degraded',
-            destination: dest,
-            carparks: [],
-            refreshedSecondsAgo: null,
-          });
+        // A background availability refresh must never wipe an already-loaded
+        // list. A transient DB-fetch failure here (dbCarparks === null) would
+        // otherwise blank the very results the user navigates back to from
+        // Detail — the reported "back shows 0 carparks, must Search wider"
+        // bug. Keep the current list and re-arm the loop so it self-heals.
+        if (!dbCarparks && isAvailOnly) {
+          scheduleRefresh(t, radius);
           return;
         }
+        // An empty DB result is NOT a dead end — we still gap-fill with Google
+        // below. Sparse areas (e.g. Jewel/Changi Airport) carry no HDB/URA/LTA
+        // carpark but do have Google parking, so proceed with whatever the DB
+        // returned and decide empty/degraded from the FINAL merged list.
+        const dbList = dbCarparks ?? [];
 
         // Index live lots by DB carpark id so we can merge in O(1).
         const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail, jpAvail);
@@ -234,7 +230,7 @@ export function useCarparks() {
         const dayType = currentDayType(now);
         const hourOfDay = now.getHours();
 
-        let carparks: Carpark[] = dbCarparks
+        let carparks: Carpark[] = dbList
           .map((row) => dbRowToCarpark(row, dest, lotsByDbId, dayType, hourOfDay))
           .sort((a, b) => a.walkMeters - b.walkMeters);
 
@@ -242,7 +238,7 @@ export function useCarparks() {
         // now living in rate_rows (source='URA'). If the daily cron hasn't
         // populated any URA rows yet the index is empty and applyUraRates is
         // a no-op — the $1.20/30min fallback from dbRowToCarpark stands.
-        carparks = applyUraRates(carparks, buildUraRatesIndex(dbCarparks)).carparks;
+        carparks = applyUraRates(carparks, buildUraRatesIndex(dbList)).carparks;
 
         // EV spatial join — unchanged from the pre-DB flow.
         if (evSettled) {
@@ -266,6 +262,23 @@ export function useCarparks() {
               (a, b) => a.walkMeters - b.walkMeters,
             );
           }
+        }
+
+        // Nothing from the DB and nothing net-new from Google → empty (or
+        // degraded if the DB fetch itself failed). On a background refresh,
+        // never wipe an already-loaded list.
+        if (carparks.length === 0) {
+          if (isAvailOnly) {
+            scheduleRefresh(t, radius);
+            return;
+          }
+          setResult({
+            state: dbCarparks ? 'empty' : 'degraded',
+            destination: dest,
+            carparks: [],
+            refreshedSecondsAgo: null,
+          });
+          return;
         }
 
         // Degraded if BOTH live-lot sources failed and we have carparks
