@@ -794,5 +794,207 @@
       { "dayType": "SAT", "start": "13:00", "end": "06:00", "perEntryCents": 350 },
       { "dayType": "SUN_PH", "perEntryCents": 350 }
     ]
+  },
+  {
+    "id": "LTA:13",
+    "name": "Ngee Ann City",
+    "ratesOnly": true,
+    "totalLots": 516,
+    "operator": "Ngee Ann City (Takashimaya)",
+    "provenance": { "url": "https://ngeeanncity.com.sg/carpark/body_carpark.html", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "12:00", "perBlockCents": 120, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "12:00", "end": "14:00", "perBlockCents": 170, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "14:00", "end": "17:00", "perBlockCents": 120, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "17:00", "end": "19:00", "perBlockCents": 170, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "19:00", "end": "24:00", "perEntryCents": 400 },
+      { "dayType": "SAT", "start": "00:00", "end": "12:00", "firstHourCents": 240, "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "12:00", "end": "14:00", "firstHourCents": 340, "perBlockCents": 200, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "14:00", "end": "17:00", "firstHourCents": 240, "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "17:00", "end": "19:00", "firstHourCents": 340, "perBlockCents": 200, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "19:00", "end": "24:00", "perEntryCents": 400 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "12:00", "firstHourCents": 240, "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "12:00", "end": "14:00", "firstHourCents": 340, "perBlockCents": 200, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "14:00", "end": "17:00", "firstHourCents": 240, "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "17:00", "end": "19:00", "firstHourCents": 340, "perBlockCents": 200, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "19:00", "end": "24:00", "perEntryCents": 400 }
+    ]
+  },
+  {
+    "id": "LTA:11",
+    "name": "Cineleisure Orchard",
+    "ratesOnly": true,
+    "operator": "Cathay Malls",
+    "provenance": { "url": "https://cineleisure.com.sg/parking/", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "07:00", "end": "17:00", "firstHourCents": 240, "perBlockCents": 140, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "17:00", "end": "24:00", "perBlockCents": 120, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "07:00", "perBlockCents": 120, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "07:00", "end": "11:00", "perEntryCents": 480 },
+      { "dayType": "SAT", "start": "11:00", "end": "20:00", "perBlockCents": 250, "blockMinutes": 60 },
+      { "dayType": "SAT", "start": "20:00", "end": "24:00", "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "00:00", "end": "07:00", "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "07:00", "end": "11:00", "perEntryCents": 480 },
+      { "dayType": "SUN_PH", "start": "11:00", "end": "20:00", "perBlockCents": 250, "blockMinutes": 60 },
+      { "dayType": "SUN_PH", "start": "20:00", "end": "24:00", "perBlockCents": 150, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "07:00", "perBlockCents": 150, "blockMinutes": 30 }
+    ]
+  },
+  {
+    "id": "LTA:12",
+    "name": "Hilton Singapore Orchard",
+    "ratesOnly": true,
+    "operator": "Hilton Singapore Orchard",
+    "provenance": { "url": "https://www.motorist.sg/parking/hilton-singapore-orchard-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "06:00", "end": "18:00", "firstHourCents": 380, "perBlockCents": 250, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 700 },
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "06:00", "perEntryCents": 700 },
+      { "dayType": "SAT", "start": "06:00", "end": "18:00", "firstHourCents": 380, "perBlockCents": 250, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 700 },
+      { "dayType": "SAT", "start": "00:00", "end": "06:00", "perEntryCents": 700 },
+      { "dayType": "SUN_PH", "start": "06:00", "end": "18:00", "firstHourCents": 380, "perBlockCents": 250, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 700 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "06:00", "perEntryCents": 700 }
+    ]
+  },
+  {
+    "id": "LTA:22",
+    "name": "Concorde Hotel Singapore",
+    "ratesOnly": true,
+    "operator": "Concorde Hotel Singapore",
+    "provenance": { "url": "https://www.motorist.sg/parking/concorde-hotel-singapore-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "firstHourCents": 214, "perBlockCents": 139, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 375 },
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "07:00", "perEntryCents": 375 },
+      { "dayType": "SAT", "start": "07:00", "end": "18:00", "firstHourCents": 214, "perBlockCents": 139, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 375 },
+      { "dayType": "SAT", "start": "00:00", "end": "07:00", "perEntryCents": 375 },
+      { "dayType": "SUN_PH", "perEntryCents": 375 }
+    ]
+  },
+  {
+    "id": "LTA:7",
+    "name": "Orchard Point",
+    "ratesOnly": true,
+    "operator": "Orchard Point",
+    "provenance": { "url": "https://www.motorist.sg/parking/orchard-point-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "06:00", "end": "23:00", "firstHourCents": 240, "perBlockCents": 120, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "23:00", "end": "24:00", "firstHourCents": 300, "perBlockCents": 150, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "06:00", "firstHourCents": 300, "perBlockCents": 150, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "06:00", "end": "23:00", "firstHourCents": 240, "perBlockCents": 120, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "23:00", "end": "24:00", "firstHourCents": 300, "perBlockCents": 150, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "06:00", "firstHourCents": 300, "perBlockCents": 150, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "06:00", "end": "23:00", "firstHourCents": 240, "perBlockCents": 120, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "23:00", "end": "24:00", "firstHourCents": 300, "perBlockCents": 150, "blockMinutes": 30, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "06:00", "firstHourCents": 300, "perBlockCents": 150, "blockMinutes": 30, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:4",
+    "name": "Esplanade — Theatres on the Bay",
+    "ratesOnly": true,
+    "totalLots": 808,
+    "operator": "Esplanade",
+    "provenance": { "url": "https://www.esplanade.com/visit-esplanade/visitor-guide/getting-here-and-parking", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "perBlockCents": 230, "blockMinutes": 60 },
+      { "dayType": "SAT", "perBlockCents": 230, "blockMinutes": 60 },
+      { "dayType": "SUN_PH", "perBlockCents": 230, "blockMinutes": 60 }
+    ]
+  },
+  {
+    "id": "LTA:56",
+    "name": "National Gallery Singapore",
+    "ratesOnly": true,
+    "operator": "National Gallery Singapore",
+    "provenance": { "url": "https://www.nationalgallery.sg/visit/visitor-information", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "perBlockCents": 140, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 330 },
+      { "dayType": "SAT", "start": "07:00", "end": "18:00", "perBlockCents": 140, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 330 },
+      { "dayType": "SUN_PH", "start": "07:00", "end": "18:00", "perBlockCents": 140, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 330 }
+    ]
+  },
+  {
+    "id": "LTA:6",
+    "name": "Singapore Flyer",
+    "ratesOnly": true,
+    "totalLots": 284,
+    "operator": "Singapore Flyer",
+    "provenance": { "url": "https://www.singaporeflyer.com/en/amenity/getting-to-singapore-flyer", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "09:00", "perEntryCents": 250 },
+      { "dayType": "WEEKDAY", "start": "09:00", "end": "23:00", "perBlockCents": 250, "blockMinutes": 60 },
+      { "dayType": "WEEKDAY", "start": "23:00", "end": "24:00", "perEntryCents": 250 },
+      { "dayType": "SAT", "start": "00:00", "end": "09:00", "perEntryCents": 250 },
+      { "dayType": "SAT", "start": "09:00", "end": "23:00", "perBlockCents": 250, "blockMinutes": 60 },
+      { "dayType": "SAT", "start": "23:00", "end": "24:00", "perEntryCents": 250 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "09:00", "perEntryCents": 250 },
+      { "dayType": "SUN_PH", "start": "09:00", "end": "23:00", "perBlockCents": 250, "blockMinutes": 60 },
+      { "dayType": "SUN_PH", "start": "23:00", "end": "24:00", "perEntryCents": 250 }
+    ]
+  },
+  {
+    "id": "LTA:59",
+    "name": "CQ @ Clarke Quay",
+    "ratesOnly": true,
+    "totalLots": 257,
+    "operator": "CapitaLand",
+    "provenance": { "url": "https://clarkequaymall.com/news/parking", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "perEntryCents": 300, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:26",
+    "name": "Resorts World Sentosa",
+    "ratesOnly": true,
+    "operator": "Resorts World Sentosa",
+    "provenance": { "url": "https://www.rwsentosa.com/en/about/getting-here", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "firstHourCents": 650, "perBlockCents": 110, "blockMinutes": 30, "capCents": 1310, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 970, "perBlockCents": 110, "blockMinutes": 30, "capCents": 1630, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 970, "perBlockCents": 110, "blockMinutes": 30, "capCents": 1630, "graceMinutes": 10 }
+    ]
+  },
+  {
+    "id": "LTA:17",
+    "name": "Sentosa Public Car Parks",
+    "ratesOnly": true,
+    "operator": "Sentosa Development Corporation",
+    "provenance": { "url": "https://www.motorist.sg/parking/sentosa-beach-station-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "07:00", "end": "17:00", "perBlockCents": 60, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "07:00", "perEntryCents": 240 },
+      { "dayType": "WEEKDAY", "start": "17:00", "end": "24:00", "perEntryCents": 240 },
+      { "dayType": "SAT", "start": "07:00", "end": "17:00", "perBlockCents": 60, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "00:00", "end": "07:00", "perEntryCents": 240 },
+      { "dayType": "SAT", "start": "17:00", "end": "24:00", "perEntryCents": 240 },
+      { "dayType": "SUN_PH", "start": "07:00", "end": "17:00", "perBlockCents": 60, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "07:00", "perEntryCents": 240 },
+      { "dayType": "SUN_PH", "start": "17:00", "end": "24:00", "perEntryCents": 240 }
+    ]
+  },
+  {
+    "id": "LTA:50",
+    "name": "VivoCity P2",
+    "ratesOnly": true,
+    "operator": "Mapletree",
+    "provenance": { "url": "https://www.motorist.sg/parking/vivocity-parking-rates", "verified": "2026-05" },
+    "rates": [
+      { "dayType": "WEEKDAY", "start": "04:00", "end": "24:00", "firstHourCents": 160, "perBlockCents": 80, "blockMinutes": 30 },
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "04:00", "perEntryCents": 320 },
+      { "dayType": "SAT", "start": "04:00", "end": "24:00", "firstHourCents": 220, "perBlockCents": 110, "blockMinutes": 30 },
+      { "dayType": "SAT", "start": "00:00", "end": "04:00", "perEntryCents": 480 },
+      { "dayType": "SUN_PH", "start": "04:00", "end": "24:00", "firstHourCents": 220, "perBlockCents": 110, "blockMinutes": 30 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "04:00", "perEntryCents": 480 }
+    ]
   }
 ]

@@ -86,9 +86,22 @@ availability, so they all render on the map today. Breakdown:
   Live availability for them would need operator APIs. (The 11 CapitaLand malls
   among the curated set now get live counts via the shipped JustPark scraper, P2 #3.)
 
-**Remaining (optional, low priority):** hand-curate verified 2025 rates + capacity
-for the 12 uncurated above (Ngee Ann City is the most notable, 516 lots). Same
-workflow as the curated-50 pass (`curated-malls.json` + `npm run migrate:malls`).
+**Remaining ✅ DONE (2026-06):** all 12 uncurated LTA malls now carry verified
+2025/2026 rates + capacity via 12 `ratesOnly` entries in `curated-malls.json`
+(`npm run migrate:malls` → 90 `MANUAL` rate_rows replacing the stale 2018
+`LTA_DATAGOV` rows). Sources: official venue sites where published (Ngee Ann City,
+Esplanade, Singapore Flyer, National Gallery, RWS, Clarke Quay) else `motorist.sg`
+(Hilton Orchard, Concorde, Orchard Point, Cineleisure, Sentosa). `total_lots`
+patched where confidently sourced: Ngee Ann City 516, Esplanade 808, Singapore
+Flyer 284, CQ @ Clarke Quay 257. Carpark rows kept `source='LTA_DATAMALL'`
+(ratesOnly) so live availability still merges. Cosmetic name fixes applied
+("Vivocity P2"→"VivoCity P2", "Cq @ Clarke Quay"→"CQ @ Clarke Quay").
+
+> ⚠️ **VivoCity rate-card refresh (follow-up):** VivoCity published a new rate card
+> "eff. 1 Feb 2026" (≈$2.60 1st hr weekday, weekend first-2-hours pricing). Both
+> VivoCity P2 (`LTA:50`) and the main VivoCity (`LTA:16`) still carry the older
+> Mapletree card for consistency. Refresh both together when the new card is
+> confirmed against the operator site (currently 403s to automated fetch).
 
 ---
 
