@@ -31,12 +31,11 @@ const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
 const AVAIL_TIMEOUT_MS = 5_000;
 
-// Supplementary Google carparks (gap-fill). Only fetched on a fresh search when
-// our own DB returns fewer than this many carparks nearby — dense, well-covered
-// areas stay DB-only (Google Nearby Search is billed per request). Results are
-// held in memory only (never persisted — Google ToS) and reused on the 60s
-// live-lot refresh rather than refetched.
-const GOOGLE_GAP_THRESHOLD = 5;
+// Supplementary Google carparks. Fetched on every fresh search and merged
+// (deduped within ~60m of our own carparks) so users get the complete nearby
+// picture, including the private/long-tail lots our feeds miss. Held in memory
+// only (never persisted — Google ToS) and reused on the 60s live-lot refresh
+// rather than refetched, so each distinct search centre costs one Nearby call.
 const GOOGLE_FETCH_TIMEOUT_MS = 8_000;
 const GOOGLE_CACHE_TTL_MS = 10 * 60_000;
 const GOOGLE_CACHE_MAX = 20;
@@ -81,24 +80,22 @@ export function useCarparks() {
   // by rounded centre + radius; reused on the 60s refresh and on back-nav.
   const googleCache = useRef<Map<string, GoogleCacheEntry>>(new Map());
 
-  // Resolve supplementary Google carparks for a search. Gap-fill: a fresh
-  // search only fetches when our own coverage is sparse (dbCount below the
-  // threshold); the 60s availability refresh reuses the cached set, never
-  // refetching. Returns [] (degrades silently) on any failure.
+  // Resolve supplementary Google carparks for a search. A fresh search fetches
+  // (on a cache miss/expiry); the 60s availability refresh reuses the cached
+  // set, never refetching — so each distinct search centre costs one Nearby
+  // call. Returns [] (degrades silently) on any failure.
   const resolveGoogleNearby = useCallback(
     async (
       dest: { lat: number; lng: number },
       radius: number,
       isAvailOnly: boolean,
-      dbCount: number,
     ): Promise<NearbyGooglePlace[]> => {
       const key = googleCacheKey(dest, radius);
       const cached = googleCache.current.get(key);
       const fresh = cached && Date.now() - cached.at < GOOGLE_CACHE_TTL_MS;
 
-      if (isAvailOnly) return fresh ? cached!.places : [];
-      if (dbCount >= GOOGLE_GAP_THRESHOLD) return []; // well covered — skip (cost control)
-      if (fresh) return cached!.places;
+      // Refresh reuses the cache; a fresh search with a warm cache reuses it too.
+      if (isAvailOnly || fresh) return fresh ? cached!.places : [];
 
       const places = await withTimeout(
         nearbyParking(dest, radius),
@@ -217,10 +214,10 @@ export function useCarparks() {
           scheduleRefresh(t, radius);
           return;
         }
-        // An empty DB result is NOT a dead end — we still gap-fill with Google
-        // below. Sparse areas (e.g. Jewel/Changi Airport) carry no HDB/URA/LTA
-        // carpark but do have Google parking, so proceed with whatever the DB
-        // returned and decide empty/degraded from the FINAL merged list.
+        // An empty DB result is NOT a dead end — we still query Google below.
+        // Sparse areas (e.g. Jewel/Changi Airport) carry no HDB/URA/LTA carpark
+        // but do have Google parking, so proceed with whatever the DB returned
+        // and decide empty/degraded from the FINAL merged list.
         const dbList = dbCarparks ?? [];
 
         // Index live lots by DB carpark id so we can merge in O(1).
@@ -247,10 +244,10 @@ export function useCarparks() {
           carparks = attachEvData(carparks, evSettled.locations, ageMin);
         }
 
-        // Supplementary Google carparks (gap-fill, in-memory only). Append any
-        // that aren't already covered by a DB carpark within ~60m, then re-sort
-        // by distance so they interleave with our own results.
-        const googlePlaces = await resolveGoogleNearby(dest, radius, isAvailOnly, carparks.length);
+        // Supplementary Google carparks (in-memory only). Append any that aren't
+        // already covered by a DB carpark within ~60m, then re-sort by distance
+        // so they interleave with our own results.
+        const googlePlaces = await resolveGoogleNearby(dest, radius, isAvailOnly);
         if (requestSeq.current !== seq) return;
         if (googlePlaces.length > 0) {
           const supplementary = filterNewGooglePlaces(
