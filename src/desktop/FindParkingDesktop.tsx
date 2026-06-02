@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
-import type { Carpark, DurationHours } from '../lib/types';
+import { useMemo, useState, useCallback } from 'react';
+import type { Carpark } from '../lib/types';
 import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
-import { DurationStrip, MonoLabel, Spinner } from '../components/atoms';
+import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
+import { MonoLabel, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { FilterBar } from '../components/FilterBar';
+import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { DetailScreen } from '../screens/DetailScreen';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
@@ -21,8 +23,8 @@ export type FindParkingDesktopProps = {
   state: 'loading' | 'loaded' | 'degraded' | 'empty';
   destinationCoords: [number, number] | null;
   refreshedSecondsAgo: number | null;
-  duration: DurationHours;
-  setDuration: (v: DurationHours) => void;
+  stay: Stay;
+  setStay: (s: Stay) => void;
   availableOnly: boolean;
   setAvailableOnly: (v: boolean) => void;
   detailCp: Carpark | null;
@@ -41,17 +43,21 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
   const {
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
-    duration, setDuration, availableOnly, setAvailableOnly,
+    stay, setStay, availableOnly, setAvailableOnly,
     detailCp, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
 
+  // Arbitrary-duration cost for the planned stay, priced per carpark.
+  const costOf = useCallback((cp: Carpark) => estCostForStay(cp, stay), [stay]);
+  const durationText = `EST · ${fmtDuration(stay.hours)}`;
+
   const { ranked } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly: false, sortBy, duration }),
-    [carparks, state, availableOnly, sortBy, duration],
+    () => selectResultsView({ carparks, state, availableOnly, evOnly: false, sortBy, costOf }),
+    [carparks, state, availableOnly, sortBy, costOf],
   );
-  const cheapestId = useMemo(() => pickCheapestId(ranked, duration), [ranked, duration]);
+  const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
 
   return (
     <main style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
@@ -73,8 +79,11 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
             cp={detailCp}
             destination={headerDestination}
             destinationCoords={destinationCoords}
-            duration={duration}
-            setDuration={setDuration}
+            duration={1}
+            setDuration={() => {}}
+            cost={costOf(detailCp)}
+            durationText={`${fmtDuration(stay.hours)} stay`}
+            hideDurationStrip
             onBack={onCloseDetail}
             refreshedSecondsAgo={refreshedSecondsAgo}
             degraded={state === 'degraded'}
@@ -111,9 +120,9 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
               {nearMeBusy ? 'Locating…' : 'Use my location'}
             </button>
 
-            {/* Duration (StayPlanner lands in a later phase) */}
+            {/* Stay planner — drives every cost estimate */}
             <div style={{ marginTop: 16 }}>
-              <DurationStrip value={duration} onChange={setDuration} compact />
+              <StayPlanner stay={stay} onChange={setStay} />
             </div>
 
             {/* Results header + filter/sort */}
@@ -152,7 +161,9 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
                   <CarparkCard
                     key={cp.id}
                     cp={cp}
-                    duration={duration}
+                    duration={1}
+                    cost={costOf(cp)}
+                    durationText={durationText}
                     rank={i + 1}
                     isCheapest={cp.id === cheapestId}
                     degraded={state === 'degraded'}
@@ -175,7 +186,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
               variant="fill"
               carparks={ranked}
               cheapestId={cheapestId}
-              duration={duration}
+              duration={1}
+              costOf={costOf}
               onSelect={onOpenDetail}
               degraded={state === 'degraded'}
               destinationCoords={destinationCoords}

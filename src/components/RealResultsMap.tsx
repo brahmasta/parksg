@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Carpark, DurationHours } from '../lib/types';
-import { availabilityStatus, formatCostMaybe } from '../lib/availability';
+import { availabilityStatus, formatCost } from '../lib/availability';
 
 const ONEMAP_TILE = 'https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png';
 const ONEMAP_ATTRIBUTION =
@@ -20,9 +20,12 @@ type Props = {
   /** 'card' (default) = the mobile fixed-height card with padding; 'fill' =
    * fill the parent (desktop map pane), no padding/border/radius. */
   variant?: 'card' | 'fill';
+  /** Optional arbitrary-duration cost (dollars) per carpark; null = unknown.
+   * Falls back to the preset estByHours[duration] when omitted. */
+  costOf?: (cp: Carpark) => number | null;
 };
 
-export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card' }: Props) {
+export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card', costOf }: Props) {
   const fill = variant === 'fill';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -106,7 +109,8 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       const isGoogle = cp.source === 'GOOGLE';
       const status = availabilityStatus(degraded ? null : cp.lotsAvailable);
       const dotColor = statusColor(status);
-      const cost = formatCostMaybe(cp, cp.estByHours[duration]);
+      const costNum = costOf ? costOf(cp) : cp.rateUnknown ? null : cp.estByHours[duration];
+      const cost = costNum == null ? '—' : formatCost(costNum);
       const fill = isCheapest ? accent : bg1;
       const fg = isCheapest ? '#0E1014' : isGoogle ? muted : text1;
       // Google pins use a muted dashed border to read as supplementary/unverified.
@@ -181,7 +185,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
 
     // Make sure tiles render after container layout settles.
     setTimeout(() => map.invalidateSize(), 50);
-  }, [carparks, cheapestId, duration, degraded, destinationCoords]);
+  }, [carparks, cheapestId, duration, degraded, destinationCoords, costOf]);
 
   return (
     <div style={fill ? { height: '100%', display: 'flex', flexDirection: 'column' } : { padding: '0 16px' }}>

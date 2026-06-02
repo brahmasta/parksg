@@ -16,7 +16,7 @@ import {
   availabilityColorVar,
   availabilityStatus,
   durationLabel,
-  formatCostMaybe,
+  formatCost,
   formatDistance,
   googleRateHint,
   lotsDisplay,
@@ -47,6 +47,9 @@ export function DetailScreen({
   degraded,
   saved,
   onToggleSave,
+  cost: costOverride,
+  durationText,
+  hideDurationStrip = false,
 }: {
   cp: Carpark;
   destination: string;
@@ -58,6 +61,13 @@ export function DetailScreen({
   degraded: boolean;
   saved: boolean;
   onToggleSave: () => void;
+  /** Explicit cost (dollars) for an arbitrary stay; null = unknown. Falls back
+   * to the preset estByHours[duration] when omitted (desktop StayPlanner). */
+  cost?: number | null;
+  /** Caption under the cost, e.g. "2h 30m stay". */
+  durationText?: string;
+  /** Hide the preset DurationStrip (desktop drives duration via StayPlanner). */
+  hideDurationStrip?: boolean;
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
 
@@ -86,8 +96,9 @@ export function DetailScreen({
     }
   }, [lastProvider, openProvider]);
   const lotsInfo = lotsDisplay(cp.lotsAvailable, cp.lotsTotal, degraded);
-  const cost = cp.estByHours[duration];
   const isGoogle = cp.source === 'GOOGLE';
+  const cost = costOverride !== undefined ? costOverride : cp.estByHours[duration];
+  const costUnknown = isGoogle || cost == null;
 
   // Live walking route: starts as haversine, upgrades to OneMap when the
   // /api/onemap-route proxy returns. Silent fallback on any error.
@@ -296,10 +307,10 @@ export function DetailScreen({
                 letterSpacing: -0.6,
               }}
             >
-              {formatCostMaybe(cp, cost)}
+              {costUnknown ? '—' : formatCost(cost as number)}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              {isGoogle ? googleRateHint(cp.googleParking) : `${durationLabel(duration)} stay`}
+              {isGoogle ? googleRateHint(cp.googleParking) : (durationText ?? `${durationLabel(duration)} stay`)}
             </div>
           </div>
           <div
@@ -432,22 +443,24 @@ export function DetailScreen({
           )}
         </div>
 
-        {/* Adjust duration */}
-        <div style={{ marginTop: 20 }}>
-          <div
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 10.5,
-              color: 'var(--text-3)',
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-              marginBottom: 10,
-            }}
-          >
-            Adjust duration
+        {/* Adjust duration (hidden on desktop — the StayPlanner drives it) */}
+        {!hideDurationStrip && (
+          <div style={{ marginTop: 20 }}>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10.5,
+                color: 'var(--text-3)',
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+                marginBottom: 10,
+              }}
+            >
+              Adjust duration
+            </div>
+            <DurationStrip value={duration} onChange={setDuration} compact />
           </div>
-          <DurationStrip value={duration} onChange={setDuration} compact />
-        </div>
+        )}
 
         {/* Rate schedule */}
         <div style={{ marginTop: 22 }}>

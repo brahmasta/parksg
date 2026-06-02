@@ -38,22 +38,28 @@ export function selectResultsView(input: {
   sortBy?: SortBy;
   /** Duration used when sortBy === 'cost'. Defaults to 1h. */
   duration?: DurationHours;
+  /** Optional arbitrary-duration cost (dollars) per carpark — used by the
+   * desktop StayPlanner. Returns null when unknown. When omitted, cost falls
+   * back to the preset estByHours[duration] (rateUnknown carparks → null). */
+  costOf?: (cp: Carpark) => number | null;
 }): ResultsView {
-  const { carparks, state, availableOnly, evOnly, sortBy = 'distance', duration = 1 } = input;
+  const { carparks, state, availableOnly, evOnly, sortBy = 'distance', duration = 1, costOf } = input;
+
+  // Cost function: explicit costOf when provided, else the preset estimate
+  // (rateUnknown → null so it can't masquerade as the cheapest $0).
+  const costFn = costOf ?? ((c: Carpark) => (c.rateUnknown ? null : c.estByHours[duration]));
 
   // Full carparks (0 lots free) always sink to the bottom, regardless of sort;
-  // within each group, sort by cost or distance. rateUnknown (Google) carparks
-  // carry a sentinel $0 cost, so they only sort meaningfully by distance — the
-  // cost comparator keeps them after priced carparks of equal availability.
+  // within each group, sort by cost or distance. Unknown costs (null) sink
+  // after priced carparks of equal availability.
   const sorted = [...carparks].sort((a, b) => {
     const af = a.lotsAvailable === 0 ? 1 : 0;
     const bf = b.lotsAvailable === 0 ? 1 : 0;
     if (af !== bf) return af - bf;
     if (sortBy === 'cost') {
-      const au = a.rateUnknown ? 1 : 0;
-      const bu = b.rateUnknown ? 1 : 0;
-      if (au !== bu) return au - bu; // unknown-rate after priced
-      if (au === 0) return a.estByHours[duration] - b.estByHours[duration];
+      const av = costFn(a) ?? Infinity;
+      const bv = costFn(b) ?? Infinity;
+      if (av !== bv) return av - bv;
     }
     return a.walkMeters - b.walkMeters;
   });
@@ -82,10 +88,15 @@ export function selectResultsView(input: {
  * where the caveat applies equally to all — do we fall back to the full list.
  * Returns null for an empty list.
  */
-export function pickCheapestId(ranked: Carpark[], duration: DurationHours): string | null {
-  // Carparks with an unknown rate (Google supplementary) carry a sentinel $0
-  // estimate that must never win — exclude them from the comparison entirely.
-  const priced = ranked.filter((c) => !c.rateUnknown);
+export function pickCheapestId(
+  ranked: Carpark[],
+  duration: DurationHours,
+  costOf?: (cp: Carpark) => number | null,
+): string | null {
+  // Cost function mirrors selectResultsView: explicit costOf, else the preset
+  // estimate. rateUnknown / null-cost carparks are excluded outright.
+  const costFn = costOf ?? ((c: Carpark) => (c.rateUnknown ? null : c.estByHours[duration]));
+  const priced = ranked.filter((c) => costFn(c) != null);
   if (priced.length === 0) return null;
   // The badge marks the genuinely cheapest *available* carpark, independent of
   // the active sort. Prefer carparks with free lots; only if none are available
@@ -94,8 +105,5 @@ export function pickCheapestId(ranked: Carpark[], duration: DurationHours): stri
   const pool = available.length > 0 ? available : priced;
   const fresh = pool.filter((c) => !isStaleRates(c));
   const field = fresh.length > 0 ? fresh : pool;
-  return field.reduce(
-    (best, c) => (c.estByHours[duration] < best.estByHours[duration] ? c : best),
-    field[0],
-  ).id;
+  return field.reduce((best, c) => ((costFn(c) as number) < (costFn(best) as number) ? c : best), field[0]).id;
 }

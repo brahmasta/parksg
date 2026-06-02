@@ -2,7 +2,7 @@ import type { Carpark, DurationHours } from '../lib/types';
 import {
   availabilityStatus,
   durationLabel,
-  formatCostMaybe,
+  formatCost,
   formatDistance,
   googleRateHint,
 } from '../lib/availability';
@@ -21,6 +21,8 @@ export function CarparkCard({
   onClick,
   saved,
   onToggleSave,
+  cost: costOverride,
+  durationText,
 }: {
   cp: Carpark;
   duration: DurationHours;
@@ -30,12 +32,18 @@ export function CarparkCard({
   onClick: () => void;
   saved?: boolean;
   onToggleSave?: () => void;
+  /** Explicit cost (dollars) for an arbitrary stay; null = unknown. When
+   * omitted, falls back to the preset estByHours[duration]. */
+  cost?: number | null;
+  /** Caption under the cost, e.g. "EST · 2h 30m". Defaults to the preset label. */
+  durationText?: string;
 }) {
   const lots = degraded ? null : cp.lotsAvailable;
   const status = availabilityStatus(lots);
   const lotsLabel = lots == null ? '—' : lots === 0 ? 'Full' : `${lots} lots`;
-  const cost = cp.estByHours[duration];
   const isGoogle = cp.source === 'GOOGLE';
+  const cost = costOverride !== undefined ? costOverride : cp.estByHours[duration];
+  const costUnknown = isGoogle || cost == null;
   const stale = !isGoogle && isStaleRates(cp);
 
   return (
@@ -146,7 +154,7 @@ export function CarparkCard({
               letterSpacing: -0.6,
             }}
           >
-            {formatCostMaybe(cp, cost)}
+            {costUnknown ? '—' : formatCost(cost as number)}
           </div>
           <div
             style={{
@@ -158,7 +166,9 @@ export function CarparkCard({
               textTransform: 'uppercase',
             }}
           >
-            {isGoogle ? googleRateHint(cp.googleParking) : `Est · ${stale ? '2018' : durationLabel(duration)}`}
+            {isGoogle
+              ? googleRateHint(cp.googleParking)
+              : (durationText ?? `Est · ${stale ? '2018' : durationLabel(duration)}`)}
           </div>
         </div>
 

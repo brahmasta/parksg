@@ -26,6 +26,7 @@ import { useCarparks } from './hooks/useCarparks';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { DesktopShell } from './desktop/DesktopShell';
 import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
+import { roundedSoon, type Stay } from './lib/stay';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
 import { recordSearch } from './lib/api/analytics';
@@ -125,6 +126,10 @@ function App() {
   }, []);
 
   const [recents, setRecents] = useState<RecentDestination[]>(() => loadRecents());
+
+  // Desktop planned-stay (now/later + 0.5–24h). Drives arbitrary-duration cost
+  // in the desktop Find view; the phone flow keeps the preset `duration`.
+  const [stay, setStay] = useState<Stay>(() => ({ startMode: 'now', startAt: roundedSoon(), hours: 2 }));
 
   const { result, search, searchAtCoords, retry, expandRadius, loadCarparkById } =
     useCarparks();
@@ -457,8 +462,8 @@ function App() {
         ? [result.destination.lat, result.destination.lng]
         : null,
       refreshedSecondsAgo: result.refreshedSecondsAgo,
-      duration,
-      setDuration,
+      stay,
+      setStay,
       availableOnly,
       setAvailableOnly,
       detailCp: selectedCarpark,
