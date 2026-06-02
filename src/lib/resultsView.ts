@@ -61,9 +61,12 @@ export function selectResultsView(input: {
  * Returns null for an empty list.
  */
 export function pickCheapestId(ranked: Carpark[], duration: DurationHours): string | null {
-  if (ranked.length === 0) return null;
-  const fresh = ranked.filter((c) => !isStaleRates(c));
-  const field = fresh.length > 0 ? fresh : ranked;
+  // Carparks with an unknown rate (Google supplementary) carry a sentinel $0
+  // estimate that must never win — exclude them from the comparison entirely.
+  const priced = ranked.filter((c) => !c.rateUnknown);
+  if (priced.length === 0) return null;
+  const fresh = priced.filter((c) => !isStaleRates(c));
+  const field = fresh.length > 0 ? fresh : priced;
   return field.reduce(
     (best, c) => (c.estByHours[duration] < best.estByHours[duration] ? c : best),
     field[0],

@@ -17,6 +17,19 @@ export type ResolvedPlace = {
   lng: number;
 };
 
+/** A nearby car park from the Google Places (New) Nearby Search proxy.
+ * Supplementary only — Google provides no rates, capacity, or live lots. */
+export type NearbyGooglePlace = {
+  placeId: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  businessStatus?: string;
+  /** Coarse free/paid flags from Google `parkingOptions`; null when unknown. */
+  parking: { free: boolean | null; paid: boolean | null };
+};
+
 export function newSessionToken(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID();
@@ -48,6 +61,25 @@ export async function autocomplete(
   };
   if (!body.ok) throw new Error(body.error ?? 'Autocomplete returned ok=false');
   return body.suggestions ?? [];
+}
+
+/** Nearby car parks around a centre, for gap-filling sparse areas.
+ * Returns [] on any failure (supplementary data must never break a search). */
+export async function nearbyParking(
+  centre: { lat: number; lng: number },
+  radiusM: number,
+  signal?: AbortSignal,
+): Promise<NearbyGooglePlace[]> {
+  const url = new URL('/api/google-places-nearby', window.location.origin);
+  url.searchParams.set('lat', String(centre.lat));
+  url.searchParams.set('lng', String(centre.lng));
+  url.searchParams.set('radius', String(Math.round(radiusM)));
+
+  const res = await fetch(url.toString(), { signal });
+  if (!res.ok) return [];
+  const body = (await res.json()) as { ok: boolean; places?: NearbyGooglePlace[] };
+  if (!body.ok) return [];
+  return body.places ?? [];
 }
 
 /** Resolves a placeId from a previous autocomplete call into coords. */

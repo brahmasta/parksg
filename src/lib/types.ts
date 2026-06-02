@@ -132,6 +132,19 @@ export type Carpark = {
   estByHours: Record<DurationHours, number>;
   /** EV charging data from LTA /EVCBatch joined by haversine ≤50m. */
   ev?: CarparkEV;
+  // ── Supplementary (Google Maps) provenance ──────────────────────────
+  /** Provenance. Absent ⇒ our own DB/feeds; 'GOOGLE' ⇒ a supplementary,
+   * unverified carpark pulled from Google Places to fill a coverage gap.
+   * Google data is held in memory only — never persisted to our DB. */
+  source?: 'GOOGLE';
+  /** True when no usable rate is known (Google carparks): the UI renders
+   * "—" / "Rate unknown" instead of a fabricated fallback estimate. When set,
+   * `estByHours` holds sentinel zeros that are NEVER displayed. */
+  rateUnknown?: boolean;
+  /** Coarse free/paid hint from Google `parkingOptions` (null when unknown). */
+  googleParking?: { free: boolean | null; paid: boolean | null };
+  /** Bare Google place id (no `google:` prefix) for the "Open in Google Maps" link. */
+  placeId?: string;
 };
 
 export type Destination = {

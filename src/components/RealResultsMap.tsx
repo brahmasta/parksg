@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Carpark, DurationHours } from '../lib/types';
-import { availabilityStatus, formatCost } from '../lib/availability';
+import { availabilityStatus, formatCostMaybe } from '../lib/availability';
 
 const ONEMAP_TILE = 'https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png';
 const ONEMAP_ATTRIBUTION =
@@ -99,12 +99,18 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
     // Carpark pins — cost label with a small tail
     carparks.forEach((cp) => {
       const isCheapest = cp.id === cheapestId;
+      const isGoogle = cp.source === 'GOOGLE';
       const status = availabilityStatus(degraded ? null : cp.lotsAvailable);
       const dotColor = statusColor(status);
-      const cost = formatCost(cp.estByHours[duration]);
+      const cost = formatCostMaybe(cp, cp.estByHours[duration]);
       const fill = isCheapest ? accent : bg1;
-      const fg = isCheapest ? '#0E1014' : text1;
-      const border = isCheapest ? accent : lineStrong;
+      const fg = isCheapest ? '#0E1014' : isGoogle ? muted : text1;
+      // Google pins use a muted dashed border to read as supplementary/unverified.
+      const border = isCheapest
+        ? `0.5px solid ${accent}`
+        : isGoogle
+        ? `0.5px dashed ${muted}`
+        : `0.5px solid ${lineStrong}`;
 
       const html = `
         <div style="
@@ -115,7 +121,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
             display:flex; align-items:center; gap:6px;
             padding:5px 9px; border-radius:999px;
             background:${fill}; color:${fg};
-            border:0.5px solid ${border};
+            border:${border};
             font-family: var(--font-display);
             font-size:12.5px; font-weight:600;
             box-shadow:0 4px 12px rgba(0,0,0,0.2);
@@ -197,6 +203,8 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
         }}
       >
         Tap a pin to view the carpark
+        {carparks.some((c) => c.source === 'GOOGLE') &&
+          ' · Dashed pins powered by Google (unverified)'}
       </div>
     </div>
   );

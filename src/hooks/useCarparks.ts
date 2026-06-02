@@ -17,6 +17,8 @@ import { getHdbAvailability, type HdbAvailability } from '../lib/api/hdb';
 import { getLtaCarparks, type LtaCarpark } from '../lib/api/lta';
 import { getJustParkLots, type JustParkLot } from '../lib/api/justpark';
 import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
+import { nearbyParking, type NearbyGooglePlace } from '../lib/api/googlePlaces';
+import { filterNewGooglePlaces, googlePlaceToCarpark } from '../lib/googleCarpark';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
 import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
@@ -28,6 +30,22 @@ import type { UraCarparkRates } from '../lib/ura';
 const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
 const AVAIL_TIMEOUT_MS = 5_000;
+
+// Supplementary Google carparks (gap-fill). Only fetched on a fresh search when
+// our own DB returns fewer than this many carparks nearby — dense, well-covered
+// areas stay DB-only (Google Nearby Search is billed per request). Results are
+// held in memory only (never persisted — Google ToS) and reused on the 60s
+// live-lot refresh rather than refetched.
+const GOOGLE_GAP_THRESHOLD = 5;
+const GOOGLE_FETCH_TIMEOUT_MS = 8_000;
+const GOOGLE_CACHE_TTL_MS = 10 * 60_000;
+const GOOGLE_CACHE_MAX = 20;
+
+type GoogleCacheEntry = { places: NearbyGooglePlace[]; at: number };
+const googleCacheKey = (
+  dest: { lat: number; lng: number },
+  radius: number,
+): string => `${dest.lat.toFixed(3)},${dest.lng.toFixed(3)},${radius}`;
 
 export type SearchResult = {
   state: ResultsState;
@@ -59,6 +77,44 @@ export function useCarparks() {
   const lastFetchedAt = useRef<number | null>(null);
   const requestSeq = useRef(0);
   const ticker = useRef<number | null>(null);
+  // In-memory only (Google ToS forbids persisting place content/coords). Keyed
+  // by rounded centre + radius; reused on the 60s refresh and on back-nav.
+  const googleCache = useRef<Map<string, GoogleCacheEntry>>(new Map());
+
+  // Resolve supplementary Google carparks for a search. Gap-fill: a fresh
+  // search only fetches when our own coverage is sparse (dbCount below the
+  // threshold); the 60s availability refresh reuses the cached set, never
+  // refetching. Returns [] (degrades silently) on any failure.
+  const resolveGoogleNearby = useCallback(
+    async (
+      dest: { lat: number; lng: number },
+      radius: number,
+      isAvailOnly: boolean,
+      dbCount: number,
+    ): Promise<NearbyGooglePlace[]> => {
+      const key = googleCacheKey(dest, radius);
+      const cached = googleCache.current.get(key);
+      const fresh = cached && Date.now() - cached.at < GOOGLE_CACHE_TTL_MS;
+
+      if (isAvailOnly) return fresh ? cached!.places : [];
+      if (dbCount >= GOOGLE_GAP_THRESHOLD) return []; // well covered — skip (cost control)
+      if (fresh) return cached!.places;
+
+      const places = await withTimeout(
+        nearbyParking(dest, radius),
+        GOOGLE_FETCH_TIMEOUT_MS,
+      ).catch(() => [] as NearbyGooglePlace[]);
+
+      // Bound the cache: drop the oldest entry when full.
+      if (googleCache.current.size >= GOOGLE_CACHE_MAX) {
+        const oldest = googleCache.current.keys().next().value;
+        if (oldest !== undefined) googleCache.current.delete(oldest);
+      }
+      googleCache.current.set(key, { places, at: Date.now() });
+      return places;
+    },
+    [],
+  );
 
   // Re-render once per second so "Lot count last refreshed Ns ago" stays fresh.
   useEffect(() => {
@@ -195,6 +251,23 @@ export function useCarparks() {
           carparks = attachEvData(carparks, evSettled.locations, ageMin);
         }
 
+        // Supplementary Google carparks (gap-fill, in-memory only). Append any
+        // that aren't already covered by a DB carpark within ~60m, then re-sort
+        // by distance so they interleave with our own results.
+        const googlePlaces = await resolveGoogleNearby(dest, radius, isAvailOnly, carparks.length);
+        if (requestSeq.current !== seq) return;
+        if (googlePlaces.length > 0) {
+          const supplementary = filterNewGooglePlaces(
+            googlePlaces.map((p) => googlePlaceToCarpark(p, dest)),
+            carparks,
+          );
+          if (supplementary.length > 0) {
+            carparks = [...carparks, ...supplementary].sort(
+              (a, b) => a.walkMeters - b.walkMeters,
+            );
+          }
+        }
+
         // Degraded if BOTH live-lot sources failed and we have carparks
         // that needed them. Either source returning is enough — the other
         // just leaves a subset of carparks showing em-dashes, which is the
@@ -236,7 +309,7 @@ export function useCarparks() {
     },
     // result.destination is intentionally not a dep — `run` is invoked imperatively.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [radiusM],
+    [radiusM, resolveGoogleNearby],
   );
 
   // Re-run whenever the caller fires a new trigger.
@@ -271,6 +344,10 @@ export function useCarparks() {
   // slow upstream just leaves those fields blank rather than blocking the open.
   const loadCarparkById = useCallback(
     async (id: string): Promise<Carpark | null> => {
+      // Google supplementary carparks are ephemeral (in-memory, never persisted)
+      // and have no DB row — a `google:` id can't be re-fetched, so a deep link
+      // or saved-open of one resolves to null rather than hitting the DB.
+      if (id.toLowerCase().startsWith('google:')) return null;
       const row = await fetchCarparkById(id).catch(() => null);
       if (!row) return null;
 

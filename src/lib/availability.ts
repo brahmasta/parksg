@@ -47,6 +47,25 @@ export function formatCost(cost: number): string {
   return `$${cost.toFixed(2)}`;
 }
 
+/** Cost for display, honouring `rateUnknown` (Google carparks have no rate, so
+ * we show "—" rather than a fabricated estimate). */
+export function formatCostMaybe(
+  cp: { rateUnknown?: boolean },
+  cost: number,
+): string {
+  return cp.rateUnknown ? '—' : formatCost(cost);
+}
+
+/** Short rate hint for a Google carpark from its coarse free/paid flags. */
+export function googleRateHint(parking?: {
+  free: boolean | null;
+  paid: boolean | null;
+}): string {
+  if (parking?.free) return 'Free parking';
+  if (parking?.paid) return 'Paid · rate unknown';
+  return 'Rate unknown';
+}
+
 export type LotsDisplay = {
   /** Hero count — the live available lots, or '—' when there's no live count. */
   count: string;

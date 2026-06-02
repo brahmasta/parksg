@@ -16,12 +16,14 @@ import {
   availabilityColorVar,
   availabilityStatus,
   durationLabel,
-  formatCost,
+  formatCostMaybe,
   formatDistance,
+  googleRateHint,
   lotsDisplay,
 } from '../lib/availability';
-import { AvailabilityDot, DurationStrip, LotTypeChips, OperatorBadge } from '../components/atoms';
+import { AvailabilityDot, DurationStrip, GoogleBadge, LotTypeChips, OperatorBadge } from '../components/atoms';
 import { EVSection } from '../components/EVSection';
+import { PoweredByGoogle } from '../components/PoweredByGoogle';
 import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
@@ -85,6 +87,7 @@ export function DetailScreen({
   }, [lastProvider, openProvider]);
   const lotsInfo = lotsDisplay(cp.lotsAvailable, cp.lotsTotal, degraded);
   const cost = cp.estByHours[duration];
+  const isGoogle = cp.source === 'GOOGLE';
 
   // Live walking route: starts as haversine, upgrades to OneMap when the
   // /api/onemap-route proxy returns. Silent fallback on any error.
@@ -97,9 +100,11 @@ export function DetailScreen({
 
   // Source attribution for the rate schedule. Shared with the Results card +
   // CHEAPEST ranking via isStaleRates so all three agree on what's "stale 2018".
-  const isDatagovRates = isStaleRates(cp);
+  const isDatagovRates = !isGoogle && isStaleRates(cp);
 
-  const rateSource = isDatagovRates
+  const rateSource = isGoogle
+    ? 'Google Maps · rates not provided'
+    : isDatagovRates
     ? 'data.gov.sg LTA Carpark Rates (Nov 2018 snapshot)'
     : cp.operator === 'HDB'
     ? 'HDB carpark tariff'
@@ -142,36 +147,38 @@ export function DetailScreen({
           <IconChevronLeft size={18} stroke={2} />
         </button>
         <div style={{ flex: 1 }} />
-        <button
-          type="button"
-          onClick={onToggleSave}
-          aria-pressed={saved}
-          aria-label={saved ? 'Remove from saved' : 'Save carpark'}
-          style={{
-            appearance: 'none',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            padding: '7px 12px 7px 10px',
-            borderRadius: 999,
-            background: saved
-              ? 'var(--accent-tint-strong)'
-              : 'var(--bg-1)',
-            border: saved
-              ? '1px solid var(--accent)'
-              : '0.5px solid var(--line-strong)',
-            color: saved ? 'var(--accent)' : 'var(--text-2)',
-            cursor: 'pointer',
-            fontSize: 12.5,
-            fontWeight: 600,
-            letterSpacing: -0.1,
-            minHeight: 32,
-            transition: 'all 140ms ease',
-          }}
-        >
-          <IconBookmark filled={saved} size={14} stroke={2} />
-          {saved ? 'Saved' : 'Save'}
-        </button>
+        {!isGoogle && (
+          <button
+            type="button"
+            onClick={onToggleSave}
+            aria-pressed={saved}
+            aria-label={saved ? 'Remove from saved' : 'Save carpark'}
+            style={{
+              appearance: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 12px 7px 10px',
+              borderRadius: 999,
+              background: saved
+                ? 'var(--accent-tint-strong)'
+                : 'var(--bg-1)',
+              border: saved
+                ? '1px solid var(--accent)'
+                : '0.5px solid var(--line-strong)',
+              color: saved ? 'var(--accent)' : 'var(--text-2)',
+              cursor: 'pointer',
+              fontSize: 12.5,
+              fontWeight: 600,
+              letterSpacing: -0.1,
+              minHeight: 32,
+              transition: 'all 140ms ease',
+            }}
+          >
+            <IconBookmark filled={saved} size={14} stroke={2} />
+            {saved ? 'Saved' : 'Save'}
+          </button>
+        )}
       </div>
 
       {/* Scrollable body */}
@@ -188,8 +195,8 @@ export function DetailScreen({
               rowGap: 4,
             }}
           >
-            <OperatorBadge operator={cp.operator} size="lg" />
-            <LotTypeChips types={cp.lotTypes} />
+            {isGoogle ? <GoogleBadge /> : <OperatorBadge operator={cp.operator} size="lg" />}
+            {!isGoogle && <LotTypeChips types={cp.lotTypes} />}
             {cp.grace > 0 && (
               <span
                 style={{
@@ -219,6 +226,36 @@ export function DetailScreen({
           </h1>
           <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>{cp.block}</div>
         </div>
+
+        {/* Google supplementary — unverified-data banner */}
+        {isGoogle && (
+          <div style={{ marginTop: 14 }}>
+            <div
+              role="status"
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+                padding: '10px 12px',
+                background: 'var(--bg-2)',
+                border: '0.5px solid var(--line)',
+                borderRadius: 10,
+                color: 'var(--text-1)',
+                fontSize: 12.5,
+                lineHeight: 1.4,
+              }}
+            >
+              <span style={{ color: 'var(--text-3)', display: 'inline-flex', flexShrink: 0, marginTop: 1 }}>
+                <IconWarning size={16} stroke={2} />
+              </span>
+              <span>
+                Found via Google Maps to fill a coverage gap. Rates, capacity and
+                live availability aren't provided — verify at the carpark.
+              </span>
+            </div>
+            <PoweredByGoogle />
+          </div>
+        )}
 
         {/* Stat cards */}
         <div
@@ -259,10 +296,10 @@ export function DetailScreen({
                 letterSpacing: -0.6,
               }}
             >
-              {formatCost(cost)}
+              {formatCostMaybe(cp, cost)}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              {durationLabel(duration)} stay
+              {isGoogle ? googleRateHint(cp.googleParking) : `${durationLabel(duration)} stay`}
             </div>
           </div>
           <div
@@ -426,7 +463,24 @@ export function DetailScreen({
           >
             Rate schedule
           </div>
-          <RateTable rates={cp.rates} />
+          {isGoogle ? (
+            <div
+              style={{
+                padding: '12px 14px',
+                background: 'var(--bg-2)',
+                border: '0.5px solid var(--line)',
+                borderRadius: 12,
+                fontSize: 12.5,
+                color: 'var(--text-2)',
+                lineHeight: 1.45,
+              }}
+            >
+              Rate information isn't available from Google. Check the signage or
+              the operator's app at the gantry.
+            </div>
+          ) : (
+            <RateTable rates={cp.rates} />
+          )}
           {isDatagovRates && (
             <div
               role="status"
@@ -457,7 +511,9 @@ export function DetailScreen({
           )}
         </div>
 
-        {/* Save reassurance — explains where the save lives */}
+        {/* Save reassurance — explains where the save lives (not for Google,
+            which is view-only and never saved). */}
+        {!isGoogle && (
         <div
           style={{
             marginTop: 18,
@@ -505,6 +561,7 @@ export function DetailScreen({
             )}
           </div>
         </div>
+        )}
 
         {/* Meta */}
         <div
@@ -516,11 +573,26 @@ export function DetailScreen({
             lineHeight: 1.6,
           }}
         >
-          {refreshedSecondsAgo == null
+          {isGoogle
+            ? 'Live lot count not available'
+            : refreshedSecondsAgo == null
             ? 'Lot count refresh pending'
             : `Lot count last refreshed ${refreshedSecondsAgo}s ago`}
           <br />
           Rates from {rateSource}
+          {isGoogle && cp.placeId && (
+            <>
+              <br />
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${cp.coords.entrance[0]},${cp.coords.entrance[1]}&query_place_id=${cp.placeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent-on)', textDecoration: 'underline' }}
+              >
+                Open in Google Maps
+              </a>
+            </>
+          )}
           {cp.ev?.hasCharging && (
             <>
               <br />

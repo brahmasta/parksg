@@ -8,6 +8,7 @@ import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
 import { FilterPill } from '../components/FilterPill';
 import { RealResultsMap } from '../components/RealResultsMap';
+import { PoweredByGoogle } from '../components/PoweredByGoogle';
 import {
   IconBolt,
   IconChevronLeft,
@@ -88,6 +89,7 @@ export function ResultsScreen({
   // CHEAPEST is awarded among trustworthy (non-stale) carparks so a 2018 figure
   // can't beat a live price unchallenged — see pickCheapestId (TRUST-1).
   const cheapestId = useMemo(() => pickCheapestId(ranked, duration), [ranked, duration]);
+  const hasGoogle = useMemo(() => ranked.some((c) => c.source === 'GOOGLE'), [ranked]);
 
   return (
     <div
@@ -320,7 +322,9 @@ export function ResultsScreen({
                 }}
               >
                 Lot counts refresh every 60s · Some mall carparks show rates only, no live count
+                {hasGoogle && ' · Some results powered by Google — rates & availability unverified'}
               </div>
+              {hasGoogle && <PoweredByGoogle />}
             </div>
           ))}
       </div>

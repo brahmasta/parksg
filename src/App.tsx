@@ -254,6 +254,9 @@ function App() {
 
   const toggleSaveCarpark = useCallback(
     (cp: Carpark) => {
+      // Google supplementary carparks are view-only — never persisted (ToS).
+      // The UI hides the save affordance; this guards the path defensively.
+      if (cp.source === 'GOOGLE') return;
       const isSaved = saves.isCarparkSaved(cp.id);
       const snapshot = snapshotFromCarpark(cp, cp.estByHours[duration] ?? 0);
       saves.toggleCarpark(cp.id, snapshot);

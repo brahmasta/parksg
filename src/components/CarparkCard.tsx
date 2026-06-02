@@ -2,11 +2,12 @@ import type { Carpark, DurationHours } from '../lib/types';
 import {
   availabilityStatus,
   durationLabel,
-  formatCost,
+  formatCostMaybe,
   formatDistance,
+  googleRateHint,
 } from '../lib/availability';
 import { isStaleRates } from '../lib/rateSource';
-import { AvailabilityDot, OperatorBadge, StaleRatesBadge } from './atoms';
+import { AvailabilityDot, GoogleBadge, OperatorBadge, StaleRatesBadge } from './atoms';
 import { EVChip } from './EVChip';
 import { BookmarkToggle } from './BookmarkToggle';
 import { IconWalk } from './icons';
@@ -34,7 +35,8 @@ export function CarparkCard({
   const status = availabilityStatus(lots);
   const lotsLabel = lots == null ? '—' : lots === 0 ? 'Full' : `${lots} lots`;
   const cost = cp.estByHours[duration];
-  const stale = isStaleRates(cp);
+  const isGoogle = cp.source === 'GOOGLE';
+  const stale = !isGoogle && isStaleRates(cp);
 
   return (
     <div
@@ -85,7 +87,7 @@ export function CarparkCard({
             >
               #{rank}
             </span>
-            <OperatorBadge operator={cp.operator} />
+            {isGoogle ? <GoogleBadge /> : <OperatorBadge operator={cp.operator} />}
             <EVChip ev={cp.ev} />
             {stale && <StaleRatesBadge />}
             {isCheapest && (
@@ -144,7 +146,7 @@ export function CarparkCard({
               letterSpacing: -0.6,
             }}
           >
-            {formatCost(cost)}
+            {formatCostMaybe(cp, cost)}
           </div>
           <div
             style={{
@@ -156,11 +158,11 @@ export function CarparkCard({
               textTransform: 'uppercase',
             }}
           >
-            Est · {stale ? '2018' : durationLabel(duration)}
+            {isGoogle ? googleRateHint(cp.googleParking) : `Est · ${stale ? '2018' : durationLabel(duration)}`}
           </div>
         </div>
 
-        {onToggleSave && (
+        {onToggleSave && !isGoogle && (
           <div style={{ marginTop: -4, marginRight: -8 }}>
             <BookmarkToggle saved={!!saved} onToggle={onToggleSave} />
           </div>

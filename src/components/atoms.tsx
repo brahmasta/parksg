@@ -62,6 +62,36 @@ export function OperatorBadge({
 }
 
 /**
+ * Provenance chip for a supplementary carpark sourced from Google Maps (shown
+ * in place of the OperatorBadge). Signals the entry is unverified — no rates,
+ * capacity, or live availability — and carries the required Google attribution.
+ */
+export function GoogleBadge() {
+  return (
+    <span
+      title="Sourced from Google Maps — rates & availability unverified"
+      style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: 10,
+        fontWeight: 500,
+        letterSpacing: 0.4,
+        padding: '2px 6px',
+        borderRadius: 4,
+        background: 'var(--bg-3)',
+        color: 'var(--text-2)',
+        border: '0.5px solid var(--line-strong)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        lineHeight: 1,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      Google
+    </span>
+  );
+}
+
+/**
  * Small amber chip marking a carpark whose price comes from the stale 2018 LTA
  * snapshot — so a 2018 figure isn't mistaken for a live, comparable rate on the
  * Results card. Mirrors the Detail screen's stale-rates banner copy. (TRUST-1)
