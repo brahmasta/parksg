@@ -12,6 +12,7 @@ import {
 } from '../lib/maps';
 import { isApplePlatform } from '../lib/platform';
 import { NavigateSheet } from '../components/NavigateSheet';
+import { NavigateModal } from '../components/NavigateModal';
 import {
   availabilityColorVar,
   availabilityStatus,
@@ -50,6 +51,7 @@ export function DetailScreen({
   cost: costOverride,
   durationText,
   hideDurationStrip = false,
+  navVariant = 'sheet',
 }: {
   cp: Carpark;
   destination: string;
@@ -68,6 +70,8 @@ export function DetailScreen({
   durationText?: string;
   /** Hide the preset DurationStrip (desktop drives duration via StayPlanner). */
   hideDurationStrip?: boolean;
+  /** Navigation picker style: bottom 'sheet' (mobile) or centered 'modal' (desktop). */
+  navVariant?: 'sheet' | 'modal';
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
 
@@ -682,12 +686,21 @@ export function DetailScreen({
         </div>
       </div>
 
-      <NavigateSheet
-        open={navSheetOpen}
-        onClose={() => setNavSheetOpen(false)}
-        carparkName={cp.name}
-        onPick={openProvider}
-      />
+      {navVariant === 'modal' ? (
+        <NavigateModal
+          open={navSheetOpen}
+          onClose={() => setNavSheetOpen(false)}
+          carparkName={cp.name}
+          onPick={openProvider}
+        />
+      ) : (
+        <NavigateSheet
+          open={navSheetOpen}
+          onClose={() => setNavSheetOpen(false)}
+          carparkName={cp.name}
+          onPick={openProvider}
+        />
+      )}
     </div>
   );
 }

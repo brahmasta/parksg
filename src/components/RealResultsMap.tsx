@@ -23,9 +23,12 @@ type Props = {
   /** Optional arbitrary-duration cost (dollars) per carpark; null = unknown.
    * Falls back to the preset estByHours[duration] when omitted. */
   costOf?: (cp: Carpark) => number | null;
+  /** Desktop: the hovered/selected carpark — emphasised, with a walk line drawn
+   * to the destination. */
+  activeId?: string | null;
 };
 
-export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card', costOf }: Props) {
+export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card', costOf, activeId }: Props) {
   const fill = variant === 'fill';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -85,6 +88,20 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
     const statusColor = (s: ReturnType<typeof availabilityStatus>) =>
       s === 'available' ? ok : s === 'limited' ? warn : s === 'full' ? bad : muted;
 
+    // Walk line from the active carpark to the destination (desktop).
+    if (activeId && destinationCoords) {
+      const active = carparks.find((c) => c.id === activeId);
+      if (active) {
+        L.polyline([active.coords.entrance, destinationCoords], {
+          color: accent,
+          weight: 3,
+          opacity: 0.85,
+          dashArray: '1 7',
+          lineCap: 'round',
+        }).addTo(map);
+      }
+    }
+
     // Destination marker — central solid dot
     if (destinationCoords) {
       L.marker(destinationCoords, {
@@ -106,6 +123,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
     // Carpark pins — cost label with a small tail
     carparks.forEach((cp) => {
       const isCheapest = cp.id === cheapestId;
+      const isActive = cp.id === activeId;
       const isGoogle = cp.source === 'GOOGLE';
       const status = availabilityStatus(degraded ? null : cp.lotsAvailable);
       const dotColor = statusColor(status);
@@ -113,8 +131,11 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       const cost = costNum == null ? '—' : formatCost(costNum);
       const fill = isCheapest ? accent : bg1;
       const fg = isCheapest ? '#0E1014' : isGoogle ? muted : text1;
-      // Google pins use a muted dashed border to read as supplementary/unverified.
-      const border = isCheapest
+      // Active pin gets an accent ring; cheapest a solid accent border; Google a
+      // muted dashed border (supplementary/unverified); else a hairline.
+      const border = isActive
+        ? `1.5px solid ${accent}`
+        : isCheapest
         ? `0.5px solid ${accent}`
         : isGoogle
         ? `0.5px dashed ${muted}`
@@ -156,7 +177,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
           iconSize: [0, 0],
           iconAnchor: [0, 0],
         }),
-        zIndexOffset: isCheapest ? 1000 : 0,
+        zIndexOffset: isActive ? 1200 : isCheapest ? 1000 : 0,
         riseOnHover: true,
         keyboard: true,
       });
@@ -185,7 +206,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
 
     // Make sure tiles render after container layout settles.
     setTimeout(() => map.invalidateSize(), 50);
-  }, [carparks, cheapestId, duration, degraded, destinationCoords, costOf]);
+  }, [carparks, cheapestId, duration, degraded, destinationCoords, costOf, activeId]);
 
   return (
     <div style={fill ? { height: '100%', display: 'flex', flexDirection: 'column' } : { padding: '0 16px' }}>

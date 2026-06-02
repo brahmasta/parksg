@@ -48,6 +48,9 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
+  const [hoverId, setHoverId] = useState<string | null>(null);
+  // The emphasised carpark on the map: the open detail, else the hovered card.
+  const activeId = detailCp?.id ?? hoverId;
 
   // Arbitrary-duration cost for the planned stay, priced per carpark.
   const costOf = useCallback((cp: Carpark) => estCostForStay(cp, stay), [stay]);
@@ -84,6 +87,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
             cost={costOf(detailCp)}
             durationText={`${fmtDuration(stay.hours)} stay`}
             hideDurationStrip
+            navVariant="modal"
             onBack={onCloseDetail}
             refreshedSecondsAgo={refreshedSecondsAgo}
             degraded={state === 'degraded'}
@@ -166,6 +170,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
                     durationText={durationText}
                     rank={i + 1}
                     isCheapest={cp.id === cheapestId}
+                    isActive={cp.id === hoverId}
+                    onHoverChange={setHoverId}
                     degraded={state === 'degraded'}
                     onClick={() => onOpenDetail(cp)}
                     saved={isCarparkSaved(cp.id)}
@@ -186,6 +192,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
               variant="fill"
               carparks={ranked}
               cheapestId={cheapestId}
+              activeId={activeId}
               duration={1}
               costOf={costOf}
               onSelect={onOpenDetail}

@@ -23,6 +23,8 @@ export function CarparkCard({
   onToggleSave,
   cost: costOverride,
   durationText,
+  isActive = false,
+  onHoverChange,
 }: {
   cp: Carpark;
   duration: DurationHours;
@@ -37,6 +39,10 @@ export function CarparkCard({
   cost?: number | null;
   /** Caption under the cost, e.g. "EST · 2h 30m". Defaults to the preset label. */
   durationText?: string;
+  /** Desktop: highlight the card (hovered or its map marker active). */
+  isActive?: boolean;
+  /** Desktop: report hover so the map can emphasise the matching marker. */
+  onHoverChange?: (id: string | null) => void;
 }) {
   const lots = degraded ? null : cp.lotsAvailable;
   const status = availabilityStatus(lots);
@@ -51,6 +57,8 @@ export function CarparkCard({
       role="button"
       tabIndex={0}
       onClick={onClick}
+      onMouseEnter={onHoverChange ? () => onHoverChange(cp.id) : undefined}
+      onMouseLeave={onHoverChange ? () => onHoverChange(null) : undefined}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -63,12 +71,14 @@ export function CarparkCard({
         width: '100%',
         padding: '14px 14px 13px 16px',
         background: 'var(--bg-1)',
-        border: '0.5px solid var(--line)',
+        border: isActive ? '1.5px solid var(--accent)' : '0.5px solid var(--line)',
+        boxShadow: isActive ? '0 6px 20px rgba(46,227,194,0.16)' : undefined,
         borderRadius: 14,
         position: 'relative',
         overflow: 'hidden',
         cursor: 'pointer',
         minHeight: 44,
+        transition: 'border-color 120ms ease, box-shadow 120ms ease',
       }}
     >
       {/* Top row: rank + name + cost */}
