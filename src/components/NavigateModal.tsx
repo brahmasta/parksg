@@ -43,7 +43,9 @@ export function NavigateModal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100,
+        // Above Leaflet's panes/controls (which go up to ~1000) — otherwise the
+        // map paints over the modal.
+        zIndex: 10000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
