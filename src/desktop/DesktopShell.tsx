@@ -1,25 +1,14 @@
 import { useState, type CSSProperties } from 'react';
-import type { MergedSaveItem, User } from '../lib/types';
+import type { User } from '../lib/types';
 import { Wordmark } from '../components/atoms';
 import { IconInfo, IconUser } from '../components/icons';
-import { FindParkingDesktop, type FindParkingDesktopProps } from './FindParkingDesktop';
+import { FindParkingDesktop, type FindParkingDesktopProps, type DesktopSavedProps } from './FindParkingDesktop';
 import { CoverageScreen } from '../screens/CoverageScreen';
 import { SavedScreen } from '../screens/SavedScreen';
 import { AboutDesktop } from './AboutDesktop';
 import { AccountDesktop } from './AccountDesktop';
 
 type DesktopRoute = 'find' | 'saved' | 'coverage' | 'about' | 'account';
-
-export type DesktopSavedProps = {
-  merged: MergedSaveItem[];
-  destinationCount: number;
-  carparkCount: number;
-  onSearchDestination: (item: MergedSaveItem & { kind: 'destination' }) => void;
-  onOpenCarpark: (item: MergedSaveItem & { kind: 'carpark' }) => void;
-  onRemoveDestination: (id: string) => void;
-  onUnsaveCarpark: (id: string) => void;
-  onAddDestination: () => void;
-};
 
 export type DesktopShellProps = {
   find: FindParkingDesktopProps;
@@ -42,7 +31,7 @@ export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRe
     <div className="psg" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-0)', color: 'var(--text-1)' }}>
       <TopNav route={route} setRoute={setRoute} user={user} />
 
-      {route === 'find' && <FindParkingDesktop {...find} />}
+      {route === 'find' && <FindParkingDesktop {...find} saved={saved} />}
 
       {route === 'saved' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

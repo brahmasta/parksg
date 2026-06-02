@@ -26,9 +26,12 @@ type Props = {
   /** Desktop: the hovered/selected carpark — emphasised, with a walk line drawn
    * to the destination. */
   activeId?: string | null;
+  /** Desktop: the real OneMap walking route ([lat,lng] points) for the open
+   * carpark. When present, drawn instead of a straight line. */
+  walkGeometry?: [number, number][] | null;
 };
 
-export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card', costOf, activeId }: Props) {
+export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card', costOf, activeId, walkGeometry }: Props) {
   const fill = variant === 'fill';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -88,14 +91,19 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
     const statusColor = (s: ReturnType<typeof availabilityStatus>) =>
       s === 'available' ? ok : s === 'limited' ? warn : s === 'full' ? bad : muted;
 
-    // Walk line from the active carpark to the destination (desktop).
+    // Walk path from the active carpark to the destination (desktop). Uses the
+    // real OneMap route when available; otherwise a straight dashed line.
     if (activeId && destinationCoords) {
       const active = carparks.find((c) => c.id === activeId);
       if (active) {
-        L.polyline([active.coords.entrance, destinationCoords], {
+        const path: [number, number][] =
+          walkGeometry && walkGeometry.length >= 2
+            ? walkGeometry
+            : [active.coords.entrance, destinationCoords];
+        L.polyline(path, {
           color: accent,
-          weight: 3,
-          opacity: 0.85,
+          weight: 3.5,
+          opacity: 0.9,
           dashArray: '1 7',
           lineCap: 'round',
         }).addTo(map);
@@ -206,7 +214,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
 
     // Make sure tiles render after container layout settles.
     setTimeout(() => map.invalidateSize(), 50);
-  }, [carparks, cheapestId, duration, degraded, destinationCoords, costOf, activeId]);
+  }, [carparks, cheapestId, duration, degraded, destinationCoords, costOf, activeId, walkGeometry]);
 
   return (
     <div style={fill ? { height: '100%', display: 'flex', flexDirection: 'column' } : { padding: '0 16px' }}>

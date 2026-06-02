@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import type { Carpark } from '../lib/types';
+import type { Carpark, MergedSaveItem } from '../lib/types';
 import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { MonoLabel, Spinner } from '../components/atoms';
@@ -9,7 +9,19 @@ import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { DetailScreen } from '../screens/DetailScreen';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
-import { IconLocation } from '../components/icons';
+import { useWalkRoute } from '../hooks/useWalkRoute';
+import { IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
+
+export type DesktopSavedProps = {
+  merged: MergedSaveItem[];
+  destinationCount: number;
+  carparkCount: number;
+  onSearchDestination: (item: MergedSaveItem & { kind: 'destination' }) => void;
+  onOpenCarpark: (item: MergedSaveItem & { kind: 'carpark' }) => void;
+  onRemoveDestination: (id: string) => void;
+  onUnsaveCarpark: (id: string) => void;
+  onAddDestination: () => void;
+};
 
 export type FindParkingDesktopProps = {
   destinationInput: string;
@@ -39,12 +51,12 @@ export type FindParkingDesktopProps = {
  * (search · stay · filter · cards, or a carpark detail panel) and the live map
  * on the right. Reuses the same data + components as the phone flow.
  */
-export function FindParkingDesktop(props: FindParkingDesktopProps) {
+export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: DesktopSavedProps }) {
   const {
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly,
-    detailCp, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark,
+    detailCp, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
@@ -56,11 +68,38 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
   const costOf = useCallback((cp: Carpark) => estCostForStay(cp, stay), [stay]);
   const durationText = `EST · ${fmtDuration(stay.hours)}`;
 
+  // Real walking route for the open carpark — drawn on the big map (not a
+  // straight line). Only fetches when a carpark is open in detail.
+  const walk = useWalkRoute(
+    detailCp ? destinationCoords : null,
+    detailCp ? detailCp.coords.entrance : [0, 0],
+    detailCp?.walkMeters ?? 0,
+    detailCp?.walkMin ?? 0,
+  );
+  const walkGeometry = detailCp && walk.source === 'onemap' && walk.geometry.length >= 2 ? walk.geometry : null;
+
   const { ranked } = useMemo(
     () => selectResultsView({ carparks, state, availableOnly, evOnly: false, sortBy, costOf }),
     [carparks, state, availableOnly, sortBy, costOf],
   );
   const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
+
+  // Before any destination is chosen, show a focused landing (search + saved
+  // places, no map) — mirroring the phone home rather than an empty map pane.
+  const showLanding = !destinationCoords && state !== 'loading';
+  if (showLanding) {
+    return (
+      <LandingDesktop
+        destinationInput={destinationInput}
+        setDestinationInput={setDestinationInput}
+        onSearch={onSearch}
+        onPickPlace={onPickPlace}
+        onNearMe={onNearMe}
+        nearMeBusy={nearMeBusy}
+        saved={saved}
+      />
+    );
+  }
 
   return (
     <main style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
@@ -194,6 +233,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
               carparks={ranked}
               cheapestId={cheapestId}
               activeId={activeId}
+              walkGeometry={walkGeometry}
               duration={1}
               costOf={costOf}
               onSelect={onOpenDetail}
@@ -208,5 +248,117 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
         )}
       </div>
     </main>
+  );
+}
+
+/** Pre-search landing — focused single column (no map): search + saved places. */
+function LandingDesktop({
+  destinationInput,
+  setDestinationInput,
+  onSearch,
+  onPickPlace,
+  onNearMe,
+  nearMeBusy,
+  saved,
+}: {
+  destinationInput: string;
+  setDestinationInput: (v: string) => void;
+  onSearch: (q?: string) => void;
+  onPickPlace: (place: { label: string; address: string; lat: number; lng: number }) => void;
+  onNearMe: () => void;
+  nearMeBusy: boolean;
+  saved: DesktopSavedProps;
+}) {
+  return (
+    <main className="psg-screen" style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: 560, padding: '64px 24px 80px' }}>
+        <h1 style={{ margin: '0 0 6px', fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.1 }}>
+          Where are you headed?
+        </h1>
+        <p style={{ margin: '0 0 20px', fontSize: 14.5, color: 'var(--text-2)' }}>
+          Compare live cost &amp; availability at your destination before you drive.
+        </p>
+
+        <PlaceAutocomplete
+          value={destinationInput}
+          onChange={setDestinationInput}
+          onSubmitText={(v) => onSearch(v)}
+          onPickPlace={onPickPlace}
+          placeholder="Search destination, mall or postcode"
+        />
+        <button
+          type="button"
+          onClick={onNearMe}
+          disabled={nearMeBusy}
+          style={{
+            appearance: 'none', width: '100%', marginTop: 10, padding: '11px 14px',
+            background: 'var(--bg-2)', border: '0.5px solid var(--line-strong)', borderRadius: 12,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            color: 'var(--text-1)', fontSize: 14, fontWeight: 500,
+            cursor: nearMeBusy ? 'default' : 'pointer', minHeight: 44,
+          }}
+        >
+          {nearMeBusy ? <Spinner /> : <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconLocation size={16} stroke={2} /></span>}
+          {nearMeBusy ? 'Locating…' : 'Use my location'}
+        </button>
+
+        {/* Saved places */}
+        <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <MonoLabel>Saved places</MonoLabel>
+          <button type="button" onClick={saved.onAddDestination} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent-on)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+            + Add destination
+          </button>
+        </div>
+
+        {saved.merged.length === 0 ? (
+          <div style={{ marginTop: 12, padding: '22px 18px', textAlign: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)' }}>Nothing saved yet</div>
+            <div style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 4 }}>Bookmark a carpark from results, or name a destination like Office for one-tap search.</div>
+          </div>
+        ) : (
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {saved.merged.map((item) =>
+              item.kind === 'destination' ? (
+                <SavedRow
+                  key={`d:${item.id}`}
+                  icon={<IconStar size={16} stroke={2} />}
+                  title={item.destination.name}
+                  sub={item.destination.address}
+                  onClick={() => saved.onSearchDestination(item)}
+                />
+              ) : (
+                <SavedRow
+                  key={`c:${item.id}`}
+                  icon={<IconBookmark filled size={16} />}
+                  title={item.carpark.name}
+                  sub={item.carpark.area || item.carpark.block}
+                  onClick={() => saved.onOpenCarpark(item)}
+                />
+              ),
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+function SavedRow({ icon, title, sub, onClick }: { icon: React.ReactNode; title: string; sub?: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', borderRadius: 12,
+        padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', cursor: 'pointer', minHeight: 56,
+      }}
+    >
+      <span style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, pointerEvents: 'none' }}>{icon}</span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
+        {sub && <span style={{ display: 'block', fontSize: 12.5, color: 'var(--text-3)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</span>}
+      </span>
+      <span style={{ color: 'var(--text-3)', flexShrink: 0 }}><IconChevronRight size={16} stroke={2} /></span>
+    </button>
   );
 }

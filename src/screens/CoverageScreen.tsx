@@ -6,53 +6,47 @@ import {
   IconDatabase,
   IconExternal,
   IconLayers,
+  IconList,
   IconRefresh,
   IconSearch,
   IconWalk,
 } from '../components/icons';
 
-// Representative coverage figures. TODO: back with a Supabase aggregate
-// (counts per agency, lot sums, EV joins, last-sync timestamp).
+// Real figures from the Supabase carpark database (snapshot). Update from:
+//   select count(*), count(*) filter (where lat is not null) … from carparks
+//   select agency, count(*) from carparks group by agency
 type CovSource = {
   key: string;
   name: string;
   provider: string;
   desc: string;
   carparks: number;
-  lots: number;
+  onMap: number;
   colorVar: string;
   freshness: string;
   url: string;
 };
 
 const COVERAGE = {
-  totalCarparks: 2728,
-  totalLots: 431600,
-  agencies: 3,
-  evCarparks: 1240,
-  lastFullSync: '2 min ago',
+  totalCarparks: 3272,
+  onMap: 3016,
+  withRates: 3226,
+  agencies: 4,
   sources: [
-    { key: 'HDB', name: 'HDB Car Parks', provider: 'data.gov.sg', desc: 'Housing & Development Board public housing car parks. Live lot availability polled every minute.', carparks: 2148, lots: 268400, colorVar: '--src-hdb', freshness: 'Live · ~1 min', url: 'https://data.gov.sg' },
-    { key: 'URA', name: 'URA Car Parks', provider: 'LTA DataMall', desc: 'Urban Redevelopment Authority off- and on-street public car parks. Availability via LTA DataMall.', carparks: 412, lots: 96300, colorVar: '--src-ura', freshness: 'Live · ~1 min', url: 'https://datamall.lta.gov.sg' },
-    { key: 'LTA', name: 'LTA Car Parks', provider: 'LTA DataMall', desc: 'Land Transport Authority managed car parks, incl. transport-node and commercial sites.', carparks: 168, lots: 66900, colorVar: '--src-lta', freshness: 'Live · ~1 min', url: 'https://datamall.lta.gov.sg' },
+    { key: 'HDB', name: 'HDB Car Parks', provider: 'data.gov.sg', desc: 'Housing & Development Board public housing car parks. Live lot availability + capacity polled every minute.', carparks: 2265, onMap: 2265, colorVar: '--src-hdb', freshness: 'Live · ~1 min', url: 'https://data.gov.sg' },
+    { key: 'URA', name: 'URA Car Parks', provider: 'URA Data Service · LTA DataMall', desc: 'Urban Redevelopment Authority off- and on-street car parks. Real tiered rate schedules from URA; availability via DataMall.', carparks: 661, onMap: 660, colorVar: '--src-ura', freshness: 'Live · ~1 min', url: 'https://www.ura.gov.sg/maps/api/' },
+    { key: 'LTA', name: 'LTA Car Parks', provider: 'LTA DataMall', desc: 'LTA-managed + commercial/mall car parks. 40 live via DataMall; the rest cold-start from a 2018 rate snapshot until curated.', carparks: 318, onMap: 63, colorVar: '--src-lta', freshness: 'Live + 2018 snapshot', url: 'https://datamall.lta.gov.sg' },
+    { key: 'JTC', name: 'JTC Car Parks', provider: 'data.gov.sg', desc: 'JTC industrial-estate car parks (Ang Mo Kio, Bukit Merah, Aljunied, Depot Lane). Metadata + coordinates; season-parking sites.', carparks: 28, onMap: 28, colorVar: '--src-ev', freshness: 'Static', url: 'https://data.gov.sg' },
   ] as CovSource[],
   layers: [
-    { key: 'EV', name: 'EV Charging', provider: 'LTA EVCBatch', value: '1,240 carparks', desc: 'Charging connectors joined to carparks within 50 m.', colorVar: '--src-ev' },
-    { key: 'WALK', name: 'Walking Routes', provider: 'OneMap', value: 'Islandwide', desc: 'Real pedestrian routes & walk times to the entrance.', colorVar: '--src-ura' },
-    { key: 'GEO', name: 'Place Search', provider: 'Google Places', value: 'Typeahead', desc: 'Destination autocomplete + place details.', colorVar: '--src-lta' },
-  ],
-  regions: [
-    { name: 'Central', count: 612 },
-    { name: 'North-East', count: 548 },
-    { name: 'West', count: 521 },
-    { name: 'East', count: 487 },
-    { name: 'North', count: 560 },
+    { key: 'EV', name: 'EV Charging', provider: 'LTA EVCBatch', value: 'Live · 5 min', desc: 'Charging connectors joined to carparks within 50 m, with live connector status.', colorVar: '--src-ev' },
+    { key: 'WALK', name: 'Walking Routes', provider: 'OneMap', value: 'Islandwide', desc: 'Real pedestrian routes & walk times from the carpark entrance to your destination.', colorVar: '--src-ura' },
+    { key: 'GEO', name: 'Place Search', provider: 'Google Places', value: 'Typeahead', desc: 'Destination autocomplete + nearby supplementary carparks where our feeds have gaps.', colorVar: '--src-lta' },
   ],
 };
 
 export function CoverageScreen({ onFindParking }: { onFindParking: () => void }) {
   const c = COVERAGE;
-  const maxRegion = Math.max(...c.regions.map((r) => r.count));
 
   return (
     <div className="psg-screen" style={{ maxWidth: 1080, margin: '0 auto', padding: '40px 28px 80px' }}>
@@ -65,15 +59,12 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
       <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 600, letterSpacing: -1, lineHeight: 1.05, maxWidth: 640 }}>
         Every public carpark in Singapore, from the source.
       </h1>
-      <p style={{ margin: '14px 0 0', fontSize: 15.5, color: 'var(--text-2)', lineHeight: 1.5, maxWidth: 560 }}>
-        We aggregate live availability and rates straight from the agencies that run the carparks — no scraping, no middlemen. Here's exactly what's covered and where it comes from.
-      </p>
 
       {/* Hero stats */}
       <div className="psg-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginTop: 32 }}>
         <BigStat value={c.totalCarparks.toLocaleString()} label="Carparks covered" icon={<IconCar size={18} stroke={2} />} accent />
-        <BigStat value={`${(c.totalLots / 1000).toFixed(0)}k`} label="Parking lots" icon={<IconDatabase size={18} stroke={2} />} />
-        <BigStat value={c.evCarparks.toLocaleString()} label="With EV charging" icon={<IconBolt size={18} stroke={2} />} />
+        <BigStat value={c.onMap.toLocaleString()} label="On the map" icon={<IconDatabase size={18} stroke={2} />} />
+        <BigStat value={c.withRates.toLocaleString()} label="With rate estimates" icon={<IconList size={18} stroke={2} />} />
         <BigStat value={String(c.agencies)} label="Official sources" icon={<IconLayers size={18} stroke={2} />} />
       </div>
 
@@ -102,34 +93,37 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
 
       {/* Source detail cards */}
       <SectionTitle>The sources in detail</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-        {c.sources.map((s) => (
-          <div key={s.key} style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ width: 38, height: 38, borderRadius: 10, background: `color-mix(in srgb, var(${s.colorVar}) 16%, transparent)`, color: `var(${s.colorVar})`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconDatabase size={19} stroke={2} />
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: 'var(--font-mono)', fontSize: 10.5, fontWeight: 600, color: 'var(--ok)', padding: '3px 8px', borderRadius: 999, background: 'var(--ok-bg)' }}>
-                <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--ok)' }} /> LIVE
-              </span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+        {c.sources.map((s) => {
+          const live = s.freshness.toLowerCase().startsWith('live');
+          return (
+            <div key={s.key} style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ width: 38, height: 38, borderRadius: 10, background: `color-mix(in srgb, var(${s.colorVar}) 16%, transparent)`, color: `var(${s.colorVar})`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IconDatabase size={19} stroke={2} />
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: 'var(--font-mono)', fontSize: 10.5, fontWeight: 600, color: live ? 'var(--ok)' : 'var(--text-3)', padding: '3px 8px', borderRadius: 999, background: live ? 'var(--ok-bg)' : 'var(--bg-3)' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: 999, background: live ? 'var(--ok)' : 'var(--text-3)' }} /> {live ? 'LIVE' : 'STATIC'}
+                </span>
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, letterSpacing: -0.3, marginTop: 14 }}>{s.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: 3, letterSpacing: 0.2 }}>via {s.provider}</div>
+              <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5, margin: '12px 0 16px' }}>{s.desc}</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 'auto' }}>
+                <MiniStat value={s.carparks.toLocaleString()} label="carparks" />
+                <MiniStat value={s.onMap.toLocaleString()} label="on map" />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTop: '0.5px solid var(--line)' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-2)' }}>
+                  <IconRefresh size={13} stroke={2} /> {s.freshness}
+                </span>
+                <a href={s.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: 'var(--accent-on)', textDecoration: 'underline', fontWeight: 600 }}>
+                  Source <IconExternal size={12} stroke={2} />
+                </a>
+              </div>
             </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, letterSpacing: -0.3, marginTop: 14 }}>{s.name}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', marginTop: 3, letterSpacing: 0.2 }}>via {s.provider}</div>
-            <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5, margin: '12px 0 16px' }}>{s.desc}</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 'auto' }}>
-              <MiniStat value={s.carparks.toLocaleString()} label="carparks" />
-              <MiniStat value={`${(s.lots / 1000).toFixed(1)}k`} label="lots" />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, paddingTop: 12, borderTop: '0.5px solid var(--line)' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-2)' }}>
-                <IconRefresh size={13} stroke={2} /> {s.freshness}
-              </span>
-              <a href={s.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: 'var(--accent-on)', textDecoration: 'underline', fontWeight: 600 }}>
-                Source <IconExternal size={12} stroke={2} />
-              </a>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Enriched-with layers */}
@@ -152,31 +146,11 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
         ))}
       </div>
 
-      {/* Coverage by region */}
-      <SectionTitle>Coverage by region</SectionTitle>
-      <div style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 18, padding: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20 }}>
-          {c.regions.map((r) => {
-            const h = (r.count / maxRegion) * 100;
-            return (
-              <div key={r.name} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>{r.count}</span>
-                {/* Fixed-height track so the bar's % height resolves. */}
-                <div style={{ width: '100%', maxWidth: 80, height: 150, display: 'flex', alignItems: 'flex-end' }}>
-                  <div style={{ width: '100%', height: `${h}%`, borderRadius: '8px 8px 0 0', background: 'linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--bg-1)))' }} />
-                </div>
-                <span style={{ fontSize: 12.5, color: 'var(--text-2)', fontWeight: 500 }}>{r.name}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Footnote + CTA */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 28, padding: '18px 22px', borderRadius: 16, background: 'var(--bg-1)', border: '0.5px solid var(--line)', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginTop: 36, padding: '18px 22px', borderRadius: 16, background: 'var(--bg-1)', border: '0.5px solid var(--line)', flexWrap: 'wrap' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'var(--text-2)', fontSize: 13 }}>
           <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconRefresh size={15} stroke={2} /></span>
-          Last full sync <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>{c.lastFullSync}</strong> · availability refreshes about every minute
+          Counts from the live carpark database · availability refreshes about every minute
         </div>
         <button onClick={onFindParking} style={{ appearance: 'none', border: 0, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 18px', borderRadius: 11, background: 'var(--accent)', color: 'var(--accent-on)', fontWeight: 600, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 16px rgba(46,227,194,0.28)' }}>
           Find parking now <IconArrowRight size={16} stroke={2.5} />
@@ -184,7 +158,7 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
       </div>
 
       <p style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 20, lineHeight: 1.5, maxWidth: 620 }}>
-        Figures are representative of current coverage and refresh as feeds update. Rate schedules vary by source recency — URA uses a flat-rate approximation and some LTA rates derive from a 2018 snapshot; always verify at the gantry.
+        Rate schedules vary by source recency — URA uses real tiered schedules, HDB the gazetted tariff, and some LTA rates derive from a 2018 snapshot. Always verify at the gantry.
       </p>
     </div>
   );
