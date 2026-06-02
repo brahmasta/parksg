@@ -87,6 +87,49 @@ export const IconNavigate = (p: IconProps) => (
     <path d="M3 11 21 3l-8 18-2-8-8-2Z" />
   </Icon>
 );
+export const IconCalendar = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="4.5" width="18" height="17" rx="2.5" />
+    <path d="M3 9h18M8 2.5v4M16 2.5v4" />
+  </Icon>
+);
+export const IconMinus = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5 12h14" />
+  </Icon>
+);
+export const IconCar = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 13l1.8-5.2A2 2 0 0 1 6.7 6.4h10.6a2 2 0 0 1 1.9 1.4L21 13v5a1 1 0 0 1-1 1h-1.5a1 1 0 0 1-1-1v-1H6.5v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+    <path d="M3 13h18" />
+    <circle cx="7" cy="16" r="0.6" />
+    <circle cx="17" cy="16" r="0.6" />
+  </Icon>
+);
+export const IconArrowRight = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 12h16M14 6l6 6-6 6" />
+  </Icon>
+);
+export const IconDatabase = (p: IconProps) => (
+  <Icon {...p}>
+    <ellipse cx="12" cy="5" rx="8" ry="3" />
+    <path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5" />
+    <path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" />
+  </Icon>
+);
+export const IconLayers = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3 3 8l9 5 9-5-9-5Z" />
+    <path d="m3 13 9 5 9-5M3 18l9 5 9-5" />
+  </Icon>
+);
+export const IconExternal = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 4h6v6M20 4l-9 9" />
+    <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+  </Icon>
+);
 export const IconWarning = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 3 2 20h20L12 3Z" />

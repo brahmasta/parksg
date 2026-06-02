@@ -33,6 +33,12 @@
   --accent-tint: rgba(46, 227, 194, 0.13);
   --accent-tint-strong: rgba(46, 227, 194, 0.22);
   --accent-on: #0e1014;
+
+  /* Per-source chart colors (Coverage page) */
+  --src-hdb: var(--accent); /* #2ee3c2 */
+  --src-ura: #6c8cff;
+  --src-lta: #f0a83c;
+  --src-ev: #8b5cf6;
 }
 
 [data-theme='dark'] {
@@ -93,14 +99,15 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-/* Stagger-in for list children */
+/* Stagger-in for list children.
+ * Transform-only (no opacity): when the animation timeline is paused — offscreen
+ * render, print/PDF, some reduced-motion paths — opacity keyframes can leave
+ * content stuck invisible. The visible state is the base; only position animates. */
 @keyframes psg-slide-up {
   from {
-    opacity: 0;
     transform: translate3d(0, 12px, 0);
   }
   to {
-    opacity: 1;
     transform: translate3d(0, 0, 0);
   }
 }
@@ -129,10 +136,10 @@ button {
   .psg-screen { animation: none; }
 }
 
-/* Screen transition */
+/* Screen transition — transform-only (see psg-slide-up note above). */
 @keyframes psg-screen-in {
-  from { opacity: 0; transform: translate3d(0, 8px, 0); }
-  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+  from { transform: translate3d(0, 8px, 0); }
+  to   { transform: translate3d(0, 0, 0); }
 }
 .psg-screen {
   animation: psg-screen-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;

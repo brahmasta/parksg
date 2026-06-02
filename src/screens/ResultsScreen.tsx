@@ -1,8 +1,9 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/types';
-import { pickCheapestId, selectResultsView } from '../lib/resultsView';
+import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
 import { DurationStrip, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
+import { FilterBar } from '../components/FilterBar';
 import { DegradedBanner } from '../components/DegradedBanner';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
@@ -71,9 +72,12 @@ export function ResultsScreen({
   // it's unit-tested in resultsView.test.ts; see selectResultsView for why the
   // EV vs Available empty-states must be attributed rather than guessed from a
   // bare length===0.
+  // Cost/distance sort lives locally — only this screen needs it on mobile.
+  const [sortBy, setSortBy] = useState<SortBy>('cost');
+
   const { ranked, evFilterEmpty, availFilterEmpty } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly }),
-    [carparks, state, availableOnly, evOnly],
+    () => selectResultsView({ carparks, state, availableOnly, evOnly, sortBy, duration }),
+    [carparks, state, availableOnly, evOnly, sortBy, duration],
   );
 
   // Preserve the list's scroll position across Detail→back. The screen
@@ -231,7 +235,7 @@ export function ResultsScreen({
             {state === 'empty' ? '0' : ranked.length} carpark
             {ranked.length === 1 ? '' : 's'}
             <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
-            sorted by distance
+            sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
           </div>
           <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
             <FilterPill
@@ -240,13 +244,17 @@ export function ResultsScreen({
               icon={<IconBolt size={11} stroke={2.25} />}
               label="EV"
             />
-            <FilterPill
-              active={availableOnly}
-              onClick={() => setAvailableOnly(!availableOnly)}
-              dot
-              label="Available"
-            />
           </div>
+        </div>
+
+        {/* Sort (Cheapest/Nearest) + Available-only */}
+        <div style={{ marginTop: 12 }}>
+          <FilterBar
+            sortBy={sortBy}
+            onSortBy={setSortBy}
+            availableOnly={availableOnly}
+            onAvailableOnly={setAvailableOnly}
+          />
         </div>
       </div>
 

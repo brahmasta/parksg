@@ -120,6 +120,44 @@ describe('pickCheapestId — stale rates never win unchallenged (TRUST-1)', () =
   });
 });
 
+describe('selectResultsView — sort + full-sinks-last', () => {
+  it("sortBy 'cost' ranks by estimated cost ascending", () => {
+    const v = selectResultsView({
+      carparks: [cp('a', { cost: 300, lotsAvailable: 5 }), cp('b', { cost: 120, lotsAvailable: 5 }), cp('c', { cost: 240, lotsAvailable: 5 })],
+      state: 'loaded', availableOnly: false, evOnly: false, sortBy: 'cost', duration: 1,
+    });
+    assert.deepEqual(v.ranked.map((c) => c.id), ['b', 'c', 'a']);
+  });
+
+  it('full carparks sink to the bottom regardless of sort', () => {
+    const v = selectResultsView({
+      carparks: [cp('full-cheap', { cost: 50, lotsAvailable: 0 }), cp('free-dear', { cost: 900, lotsAvailable: 9 })],
+      state: 'loaded', availableOnly: false, evOnly: false, sortBy: 'cost', duration: 1,
+    });
+    assert.deepEqual(v.ranked.map((c) => c.id), ['free-dear', 'full-cheap']);
+  });
+
+  it("defaults to distance sort when sortBy is omitted (back-compat)", () => {
+    const v = selectResultsView({
+      carparks: [cp('far', { walkMeters: 300, cost: 1 }), cp('near', { walkMeters: 50, cost: 9 })],
+      state: 'loaded', availableOnly: false, evOnly: false,
+    });
+    assert.deepEqual(v.ranked.map((c) => c.id), ['near', 'far']);
+  });
+});
+
+describe('pickCheapestId — cheapest AVAILABLE, independent of sort', () => {
+  it('skips a cheaper full carpark in favour of the cheapest with free lots', () => {
+    const list = [cp('full', { cost: 100, lotsAvailable: 0 }), cp('free', { cost: 250, lotsAvailable: 5 })];
+    assert.equal(pickCheapestId(list, 1), 'free');
+  });
+
+  it('falls back to the full set when nothing is available', () => {
+    const list = [cp('a', { cost: 300, lotsAvailable: 0 }), cp('b', { cost: 180, lotsAvailable: 0 })];
+    assert.equal(pickCheapestId(list, 1), 'b');
+  });
+});
+
 describe('selectResultsView — only attributes on a settled state', () => {
   for (const state of ['loading', 'empty'] as ResultsState[]) {
     it(`no filter-empty flags while state='${state}'`, () => {
