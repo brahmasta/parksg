@@ -19,6 +19,7 @@ import { getJustParkLots, type JustParkLot } from '../lib/api/justpark';
 import { geocode, type GeocodedPlace } from '../lib/api/oneMap';
 import { nearbyParking, type NearbyGooglePlace } from '../lib/api/googlePlaces';
 import { filterNewGooglePlaces, googlePlaceToCarpark } from '../lib/googleCarpark';
+import { GOOGLE_GAP_THRESHOLD } from '../lib/config';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
 import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
@@ -31,11 +32,12 @@ const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
 const AVAIL_TIMEOUT_MS = 5_000;
 
-// Supplementary Google carparks. Fetched on every fresh search and merged
-// (deduped within ~60m of our own carparks) so users get the complete nearby
-// picture, including the private/long-tail lots our feeds miss. Held in memory
-// only (never persisted — Google ToS) and reused on the 60s live-lot refresh
-// rather than refetched, so each distinct search centre costs one Nearby call.
+// Supplementary Google carparks (gap-fill). Fetched on a fresh search only when
+// our own DB returns fewer than GOOGLE_GAP_THRESHOLD carparks nearby (tunable
+// via the VITE_GOOGLE_GAP_THRESHOLD env var — see src/lib/config.ts), then
+// merged (deduped within ~60m of our own carparks). Held in memory only (never
+// persisted — Google ToS) and reused on the 60s live-lot refresh rather than
+// refetched, so each distinct search centre costs at most one Nearby call.
 const GOOGLE_FETCH_TIMEOUT_MS = 8_000;
 const GOOGLE_CACHE_TTL_MS = 10 * 60_000;
 const GOOGLE_CACHE_MAX = 20;
@@ -80,22 +82,25 @@ export function useCarparks() {
   // by rounded centre + radius; reused on the 60s refresh and on back-nav.
   const googleCache = useRef<Map<string, GoogleCacheEntry>>(new Map());
 
-  // Resolve supplementary Google carparks for a search. A fresh search fetches
-  // (on a cache miss/expiry); the 60s availability refresh reuses the cached
-  // set, never refetching — so each distinct search centre costs one Nearby
+  // Resolve supplementary Google carparks for a search. Gap-fill: a fresh
+  // search only fetches when our own coverage is sparse (dbCount below
+  // GOOGLE_GAP_THRESHOLD); the 60s availability refresh reuses the cached set,
+  // never refetching — so each distinct search centre costs at most one Nearby
   // call. Returns [] (degrades silently) on any failure.
   const resolveGoogleNearby = useCallback(
     async (
       dest: { lat: number; lng: number },
       radius: number,
       isAvailOnly: boolean,
+      dbCount: number,
     ): Promise<NearbyGooglePlace[]> => {
       const key = googleCacheKey(dest, radius);
       const cached = googleCache.current.get(key);
       const fresh = cached && Date.now() - cached.at < GOOGLE_CACHE_TTL_MS;
 
-      // Refresh reuses the cache; a fresh search with a warm cache reuses it too.
-      if (isAvailOnly || fresh) return fresh ? cached!.places : [];
+      if (isAvailOnly) return fresh ? cached!.places : [];
+      if (dbCount >= GOOGLE_GAP_THRESHOLD) return []; // well covered — skip (cost control)
+      if (fresh) return cached!.places;
 
       const places = await withTimeout(
         nearbyParking(dest, radius),
@@ -247,7 +252,7 @@ export function useCarparks() {
         // Supplementary Google carparks (in-memory only). Append any that aren't
         // already covered by a DB carpark within ~60m, then re-sort by distance
         // so they interleave with our own results.
-        const googlePlaces = await resolveGoogleNearby(dest, radius, isAvailOnly);
+        const googlePlaces = await resolveGoogleNearby(dest, radius, isAvailOnly, carparks.length);
         if (requestSeq.current !== seq) return;
         if (googlePlaces.length > 0) {
           const supplementary = filterNewGooglePlaces(
