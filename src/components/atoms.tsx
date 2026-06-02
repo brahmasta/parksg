@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type {
   AvailabilityStatus,
   DurationHours,
@@ -33,6 +33,63 @@ export function AvailabilityDot({
         flexShrink: 0,
       }}
     />
+  );
+}
+
+/* ── Mono label ──────────────────────────────────────────────────────────── */
+export function MonoLabel({ children }: { children: ReactNode }) {
+  return (
+    <span
+      style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: 10.5,
+        color: 'var(--text-3)',
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* ── Wordmark ────────────────────────────────────────────────────────────── */
+export function Wordmark({ size = 19 }: { size?: number }) {
+  const tile = Math.round(size * 1.35);
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 9 }}>
+      <span
+        aria-hidden
+        style={{
+          width: tile,
+          height: tile,
+          borderRadius: Math.round(tile * 0.32),
+          background: 'var(--accent)',
+          color: 'var(--accent-on)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: 'var(--font-display)',
+          fontWeight: 700,
+          fontSize: Math.round(size * 0.85),
+          flexShrink: 0,
+        }}
+      >
+        P
+      </span>
+      <span
+        style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: size,
+          fontWeight: 600,
+          letterSpacing: -0.4,
+          color: 'var(--text-1)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        wheretopark<span style={{ color: 'var(--text-3)' }}>.sg</span>
+      </span>
+    </span>
   );
 }
 

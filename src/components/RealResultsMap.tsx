@@ -17,9 +17,13 @@ type Props = {
   onSelect: (cp: Carpark) => void;
   degraded: boolean;
   destinationCoords: [number, number] | null;
+  /** 'card' (default) = the mobile fixed-height card with padding; 'fill' =
+   * fill the parent (desktop map pane), no padding/border/radius. */
+  variant?: 'card' | 'fill';
 };
 
-export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords }: Props) {
+export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card' }: Props) {
+  const fill = variant === 'fill';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   // We have to keep a stable handler ref because Leaflet markers don't
@@ -180,26 +184,29 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
   }, [carparks, cheapestId, duration, degraded, destinationCoords]);
 
   return (
-    <div style={{ padding: '0 16px' }}>
+    <div style={fill ? { height: '100%', display: 'flex', flexDirection: 'column' } : { padding: '0 16px' }}>
       <div
         style={{
           position: 'relative',
-          height: 460,
-          borderRadius: 14,
+          height: fill ? 'auto' : 460,
+          flex: fill ? 1 : undefined,
+          minHeight: 0,
+          borderRadius: fill ? 0 : 14,
           overflow: 'hidden',
           background: 'var(--bg-1)',
-          border: '0.5px solid var(--line)',
+          border: fill ? 'none' : '0.5px solid var(--line)',
         }}
       >
         <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       </div>
       <div
         style={{
-          marginTop: 8,
-          padding: '0 4px',
+          marginTop: fill ? 0 : 8,
+          padding: fill ? '8px 16px' : '0 4px',
           fontSize: 11,
           color: 'var(--text-3)',
           textAlign: 'center',
+          flexShrink: fill ? 0 : undefined,
         }}
       >
         Tap a pin to view the carpark

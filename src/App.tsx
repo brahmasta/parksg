@@ -23,6 +23,9 @@ import {
   IconWarning,
 } from './components/icons';
 import { useCarparks } from './hooks/useCarparks';
+import { useMediaQuery } from './hooks/useMediaQuery';
+import { DesktopShell } from './desktop/DesktopShell';
+import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
 import { recordSearch } from './lib/api/analytics';
@@ -49,6 +52,8 @@ function readStored<T>(key: string, fallback: T, parse: (raw: string) => T | nul
 }
 
 function App() {
+  // ≥960px renders the desktop/tablet shell; below keeps the phone flow.
+  const isDesktop = useMediaQuery('(min-width: 960px)');
   const [screen, setScreen] = useState<Screen>('home');
   const [destinationInput, setDestinationInput] = useState<string>('');
 
@@ -431,6 +436,65 @@ function App() {
       saves.isDestinationSaved(result.destination.address)
     );
   }, [result.destination, saves]);
+
+  // ── Desktop/tablet shell (≥960px) ───────────────────────────────────
+  // Shares every data hook + handler with the phone flow; only the
+  // presentation layer forks. The desktop "Find parking" view manages its
+  // own detail panel via selectedCarpark (the phone `screen` state is unused
+  // here). Overlays (sheets, toast) still mount alongside.
+  if (isDesktop) {
+    const findProps: FindParkingDesktopProps = {
+      destinationInput,
+      setDestinationInput,
+      headerDestination,
+      onSearch: goSearch,
+      onPickPlace: goPickPlace,
+      onNearMe,
+      nearMeBusy,
+      carparks: result.carparks,
+      state: result.state,
+      destinationCoords: result.destination
+        ? [result.destination.lat, result.destination.lng]
+        : null,
+      refreshedSecondsAgo: result.refreshedSecondsAgo,
+      duration,
+      setDuration,
+      availableOnly,
+      setAvailableOnly,
+      detailCp: selectedCarpark,
+      onOpenDetail: (cp) => setSelectedCarpark(cp),
+      onCloseDetail: () => setSelectedCarpark(null),
+      isCarparkSaved: (id) => saves.isCarparkSaved(id),
+      onToggleSaveCarpark: toggleSaveCarpark,
+    };
+    return (
+      <>
+        <Analytics />
+        <DesktopShell
+          find={findProps}
+          user={user}
+          savedItemCount={saves.merged.length}
+          onSignIn={handleSignIn}
+          onRequestSignOut={() => setSignOutOpen(true)}
+        />
+        <SignOutSheet
+          open={signOutOpen}
+          onClose={() => setSignOutOpen(false)}
+          onConfirm={handleSignOut}
+        />
+        <AddDestSheet
+          open={addDestOpen}
+          onClose={() => {
+            setAddDestOpen(false);
+            setDestPrefill(null);
+          }}
+          onSave={handleAddDest}
+          prefill={destPrefill}
+        />
+        <Toast toast={toast} bottomOffset={28} />
+      </>
+    );
+  }
 
   let body: React.ReactNode = null;
   if (screen === 'home') {
