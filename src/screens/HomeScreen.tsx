@@ -16,7 +16,6 @@ import {
   IconCloud,
   IconGoogleG,
   IconHistory,
-  IconInfo,
   IconLocation,
   IconPin,
   IconUser,
@@ -30,7 +29,6 @@ export function HomeScreen({
   onNearMe,
   recents,
   nearMeBusy,
-  onAbout,
   user,
   onOpenAccount,
   merged,
@@ -45,7 +43,6 @@ export function HomeScreen({
   onNearMe: () => void;
   recents: RecentDestination[];
   nearMeBusy?: boolean;
-  onAbout: () => void;
   user: User | null;
   onOpenAccount: () => void;
   /** Merged Saved feed, latest-first. */
@@ -140,27 +137,6 @@ export function HomeScreen({
       >
         <Wordmark size={19} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button
-            type="button"
-            onClick={onAbout}
-            aria-label="About"
-            style={{
-              appearance: 'none',
-              width: 32,
-              height: 32,
-              borderRadius: 999,
-              background: 'transparent',
-              border: '0.5px solid var(--line-strong)',
-              color: 'var(--text-2)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <IconInfo size={16} stroke={2} />
-          </button>
           <button
             type="button"
             onClick={onOpenAccount}

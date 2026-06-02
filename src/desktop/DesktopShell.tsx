@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import type { User } from '../lib/types';
 import { Wordmark } from '../components/atoms';
-import { IconInfo, IconUser } from '../components/icons';
+import { IconUser } from '../components/icons';
 import { FindParkingDesktop, type FindParkingDesktopProps, type DesktopSavedProps } from './FindParkingDesktop';
 import { CoverageScreen } from '../screens/CoverageScreen';
 import { SavedScreen } from '../screens/SavedScreen';
@@ -157,9 +157,6 @@ function TopNav({ route, setRoute, user }: { route: DesktopRoute; setRoute: (r: 
         </nav>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button aria-label="About" onClick={() => setRoute('about')} style={circleBtn}>
-          <IconInfo size={17} stroke={2} />
-        </button>
         <button
           aria-label="Account"
           onClick={() => setRoute('account')}

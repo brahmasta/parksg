@@ -3,6 +3,7 @@ import {
   IconArrowRight,
   IconBolt,
   IconCar,
+  IconChevronLeft,
   IconDatabase,
   IconExternal,
   IconLayers,
@@ -45,23 +46,36 @@ const COVERAGE = {
   ],
 };
 
-export function CoverageScreen({ onFindParking }: { onFindParking: () => void }) {
+export function CoverageScreen({ onFindParking, onBack }: { onFindParking: () => void; onBack?: () => void }) {
   const c = COVERAGE;
 
   return (
-    <div className="psg-screen" style={{ maxWidth: 1080, margin: '0 auto', padding: '40px 28px 80px' }}>
+    <div
+      className="psg-screen"
+      style={{ maxWidth: 1080, margin: '0 auto', padding: onBack ? '48px 18px 80px' : '40px 28px 80px', overflowY: onBack ? 'auto' : undefined, height: onBack ? '100%' : undefined }}
+    >
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back"
+          style={{ appearance: 'none', width: 36, height: 36, borderRadius: 999, background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', color: 'var(--text-1)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}
+        >
+          <IconChevronLeft size={18} stroke={2} />
+        </button>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconDatabase size={16} stroke={2} /></span>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--accent)', letterSpacing: 1, textTransform: 'uppercase', fontWeight: 600 }}>
           Data Coverage
         </span>
       </div>
-      <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 40, fontWeight: 600, letterSpacing: -1, lineHeight: 1.05, maxWidth: 640 }}>
+      <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 7vw, 40px)', fontWeight: 600, letterSpacing: -1, lineHeight: 1.05, maxWidth: 640 }}>
         Every public carpark in Singapore, from the source.
       </h1>
 
       {/* Hero stats */}
-      <div className="psg-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginTop: 32 }}>
+      <div className="psg-stagger" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, marginTop: 32 }}>
         <BigStat value={c.totalCarparks.toLocaleString()} label="Carparks covered" icon={<IconCar size={18} stroke={2} />} accent />
         <BigStat value={c.onMap.toLocaleString()} label="On the map" icon={<IconDatabase size={18} stroke={2} />} />
         <BigStat value={c.withRates.toLocaleString()} label="With rate estimates" icon={<IconList size={18} stroke={2} />} />
@@ -70,7 +84,7 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
 
       {/* Breakdown by source */}
       <SectionTitle>Breakdown by source</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 28, alignItems: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 18, padding: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 28, alignItems: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 18, padding: 28 }}>
         <SourceDonut sources={c.sources} total={c.totalCarparks} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {c.sources.map((s, i) => {
@@ -93,7 +107,7 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
 
       {/* Source detail cards */}
       <SectionTitle>The sources in detail</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
         {c.sources.map((s) => {
           const live = s.freshness.toLowerCase().startsWith('live');
           return (
@@ -128,7 +142,7 @@ export function CoverageScreen({ onFindParking }: { onFindParking: () => void })
 
       {/* Enriched-with layers */}
       <SectionTitle>Enriched with</SectionTitle>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
         {c.layers.map((l) => (
           <div key={l.key} style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14, padding: 18, display: 'flex', alignItems: 'flex-start', gap: 13 }}>
             <span style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, background: `color-mix(in srgb, var(${l.colorVar}) 16%, transparent)`, color: `var(${l.colorVar})`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>

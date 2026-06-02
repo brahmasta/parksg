@@ -10,6 +10,7 @@ import { RealResultsMap } from '../components/RealResultsMap';
 import { DetailScreen } from '../screens/DetailScreen';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import { useWalkRoute } from '../hooks/useWalkRoute';
+import { pickHeroCopy } from '../lib/heroCopy';
 import { IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
 
 export type DesktopSavedProps = {
@@ -269,14 +270,16 @@ function LandingDesktop({
   nearMeBusy: boolean;
   saved: DesktopSavedProps;
 }) {
+  // Same hero copy as the phone home, locked per mount.
+  const hero = useMemo(() => pickHeroCopy(), []);
   return (
     <main className="psg-screen" style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: 560, padding: '64px 24px 80px' }}>
-        <h1 style={{ margin: '0 0 6px', fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.1 }}>
-          Where are you headed?
+        <h1 style={{ margin: '0 0 6px', fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.1, textWrap: 'balance' }}>
+          {hero.header}
         </h1>
-        <p style={{ margin: '0 0 20px', fontSize: 14.5, color: 'var(--text-2)' }}>
-          Compare live cost &amp; availability at your destination before you drive.
+        <p style={{ margin: '0 0 20px', fontSize: 14.5, color: 'var(--text-2)', lineHeight: 1.45, maxWidth: 420 }}>
+          {hero.sub}
         </p>
 
         <PlaceAutocomplete

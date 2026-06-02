@@ -174,7 +174,8 @@ export type Screen =
   | 'detail'
   | 'about'
   | 'account'
-  | 'saved';
+  | 'saved'
+  | 'coverage';
 export type ViewMode = 'list' | 'map';
 
 // ── Accounts & Save ─────────────────────────────────────────────────
