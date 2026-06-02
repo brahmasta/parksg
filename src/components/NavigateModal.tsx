@@ -63,6 +63,7 @@ export function NavigateModal({
           borderRadius: 20,
           boxShadow: '0 30px 80px rgba(0,0,0,0.35)',
           padding: 22,
+          userSelect: 'none',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
@@ -88,7 +89,7 @@ export function NavigateModal({
               }}
               style={{ appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', borderRadius: 12, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', width: '100%', textAlign: 'left', minHeight: 56 }}
             >
-              <span style={{ display: 'inline-flex', flexShrink: 0 }}>{PROVIDER_ICON[p]}</span>
+              <span style={{ display: 'inline-flex', flexShrink: 0, pointerEvents: 'none' }}>{PROVIDER_ICON[p]}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', fontSize: 15, fontWeight: 600, color: 'var(--text-1)' }}>{MAPS_PROVIDER_LABELS[p]}</span>
                 <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-3)', marginTop: 1 }}>Opens in a new tab</span>

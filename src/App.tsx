@@ -477,6 +477,19 @@ function App() {
         <Analytics />
         <DesktopShell
           find={findProps}
+          saved={{
+            merged: saves.merged,
+            destinationCount: saves.destinations.length,
+            carparkCount: saves.savedCarparks.length,
+            onSearchDestination: (item) => handleSearchSavedDestination(item.destination),
+            onOpenCarpark: (item) => handleOpenSavedCarpark(item),
+            onRemoveDestination: handleRemoveDest,
+            onUnsaveCarpark: (id) => saves.toggleCarpark(id),
+            onAddDestination: () => {
+              setDestPrefill(null);
+              setAddDestOpen(true);
+            },
+          }}
           user={user}
           savedItemCount={saves.merged.length}
           onSignIn={handleSignIn}

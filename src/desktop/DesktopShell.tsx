@@ -1,16 +1,29 @@
 import { useState, type CSSProperties } from 'react';
-import type { User } from '../lib/types';
+import type { MergedSaveItem, User } from '../lib/types';
 import { Wordmark } from '../components/atoms';
 import { IconInfo, IconUser } from '../components/icons';
 import { FindParkingDesktop, type FindParkingDesktopProps } from './FindParkingDesktop';
 import { CoverageScreen } from '../screens/CoverageScreen';
+import { SavedScreen } from '../screens/SavedScreen';
 import { AboutDesktop } from './AboutDesktop';
 import { AccountDesktop } from './AccountDesktop';
 
-type DesktopRoute = 'find' | 'coverage' | 'about' | 'account';
+type DesktopRoute = 'find' | 'saved' | 'coverage' | 'about' | 'account';
+
+export type DesktopSavedProps = {
+  merged: MergedSaveItem[];
+  destinationCount: number;
+  carparkCount: number;
+  onSearchDestination: (item: MergedSaveItem & { kind: 'destination' }) => void;
+  onOpenCarpark: (item: MergedSaveItem & { kind: 'carpark' }) => void;
+  onRemoveDestination: (id: string) => void;
+  onUnsaveCarpark: (id: string) => void;
+  onAddDestination: () => void;
+};
 
 export type DesktopShellProps = {
   find: FindParkingDesktopProps;
+  saved: DesktopSavedProps;
   user: User | null;
   savedItemCount: number;
   onSignIn: () => void;
@@ -22,7 +35,7 @@ export type DesktopShellProps = {
  * Find parking is a two-pane view; Coverage/About/Account are peer routes.
  * All data + handlers are shared with the phone flow (passed down from App).
  */
-export function DesktopShell({ find, user, savedItemCount, onSignIn, onRequestSignOut }: DesktopShellProps) {
+export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRequestSignOut }: DesktopShellProps) {
   const [route, setRoute] = useState<DesktopRoute>('find');
 
   return (
@@ -30,6 +43,31 @@ export function DesktopShell({ find, user, savedItemCount, onSignIn, onRequestSi
       <TopNav route={route} setRoute={setRoute} user={user} />
 
       {route === 'find' && <FindParkingDesktop {...find} />}
+
+      {route === 'saved' && (
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+          <div style={{ maxWidth: 760, margin: '0 auto' }}>
+            <SavedScreen
+              merged={saved.merged}
+              destinationCount={saved.destinationCount}
+              carparkCount={saved.carparkCount}
+              onBack={() => setRoute('find')}
+              onSearchDestination={(item) => {
+                saved.onSearchDestination(item);
+                setRoute('find');
+              }}
+              onOpenCarpark={(item) => {
+                saved.onOpenCarpark(item);
+                setRoute('find');
+              }}
+              onRemoveDestination={saved.onRemoveDestination}
+              onUnsaveCarpark={saved.onUnsaveCarpark}
+              onAddDestination={saved.onAddDestination}
+              onGoFindCarpark={() => setRoute('find')}
+            />
+          </div>
+        </div>
+      )}
 
       {route === 'coverage' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
@@ -49,7 +87,7 @@ export function DesktopShell({ find, user, savedItemCount, onSignIn, onRequestSi
             user={user}
             savedItemCount={savedItemCount}
             onSignIn={onSignIn}
-            onOpenSaved={() => setRoute('find')}
+            onOpenSaved={() => setRoute('saved')}
             onRequestSignOut={onRequestSignOut}
           />
         </div>
@@ -76,6 +114,7 @@ const circleBtn: CSSProperties = {
 function TopNav({ route, setRoute, user }: { route: DesktopRoute; setRoute: (r: DesktopRoute) => void; user: User | null }) {
   const links: [DesktopRoute, string][] = [
     ['find', 'Find parking'],
+    ['saved', 'Saved'],
     ['coverage', 'Coverage'],
     ['about', 'About'],
   ];

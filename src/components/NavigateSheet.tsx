@@ -82,7 +82,7 @@ export function NavigateSheet({
                 minHeight: 56,
               }}
             >
-              <span style={{ display: 'inline-flex', flexShrink: 0 }}>
+              <span style={{ display: 'inline-flex', flexShrink: 0, pointerEvents: 'none' }}>
                 {PROVIDER_ICON[p]}
               </span>
               <span style={{ flex: 1, minWidth: 0 }}>

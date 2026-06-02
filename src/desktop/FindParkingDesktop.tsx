@@ -87,6 +87,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps) {
             cost={costOf(detailCp)}
             durationText={`${fmtDuration(stay.hours)} stay`}
             hideDurationStrip
+            hideWalkMap
             navVariant="modal"
             onBack={onCloseDetail}
             refreshedSecondsAgo={refreshedSecondsAgo}

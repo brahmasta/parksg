@@ -52,6 +52,7 @@ export function DetailScreen({
   durationText,
   hideDurationStrip = false,
   navVariant = 'sheet',
+  hideWalkMap = false,
 }: {
   cp: Carpark;
   destination: string;
@@ -72,6 +73,9 @@ export function DetailScreen({
   hideDurationStrip?: boolean;
   /** Navigation picker style: bottom 'sheet' (mobile) or centered 'modal' (desktop). */
   navVariant?: 'sheet' | 'modal';
+  /** Hide the in-panel walk diagram (desktop shows the walk line on the main map
+   * instead, so the path isn't drawn twice). */
+  hideWalkMap?: boolean;
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
 
@@ -84,7 +88,17 @@ export function DetailScreen({
   const openProvider = useCallback(
     (provider: MapsProvider) => {
       const [lat, lng] = cp.coords.entrance;
-      window.open(mapsDirectionsUrl(provider, lat, lng), '_blank', 'noopener');
+      const url = mapsDirectionsUrl(provider, lat, lng);
+      // Use a real anchor click rather than window.open — anchors with
+      // target=_blank are never treated as a popup (so they're not blocked) and
+      // open reliably across browsers.
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
       setLastProvider(provider);
       setLastProviderState(provider);
       track('navigate', { provider, carpark: cp.id });
@@ -434,7 +448,11 @@ export function DetailScreen({
               {walk.minutes} min · {formatDistance(walk.meters)}
             </div>
           </div>
-          {destinationCoords && walk.source === 'onemap' && walk.geometry.length >= 2 ? (
+          {hideWalkMap ? (
+            <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.4 }}>
+              Walking route shown on the map.
+            </div>
+          ) : destinationCoords && walk.source === 'onemap' && walk.geometry.length >= 2 ? (
             <RealWalkMap
               origin={cp.coords.entrance}
               destination={destinationCoords}
