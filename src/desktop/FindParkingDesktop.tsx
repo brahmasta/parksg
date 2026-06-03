@@ -9,9 +9,10 @@ import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { DetailScreen } from '../screens/DetailScreen';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
+import { FilterPill } from '../components/FilterPill';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 import { pickHeroCopy } from '../lib/heroCopy';
-import { IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
+import { IconBolt, IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
 
 export type DesktopSavedProps = {
   merged: MergedSaveItem[];
@@ -61,6 +62,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
+  const [evOnly, setEvOnly] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
   // The emphasised carpark on the map: the open detail, else the hovered card.
   const activeId = detailCp?.id ?? hoverId;
@@ -79,9 +81,9 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   );
   const walkGeometry = detailCp && walk.source === 'onemap' && walk.geometry.length >= 2 ? walk.geometry : null;
 
-  const { ranked } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly: false, sortBy, costOf }),
-    [carparks, state, availableOnly, sortBy, costOf],
+  const { ranked, evFilterEmpty } = useMemo(
+    () => selectResultsView({ carparks, state, availableOnly, evOnly, sortBy, costOf }),
+    [carparks, state, availableOnly, evOnly, sortBy, costOf],
   );
   const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
 
@@ -175,6 +177,12 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
                   {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
                   {headerDestination ? ` near ${headerDestination}` : ''}
                 </MonoLabel>
+                <FilterPill
+                  active={evOnly}
+                  onClick={() => setEvOnly(!evOnly)}
+                  icon={<IconBolt size={11} stroke={2.25} />}
+                  label="EV"
+                />
               </div>
               <FilterBar
                 sortBy={sortBy}
@@ -192,10 +200,14 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             ) : ranked.length === 0 ? (
               <div style={{ marginTop: 8, padding: '28px 20px', textAlign: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
-                  {availableOnly ? 'No carparks with free lots' : 'No carparks nearby'}
+                  {evFilterEmpty ? 'No carparks with EV charging' : availableOnly ? 'No carparks with free lots' : 'No carparks nearby'}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>
-                  {availableOnly ? 'Turn off “Available only” to see full carparks too.' : 'Try a different destination or search wider.'}
+                  {evFilterEmpty
+                    ? 'Turn off the EV filter to see all carparks nearby.'
+                    : availableOnly
+                      ? 'Turn off “Available only” to see full carparks too.'
+                      : 'Try a different destination or search wider.'}
                 </div>
               </div>
             ) : (
