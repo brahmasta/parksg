@@ -23,6 +23,8 @@ import {
   lotsDisplay,
 } from '../lib/availability';
 import { AvailabilityDot, DurationStrip, GoogleBadge, LotTypeChips, OperatorBadge } from '../components/atoms';
+import { StayPlanner } from '../components/StayPlanner';
+import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { EVSection } from '../components/EVSection';
 import { PoweredByGoogle } from '../components/PoweredByGoogle';
 import { RateTable } from '../components/RateTable';
@@ -41,8 +43,10 @@ export function DetailScreen({
   cp,
   destination,
   destinationCoords,
-  duration,
+  duration = 1,
   setDuration,
+  stay,
+  setStay,
   onBack,
   refreshedSecondsAgo,
   degraded,
@@ -57,19 +61,24 @@ export function DetailScreen({
   cp: Carpark;
   destination: string;
   destinationCoords: [number, number] | null;
-  duration: DurationHours;
-  setDuration: (v: DurationHours) => void;
+  /** Legacy preset duration — used only when `stay` is not provided. */
+  duration?: DurationHours;
+  setDuration?: (v: DurationHours) => void;
+  /** Planned stay — when provided, drives the cost and renders a StayPlanner in
+   * the adjust-duration slot (unless hideDurationStrip). */
+  stay?: Stay;
+  setStay?: (s: Stay) => void;
   onBack: () => void;
   refreshedSecondsAgo: number | null;
   degraded: boolean;
   saved: boolean;
   onToggleSave: () => void;
   /** Explicit cost (dollars) for an arbitrary stay; null = unknown. Falls back
-   * to the preset estByHours[duration] when omitted (desktop StayPlanner). */
+   * to the preset estByHours[duration] when omitted and no `stay`. */
   cost?: number | null;
   /** Caption under the cost, e.g. "2h 30m stay". */
   durationText?: string;
-  /** Hide the preset DurationStrip (desktop drives duration via StayPlanner). */
+  /** Hide the duration control entirely (desktop rail drives it via StayPlanner). */
   hideDurationStrip?: boolean;
   /** Navigation picker style: bottom 'sheet' (mobile) or centered 'modal' (desktop). */
   navVariant?: 'sheet' | 'modal';
@@ -115,8 +124,15 @@ export function DetailScreen({
   }, [lastProvider, openProvider]);
   const lotsInfo = lotsDisplay(cp.lotsAvailable, cp.lotsTotal, degraded);
   const isGoogle = cp.source === 'GOOGLE';
-  const cost = costOverride !== undefined ? costOverride : cp.estByHours[duration];
+  const cost = stay
+    ? estCostForStay(cp, stay)
+    : costOverride !== undefined
+      ? costOverride
+      : cp.estByHours[duration];
   const costUnknown = isGoogle || cost == null;
+  const effectiveDurationText = stay
+    ? `${fmtDuration(stay.hours)} stay`
+    : (durationText ?? `${durationLabel(duration)} stay`);
 
   // Live walking route: starts as haversine, upgrades to OneMap when the
   // /api/onemap-route proxy returns. Silent fallback on any error.
@@ -328,7 +344,7 @@ export function DetailScreen({
               {costUnknown ? '—' : formatCost(cost as number)}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              {isGoogle ? googleRateHint(cp.googleParking) : (durationText ?? `${durationLabel(duration)} stay`)}
+              {isGoogle ? googleRateHint(cp.googleParking) : effectiveDurationText}
             </div>
           </div>
           <div
@@ -465,24 +481,31 @@ export function DetailScreen({
           )}
         </div>
 
-        {/* Adjust duration (hidden on desktop — the StayPlanner drives it) */}
-        {!hideDurationStrip && (
-          <div style={{ marginTop: 20 }}>
-            <div
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10.5,
-                color: 'var(--text-3)',
-                letterSpacing: 1,
-                textTransform: 'uppercase',
-                marginBottom: 10,
-              }}
-            >
-              Adjust duration
+        {/* Adjust duration — StayPlanner when a `stay` is supplied (mobile +
+            desktop parity); legacy preset strip otherwise. Hidden entirely on
+            the desktop rail, which has its own StayPlanner. */}
+        {!hideDurationStrip &&
+          (stay && setStay ? (
+            <div style={{ marginTop: 20 }}>
+              <StayPlanner stay={stay} onChange={setStay} />
             </div>
-            <DurationStrip value={duration} onChange={setDuration} compact />
-          </div>
-        )}
+          ) : setDuration ? (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10.5,
+                  color: 'var(--text-3)',
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                Adjust duration
+              </div>
+              <DurationStrip value={duration} onChange={setDuration} compact />
+            </div>
+          ) : null)}
 
         {/* Rate schedule */}
         <div style={{ marginTop: 22 }}>

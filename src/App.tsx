@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Analytics, track } from '@vercel/analytics/react';
 import type {
   Carpark,
-  DurationHours,
   MergedSaveItem,
   RecentDestination,
   SavedDestination,
@@ -27,7 +26,7 @@ import { useCarparks } from './hooks/useCarparks';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { DesktopShell } from './desktop/DesktopShell';
 import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
-import { roundedSoon, type Stay } from './lib/stay';
+import { estCostForStay, roundedSoon, type Stay } from './lib/stay';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
 import { recordSearch } from './lib/api/analytics';
@@ -37,7 +36,6 @@ import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
 
-const DURATION_KEY = 'psg.duration';
 const VIEW_MODE_KEY = 'psg.viewMode';
 const AVAILABLE_ONLY_KEY = 'psg.availableOnly';
 const EV_ONLY_KEY = 'psg.evOnly';
@@ -67,22 +65,6 @@ function App() {
   useEffect(() => {
     track('screen_view', { screen });
   }, [screen]);
-
-  const [duration, setDurationState] = useState<DurationHours>(() =>
-    readStored<DurationHours>(DURATION_KEY, 1, (raw) => {
-      const n = Number(raw);
-      const allowed: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
-      return allowed.includes(n as DurationHours) ? (n as DurationHours) : null;
-    }),
-  );
-  const setDuration = useCallback((v: DurationHours) => {
-    setDurationState(v);
-    try {
-      localStorage.setItem(DURATION_KEY, String(v));
-    } catch {
-      /* ignore */
-    }
-  }, []);
 
   const [viewMode, setViewModeState] = useState<ViewMode>(() =>
     readStored<ViewMode>(VIEW_MODE_KEY, 'list', (raw) =>
@@ -269,7 +251,7 @@ function App() {
       // The UI hides the save affordance; this guards the path defensively.
       if (cp.source === 'GOOGLE') return;
       const isSaved = saves.isCarparkSaved(cp.id);
-      const snapshot = snapshotFromCarpark(cp, cp.estByHours[duration] ?? 0);
+      const snapshot = snapshotFromCarpark(cp, estCostForStay(cp, stay) ?? 0);
       saves.toggleCarpark(cp.id, snapshot);
       pop({
         icon: <IconBookmark filled={!isSaved} size={15} stroke={2} />,
@@ -277,7 +259,7 @@ function App() {
         sub: cp.name,
       });
     },
-    [saves, duration, pop],
+    [saves, stay, pop],
   );
 
   const handleSignIn = useCallback(() => {
@@ -552,8 +534,8 @@ function App() {
             ? [result.destination.lat, result.destination.lng]
             : null
         }
-        duration={duration}
-        setDuration={setDuration}
+        stay={stay}
+        setStay={setStay}
         carparks={result.carparks}
         state={result.state}
         availableOnly={availableOnly}
@@ -586,8 +568,8 @@ function App() {
             ? [result.destination.lat, result.destination.lng]
             : null
         }
-        duration={duration}
-        setDuration={setDuration}
+        stay={stay}
+        setStay={setStay}
         onBack={() => setScreen('results')}
         refreshedSecondsAgo={result.refreshedSecondsAgo}
         degraded={result.state === 'degraded'}

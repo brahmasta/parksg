@@ -1,8 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { Carpark, DurationHours, ResultsState, ViewMode } from '../lib/types';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { Carpark, ResultsState, ViewMode } from '../lib/types';
 import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
-import { DurationStrip, Spinner } from '../components/atoms';
+import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
+import { Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
+import { StayPlanner } from '../components/StayPlanner';
 import { FilterBar } from '../components/FilterBar';
 import { DegradedBanner } from '../components/DegradedBanner';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
@@ -22,8 +24,8 @@ import {
 export function ResultsScreen({
   destination,
   destinationCoords,
-  duration,
-  setDuration,
+  stay,
+  setStay,
   carparks,
   state,
   availableOnly,
@@ -45,8 +47,8 @@ export function ResultsScreen({
 }: {
   destination: string;
   destinationCoords: [number, number] | null;
-  duration: DurationHours;
-  setDuration: (v: DurationHours) => void;
+  stay: Stay;
+  setStay: (s: Stay) => void;
   carparks: Carpark[];
   state: ResultsState;
   availableOnly: boolean;
@@ -75,9 +77,13 @@ export function ResultsScreen({
   // Cost/distance sort lives locally — only this screen needs it on mobile.
   const [sortBy, setSortBy] = useState<SortBy>('cost');
 
+  // Arbitrary-duration cost for the planned stay (parity with desktop).
+  const costOf = useCallback((cp: Carpark) => estCostForStay(cp, stay), [stay]);
+  const durationText = `EST · ${fmtDuration(stay.hours)}`;
+
   const { ranked, evFilterEmpty, availFilterEmpty } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly, sortBy, duration }),
-    [carparks, state, availableOnly, evOnly, sortBy, duration],
+    () => selectResultsView({ carparks, state, availableOnly, evOnly, sortBy, costOf }),
+    [carparks, state, availableOnly, evOnly, sortBy, costOf],
   );
 
   // Preserve the list's scroll position across Detail→back. The screen
@@ -92,7 +98,7 @@ export function ResultsScreen({
 
   // CHEAPEST is awarded among trustworthy (non-stale) carparks so a 2018 figure
   // can't beat a live price unchallenged — see pickCheapestId (TRUST-1).
-  const cheapestId = useMemo(() => pickCheapestId(ranked, duration), [ranked, duration]);
+  const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
   const hasGoogle = useMemo(() => ranked.some((c) => c.source === 'GOOGLE'), [ranked]);
 
   return (
@@ -214,13 +220,6 @@ export function ResultsScreen({
           </button>
         </div>
 
-        {/* Duration */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14 }}>
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <DurationStrip value={duration} onChange={setDuration} compact />
-          </div>
-        </div>
-
         {/* Result summary */}
         <div
           style={{
@@ -266,6 +265,15 @@ export function ResultsScreen({
       >
         {state === 'degraded' && <DegradedBanner onRetry={onRetry} />}
 
+        {/* Stay planner — same control + arbitrary-duration cost as desktop.
+            Lives at the top of the scrollable body so it doesn't crowd the
+            sticky header on a phone. */}
+        {(state === 'loaded' || state === 'degraded') && (
+          <div style={{ padding: '4px 16px 10px' }}>
+            <StayPlanner stay={stay} onChange={setStay} />
+          </div>
+        )}
+
         {state === 'loading' && <ResultsLoading />}
 
         {state === 'empty' && (
@@ -292,7 +300,8 @@ export function ResultsScreen({
             <RealResultsMap
               carparks={ranked}
               cheapestId={cheapestId}
-              duration={duration}
+              duration={1}
+              costOf={costOf}
               onSelect={onSelect}
               degraded={state === 'degraded'}
               destinationCoords={destinationCoords}
@@ -311,7 +320,9 @@ export function ResultsScreen({
                 <CarparkCard
                   key={cp.id}
                   cp={cp}
-                  duration={duration}
+                  duration={1}
+                  cost={costOf(cp)}
+                  durationText={durationText}
                   rank={i + 1}
                   isCheapest={cp.id === cheapestId}
                   degraded={state === 'degraded'}

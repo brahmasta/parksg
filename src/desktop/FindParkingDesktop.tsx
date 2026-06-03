@@ -122,10 +122,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             cp={detailCp}
             destination={headerDestination}
             destinationCoords={destinationCoords}
-            duration={1}
-            setDuration={() => {}}
-            cost={costOf(detailCp)}
-            durationText={`${fmtDuration(stay.hours)} stay`}
+            stay={stay}
+            setStay={setStay}
             hideDurationStrip
             hideWalkMap
             navVariant="modal"
