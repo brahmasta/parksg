@@ -266,11 +266,18 @@ export function ResultsScreen({
         {state === 'degraded' && <DegradedBanner onRetry={onRetry} />}
 
         {/* Stay planner — same control + arbitrary-duration cost as desktop.
-            Lives at the top of the scrollable body so it doesn't crowd the
-            sticky header on a phone. */}
+            Lives at the top of the scrollable body and is collapsible so it
+            doesn't crowd a phone — collapsed by default in map view. The
+            `key` remounts it on view switch so the default applies. */}
         {(state === 'loaded' || state === 'degraded') && (
           <div style={{ padding: '4px 16px 10px' }}>
-            <StayPlanner stay={stay} onChange={setStay} />
+            <StayPlanner
+              key={viewMode}
+              stay={stay}
+              onChange={setStay}
+              collapsible
+              defaultOpen={viewMode === 'list'}
+            />
           </div>
         )}
 

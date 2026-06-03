@@ -487,7 +487,7 @@ export function DetailScreen({
         {!hideDurationStrip &&
           (stay && setStay ? (
             <div style={{ marginTop: 20 }}>
-              <StayPlanner stay={stay} onChange={setStay} />
+              <StayPlanner stay={stay} onChange={setStay} collapsible />
             </div>
           ) : setDuration ? (
             <div style={{ marginTop: 20 }}>

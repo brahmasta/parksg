@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import {
   STAY_MAX_HOURS,
   STAY_MIN_HOURS,
@@ -14,14 +14,29 @@ import {
   type StartMode,
 } from '../lib/stay';
 import { MonoLabel } from './atoms';
-import { IconArrowRight, IconCalendar, IconCar, IconClock, IconMinus, IconPlus } from './icons';
+import { IconArrowRight, IconCalendar, IconCar, IconChevronDown, IconClock, IconMinus, IconPlus } from './icons';
 
 /**
  * "When are you parking, and for how long?" — a start time (Now / Later +
  * date-time) and a duration dialed in 30-min steps, hard-capped at 24h. Emits
  * the full Stay upward; the results re-rank costs from `stay.hours`.
+ *
+ * `collapsible` (mobile) turns the header into a toggle that shows a compact
+ * summary when collapsed, so it doesn't dominate the screen (esp. map view).
  */
-export function StayPlanner({ stay, onChange }: { stay: Stay; onChange: (s: Stay) => void }) {
+export function StayPlanner({
+  stay,
+  onChange,
+  collapsible = false,
+  defaultOpen = false,
+}: {
+  stay: Stay;
+  onChange: (s: Stay) => void;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(collapsible ? defaultOpen : true);
+  const bodyVisible = !collapsible || open;
   const { startMode, startAt, hours } = stay;
   const start = effectiveStart(stay);
   const endDate = new Date(start.getTime() + hours * 3600000);
@@ -56,15 +71,44 @@ export function StayPlanner({ stay, onChange }: { stay: Stay; onChange: (s: Stay
   const atMin = hours <= STAY_MIN_HOURS;
 
   return (
-    <div style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 16, padding: 18, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: 'var(--text-2)', display: 'inline-flex' }}><IconClock size={15} stroke={2} /></span>
-          <MonoLabel>Plan your stay</MonoLabel>
+    <div style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 16, padding: collapsible && !open ? '14px 18px' : 18, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+      {/* Header — a toggle when collapsible, with a compact summary when closed. */}
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          style={{
+            appearance: 'none', border: 0, background: 'transparent', padding: 0, width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+            cursor: 'pointer', marginBottom: open ? 12 : 0,
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{ color: 'var(--text-2)', display: 'inline-flex', flexShrink: 0 }}><IconClock size={15} stroke={2} /></span>
+            <MonoLabel>Plan your stay</MonoLabel>
+            {!open && (
+              <span style={{ fontSize: 12.5, color: 'var(--text-2)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                · {fmtDuration(hours)} · {startMode === 'now' ? 'Now' : `${fmtDay(start)} ${fmtClock(start)}`}
+              </span>
+            )}
+          </span>
+          <span style={{ color: 'var(--text-3)', display: 'inline-flex', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 150ms ease' }}>
+            <IconChevronDown size={18} stroke={2} />
+          </span>
+        </button>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: 'var(--text-2)', display: 'inline-flex' }}><IconClock size={15} stroke={2} /></span>
+            <MonoLabel>Plan your stay</MonoLabel>
+          </div>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-3)', letterSpacing: 0.4, padding: '2px 7px', borderRadius: 5, background: 'var(--bg-3)' }}>MAX 24H</span>
         </div>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-3)', letterSpacing: 0.4, padding: '2px 7px', borderRadius: 5, background: 'var(--bg-3)' }}>MAX 24H</span>
-      </div>
+      )}
+
+      {bodyVisible && (
+        <>
 
       {/* Now / Later */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, padding: 4, background: 'var(--bg-2)', borderRadius: 11, border: '0.5px solid var(--line)' }}>
@@ -159,6 +203,8 @@ export function StayPlanner({ stay, onChange }: { stay: Stay; onChange: (s: Stay
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
