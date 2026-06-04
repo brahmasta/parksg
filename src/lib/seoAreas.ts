@@ -3,8 +3,7 @@
  *  - the server SSR landing pages (`/parking-near/:area`) and the sitemap
  *    (re-exported from `api/_seo/areas.ts`), and
  *  - the client, which path-routes `/parking-near/:slug` to a live in-app
- *    search (src/App.tsx) and renders the in-app "Browse by area" links
- *    (src/components/AreaLinks.tsx).
+ *    search (src/App.tsx).
  *
  * Each entry is a real place people search "parking near …" for, with a centre
  * coordinate used to pull nearby carparks (bounding box + haversine).

@@ -254,19 +254,6 @@ function App() {
     setScreen('detail');
   };
 
-  // "Browse parking by area" links (AreaLinks). Route to live results in-app and
-  // reflect the clean, shareable `/parking-near/:slug` URL in the address bar —
-  // the same URL Google/LLMs crawl — without a full reload.
-  const goArea = useCallback(
-    (area: { slug: string; name: string; lat: number; lng: number }) => {
-      window.history.pushState(null, '', `/parking-near/${area.slug}`);
-      resultsScrollRef.current = 0;
-      setScreen('results');
-      searchAtCoords(area.name, area.lat, area.lng);
-    },
-    [searchAtCoords],
-  );
-
   const [nearMeBusy, setNearMeBusy] = useState(false);
   const onNearMe = useCallback(() => {
     if (!navigator.geolocation) {
@@ -550,7 +537,6 @@ function App() {
       onSearch: goSearch,
       onPickPlace: goPickPlace,
       onNearMe,
-      onPickArea: goArea,
       nearMeBusy,
       carparks: result.carparks,
       state: result.state,
@@ -630,7 +616,6 @@ function App() {
           handleSearchSavedDestination(item.destination)
         }
         onOpenSavedCarpark={handleOpenSavedCarpark}
-        onPickArea={goArea}
       />
     );
   } else if (screen === 'about') {

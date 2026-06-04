@@ -5,8 +5,6 @@ import type {
   User,
 } from '../lib/types';
 import { AppFooter } from '../components/AppFooter';
-import { AreaLinks } from '../components/AreaLinks';
-import type { SeoArea } from '../lib/seoAreas';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { Wordmark } from '../components/Wordmark';
@@ -37,14 +35,12 @@ export function HomeScreen({
   onOpenSaved,
   onSearchSavedDestination,
   onOpenSavedCarpark,
-  onPickArea,
 }: {
   destination: string;
   setDestination: (v: string) => void;
   onSearch: (q?: string) => void;
   onPickPlace: (place: ResolvedPlace) => void;
   onNearMe: () => void;
-  onPickArea: (area: SeoArea) => void;
   recents: RecentDestination[];
   nearMeBusy?: boolean;
   user: User | null;
@@ -504,8 +500,6 @@ export function HomeScreen({
             </div>
           </div>
         ) : null}
-
-        <AreaLinks onPick={onPickArea} />
 
         <AppFooter />
       </div>
