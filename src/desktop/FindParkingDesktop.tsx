@@ -115,6 +115,14 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
     );
   }
 
+  // When the rail shows a carpark Detail (or its loading spinner) it must be a
+  // flex column so DetailScreen's own `flex:1` gets a bounded height — its
+  // internal body scrolls and the sticky "Navigate" CTA (position:absolute;
+  // bottom:0) anchors to the rail's bottom. A plain block rail leaves the root
+  // unbounded, pushing the CTA past the clipped viewport (it vanishes). The
+  // search/cards branch keeps the simple scrolling block.
+  const showingDetail = !!detailCp || !!detailLoading;
+
   return (
     <main style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
       {/* Left rail */}
@@ -124,8 +132,11 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
           maxWidth: 460,
           flexShrink: 0,
           height: '100%',
+          minHeight: 0,
           position: 'relative',
-          overflowY: detailCp ? 'hidden' : 'auto',
+          display: showingDetail ? 'flex' : 'block',
+          flexDirection: showingDetail ? 'column' : undefined,
+          overflowY: showingDetail ? 'hidden' : 'auto',
           borderRight: '0.5px solid var(--line-strong)',
           background: 'var(--bg-0)',
         }}
