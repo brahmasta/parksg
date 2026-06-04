@@ -92,7 +92,11 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
 
   // Before any destination is chosen, show a focused landing (search + saved
   // places, no map) — mirroring the phone home rather than an empty map pane.
-  const showLanding = !destinationCoords && state !== 'loading';
+  // Exception: when a carpark is open directly (e.g. a `/carpark/:slug` deep
+  // link or a saved-carpark open) there's no surrounding search, so
+  // destinationCoords is null — but we must still show that carpark's Detail,
+  // not the landing.
+  const showLanding = !detailCp && !destinationCoords && state !== 'loading';
   if (showLanding) {
     return (
       <LandingDesktop
@@ -249,6 +253,23 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
               cheapestId={cheapestId}
               activeId={activeId}
               walkGeometry={walkGeometry}
+              duration={1}
+              costOf={costOf}
+              onSelect={onOpenDetail}
+              degraded={state === 'degraded'}
+              destinationCoords={destinationCoords}
+            />
+          </div>
+        ) : detailCp ? (
+          // Carpark opened directly (deep link / saved open) with no surrounding
+          // search — centre the map on that single carpark.
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <RealResultsMap
+              variant="fill"
+              carparks={[detailCp]}
+              cheapestId={null}
+              activeId={detailCp.id}
+              walkGeometry={null}
               duration={1}
               costOf={costOf}
               onSelect={onOpenDetail}
