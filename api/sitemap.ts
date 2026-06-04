@@ -19,7 +19,9 @@ export default async function handler(_req: Request): Promise<Response> {
     /* still emit a valid sitemap with the home + area pages */
   }
   const areaSlugs = SEO_AREAS.map((a) => a.slug);
-  const xml = renderSitemap(carparkSlugs, areaSlugs);
+  // Stamp lastmod at request time (Edge handler, so Date is allowed here).
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const xml = renderSitemap(carparkSlugs, areaSlugs, lastmod);
   return new Response(xml, {
     status: 200,
     headers: {

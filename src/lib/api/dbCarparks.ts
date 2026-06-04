@@ -96,6 +96,39 @@ const CARPARK_SELECT =
   'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
 
 /**
+ * Fetch a single carpark (with rate_rows) by its URL slug — used when the app
+ * cold-loads on a `/carpark/:slug` SEO URL and boots straight to that carpark's
+ * Detail screen. Mirrors `fetchCarparkById` but matches the stable `slug`
+ * column the SSR pages link by.
+ */
+export async function fetchCarparkBySlug(
+  slug: string,
+  signal?: AbortSignal,
+): Promise<DbCarparkRaw | null> {
+  if (!URL_BASE || !ANON_KEY) return null;
+
+  const params = new URLSearchParams({
+    select: CARPARK_SELECT,
+    slug: `eq.${slug.toLowerCase()}`,
+    limit: '1',
+  });
+
+  const res = await fetch(`${URL_BASE}/rest/v1/carparks?${params.toString()}`, {
+    signal,
+    headers: {
+      apikey: ANON_KEY,
+      Authorization: `Bearer ${ANON_KEY}`,
+      Accept: 'application/json',
+    },
+  });
+  if (!res.ok) return null;
+  const rows = (await res.json()) as DbCarparkRaw[];
+  const row = rows[0];
+  if (!row || row.lat == null || row.lng == null) return null;
+  return row;
+}
+
+/**
  * Returns every carpark within `radiusM` of `centre`, with its rate_rows
  * embedded. Result is unsorted; caller ranks (by distance or cost).
  */

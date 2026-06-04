@@ -9,6 +9,7 @@ import type {
 } from '../lib/types';
 import {
   fetchCarparkById,
+  fetchCarparkBySlug,
   fetchNearbyCarparks,
   type DbCarparkRaw,
   type DbRateRowRaw,
@@ -353,19 +354,12 @@ export function useCarparks() {
     if (trigger) void run(trigger, { radius: 1000 });
   }, [trigger, run]);
 
-  // Load a single carpark by id — used to open a saved carpark straight to
-  // its Detail screen, without a surrounding destination search. Static data
-  // (rates) comes from the DB row; live lots + EV are merged best-effort so a
-  // slow upstream just leaves those fields blank rather than blocking the open.
-  const loadCarparkById = useCallback(
-    async (id: string): Promise<Carpark | null> => {
-      // Google supplementary carparks are ephemeral (in-memory, never persisted)
-      // and have no DB row — a `google:` id can't be re-fetched, so a deep link
-      // or saved-open of one resolves to null rather than hitting the DB.
-      if (id.toLowerCase().startsWith('google:')) return null;
-      const row = await fetchCarparkById(id).catch(() => null);
-      if (!row) return null;
-
+  // Hydrate a fetched DB row into a Detail-ready Carpark. Static data (rates)
+  // comes from the DB row; live lots + EV are merged best-effort so a slow
+  // upstream just leaves those fields blank rather than blocking the open.
+  // Shared by the id and slug loaders below.
+  const hydrateCarpark = useCallback(
+    async (row: DbCarparkRaw): Promise<Carpark> => {
       const wantHdb = row.agency === 'HDB';
       const [hdbAvail, ltaAvail, jpAvail, evSettled] = await Promise.all([
         wantHdb
@@ -398,7 +392,42 @@ export function useCarparks() {
     [],
   );
 
-  return { result, search, searchAtCoords, retry, expandRadius, loadCarparkById, trigger };
+  // Load a single carpark by id — used to open a saved carpark straight to its
+  // Detail screen, without a surrounding destination search.
+  const loadCarparkById = useCallback(
+    async (id: string): Promise<Carpark | null> => {
+      // Google supplementary carparks are ephemeral (in-memory, never persisted)
+      // and have no DB row — a `google:` id can't be re-fetched, so a deep link
+      // or saved-open of one resolves to null rather than hitting the DB.
+      if (id.toLowerCase().startsWith('google:')) return null;
+      const row = await fetchCarparkById(id).catch(() => null);
+      if (!row) return null;
+      return hydrateCarpark(row);
+    },
+    [hydrateCarpark],
+  );
+
+  // Load a single carpark by its URL slug — used when the app cold-loads on a
+  // `/carpark/:slug` SEO URL and boots straight to that carpark's Detail screen.
+  const loadCarparkBySlug = useCallback(
+    async (slug: string): Promise<Carpark | null> => {
+      const row = await fetchCarparkBySlug(slug).catch(() => null);
+      if (!row) return null;
+      return hydrateCarpark(row);
+    },
+    [hydrateCarpark],
+  );
+
+  return {
+    result,
+    search,
+    searchAtCoords,
+    retry,
+    expandRadius,
+    loadCarparkById,
+    loadCarparkBySlug,
+    trigger,
+  };
 }
 
 // ──────────────────────────────────────────────────────────────────────

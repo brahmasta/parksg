@@ -12,6 +12,8 @@ import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import { FilterPill } from '../components/FilterPill';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 import { pickHeroCopy } from '../lib/heroCopy';
+import { AreaLinks } from '../components/AreaLinks';
+import type { SeoArea } from '../lib/seoAreas';
 import { IconBolt, IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
 
 export type DesktopSavedProps = {
@@ -32,6 +34,7 @@ export type FindParkingDesktopProps = {
   onSearch: (q?: string) => void;
   onPickPlace: (place: { label: string; address: string; lat: number; lng: number }) => void;
   onNearMe: () => void;
+  onPickArea: (area: SeoArea) => void;
   nearMeBusy: boolean;
   carparks: Carpark[];
   state: 'loading' | 'loaded' | 'degraded' | 'empty';
@@ -56,7 +59,7 @@ export type FindParkingDesktopProps = {
 export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: DesktopSavedProps }) {
   const {
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
-    onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
+    onNearMe, onPickArea, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly,
     detailCp, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
   } = props;
@@ -98,6 +101,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
         onSearch={onSearch}
         onPickPlace={onPickPlace}
         onNearMe={onNearMe}
+        onPickArea={onPickArea}
         nearMeBusy={nearMeBusy}
         saved={saved}
       />
@@ -269,6 +273,7 @@ function LandingDesktop({
   onSearch,
   onPickPlace,
   onNearMe,
+  onPickArea,
   nearMeBusy,
   saved,
 }: {
@@ -277,6 +282,7 @@ function LandingDesktop({
   onSearch: (q?: string) => void;
   onPickPlace: (place: { label: string; address: string; lat: number; lng: number }) => void;
   onNearMe: () => void;
+  onPickArea: (area: SeoArea) => void;
   nearMeBusy: boolean;
   saved: DesktopSavedProps;
 }) {
@@ -351,6 +357,8 @@ function LandingDesktop({
             )}
           </div>
         )}
+
+        <AreaLinks onPick={onPickArea} style={{ marginTop: 30 }} />
       </div>
     </main>
   );

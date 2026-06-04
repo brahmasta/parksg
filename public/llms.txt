@@ -1,0 +1,43 @@
+# wheretopark.sg
+
+> wheretopark.sg is a free web app that helps drivers in Singapore find and
+> compare carpark rates and live availability before they leave. It ranks the
+> cheapest carparks near any destination using official rate data and live lot
+> counts, so you know where to park before you drive.
+
+## What it does
+
+- Search any Singapore destination (mall, address, postcode, or landmark) and
+  see nearby carparks ranked cheapest-first.
+- Estimated parking cost for how long you plan to stay (cap-aware), for
+  weekdays, Saturdays and Sundays/public holidays.
+- Live lot availability for HDB and many LTA/operator carparks, refreshed about
+  every minute.
+- EV charging availability where reported.
+
+## Data sources
+
+- HDB (Housing & Development Board) — carpark locations, capacity and live lots.
+- URA (Urban Redevelopment Authority) — public carpark rates.
+- LTA (Land Transport Authority) DataMall — carpark availability and rates.
+- JTC and operator feeds for selected carparks.
+- Rates are estimates for guidance; drivers should confirm at the gantry.
+
+## Coverage
+
+Singapore-wide, including HDB estates, URA public carparks, malls, and CBD/
+commercial carparks.
+
+## Key pages
+
+- Home: https://wheretopark.sg/
+- Sitemap: https://wheretopark.sg/sitemap.xml
+- Parking near Orchard Road: https://wheretopark.sg/parking-near/orchard
+- Parking near Marina Bay: https://wheretopark.sg/parking-near/marina-bay
+- Parking in the CBD (Raffles Place): https://wheretopark.sg/parking-near/cbd
+- Parking near Changi Airport & Jewel: https://wheretopark.sg/parking-near/changi-airport
+- Parking near Tampines: https://wheretopark.sg/parking-near/tampines
+- Parking near Jurong East: https://wheretopark.sg/parking-near/jurong-east
+
+Each `/parking-near/{area}` page lists nearby carparks with rates and estimated
+costs; each carpark has its own page at `/carpark/{slug}` with full rate tables.

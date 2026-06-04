@@ -20,6 +20,10 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <!-- SEO_HEAD_START — the SSR routes (api/home, api/carpark, api/parking-near)
+         replace everything up to SEO_HEAD_END with per-page title/description/
+         canonical/OG + JSON-LD. Served verbatim (home defaults) when un-injected. -->
+    <!--SEO_HEAD_START-->
     <title>wheretopark.sg — Find parking before you leave</title>
     <meta
       name="description"
@@ -44,9 +48,10 @@
       content="Compare Singapore carpark rates and availability before you drive."
     />
     <meta name="twitter:image" content="https://wheretopark.sg/og.png" />
+    <!--SEO_HEAD_END-->
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--SEO_BODY--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

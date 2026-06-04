@@ -27,6 +27,7 @@ import { useMediaQuery } from './hooks/useMediaQuery';
 import { DesktopShell } from './desktop/DesktopShell';
 import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
 import { estCostForStay, roundedSoon, type Stay } from './lib/stay';
+import { findArea } from './lib/seoAreas';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
 import { recordSearch } from './lib/api/analytics';
@@ -114,8 +115,15 @@ function App() {
   // in the desktop Find view; the phone flow keeps the preset `duration`.
   const [stay, setStay] = useState<Stay>(() => ({ startMode: 'now', startAt: roundedSoon(), hours: 2 }));
 
-  const { result, search, searchAtCoords, retry, expandRadius, loadCarparkById } =
-    useCarparks();
+  const {
+    result,
+    search,
+    searchAtCoords,
+    retry,
+    expandRadius,
+    loadCarparkById,
+    loadCarparkBySlug,
+  } = useCarparks();
 
   // Results scroll offset, preserved across Detail→back (the Results screen
   // unmounts when Detail opens). Reset on a fresh search so a new destination
@@ -181,6 +189,19 @@ function App() {
     setSelectedCarpark(cp);
     setScreen('detail');
   };
+
+  // "Browse parking by area" links (AreaLinks). Route to live results in-app and
+  // reflect the clean, shareable `/parking-near/:slug` URL in the address bar —
+  // the same URL Google/LLMs crawl — without a full reload.
+  const goArea = useCallback(
+    (area: { slug: string; name: string; lat: number; lng: number }) => {
+      window.history.pushState(null, '', `/parking-near/${area.slug}`);
+      resultsScrollRef.current = 0;
+      setScreen('results');
+      searchAtCoords(area.name, area.lat, area.lng);
+    },
+    [searchAtCoords],
+  );
 
   const [nearMeBusy, setNearMeBusy] = useState(false);
   const onNearMe = useCallback(() => {
@@ -376,31 +397,80 @@ function App() {
     [result.carparks, loadCarparkById, pop],
   );
 
-  // Deep link from the SSR landing pages: `/?cp=<id>` opens that carpark's
-  // Detail directly on cold load. Runs once; strips the param afterwards so a
-  // refresh or share of the resulting URL doesn't re-trigger it.
+  // Cold-load routing from the SSR/SEO URLs. The same URL that serves crawlable
+  // HTML to Google/LLMs boots the SPA here and lands the human on the matching
+  // *live* screen — so `/parking-near/orchard` gives the same instant results as
+  // typing "Orchard Road", and `/carpark/:slug` opens straight to Detail. Runs
+  // once on mount. Path routes keep their clean (shareable) URL; query-param
+  // deep links (`?cp=`, `?q=`) are stripped afterwards so a refresh doesn't
+  // re-trigger them.
   const deepLinkDone = useRef(false);
   useEffect(() => {
     if (deepLinkDone.current) return;
     deepLinkDone.current = true;
-    const params = new URLSearchParams(window.location.search);
-    const cp = params.get('cp');
-    if (!cp) return;
+
+    // All work happens in this async IIFE so state updates land in a microtask
+    // (not synchronously in the effect body), matching the prior deep-link flow.
     void (async () => {
-      const loaded = await loadCarparkById(cp).catch(() => null);
-      if (loaded) {
-        setSelectedCarpark(loaded);
-        setScreen('detail');
+      const { pathname } = window.location;
+      const params = new URLSearchParams(window.location.search);
+
+      const stripParam = (key: string) => {
+        params.delete(key);
+        const qs = params.toString();
+        window.history.replaceState(
+          null,
+          '',
+          window.location.pathname + (qs ? `?${qs}` : ''),
+        );
+      };
+
+      // 1. `/parking-near/:area` → run the live search for that area.
+      const areaMatch = /^\/parking-near\/([^/]+)\/?$/.exec(pathname);
+      if (areaMatch) {
+        const area = findArea(decodeURIComponent(areaMatch[1]));
+        if (area) {
+          setScreen('results');
+          searchAtCoords(area.name, area.lat, area.lng);
+          return;
+        }
       }
-      params.delete('cp');
-      const qs = params.toString();
-      window.history.replaceState(
-        null,
-        '',
-        window.location.pathname + (qs ? `?${qs}` : ''),
-      );
+
+      // 2. `/carpark/:slug` → open that carpark's Detail directly.
+      const cpMatch = /^\/carpark\/([^/]+)\/?$/.exec(pathname);
+      if (cpMatch) {
+        const slug = decodeURIComponent(cpMatch[1]);
+        const loaded = await loadCarparkBySlug(slug).catch(() => null);
+        if (loaded) {
+          setSelectedCarpark(loaded);
+          setScreen('detail');
+        }
+        return;
+      }
+
+      // 3. `/?q=<query>` → run a destination search (powers the Google
+      //    sitelinks SearchAction). Strip the param afterwards.
+      const q = params.get('q')?.trim();
+      if (q) {
+        setDestinationInput(q);
+        setScreen('results');
+        search(q);
+        stripParam('q');
+        return;
+      }
+
+      // 4. `/?cp=<id>` → open that carpark's Detail (saved-carpark deep link).
+      const cp = params.get('cp');
+      if (cp) {
+        const loaded = await loadCarparkById(cp).catch(() => null);
+        if (loaded) {
+          setSelectedCarpark(loaded);
+          setScreen('detail');
+        }
+        stripParam('cp');
+      }
     })();
-  }, [loadCarparkById]);
+  }, [loadCarparkById, loadCarparkBySlug, search, searchAtCoords]);
 
   const openSaveDestSheet = useCallback(() => {
     if (!result.destination) return;
@@ -438,6 +508,7 @@ function App() {
       onSearch: goSearch,
       onPickPlace: goPickPlace,
       onNearMe,
+      onPickArea: goArea,
       nearMeBusy,
       carparks: result.carparks,
       state: result.state,
@@ -516,6 +587,7 @@ function App() {
           handleSearchSavedDestination(item.destination)
         }
         onOpenSavedCarpark={handleOpenSavedCarpark}
+        onPickArea={goArea}
       />
     );
   } else if (screen === 'about') {

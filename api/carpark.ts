@@ -8,6 +8,7 @@
 
 import { fetchCarparkBySlug, fetchCarparksInBox } from './_seo/db';
 import { renderCarparkPage } from './_seo/render';
+import { injectShell } from './_seo/shell';
 
 export const config = { runtime: 'edge' };
 
@@ -31,8 +32,9 @@ export default async function handler(req: Request): Promise<Response> {
     /* nearby is decorative — ignore failures */
   }
 
-  const html = renderCarparkPage(cp, nearby);
-  return new Response(html, {
+  const page = renderCarparkPage(cp, nearby);
+  const injected = await injectShell(req, { head: page.head, body: page.body });
+  return new Response(injected ?? page.html, {
     status: 200,
     headers: {
       'content-type': 'text/html; charset=utf-8',
