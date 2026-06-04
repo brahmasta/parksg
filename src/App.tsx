@@ -22,7 +22,7 @@ import {
   IconTrash,
   IconWarning,
 } from './components/icons';
-import { useCarparks } from './hooks/useCarparks';
+import { useCarparks, type Trigger } from './hooks/useCarparks';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { DesktopShell } from './desktop/DesktopShell';
 import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
@@ -36,6 +36,7 @@ import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
+import { Spinner } from './components/atoms';
 
 const VIEW_MODE_KEY = 'psg.viewMode';
 const AVAILABLE_ONLY_KEY = 'psg.availableOnly';
@@ -52,11 +53,65 @@ function readStored<T>(key: string, fallback: T, parse: (raw: string) => T | nul
   }
 }
 
+/** What the cold-load URL maps to. Parsed once, synchronously, so the app can
+ * boot straight into the right screen (results / detail) with no home-screen
+ * flash before an effect redirects. */
+type InitialRoute =
+  | { kind: 'area'; slug: string; name: string; lat: number; lng: number }
+  | { kind: 'carpark'; slug: string }
+  | { kind: 'query'; q: string }
+  | { kind: 'cp'; id: string }
+  | null;
+
+function parseInitialRoute(): InitialRoute {
+  if (typeof window === 'undefined') return null;
+  const { pathname, search } = window.location;
+  const params = new URLSearchParams(search);
+
+  const areaMatch = /^\/parking-near\/([^/]+)\/?$/.exec(pathname);
+  if (areaMatch) {
+    const area = findArea(decodeURIComponent(areaMatch[1]));
+    if (area) {
+      return { kind: 'area', slug: area.slug, name: area.name, lat: area.lat, lng: area.lng };
+    }
+  }
+
+  const cpMatch = /^\/carpark\/([^/]+)\/?$/.exec(pathname);
+  if (cpMatch) return { kind: 'carpark', slug: decodeURIComponent(cpMatch[1]) };
+
+  const q = params.get('q')?.trim();
+  if (q) return { kind: 'query', q };
+
+  const cp = params.get('cp');
+  if (cp) return { kind: 'cp', id: cp };
+
+  return null;
+}
+
 function App() {
   // ≥960px renders the desktop/tablet shell; below keeps the phone flow.
   const isDesktop = useMediaQuery('(min-width: 960px)');
-  const [screen, setScreen] = useState<Screen>('home');
-  const [destinationInput, setDestinationInput] = useState<string>('');
+
+  // Cold-load routing parsed once from the URL, so the app boots straight into
+  // the right screen — no home flash before an effect redirects. An SEO URL
+  // like /parking-near/orchard lands directly on the (loading) results screen;
+  // /carpark/:slug lands on Detail.
+  const [initialRoute] = useState(parseInitialRoute);
+  const [screen, setScreen] = useState<Screen>(() =>
+    initialRoute?.kind === 'area' || initialRoute?.kind === 'query'
+      ? 'results'
+      : initialRoute?.kind === 'carpark' || initialRoute?.kind === 'cp'
+        ? 'detail'
+        : 'home',
+  );
+  const [destinationInput, setDestinationInput] = useState<string>(() =>
+    initialRoute?.kind === 'query' ? initialRoute.q : '',
+  );
+  // True while a deep-linked carpark (/carpark/:slug or ?cp=) is still loading,
+  // so Detail shows a spinner instead of the app falling back to the home view.
+  const [detailLoading, setDetailLoading] = useState<boolean>(
+    () => initialRoute?.kind === 'carpark' || initialRoute?.kind === 'cp',
+  );
 
   // Vercel Analytics — fire a custom event on every screen change. The
   // app is a single-page state-machine router so the URL never changes;
@@ -115,6 +170,15 @@ function App() {
   // in the desktop Find view; the phone flow keeps the preset `duration`.
   const [stay, setStay] = useState<Stay>(() => ({ startMode: 'now', startAt: roundedSoon(), hours: 2 }));
 
+  // Fire the matching search on mount for area/query cold loads, so the results
+  // screen starts in its loading state from the first render (no home flash).
+  const initialTrigger: Trigger | null =
+    initialRoute?.kind === 'area'
+      ? { kind: 'coords', label: initialRoute.name, lat: initialRoute.lat, lng: initialRoute.lng }
+      : initialRoute?.kind === 'query'
+        ? { kind: 'query', query: initialRoute.q }
+        : null;
+
   const {
     result,
     search,
@@ -123,7 +187,7 @@ function App() {
     expandRadius,
     loadCarparkById,
     loadCarparkBySlug,
-  } = useCarparks();
+  } = useCarparks(initialTrigger);
 
   // Results scroll offset, preserved across Detail→back (the Results screen
   // unmounts when Detail opens). Reset on a fresh search so a new destination
@@ -409,68 +473,46 @@ function App() {
     if (deepLinkDone.current) return;
     deepLinkDone.current = true;
 
-    // All work happens in this async IIFE so state updates land in a microtask
-    // (not synchronously in the effect body), matching the prior deep-link flow.
-    void (async () => {
-      const { pathname } = window.location;
+    const route = initialRoute;
+    if (!route) return;
+
+    const stripParam = (key: string) => {
       const params = new URLSearchParams(window.location.search);
+      params.delete(key);
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        '',
+        window.location.pathname + (qs ? `?${qs}` : ''),
+      );
+    };
 
-      const stripParam = (key: string) => {
-        params.delete(key);
-        const qs = params.toString();
-        window.history.replaceState(
-          null,
-          '',
-          window.location.pathname + (qs ? `?${qs}` : ''),
-        );
-      };
-
-      // 1. `/parking-near/:area` → run the live search for that area.
-      const areaMatch = /^\/parking-near\/([^/]+)\/?$/.exec(pathname);
-      if (areaMatch) {
-        const area = findArea(decodeURIComponent(areaMatch[1]));
-        if (area) {
-          setScreen('results');
-          searchAtCoords(area.name, area.lat, area.lng);
-          return;
-        }
-      }
-
-      // 2. `/carpark/:slug` → open that carpark's Detail directly.
-      const cpMatch = /^\/carpark\/([^/]+)\/?$/.exec(pathname);
-      if (cpMatch) {
-        const slug = decodeURIComponent(cpMatch[1]);
-        const loaded = await loadCarparkBySlug(slug).catch(() => null);
-        if (loaded) {
-          setSelectedCarpark(loaded);
-          setScreen('detail');
-        }
+    void (async () => {
+      // Detail deep links (`/carpark/:slug` or `?cp=<id>`) — load async then
+      // swap the spinner for the carpark. The screen was already set to
+      // 'detail' synchronously so there's no home flash; a failed load falls
+      // back to home rather than a blank screen.
+      if (route.kind === 'carpark' || route.kind === 'cp') {
+        const loaded =
+          route.kind === 'carpark'
+            ? await loadCarparkBySlug(route.slug).catch(() => null)
+            : await loadCarparkById(route.id).catch(() => null);
+        if (loaded) setSelectedCarpark(loaded);
+        else setScreen('home');
+        setDetailLoading(false);
+        if (route.kind === 'cp') stripParam('cp');
         return;
       }
 
-      // 3. `/?q=<query>` → run a destination search (powers the Google
-      //    sitelinks SearchAction). Strip the param afterwards.
-      const q = params.get('q')?.trim();
-      if (q) {
-        setDestinationInput(q);
-        setScreen('results');
-        search(q);
-        stripParam('q');
-        return;
-      }
+      // `?q=<query>` powered the search via the initial trigger; just tidy the
+      // URL so a refresh/share doesn't carry the param.
+      if (route.kind === 'query') stripParam('q');
 
-      // 4. `/?cp=<id>` → open that carpark's Detail (saved-carpark deep link).
-      const cp = params.get('cp');
-      if (cp) {
-        const loaded = await loadCarparkById(cp).catch(() => null);
-        if (loaded) {
-          setSelectedCarpark(loaded);
-          setScreen('detail');
-        }
-        stripParam('cp');
-      }
+      // `area`: the initial trigger already ran the search and the clean
+      // `/parking-near/:slug` URL is already correct and shareable — nothing
+      // more to do here.
     })();
-  }, [loadCarparkById, loadCarparkBySlug, search, searchAtCoords]);
+  }, [initialRoute, loadCarparkById, loadCarparkBySlug]);
 
   const openSaveDestSheet = useCallback(() => {
     if (!result.destination) return;
@@ -521,6 +563,7 @@ function App() {
       availableOnly,
       setAvailableOnly,
       detailCp: selectedCarpark,
+      detailLoading,
       onOpenDetail: (cp) => setSelectedCarpark(cp),
       onCloseDetail: () => setSelectedCarpark(null),
       isCarparkSaved: (id) => saves.isCarparkSaved(id),
@@ -648,6 +691,23 @@ function App() {
         saved={saves.isCarparkSaved(selectedCarpark.id)}
         onToggleSave={() => toggleSaveCarpark(selectedCarpark)}
       />
+    );
+  } else if (screen === 'detail') {
+    // Deep-linked carpark (/carpark/:slug or ?cp=) still resolving.
+    body = (
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          color: 'var(--text-3)',
+          fontSize: 13,
+        }}
+      >
+        <Spinner /> Loading carpark…
+      </div>
     );
   } else if (screen === 'account') {
     body = (

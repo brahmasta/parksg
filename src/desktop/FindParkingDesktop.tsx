@@ -45,6 +45,8 @@ export type FindParkingDesktopProps = {
   availableOnly: boolean;
   setAvailableOnly: (v: boolean) => void;
   detailCp: Carpark | null;
+  /** True while a deep-linked carpark (/carpark/:slug) is still loading. */
+  detailLoading?: boolean;
   onOpenDetail: (cp: Carpark) => void;
   onCloseDetail: () => void;
   isCarparkSaved: (id: string) => boolean;
@@ -61,7 +63,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
     onNearMe, onPickArea, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly,
-    detailCp, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
+    detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
@@ -94,9 +96,10 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   // places, no map) — mirroring the phone home rather than an empty map pane.
   // Exception: when a carpark is open directly (e.g. a `/carpark/:slug` deep
   // link or a saved-carpark open) there's no surrounding search, so
-  // destinationCoords is null — but we must still show that carpark's Detail,
-  // not the landing.
-  const showLanding = !detailCp && !destinationCoords && state !== 'loading';
+  // destinationCoords is null — but we must still show that carpark's Detail
+  // (or its loading spinner), not the landing.
+  const showLanding =
+    !detailCp && !detailLoading && !destinationCoords && state !== 'loading';
   if (showLanding) {
     return (
       <LandingDesktop
@@ -143,6 +146,10 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             saved={isCarparkSaved(detailCp.id)}
             onToggleSave={() => onToggleSaveCarpark(detailCp)}
           />
+        ) : detailLoading ? (
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'var(--text-3)', fontSize: 13 }}>
+            <Spinner /> Loading carpark…
+          </div>
         ) : (
           <div className="psg-screen" style={{ padding: '22px 22px 32px' }}>
             {/* Search */}
@@ -279,7 +286,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
           </div>
         ) : (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 13 }}>
-            {state === 'loading' ? 'Loading map…' : 'Search a destination to see carparks on the map'}
+            {state === 'loading' || detailLoading ? 'Loading map…' : 'Search a destination to see carparks on the map'}
           </div>
         )}
       </div>

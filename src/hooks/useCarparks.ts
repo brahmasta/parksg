@@ -66,14 +66,29 @@ const EMPTY: SearchResult = {
 
 /** Drives the whole search pipeline. Callers pass a destination query
  * (e.g. "Vivocity"), the desired radius, and get back a ranked result. */
-type Trigger =
+export type Trigger =
   | { kind: 'query'; query: string }
   | { kind: 'coords'; label: string; lat: number; lng: number; address?: string };
 
-export function useCarparks() {
-  const [trigger, setTrigger] = useState<Trigger | null>(null);
+const LOADING: SearchResult = {
+  state: 'loading',
+  destination: null,
+  carparks: [],
+  refreshedSecondsAgo: null,
+};
+
+/**
+ * @param initialTrigger When set (e.g. an SEO `/parking-near/:area` cold load),
+ * the search fires on mount and `result.state` starts as `loading` from the
+ * very first render — so the app boots straight into the results screen with no
+ * home-screen flash before an effect redirects.
+ */
+export function useCarparks(initialTrigger: Trigger | null = null) {
+  const [trigger, setTrigger] = useState<Trigger | null>(initialTrigger);
   const [radiusM, setRadiusM] = useState<number>(DEFAULT_RADIUS_M);
-  const [result, setResult] = useState<SearchResult>(EMPTY);
+  const [result, setResult] = useState<SearchResult>(
+    initialTrigger ? LOADING : EMPTY,
+  );
 
   const refreshTimer = useRef<number | null>(null);
   const lastFetchedAt = useRef<number | null>(null);
