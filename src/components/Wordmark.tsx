@@ -27,7 +27,7 @@ export function Wordmark({ size = 18 }: { size?: number }) {
           fontFamily: 'var(--font-display)',
         }}
       >
-        W
+        P
       </span>
       <span>
         wheretopark<span style={{ color: 'var(--text-2)', fontWeight: 500 }}>.sg</span>
