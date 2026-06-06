@@ -13,6 +13,7 @@ import {
 import { isApplePlatform } from '../lib/platform';
 import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
+import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
 import {
   availabilityColorVar,
   availabilityStatus,
@@ -92,6 +93,7 @@ export function DetailScreen({
   // provider picker; after that the primary button repeats the last-used app
   // (the chevron always re-opens the picker). See src/lib/maps.ts.
   const [navSheetOpen, setNavSheetOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [lastProvider, setLastProviderState] = useState<MapsProvider | null>(() => getLastProvider());
 
   const openProvider = useCallback(
@@ -658,6 +660,32 @@ export function DetailScreen({
             </>
           )}
         </div>
+
+        {/* Report a data inaccuracy — opens the report form. */}
+        <button
+          type="button"
+          onClick={() => setReportOpen(true)}
+          style={{
+            appearance: 'none',
+            width: '100%',
+            marginTop: 16,
+            padding: '11px 14px',
+            borderRadius: 12,
+            border: '0.5px solid color-mix(in srgb, var(--bad, #C0392B) 40%, transparent)',
+            background: 'color-mix(in srgb, var(--bad, #C0392B) 8%, transparent)',
+            color: 'var(--bad, #C0392B)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            fontSize: 13.5,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          <IconWarning size={15} stroke={2} />
+          Report data inaccuracy
+        </button>
       </div>
 
       {/* Sticky navigate CTA */}
@@ -742,6 +770,14 @@ export function DetailScreen({
           onPick={openProvider}
         />
       )}
+
+      <ReportInaccuracyDialog
+        key={reportOpen ? 'report-open' : 'report-closed'}
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        variant={navVariant}
+        carpark={{ id: cp.id, name: cp.name, source: isGoogle ? 'GOOGLE' : cp.operator }}
+      />
     </div>
   );
 }
