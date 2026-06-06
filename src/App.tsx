@@ -27,6 +27,7 @@ import { DesktopShell } from './desktop/DesktopShell';
 import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
 import { estCostForStay, roundedSoon, type Stay } from './lib/stay';
 import { findArea } from './lib/seoAreas';
+import { haversineMeters, walkMinutesFromMeters } from './lib/geo';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
 import { recordSearch } from './lib/api/analytics';
@@ -60,6 +61,10 @@ type InitialRoute =
   | { kind: 'carpark'; slug: string }
   | { kind: 'query'; q: string }
   | { kind: 'cp'; id: string }
+  // A shared carpark link: open carpark `cpId` (if any) with the walk distance
+  // to the destination at (lat,lng) labelled `dest`. See the Share button in
+  // DetailScreen.
+  | { kind: 'share'; cpId: string | null; dest: string; lat: number; lng: number }
   | null;
 
 function parseInitialRoute(): InitialRoute {
@@ -81,8 +86,19 @@ function parseInitialRoute(): InitialRoute {
   const q = params.get('q')?.trim();
   if (q) return { kind: 'query', q };
 
-  const cp = params.get('cp');
-  if (cp) return { kind: 'cp', id: cp };
+  // Shared link: `?to=lat,lng` (+ optional `cp`, `dest`) restores the carpark
+  // and the walk distance to the shared destination.
+  const cpId = params.get('cp');
+  const to = params.get('to');
+  if (to) {
+    const [latS, lngS] = to.split(',');
+    const lat = Number.parseFloat(latS ?? '');
+    const lng = Number.parseFloat(lngS ?? '');
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      return { kind: 'share', cpId: cpId || null, dest: params.get('dest')?.trim() || '', lat, lng };
+    }
+  }
+  if (cpId) return { kind: 'cp', id: cpId };
 
   return null;
 }
@@ -101,15 +117,26 @@ function App() {
       ? 'results'
       : initialRoute?.kind === 'carpark' || initialRoute?.kind === 'cp'
         ? 'detail'
-        : 'home',
+        : initialRoute?.kind === 'share'
+          ? initialRoute.cpId
+            ? 'detail'
+            : 'results'
+          : 'home',
   );
   const [destinationInput, setDestinationInput] = useState<string>(() =>
-    initialRoute?.kind === 'query' ? initialRoute.q : '',
+    initialRoute?.kind === 'query'
+      ? initialRoute.q
+      : initialRoute?.kind === 'share'
+        ? initialRoute.dest
+        : '',
   );
-  // True while a deep-linked carpark (/carpark/:slug or ?cp=) is still loading,
-  // so Detail shows a spinner instead of the app falling back to the home view.
+  // True while a deep-linked carpark (/carpark/:slug, ?cp=, or a shared link) is
+  // still loading, so Detail shows a spinner instead of falling back to home.
   const [detailLoading, setDetailLoading] = useState<boolean>(
-    () => initialRoute?.kind === 'carpark' || initialRoute?.kind === 'cp',
+    () =>
+      initialRoute?.kind === 'carpark' ||
+      initialRoute?.kind === 'cp' ||
+      (initialRoute?.kind === 'share' && !!initialRoute.cpId),
   );
 
   // Vercel Analytics — fire a custom event on every screen change. The
@@ -176,7 +203,9 @@ function App() {
       ? { kind: 'coords', label: initialRoute.name, lat: initialRoute.lat, lng: initialRoute.lng }
       : initialRoute?.kind === 'query'
         ? { kind: 'query', query: initialRoute.q }
-        : null;
+        : initialRoute?.kind === 'share'
+          ? { kind: 'coords', label: initialRoute.dest || 'Shared destination', lat: initialRoute.lat, lng: initialRoute.lng }
+          : null;
 
   const {
     result,
@@ -487,6 +516,38 @@ function App() {
         else setScreen('home');
         setDetailLoading(false);
         if (route.kind === 'cp') stripParam('cp');
+        return;
+      }
+
+      // Shared link (`?cp=&to=&dest=`). The initial trigger already searched the
+      // shared destination (so result.destination drives Detail's walk card and
+      // gives a populated Results screen to back out to). Open the shared carpark
+      // with its walk distance computed from the shared destination; the
+      // selected-carpark sync effect then swaps in the live results instance if
+      // the carpark falls inside the search.
+      if (route.kind === 'share') {
+        if (route.cpId) {
+          const loaded = await loadCarparkById(route.cpId).catch(() => null);
+          if (loaded) {
+            const meters = haversineMeters(
+              { lat: route.lat, lng: route.lng },
+              { lat: loaded.coords.entrance[0], lng: loaded.coords.entrance[1] },
+            );
+            setSelectedCarpark({
+              ...loaded,
+              walkMeters: Math.round(meters),
+              walkMin: walkMinutesFromMeters(meters),
+            });
+          } else {
+            // e.g. an ephemeral Google carpark that can't be re-fetched — leave
+            // the recipient on the destination's live Results.
+            setScreen('results');
+          }
+          setDetailLoading(false);
+        }
+        stripParam('cp');
+        stripParam('to');
+        stripParam('dest');
         return;
       }
 

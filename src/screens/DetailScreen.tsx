@@ -34,9 +34,11 @@ import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
 import {
   IconBookmark,
+  IconCheck,
   IconChevronDown,
   IconChevronLeft,
   IconNavigate,
+  IconShare,
   IconWarning,
 } from '../components/icons';
 import { useWalkRoute } from '../hooks/useWalkRoute';
@@ -101,6 +103,7 @@ export function DetailScreen({
   // (the chevron always re-opens the picker). See src/lib/maps.ts.
   const [navSheetOpen, setNavSheetOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [shareNote, setShareNote] = useState<string | null>(null);
   const [lastProvider, setLastProviderState] = useState<MapsProvider | null>(() => getLastProvider());
 
   const openProvider = useCallback(
@@ -142,6 +145,48 @@ export function DetailScreen({
   const effectiveDurationText = stay
     ? `${fmtDuration(stay.hours)} stay`
     : (durationText ?? `${durationLabel(duration)} stay`);
+
+  // Share this carpark + the walk distance to the destination. The link reopens
+  // the carpark in the same destination context for the recipient (App parses
+  // `?cp=&to=&dest=`). Uses the native share sheet where available, else copies.
+  const onShare = useCallback(async () => {
+    const origin = window.location.origin;
+    const params = new URLSearchParams();
+    // Ephemeral Google carparks can't be re-fetched by id, so share the
+    // destination only — the recipient lands on its live results.
+    if (!isGoogle) params.set('cp', cp.id);
+    if (destinationCoords) {
+      params.set('to', `${destinationCoords[0].toFixed(6)},${destinationCoords[1].toFixed(6)}`);
+      if (destination) params.set('dest', destination);
+    }
+    const qs = params.toString();
+    const url = qs ? `${origin}/?${qs}` : `${origin}/`;
+
+    const walkBit =
+      destinationCoords && cp.walkMin != null
+        ? ` — ${cp.walkMin} min (${formatDistance(cp.walkMeters)}) walk to ${destination}`
+        : '';
+    const costBit =
+      !costUnknown && cost != null ? ` · ~${formatCost(cost)} for ${effectiveDurationText}` : '';
+    const text = `Park at ${cp.name}${walkBit}${costBit}`;
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({ title: `Parking: ${cp.name}`, text, url });
+        return;
+      }
+    } catch (e) {
+      // User dismissed the native sheet — not an error.
+      if ((e as Error)?.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard?.writeText(`${text}\n${url}`);
+      setShareNote('Link copied');
+    } catch {
+      setShareNote('Could not copy link');
+    }
+    window.setTimeout(() => setShareNote(null), 1800);
+  }, [cp, destination, destinationCoords, cost, costUnknown, effectiveDurationText, isGoogle]);
 
   // Live walking route: starts as haversine, upgrades to OneMap when the
   // /api/onemap-route proxy returns. Silent fallback on any error.
@@ -201,6 +246,27 @@ export function DetailScreen({
           <IconChevronLeft size={18} stroke={2} />
         </button>
         <div style={{ flex: 1 }} />
+        <button
+          type="button"
+          onClick={() => void onShare()}
+          aria-label="Share carpark"
+          style={{
+            appearance: 'none',
+            width: 36,
+            height: 36,
+            borderRadius: 999,
+            background: 'var(--bg-1)',
+            border: '0.5px solid var(--line-strong)',
+            color: 'var(--text-1)',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 8,
+          }}
+        >
+          <IconShare size={16} stroke={2} />
+        </button>
         {!isGoogle && (
           <button
             type="button"
@@ -793,6 +859,33 @@ export function DetailScreen({
         variant={navVariant}
         carpark={{ id: cp.id, name: cp.name, source: isGoogle ? 'GOOGLE' : cp.operator }}
       />
+
+      {shareNote && (
+        <div
+          role="status"
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 96,
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 7,
+            padding: '9px 15px',
+            borderRadius: 999,
+            background: 'var(--text-1)',
+            color: 'var(--bg-0)',
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+            pointerEvents: 'none',
+          }}
+        >
+          <IconCheck size={14} stroke={2.5} />
+          {shareNote}
+        </div>
+      )}
     </div>
   );
 }
