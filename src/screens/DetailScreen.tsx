@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { track } from '@vercel/analytics/react';
-import type { Carpark, DurationHours } from '../lib/types';
+import type { Carpark, DurationHours, User } from '../lib/types';
 import { isStaleRates } from '../lib/rateSource';
 import {
   MAPS_PROVIDER_LABELS,
@@ -14,6 +14,7 @@ import { isApplePlatform } from '../lib/platform';
 import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
 import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
+import { CheckinCard } from '../components/CheckinCard';
 import {
   availabilityColorVar,
   availabilityStatus,
@@ -58,6 +59,8 @@ export function DetailScreen({
   hideDurationStrip = false,
   navVariant = 'sheet',
   hideWalkMap = false,
+  user = null,
+  onRequireSignIn,
 }: {
   cp: Carpark;
   destination: string;
@@ -86,6 +89,10 @@ export function DetailScreen({
   /** Hide the in-panel walk diagram (desktop shows the walk line on the main map
    * instead, so the path isn't drawn twice). */
   hideWalkMap?: boolean;
+  /** Signed-in user (enables crowdsourced check-ins). */
+  user?: User | null;
+  /** Prompt sign-in when a signed-out user taps a check-in button. */
+  onRequireSignIn?: () => void;
 }) {
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
 
@@ -421,6 +428,14 @@ export function DetailScreen({
             )}
           </div>
         </div>
+
+        {/* Crowdsourced "is it full now?" — community signal + report buttons. */}
+        <CheckinCard
+          carparkId={cp.id}
+          user={user}
+          onRequireSignIn={onRequireSignIn ?? (() => {})}
+          hasSensor={cp.lotsAvailable != null}
+        />
 
         {/* EV charging (between stat cards and walk map per E8 design spec). */}
         <EVSection ev={cp.ev} />

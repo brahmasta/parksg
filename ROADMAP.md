@@ -229,14 +229,29 @@ No code yet. Assess after DataMall audit (P2 #1) confirms true gap.
 
 ---
 
-### Crowdsourced "lots free?" check-ins
+### Crowdsourced "lots free?" check-ins ✅ SHIPPED (v1, 2026-06)
 
-**Pre-requisites:** Saves cloud sync (now shipped) provides the per-user cloud table pattern this builds on.
+A signed-in driver reports the live state (Available / Filling up / Full) from
+the carpark Detail screen; the recent community signal (last 2h) is shown
+alongside the sensor count — and is the *only* live signal for the many
+carparks without sensors.
 
-**What's needed:**
-- Verified-user check-in endpoint (Supabase RPC with rate-limiting)
-- Trusted-reporter gating (min account age, min check-in count before counts are surfaced)
-- UI: check-in button in Detail screen; crowdsourced count shown alongside sensor count
+- **DB:** `checkins` table (RLS-locked, no policies) + two SECURITY DEFINER
+  RPCs. `record_checkin(carpark_id, status, user_id)` — sign-in required;
+  rate-limited to one active report per user per carpark per 10 min (a repeat
+  *updates* the row so users can correct, never stacks → spam-resistant).
+  `get_checkin_summary(carpark_id)` returns the last-2h aggregate counting each
+  reporter **once** (their latest), so one spammer = one vote; anon-readable,
+  no PII.
+- **Client:** `src/lib/api/checkins.ts` (`submitCheckin`, `fetchCheckinSummary`).
+- **UI:** `src/components/CheckinCard.tsx` in `DetailScreen` (mobile + desktop) —
+  shows "Drivers say: …· N reports · Xm ago" + 3 report buttons; signed-out taps
+  route to sign-in. Copy adapts when the carpark has no sensor feed.
+
+**Deferred (v2):** stricter trusted-reporter gating — min account age / min
+prior check-in count before a reporter's votes are surfaced (v1 trust = signed-in
+Google account + distinct-user counting + the 10-min rate limit). Also: decay/
+confidence weighting and a "confirm still accurate" nudge.
 
 **Why it matters:** Only realistic coverage path for MCST condos and the long tail of private carparks without sensors. No Singapore parking app currently does this.
 

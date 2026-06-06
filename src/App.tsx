@@ -553,6 +553,8 @@ function App() {
       onCloseDetail: () => setSelectedCarpark(null),
       isCarparkSaved: (id) => saves.isCarparkSaved(id),
       onToggleSaveCarpark: toggleSaveCarpark,
+      user,
+      onRequireSignIn: handleSignIn,
     };
     return (
       <>
@@ -674,6 +676,8 @@ function App() {
         degraded={result.state === 'degraded'}
         saved={saves.isCarparkSaved(selectedCarpark.id)}
         onToggleSave={() => toggleSaveCarpark(selectedCarpark)}
+        user={user}
+        onRequireSignIn={handleSignIn}
       />
     );
   } else if (screen === 'detail') {

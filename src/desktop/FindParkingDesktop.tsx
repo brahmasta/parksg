@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import type { Carpark, MergedSaveItem } from '../lib/types';
+import type { Carpark, MergedSaveItem, User } from '../lib/types';
 import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { MonoLabel, Spinner } from '../components/atoms';
@@ -48,6 +48,9 @@ export type FindParkingDesktopProps = {
   onCloseDetail: () => void;
   isCarparkSaved: (id: string) => boolean;
   onToggleSaveCarpark: (cp: Carpark) => void;
+  /** Signed-in user + sign-in prompt — powers crowdsourced check-ins in Detail. */
+  user: User | null;
+  onRequireSignIn: () => void;
 };
 
 /**
@@ -61,6 +64,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly,
     detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
+    user, onRequireSignIn,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
@@ -152,6 +156,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             degraded={state === 'degraded'}
             saved={isCarparkSaved(detailCp.id)}
             onToggleSave={() => onToggleSaveCarpark(detailCp)}
+            user={user}
+            onRequireSignIn={onRequireSignIn}
           />
         ) : detailLoading ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'var(--text-3)', fontSize: 13 }}>
