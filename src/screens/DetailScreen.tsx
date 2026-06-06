@@ -180,7 +180,8 @@ export function DetailScreen({
       if ((e as Error)?.name === 'AbortError') return;
     }
     try {
-      await navigator.clipboard?.writeText(`${text}\n${url}`);
+      // Copy the link only — the description must not embed the URL.
+      await navigator.clipboard?.writeText(url);
       setShareNote('Link copied');
     } catch {
       setShareNote('Could not copy link');
