@@ -3,12 +3,11 @@ import type { User } from '../lib/types';
 import { Wordmark } from '../components/atoms';
 import { IconUser } from '../components/icons';
 import { FindParkingDesktop, type FindParkingDesktopProps, type DesktopSavedProps } from './FindParkingDesktop';
-import { CoverageScreen } from '../screens/CoverageScreen';
 import { SavedScreen } from '../screens/SavedScreen';
 import { AboutDesktop } from './AboutDesktop';
 import { AccountDesktop } from './AccountDesktop';
 
-type DesktopRoute = 'find' | 'saved' | 'coverage' | 'about' | 'account';
+type DesktopRoute = 'find' | 'saved' | 'about' | 'account';
 
 export type DesktopShellProps = {
   find: FindParkingDesktopProps;
@@ -21,7 +20,7 @@ export type DesktopShellProps = {
 
 /**
  * Desktop/tablet shell (≥960px): a sticky top nav over a routed content area.
- * Find parking is a two-pane view; Coverage/About/Account are peer routes.
+ * Find parking is a two-pane view; About/Account are peer routes.
  * All data + handlers are shared with the phone flow (passed down from App).
  */
 export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRequestSignOut }: DesktopShellProps) {
@@ -58,15 +57,9 @@ export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRe
         </div>
       )}
 
-      {route === 'coverage' && (
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <CoverageScreen onFindParking={() => setRoute('find')} />
-        </div>
-      )}
-
       {route === 'about' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <AboutDesktop onFindParking={() => setRoute('find')} onCoverage={() => setRoute('coverage')} />
+          <AboutDesktop onFindParking={() => setRoute('find')} />
         </div>
       )}
 
@@ -104,7 +97,6 @@ function TopNav({ route, setRoute, user }: { route: DesktopRoute; setRoute: (r: 
   const links: [DesktopRoute, string][] = [
     ['find', 'Find parking'],
     ['saved', 'Saved'],
-    ['coverage', 'Coverage'],
     ['about', 'About'],
   ];
   return (

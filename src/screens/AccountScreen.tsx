@@ -5,7 +5,6 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCloud,
-  IconDatabase,
   IconGoogleG,
   IconInfo,
   IconShield,
@@ -22,7 +21,6 @@ export function AccountScreen({
   onSignIn,
   onOpenSaved,
   onRequestSignOut,
-  onOpenCoverage,
   onOpenAbout,
 }: {
   user: User | null;
@@ -32,7 +30,6 @@ export function AccountScreen({
   onSignIn: () => void;
   onOpenSaved: () => void;
   onRequestSignOut: () => void;
-  onOpenCoverage: () => void;
   onOpenAbout: () => void;
 }) {
   return (
@@ -53,14 +50,12 @@ export function AccountScreen({
             savedItemCount={savedItemCount}
             onOpenSaved={onOpenSaved}
             onRequestSignOut={onRequestSignOut}
-            onOpenCoverage={onOpenCoverage}
             onOpenAbout={onOpenAbout}
           />
         ) : (
           <SignedOutBody
             onSignIn={onSignIn}
             onOpenSaved={onOpenSaved}
-            onOpenCoverage={onOpenCoverage}
             onOpenAbout={onOpenAbout}
           />
         )}
@@ -72,12 +67,10 @@ export function AccountScreen({
 /** Saved · Coverage · About — the in-menu navigation (mobile lacks a top nav). */
 function ExploreGroup({
   onOpenSaved,
-  onOpenCoverage,
   onOpenAbout,
   savedSub,
 }: {
   onOpenSaved?: () => void;
-  onOpenCoverage: () => void;
   onOpenAbout: () => void;
   savedSub?: string;
 }) {
@@ -88,8 +81,7 @@ function ExploreGroup({
         {onOpenSaved && (
           <NavRow icon={<IconBookmark filled size={16} />} title="Saved" sub={savedSub} onClick={onOpenSaved} />
         )}
-        <NavRow icon={<IconDatabase size={16} stroke={2} />} title="Coverage" sub="Where the data comes from" onClick={onOpenCoverage} />
-        <NavRow icon={<IconInfo size={16} stroke={2} />} title="About" sub="How wheretopark.sg works" onClick={onOpenAbout} last />
+        <NavRow icon={<IconInfo size={16} stroke={2} />} title="About" sub="How it works · data coverage" onClick={onOpenAbout} last />
       </div>
     </div>
   );
@@ -146,12 +138,10 @@ function TopBar({ onBack, title }: { onBack: () => void; title: string }) {
 function SignedOutBody({
   onSignIn,
   onOpenSaved,
-  onOpenCoverage,
   onOpenAbout,
 }: {
   onSignIn: () => void;
   onOpenSaved: () => void;
-  onOpenCoverage: () => void;
   onOpenAbout: () => void;
 }) {
   return (
@@ -312,7 +302,6 @@ function SignedOutBody({
 
       <ExploreGroup
         onOpenSaved={onOpenSaved}
-        onOpenCoverage={onOpenCoverage}
         onOpenAbout={onOpenAbout}
         savedSub="Carparks & destinations you bookmark on this device"
       />
@@ -325,14 +314,12 @@ function SignedInBody({
   savedItemCount,
   onOpenSaved,
   onRequestSignOut,
-  onOpenCoverage,
   onOpenAbout,
 }: {
   user: { name: string; email: string; initials: string };
   savedItemCount: number;
   onOpenSaved: () => void;
   onRequestSignOut: () => void;
-  onOpenCoverage: () => void;
   onOpenAbout: () => void;
 }) {
   return (
@@ -478,7 +465,7 @@ function SignedInBody({
         </div>
       </div>
 
-      <ExploreGroup onOpenCoverage={onOpenCoverage} onOpenAbout={onOpenAbout} />
+      <ExploreGroup onOpenAbout={onOpenAbout} />
 
       <button
         type="button"

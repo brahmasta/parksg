@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { CoverageSections } from '../components/CoverageSections';
 import {
   IconArrowRight,
   IconCheck,
@@ -27,8 +28,8 @@ const WHATS_NEW = [
   'Save carparks & destinations, synced across devices',
 ];
 
-/** Desktop About — centered column, nav peer of Find/Coverage. */
-export function AboutDesktop({ onFindParking, onCoverage }: { onFindParking: () => void; onCoverage: () => void }) {
+/** Desktop About — centered column, nav peer of Find. Folds in data coverage. */
+export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
   return (
     <div className="psg-screen" style={{ maxWidth: 920, margin: '0 auto', padding: '44px 28px 80px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -41,12 +42,6 @@ export function AboutDesktop({ onFindParking, onCoverage }: { onFindParking: () 
       <p style={{ margin: '16px 0 0', fontSize: 16, color: 'var(--text-2)', lineHeight: 1.5, maxWidth: 540 }}>
         No more circling. No more bill shock at the gantry. wheretopark.sg pulls every public carpark’s live availability and rates into one place.
       </p>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginTop: 32 }}>
-        <AboutStat value="2,728" label="Carparks covered" />
-        <AboutStat value="~60s" label="Live refresh rate" />
-        <AboutStat value="$0" label="Free to use" />
-      </div>
 
       <Section title="Why we built this">
         <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)', maxWidth: 720 }}>
@@ -70,6 +65,9 @@ export function AboutDesktop({ onFindParking, onCoverage }: { onFindParking: () 
         </div>
       </Section>
 
+      {/* Data coverage — merged in from the old Coverage page. */}
+      <CoverageSections />
+
       <Section title="Where the data comes from">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
           {DATA_SOURCES.map((src) => (
@@ -77,8 +75,7 @@ export function AboutDesktop({ onFindParking, onCoverage }: { onFindParking: () 
           ))}
         </div>
         <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-3)', lineHeight: 1.55, maxWidth: 700 }}>
-          Carpark & availability data © Singapore Land Transport Authority, HDB and URA, under the Singapore Open Data Licence. Rates are estimates — always check the signboard.{' '}
-          <button onClick={onCoverage} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent-on)', fontWeight: 600, cursor: 'pointer', padding: 0, fontSize: 12.5, textDecoration: 'underline' }}>See full coverage →</button>
+          Carpark & availability data © Singapore Land Transport Authority, HDB and URA, under the Singapore Open Data Licence. Rates are estimates — always check the signboard.
         </p>
       </Section>
 
@@ -102,15 +99,6 @@ export function AboutDesktop({ onFindParking, onCoverage }: { onFindParking: () 
           Find parking near me <IconArrowRight size={17} stroke={2.5} />
         </button>
       </div>
-    </div>
-  );
-}
-
-function AboutStat({ value, label }: { value: string; label: string }) {
-  return (
-    <div style={{ background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 16, padding: '22px 20px', textAlign: 'center' }}>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 600, color: 'var(--text-1)', letterSpacing: -0.8, lineHeight: 1 }}>{value}</div>
-      <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: 0.6, textTransform: 'uppercase' }}>{label}</div>
     </div>
   );
 }

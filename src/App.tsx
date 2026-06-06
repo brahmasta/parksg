@@ -13,7 +13,6 @@ import { ResultsScreen } from './screens/ResultsScreen';
 import { DetailScreen } from './screens/DetailScreen';
 import { AboutScreen } from './screens/AboutScreen';
 import { AccountScreen } from './screens/AccountScreen';
-import { CoverageScreen } from './screens/CoverageScreen';
 import { SavedScreen } from './screens/SavedScreen';
 import {
   IconBookmark,
@@ -703,15 +702,7 @@ function App() {
         onSignIn={handleSignIn}
         onOpenSaved={() => setScreen('saved')}
         onRequestSignOut={() => setSignOutOpen(true)}
-        onOpenCoverage={() => setScreen('coverage')}
         onOpenAbout={() => setScreen('about')}
-      />
-    );
-  } else if (screen === 'coverage') {
-    body = (
-      <CoverageScreen
-        onFindParking={() => setScreen('home')}
-        onBack={() => setScreen('account')}
       />
     );
   } else if (screen === 'saved') {

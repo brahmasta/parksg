@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Wordmark } from '../components/Wordmark';
+import { CoverageSections } from '../components/CoverageSections';
 import {
   IconCheck,
   IconChevronLeft,
@@ -13,8 +14,6 @@ type AboutScreenProps = {
   /** Reuse the Home search entry point so the CTA does something real. */
   onStartSearch?: () => void;
 };
-
-const DATA_SOURCES = ['data.gov.sg', 'LTA DataMall', 'URA Data Service', 'OneMap'];
 
 const STEPS: { icon: ReactNode; title: string; body: string }[] = [
   {
@@ -133,20 +132,6 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           </p>
         </section>
 
-        {/* Stats */}
-        <section
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr',
-            gap: 8,
-            marginTop: 8,
-          }}
-        >
-          <Stat value="2,000+" label="HDB carparks" />
-          <Stat value="~60s" label="Live refresh" />
-          <Stat value="$0" label="To use" />
-        </section>
-
         <Section title="Why we built this">
           <p
             style={{
@@ -211,33 +196,10 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           </div>
         </Section>
 
-        <Section title="Where the data comes from">
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 6,
-              marginBottom: 10,
-            }}
-          >
-            {DATA_SOURCES.map((src) => (
-              <span
-                key={src}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '4px 10px',
-                  borderRadius: 999,
-                  border: '0.5px solid var(--line-strong)',
-                  background: 'var(--bg-1)',
-                  fontSize: 11.5,
-                  color: 'var(--text-2)',
-                }}
-              >
-                {src}
-              </span>
-            ))}
-          </div>
+        {/* Data coverage — merged in from the old Coverage screen. */}
+        <CoverageSections />
+
+        <Section title="Licence">
           <p
             style={{
               margin: 0,
@@ -318,45 +280,6 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
 }
 
 /* ── Small local helpers ──────────────────────────────────────────────── */
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div
-      style={{
-        background: 'var(--bg-1)',
-        border: '0.5px solid var(--line)',
-        borderRadius: 12,
-        padding: '12px 8px',
-        textAlign: 'center',
-      }}
-    >
-      <div
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 18,
-          fontWeight: 600,
-          color: 'var(--text-1)',
-          letterSpacing: -0.3,
-          lineHeight: 1,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{
-          marginTop: 4,
-          fontSize: 10.5,
-          color: 'var(--text-3)',
-          fontFamily: 'var(--font-mono)',
-          letterSpacing: 0.4,
-          textTransform: 'uppercase',
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
 
 function Section({
   title,
