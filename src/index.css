@@ -184,6 +184,10 @@ button {
 .psg-no-scrollbar::-webkit-scrollbar { display: none; }
 .psg-no-scrollbar { scrollbar-width: none; }
 
+/* Mute the OneMap basemap (desaturate) so the colored price pins read clearly
+ * against a calmer map. Pairs with the tile layer's reduced opacity. */
+.psg-basemap { filter: saturate(0.85); }
+
 /* Frame around the mobile viewport when shown on larger screens */
 .psg-frame-wrap {
   min-height: 100dvh;

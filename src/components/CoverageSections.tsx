@@ -165,10 +165,18 @@ export function CoverageSections() {
 
 function BigStat({ value, label, icon, accent }: { value: string; label: string; icon: ReactNode; accent?: boolean }) {
   return (
-    <div style={{ background: accent ? 'var(--accent-tint)' : 'var(--bg-1)', border: accent ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)', borderRadius: 16, padding: '18px 16px' }}>
-      <span style={{ color: accent ? 'var(--accent)' : 'var(--text-3)', display: 'inline-flex' }}>{icon}</span>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -1, marginTop: 10, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 6, fontWeight: 500 }}>{label}</div>
+    <div
+      style={{
+        background: accent ? 'var(--accent)' : 'var(--bg-1)',
+        border: accent ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)',
+        borderRadius: 16,
+        padding: '18px 16px',
+        boxShadow: accent ? 'var(--shadow-card)' : undefined,
+      }}
+    >
+      <span style={{ color: accent ? 'var(--accent-on)' : 'var(--text-3)', display: 'inline-flex' }}>{icon}</span>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -1, marginTop: 10, lineHeight: 1, color: accent ? 'var(--accent-on)' : 'var(--text-1)' }}>{value}</div>
+      <div style={{ fontSize: 12, marginTop: 6, fontWeight: 500, color: accent ? 'color-mix(in srgb, var(--accent-on) 78%, transparent)' : 'var(--text-2)' }}>{label}</div>
     </div>
   );
 }

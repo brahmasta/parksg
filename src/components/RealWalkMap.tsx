@@ -49,6 +49,8 @@ export function RealWalkMap({
     });
     L.tileLayer(ONEMAP_TILE, {
       attribution: ONEMAP_ATTRIBUTION,
+      opacity: 0.82,
+      className: 'psg-basemap',
       detectRetina: true,
       bounds: SG_BOUNDS,
     }).addTo(map);

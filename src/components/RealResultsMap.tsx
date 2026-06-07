@@ -62,6 +62,9 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       attribution: ONEMAP_ATTRIBUTION,
       detectRetina: true,
       bounds: SG_BOUNDS,
+      // Mute the basemap so the colored price pins read clearly against it.
+      opacity: 0.82,
+      className: 'psg-basemap',
     }).addTo(map);
     mapRef.current = map;
     return () => {
@@ -162,7 +165,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
             border:${border};
             font-family: var(--font-display);
             font-size:12.5px; font-weight:600;
-            box-shadow:0 4px 12px rgba(0,0,0,0.2);
+            box-shadow:0 2px 6px rgba(28,39,76,0.18);
             white-space:nowrap;
           ">
             <span style="
