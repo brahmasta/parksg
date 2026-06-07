@@ -79,8 +79,9 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       if (!(layer instanceof L.TileLayer)) map.removeLayer(layer);
     });
 
-    const accent = getCssVar('--accent', '#2EE3C2');
-    const text1 = getCssVar('--text-1', '#0E1014');
+    const accent = getCssVar('--accent', '#0D9488');
+    const accentOn = getCssVar('--accent-on', '#FFFFFF');
+    const text1 = getCssVar('--text-1', '#242A33');
     const bg1 = getCssVar('--bg-1', '#FFFFFF');
     const lineStrong = getCssVar('--line-strong', 'rgba(14,16,20,0.14)');
     const ok = getCssVar('--ok', '#1F8A4F');
@@ -138,7 +139,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       const costNum = costOf ? costOf(cp) : cp.rateUnknown ? null : cp.estByHours[duration];
       const cost = costNum == null ? '—' : formatCost(costNum);
       const fill = isCheapest ? accent : bg1;
-      const fg = isCheapest ? '#0E1014' : isGoogle ? muted : text1;
+      const fg = isCheapest ? accentOn : isGoogle ? muted : text1;
       // Active pin gets an accent ring; cheapest a solid accent border; Google a
       // muted dashed border (supplementary/unverified); else a hairline.
       const border = isActive

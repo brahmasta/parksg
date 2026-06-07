@@ -38,7 +38,7 @@ export function FilterPill({
           ? '1px solid var(--accent)'
           : '0.5px solid var(--line-strong)',
         background: active ? 'var(--accent-tint-strong)' : 'transparent',
-        color: active ? 'var(--accent-on)' : 'var(--text-2)',
+        color: active ? 'var(--accent)' : 'var(--text-2)',
         borderRadius: 999,
         fontSize: 11.5,
         fontWeight: 500,

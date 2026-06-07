@@ -3,61 +3,90 @@
 /* ── Design tokens (mirrors the prototype's styles.css) ──────────────────── */
 
 :root {
-  --font-display: 'Space Grotesk', 'Helvetica Neue', system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans', 'Helvetica Neue', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+  /* Unified UI is Plus Jakarta Sans throughout; the logo is pinned to Space
+     Grotesk via --font-brand so the mark never changes. */
+  --font-display: 'Plus Jakarta Sans', 'Helvetica Neue', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: 'Plus Jakarta Sans', 'Helvetica Neue', system-ui, sans-serif;
+  --font-brand: 'Space Grotesk', 'Helvetica Neue', system-ui, sans-serif;
 
-  /* Light is the shipped default */
-  --bg-0: #f4f2ec;
+  /* Brand — logo ONLY (bright mint teal; deliberately NOT the UI accent) */
+  --brand: #2ee3c2;
+  --brand-2: #14c9b6;
+  --brand-on: #0b2e2a;
+  --brand-glow: rgba(46, 227, 194, 0.45);
+  --uui-gradient-brand: linear-gradient(76.7deg, #921fff 2%, #ff0a58 51%, #ffbf57 99%);
+
+  /* Surfaces — Unified UI clean light */
+  --bg-0: #fafafa;
   --bg-1: #ffffff;
-  --bg-2: #faf8f2;
-  --bg-3: #eeeae0;
-  --line: rgba(14, 16, 20, 0.07);
-  --line-strong: rgba(14, 16, 20, 0.14);
-  --text-1: #0e1014;
-  --text-2: rgba(14, 16, 20, 0.65);
-  --text-3: rgba(14, 16, 20, 0.42);
+  --bg-2: #f5f7f9;
+  --bg-3: #eef2f8;
+  --line: #e9eff7;
+  --line-strong: #c1d0e5;
+  --text-1: #242a33;
+  --text-2: #58677d;
+  --text-3: #8a97aa;
 
-  /* Availability semantics — light */
-  --ok: #1f8a4f;
-  --ok-bg: rgba(34, 160, 80, 0.12);
-  --warn: #a66b00;
-  --warn-bg: rgba(217, 142, 16, 0.14);
-  --bad: #c0392b;
-  --bad-bg: rgba(192, 57, 43, 0.1);
-  --muted-status: #6b7280;
-  --muted-status-bg: rgba(107, 114, 128, 0.1);
+  /* Availability semantics — Unified UI success / warning / error */
+  --ok: #0e9e6e;
+  --ok-bg: #e2f7ef;
+  --warn: #b8810f;
+  --warn-bg: #fef1dc;
+  --bad: #ec113a;
+  --bad-bg: #fbe0e5;
+  --muted-status: #58677d;
+  --muted-status-bg: #eef2f8;
 
-  /* Accent — teal (shipped default) */
-  --accent: #2ee3c2;
-  --accent-tint: rgba(46, 227, 194, 0.13);
-  --accent-tint-strong: rgba(46, 227, 194, 0.22);
-  --accent-on: #0e1014;
+  /* Accent — functional deep teal. Tints derive from accent + surface. */
+  --accent: #0d9488;
+  --accent-on: #ffffff;
+  --accent-tint: color-mix(in srgb, var(--accent) 11%, var(--bg-1));
+  --accent-tint-strong: color-mix(in srgb, var(--accent) 20%, var(--bg-1));
 
-  /* Per-source chart colors (Coverage page) */
-  --src-hdb: var(--accent); /* #2ee3c2 */
-  --src-ura: #6c8cff;
-  --src-lta: #f0a83c;
-  --src-ev: #8b5cf6;
+  /* Interactive blue — links / info highlights */
+  --accent-blue: #5050fa;
+  --accent-blue-bg: #ececfe;
+
+  /* Glass overlay (walk-map chips) — adapts to theme via bg-1 */
+  --glass: color-mix(in srgb, var(--bg-1) 82%, transparent);
+
+  /* Elevation — soft, low-opacity, navy-tinted */
+  --shadow-sm: 0 1px 2px rgba(28, 39, 76, 0.05);
+  --shadow-card: 0 2px 8px rgba(28, 39, 76, 0.06);
+  --shadow-raised: 0 10px 28px rgba(28, 39, 76, 0.12);
+  --shadow-modal: 0 20px 50px rgba(28, 39, 76, 0.2);
+
+  /* Per-source chart colors (Coverage page) — Unified UI bento palette */
+  --src-hdb: var(--accent); /* teal */
+  --src-ura: #5050fa; /* blue */
+  --src-lta: #fcae30; /* gold */
+  --src-ev: #921fff; /* purple */
 }
 
 [data-theme='dark'] {
-  --bg-0: #0e1014;
-  --bg-1: #161a21;
-  --bg-2: #1e232c;
-  --bg-3: #262c37;
-  --line: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.14);
-  --text-1: #f5f6f8;
-  --text-2: rgba(245, 246, 248, 0.68);
-  --text-3: rgba(245, 246, 248, 0.42);
+  --bg-0: #12151a;
+  --bg-1: #1a1e25;
+  --bg-2: #20252e;
+  --bg-3: #2a313c;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text-1: #f5f7fa;
+  --text-2: rgba(245, 247, 250, 0.66);
+  --text-3: rgba(245, 247, 250, 0.42);
 
-  --ok: #4ade80;
-  --ok-bg: rgba(74, 222, 128, 0.12);
-  --warn: #fbbf24;
-  --warn-bg: rgba(251, 191, 36, 0.14);
-  --bad: #f87171;
-  --bad-bg: rgba(248, 113, 113, 0.12);
+  --ok: #25d092;
+  --ok-bg: rgba(37, 208, 146, 0.15);
+  --warn: #fcae30;
+  --warn-bg: rgba(252, 174, 48, 0.16);
+  --bad: #ff5a6e;
+  --bad-bg: rgba(255, 90, 110, 0.15);
+  --muted-status: #8a97aa;
+  --muted-status-bg: rgba(138, 151, 170, 0.16);
+
+  /* Brighter teal accent so it sings on near-black */
+  --accent: #2dd4bf;
+  --accent-on: #062925;
 }
 
 * {
@@ -162,7 +191,7 @@ button {
   align-items: center;
   justify-content: center;
   padding: 24px 12px;
-  background: radial-gradient(120% 70% at 50% 0%, #ece7dc 0%, #d9d1be 70%);
+  background: radial-gradient(120% 70% at 50% 0%, #e9edf3 0%, #d3dae6 70%);
 }
 .psg-frame {
   width: 100%;

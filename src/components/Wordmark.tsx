@@ -5,7 +5,7 @@ export function Wordmark({ size = 18 }: { size?: number }) {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 8,
-        fontFamily: 'var(--font-display)',
+        fontFamily: 'var(--font-brand)',
         fontSize: size,
         fontWeight: 700,
         color: 'var(--text-1)',
@@ -13,24 +13,27 @@ export function Wordmark({ size = 18 }: { size?: number }) {
       }}
     >
       <span
+        aria-hidden
         style={{
-          width: size + 6,
-          height: size + 6,
-          borderRadius: 7,
-          background: 'var(--accent)',
-          color: 'var(--accent-on)',
+          width: size + 8,
+          height: size + 8,
+          borderRadius: 10,
+          background: 'linear-gradient(145deg, var(--brand) 0%, var(--brand-2) 100%)',
+          color: 'var(--brand-on)',
+          boxShadow: '0 4px 13px var(--brand-glow)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: size - 2,
+          fontSize: size,
           fontWeight: 700,
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-brand)',
+          flexShrink: 0,
         }}
       >
         P
       </span>
       <span>
-        wheretopark<span style={{ color: 'var(--text-2)', fontWeight: 500 }}>.sg</span>
+        wheretopark<span style={{ color: 'var(--text-3)', fontWeight: 500 }}>.sg</span>
       </span>
     </div>
   );

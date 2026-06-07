@@ -208,7 +208,7 @@ export function ResultsScreen({
                 viewMode === 'map'
                   ? '1px solid var(--accent)'
                   : '0.5px solid var(--line-strong)',
-              color: viewMode === 'map' ? 'var(--accent-on)' : 'var(--text-2)',
+              color: viewMode === 'map' ? 'var(--accent)' : 'var(--text-2)',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',

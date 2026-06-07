@@ -363,7 +363,7 @@ function LandingDesktop({
         {/* Saved places */}
         <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <MonoLabel>Saved places</MonoLabel>
-          <button type="button" onClick={saved.onAddDestination} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent-on)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+          <button type="button" onClick={saved.onAddDestination} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
             + Add destination
           </button>
         </div>

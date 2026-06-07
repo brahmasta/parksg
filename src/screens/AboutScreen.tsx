@@ -115,7 +115,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
             }}
           >
             Find the nearest{' '}
-            <span style={{ color: 'var(--accent-on)', background: 'var(--accent-tint-strong)', padding: '0 4px', borderRadius: 4 }}>
+            <span style={{ color: 'var(--accent)', background: 'var(--accent-tint-strong)', padding: '0 4px', borderRadius: 4 }}>
               and
             </span>{' '}
             cheapest carpark, before you start driving.
@@ -160,7 +160,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
                     height: 30,
                     borderRadius: 999,
                     background: 'var(--accent-tint)',
-                    color: 'var(--accent-on)',
+                    color: 'var(--accent)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -235,7 +235,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
                     height: 18,
                     borderRadius: 999,
                     background: 'var(--accent-tint)',
-                    color: 'var(--accent-on)',
+                    color: 'var(--accent)',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -267,7 +267,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
               fontWeight: 600,
               letterSpacing: -0.1,
               cursor: 'pointer',
-              boxShadow: '0 8px 22px rgba(46,227,194,0.28), 0 2px 6px rgba(0,0,0,0.08)',
+              boxShadow: 'var(--shadow-raised)',
               minHeight: 48,
             }}
           >

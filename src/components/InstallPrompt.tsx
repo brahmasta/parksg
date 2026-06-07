@@ -127,7 +127,7 @@ export function InstallPrompt() {
             fontWeight: 600,
             cursor: 'pointer',
             fontFamily: 'var(--font-body)',
-            boxShadow: '0 6px 14px rgba(46,227,194,0.18)',
+            boxShadow: 'var(--shadow-card)',
           }}
         >
           Install

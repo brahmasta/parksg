@@ -72,7 +72,7 @@ export function CarparkCard({
         padding: '14px 14px 13px 16px',
         background: 'var(--bg-1)',
         border: isActive ? '1.5px solid var(--accent)' : '0.5px solid var(--line)',
-        boxShadow: isActive ? '0 6px 20px rgba(46,227,194,0.16)' : undefined,
+        boxShadow: isActive ? 'var(--shadow-raised)' : 'var(--shadow-sm)',
         borderRadius: 14,
         position: 'relative',
         overflow: 'hidden',
@@ -98,7 +98,7 @@ export function CarparkCard({
               style={{
                 fontFamily: 'var(--font-mono)',
                 fontSize: 10,
-                color: isCheapest ? 'var(--accent-on)' : 'var(--text-3)',
+                color: isCheapest ? 'var(--accent)' : 'var(--text-3)',
                 fontWeight: 500,
                 letterSpacing: 0.4,
               }}

@@ -69,9 +69,9 @@ export function RealWalkMap({
       if (!(layer instanceof L.TileLayer)) map.removeLayer(layer);
     });
 
-    const accent = getCssVar('--accent', '#2EE3C2');
-    const accentOn = getCssVar('--accent-on', '#0E1014');
-    const text1 = getCssVar('--text-1', '#0E1014');
+    const accent = getCssVar('--accent', '#0D9488');
+    const accentOn = getCssVar('--accent-on', '#FFFFFF');
+    const text1 = getCssVar('--text-1', '#242A33');
 
     // Route polyline (use real geometry; fall back to a straight line if empty)
     const path: [number, number][] = geometry.length >= 2 ? geometry : [origin, destination];

@@ -269,7 +269,7 @@ export function PlaceAutocomplete({
               justifyContent: 'center',
               cursor: 'pointer',
               flexShrink: 0,
-              boxShadow: '0 2px 6px rgba(46,227,194,0.35)',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             <IconChevronRight size={16} stroke={2.5} />

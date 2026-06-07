@@ -95,7 +95,7 @@ export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, letterSpacing: -0.4, color: 'var(--text-1)' }}>Ready to park smarter?</div>
           <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 4 }}>Compare live cost & availability near you.</div>
         </div>
-        <button onClick={onFindParking} style={{ appearance: 'none', border: 0, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 22px', borderRadius: 13, background: 'var(--accent)', color: 'var(--accent-on)', fontFamily: 'var(--font-display)', fontSize: 15.5, fontWeight: 600, cursor: 'pointer', boxShadow: '0 8px 22px rgba(46,227,194,0.28)' }}>
+        <button onClick={onFindParking} style={{ appearance: 'none', border: 0, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 22px', borderRadius: 13, background: 'var(--accent)', color: 'var(--accent-on)', fontFamily: 'var(--font-display)', fontSize: 15.5, fontWeight: 600, cursor: 'pointer', boxShadow: 'var(--shadow-raised)' }}>
           Find parking near me <IconArrowRight size={17} stroke={2.5} />
         </button>
       </div>

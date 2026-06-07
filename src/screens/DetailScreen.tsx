@@ -729,7 +729,7 @@ export function DetailScreen({
                 href={`https://www.google.com/maps/search/?api=1&query=${cp.coords.entrance[0]},${cp.coords.entrance[1]}&query_place_id=${cp.placeId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: 'var(--accent-on)', textDecoration: 'underline' }}
+                style={{ color: 'var(--accent)', textDecoration: 'underline' }}
               >
                 Open in Google Maps
               </a>
@@ -805,7 +805,7 @@ export function DetailScreen({
               letterSpacing: -0.1,
               cursor: 'pointer',
               boxShadow:
-                '0 10px 28px rgba(46,227,194,0.30), 0 2px 6px rgba(0,0,0,0.10)',
+                'var(--shadow-raised)',
               minHeight: 50,
             }}
           >

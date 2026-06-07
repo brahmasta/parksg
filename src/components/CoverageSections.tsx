@@ -126,7 +126,7 @@ export function CoverageSections() {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11.5, color: 'var(--text-2)' }}>
                   <IconRefresh size={13} stroke={2} /> {s.freshness}
                 </span>
-                <a href={s.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: 'var(--accent-on)', textDecoration: 'underline', fontWeight: 600 }}>
+                <a href={s.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: 'var(--accent)', textDecoration: 'underline', fontWeight: 600 }}>
                   Source <IconExternal size={12} stroke={2} />
                 </a>
               </div>
@@ -166,7 +166,7 @@ export function CoverageSections() {
 function BigStat({ value, label, icon, accent }: { value: string; label: string; icon: ReactNode; accent?: boolean }) {
   return (
     <div style={{ background: accent ? 'var(--accent-tint)' : 'var(--bg-1)', border: accent ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)', borderRadius: 16, padding: '18px 16px' }}>
-      <span style={{ color: accent ? 'var(--accent-on)' : 'var(--text-3)', display: 'inline-flex' }}>{icon}</span>
+      <span style={{ color: accent ? 'var(--accent)' : 'var(--text-3)', display: 'inline-flex' }}>{icon}</span>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -1, marginTop: 10, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 6, fontWeight: 500 }}>{label}</div>
     </div>

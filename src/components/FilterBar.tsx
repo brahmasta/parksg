@@ -90,7 +90,7 @@ export function FilterBar({
           minHeight: 32,
           background: availableOnly ? 'var(--accent-tint-strong)' : 'var(--bg-1)',
           border: availableOnly ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)',
-          color: availableOnly ? 'var(--accent-on)' : 'var(--text-2)',
+          color: availableOnly ? 'var(--accent)' : 'var(--text-2)',
         }}
       >
         <span

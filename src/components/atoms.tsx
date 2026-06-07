@@ -63,15 +63,16 @@ export function Wordmark({ size = 19 }: { size?: number }) {
         style={{
           width: tile,
           height: tile,
-          borderRadius: Math.round(tile * 0.32),
-          background: 'var(--accent)',
-          color: 'var(--accent-on)',
+          borderRadius: 10,
+          background: 'linear-gradient(145deg, var(--brand) 0%, var(--brand-2) 100%)',
+          color: 'var(--brand-on)',
+          boxShadow: '0 4px 13px var(--brand-glow)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-brand)',
           fontWeight: 700,
-          fontSize: Math.round(size * 0.85),
+          fontSize: Math.round(size * 0.92),
           flexShrink: 0,
         }}
       >
@@ -79,15 +80,15 @@ export function Wordmark({ size = 19 }: { size?: number }) {
       </span>
       <span
         style={{
-          fontFamily: 'var(--font-display)',
+          fontFamily: 'var(--font-brand)',
           fontSize: size,
-          fontWeight: 600,
+          fontWeight: 700,
           letterSpacing: -0.4,
           color: 'var(--text-1)',
           whiteSpace: 'nowrap',
         }}
       >
-        wheretopark<span style={{ color: 'var(--text-3)' }}>.sg</span>
+        wheretopark<span style={{ color: 'var(--text-3)', fontWeight: 500 }}>.sg</span>
       </span>
     </span>
   );
@@ -256,7 +257,7 @@ export function DurationStrip({
                 ? '1px solid var(--accent)'
                 : '0.5px solid var(--line-strong)',
               background: active ? 'var(--accent-tint-strong)' : 'var(--bg-1)',
-              color: active ? 'var(--accent-on)' : 'var(--text-2)',
+              color: active ? 'var(--accent)' : 'var(--text-2)',
               fontSize: compact ? 12.5 : 13.5,
               fontWeight: active ? 600 : 500,
               cursor: 'pointer',
@@ -369,7 +370,7 @@ export function SearchField({
               justifyContent: 'center',
               cursor: 'pointer',
               flexShrink: 0,
-              boxShadow: '0 2px 6px rgba(46,227,194,0.35)',
+              boxShadow: 'var(--shadow-sm)',
             }}
           >
             <IconChevronRight size={16} stroke={2.5} />

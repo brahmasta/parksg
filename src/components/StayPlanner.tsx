@@ -175,7 +175,7 @@ export function StayPlanner({
           {[1, 2, 3, 4, 8, 24].map((h) => {
             const active = hours === h;
             return (
-              <button key={h} onClick={() => onChange({ ...stay, hours: h })} aria-pressed={active} style={{ appearance: 'none', padding: '5px 11px', fontSize: 12.5, borderRadius: 999, cursor: 'pointer', fontWeight: active ? 600 : 500, border: active ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)', background: active ? 'var(--accent-tint-strong)' : 'var(--bg-1)', color: active ? 'var(--accent-on)' : 'var(--text-2)', transition: 'all 120ms ease' }}>
+              <button key={h} onClick={() => onChange({ ...stay, hours: h })} aria-pressed={active} style={{ appearance: 'none', padding: '5px 11px', fontSize: 12.5, borderRadius: 999, cursor: 'pointer', fontWeight: active ? 600 : 500, border: active ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)', background: active ? 'var(--accent-tint-strong)' : 'var(--bg-1)', color: active ? 'var(--accent)' : 'var(--text-2)', transition: 'all 120ms ease' }}>
                 {fmtDuration(h)}
               </button>
             );
