@@ -101,11 +101,11 @@ export function WalkMap({
           gap: 6,
           padding: '6px 10px',
           borderRadius: 999,
-          background: 'rgba(14,16,20,0.75)',
+          background: 'var(--glass)',
           border: '0.5px solid var(--line-strong)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
-          color: '#F5F6F8',
+          color: 'var(--text-1)',
           fontSize: 12,
           fontWeight: 500,
         }}
@@ -127,13 +127,13 @@ export function WalkMap({
           gap: 4,
           padding: '6px 10px',
           borderRadius: 8,
-          background: 'rgba(14,16,20,0.75)',
+          background: 'var(--glass)',
           border: '0.5px solid var(--line-strong)',
           fontSize: 10.5,
           fontFamily: 'var(--font-mono)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
-          color: '#F5F6F8',
+          color: 'var(--text-1)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
