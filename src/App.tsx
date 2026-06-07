@@ -30,7 +30,7 @@ import { findArea } from './lib/seoAreas';
 import { haversineMeters, walkMinutesFromMeters } from './lib/geo';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
-import { recordSearch } from './lib/api/analytics';
+import { recordSearch, recordVisit } from './lib/api/analytics';
 import { snapshotFromCarpark, useSaves } from './lib/saves';
 import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
@@ -312,6 +312,11 @@ function App() {
     onSynced: (ts) => markSynced(ts),
   });
   const { toast, pop } = useToast();
+
+  // Log one visit per app load (DAU / device / referrer for all visitors).
+  useEffect(() => {
+    recordVisit();
+  }, []);
 
   // Best-effort: log every resolved destination search to Supabase so the
   // owner can query top searches. Fires once per resolved destination (the

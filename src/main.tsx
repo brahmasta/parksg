@@ -3,7 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css';
 import App from './App.tsx';
+import { AdminApp } from './admin/AdminApp.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
+
+// The /admin control panel is a separate top-level surface (Google-gated,
+// server-authorized). Everything else is the public app.
+const isAdmin = /^\/admin(\/|$)/.test(window.location.pathname);
 
 // Google OAuth client ID, read at build time from .env (.env.local).
 // Google's GSI script (initTokenClient) throws synchronously on an empty
@@ -17,7 +22,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <App />
+        {isAdmin ? <AdminApp /> : <App />}
       </GoogleOAuthProvider>
     </ErrorBoundary>
   </StrictMode>,

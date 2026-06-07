@@ -51,6 +51,10 @@ type GoogleUserInfo = {
 export function useSession() {
   const [session, setSession] = useState<Session>(() => readSession());
   const [error, setError] = useState<string | null>(null);
+  // The Google access token, kept in memory only (never persisted). Used to
+  // authenticate the admin control panel: the server re-verifies it against
+  // Google + the admin-email allowlist. Null after a reload until re-sign-in.
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   // Cross-tab sync — keep both windows in step on sign-in / sign-out.
   useEffect(() => {
@@ -63,6 +67,7 @@ export function useSession() {
 
   const login = useGoogleLogin({
     onSuccess: async (resp) => {
+      setAccessToken(resp.access_token ?? null);
       try {
         const r = await fetch(
           'https://www.googleapis.com/oauth2/v3/userinfo',
@@ -116,6 +121,7 @@ export function useSession() {
     const next: Session = { user: null, syncedAt: null };
     writeSession(next);
     setSession(next);
+    setAccessToken(null);
     setError(null);
   }, []);
 
@@ -130,5 +136,5 @@ export function useSession() {
     });
   }, []);
 
-  return { session, user: session.user, signIn, signOut, markSynced, error };
+  return { session, user: session.user, accessToken, signIn, signOut, markSynced, error };
 }
