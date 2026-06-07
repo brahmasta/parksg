@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="114" fill="#2EE3C2"/>
-  <path d="M180 366 L180 150 L300 150 Q360 150 360 210 Q360 270 300 270 L180 270"
-        fill="none" stroke="#0E1014" stroke-width="64"
-        stroke-linejoin="round" stroke-linecap="round"/>
+  <rect width="512" height="512" rx="114" fill="#2ee3c2"/>
+  <!-- Bold filled "P", matching the in-app wordmark (accent-on #0e1014 on accent teal). -->
+  <path fill="#0e1014" d="M160 374 V152 H300 C344 152 368 178 368 226 C368 274 344 300 300 300 H242 V374 Z"/>
+  <!-- Counter (punched in the teal tile colour). -->
+  <path fill="#2ee3c2" d="M242 206 H300 C322 206 334 215 334 226 C334 237 322 246 300 246 H242 Z"/>
 </svg>
