@@ -6,6 +6,7 @@ import { FindParkingDesktop, type FindParkingDesktopProps, type DesktopSavedProp
 import { SavedScreen } from '../screens/SavedScreen';
 import { AboutDesktop } from './AboutDesktop';
 import { AccountDesktop } from './AccountDesktop';
+import { AddCarparkDialog } from '../components/AddCarparkDialog';
 
 type DesktopRoute = 'find' | 'saved' | 'about' | 'account';
 
@@ -25,10 +26,19 @@ export type DesktopShellProps = {
  */
 export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRequestSignOut }: DesktopShellProps) {
   const [route, setRoute] = useState<DesktopRoute>('find');
+  const [addOpen, setAddOpen] = useState(false);
 
   return (
     <div className="psg" style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-0)', color: 'var(--text-1)' }}>
-      <TopNav route={route} setRoute={setRoute} user={user} />
+      <TopNav route={route} setRoute={setRoute} user={user} onAddCarpark={() => setAddOpen(true)} />
+
+      <AddCarparkDialog
+        key={addOpen ? 'add-open' : 'add-closed'}
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        variant="modal"
+        user={user}
+      />
 
       {route === 'find' && <FindParkingDesktop {...find} saved={saved} />}
 
@@ -93,11 +103,13 @@ const circleBtn: CSSProperties = {
   flexShrink: 0,
 };
 
-function TopNav({ route, setRoute, user }: { route: DesktopRoute; setRoute: (r: DesktopRoute) => void; user: User | null }) {
-  const links: [DesktopRoute, string][] = [
-    ['find', 'Find parking'],
-    ['saved', 'Saved'],
-    ['about', 'About'],
+function TopNav({ route, setRoute, user, onAddCarpark }: { route: DesktopRoute; setRoute: (r: DesktopRoute) => void; user: User | null; onAddCarpark: () => void }) {
+  // 'add' is an action (opens the submit dialog), not a route — placed after Saved.
+  const items: { key: DesktopRoute | 'add'; label: string }[] = [
+    { key: 'find', label: 'Find parking' },
+    { key: 'saved', label: 'Saved' },
+    { key: 'add', label: 'Add carpark' },
+    { key: 'about', label: 'About' },
   ];
   return (
     <header
@@ -122,12 +134,12 @@ function TopNav({ route, setRoute, user }: { route: DesktopRoute; setRoute: (r: 
           <Wordmark size={19} />
         </button>
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {links.map(([key, label]) => {
-            const active = route === key;
+          {items.map(({ key, label }) => {
+            const active = key !== 'add' && route === key;
             return (
               <button
                 key={key}
-                onClick={() => setRoute(key)}
+                onClick={() => (key === 'add' ? onAddCarpark() : setRoute(key))}
                 aria-current={active ? 'page' : undefined}
                 style={{
                   appearance: 'none',

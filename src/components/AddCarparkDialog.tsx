@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BottomSheet } from './BottomSheet';
 import { IconCheck, IconClose, IconInfo } from './icons';
-import { OneMapSearch } from './OneMapSearch';
+import { PlaceSearch } from './PlaceSearch';
 import { LatLngPicker } from './LatLngPicker';
 import { RateGridEditor } from './RateGridEditor';
 import { blankEditableRate, type EditableRate } from './rateGrid';
@@ -96,7 +96,7 @@ export function AddCarparkDialog({ open, onClose, variant = 'sheet', user = null
         </div>
 
         <Label htmlFor="ac-search">Find the location</Label>
-        <OneMapSearch
+        <PlaceSearch
           placeholder="Search a building or address…"
           onSelect={(p) => {
             if (!name.trim()) setName(p.name);

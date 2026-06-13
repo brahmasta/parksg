@@ -1,24 +1,36 @@
 import { useEffect, useRef, useState } from 'react';
-import { searchOneMap, type OneMapPlace } from '../lib/api/onemapSearch';
+import {
+  autocomplete,
+  placeDetails,
+  newSessionToken,
+  type PlaceSuggestion,
+} from '../lib/api/googlePlaces';
 
-/** Debounced OneMap location search box with a results dropdown. Selecting a
- * result fires `onSelect` and clears the dropdown. */
-export function OneMapSearch({
+export type SelectedPlace = { name: string; address: string; lat: number; lng: number };
+
+/** Debounced Google Places (New) location search with a suggestions dropdown.
+ * Picking a suggestion resolves its coordinates via Place Details and fires
+ * `onSelect`. Used by the carpark location pickers (admin add-form + the
+ * customer "Add a carpark" dialog) to recenter the map.
+ *
+ * Note: the resolved coordinate is only used to recenter the map; the value we
+ * persist is the user's confirmed map pin (see LatLngPicker), so we don't store
+ * Google place content per Maps Platform terms. */
+export function PlaceSearch({
   onSelect,
-  placeholder = 'Search a place (OneMap)…',
+  placeholder = 'Search a building or address…',
 }: {
-  onSelect: (p: OneMapPlace) => void;
+  onSelect: (p: SelectedPlace) => void;
   placeholder?: string;
 }) {
   const [q, setQ] = useState('');
-  const [results, setResults] = useState<OneMapPlace[]>([]);
+  const [results, setResults] = useState<PlaceSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const tokenRef = useRef<string>(newSessionToken());
   const boxRef = useRef<HTMLDivElement | null>(null);
 
-  // Debounced search; aborts the in-flight request when the query changes.
-  // All state updates happen inside the timeout callback (not synchronously in
-  // the effect body) to avoid cascading-render lint.
+  // Debounced autocomplete; all state updates happen in the timeout callback.
   useEffect(() => {
     const term = q.trim();
     const ctrl = new AbortController();
@@ -28,20 +40,20 @@ export function OneMapSearch({
         return;
       }
       setLoading(true);
-      searchOneMap(term, ctrl.signal)
-        .then((r) => {
-          setResults(r);
+      autocomplete(term, tokenRef.current, ctrl.signal)
+        .then((s) => {
+          setResults(s);
           setOpen(true);
         })
+        .catch(() => setResults([]))
         .finally(() => setLoading(false));
-    }, 280);
+    }, 220);
     return () => {
       clearTimeout(h);
       ctrl.abort();
     };
   }, [q]);
 
-  // Close on outside click.
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
@@ -50,10 +62,16 @@ export function OneMapSearch({
     return () => window.removeEventListener('mousedown', onDown);
   }, []);
 
-  const pick = (p: OneMapPlace) => {
-    onSelect(p);
-    setQ(p.name);
+  const pick = async (s: PlaceSuggestion) => {
     setOpen(false);
+    setQ(s.primary);
+    try {
+      const place = await placeDetails(s.placeId, tokenRef.current);
+      tokenRef.current = newSessionToken(); // start a fresh billing session after a pick
+      if (place) onSelect({ name: place.label, address: place.address, lat: place.lat, lng: place.lng });
+    } catch {
+      /* ignore — the user can still drop a pin manually */
+    }
   };
 
   return (
@@ -69,7 +87,7 @@ export function OneMapSearch({
           color: 'var(--text-1)', fontSize: 14, outline: 'none',
         }}
       />
-      {open && (q.trim().length >= 2) && (
+      {open && q.trim().length >= 2 && (
         <div
           style={{
             position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 30,
@@ -82,11 +100,11 @@ export function OneMapSearch({
           ) : results.length === 0 ? (
             <div style={{ padding: '12px 14px', fontSize: 13, color: 'var(--text-3)' }}>No matches.</div>
           ) : (
-            results.map((p, i) => (
+            results.map((s, i) => (
               <button
-                key={`${p.lat},${p.lng},${i}`}
+                key={s.placeId}
                 type="button"
-                onClick={() => pick(p)}
+                onClick={() => pick(s)}
                 style={{
                   appearance: 'none', display: 'block', width: '100%', textAlign: 'left',
                   background: 'transparent', border: 0,
@@ -94,10 +112,10 @@ export function OneMapSearch({
                   padding: '10px 14px', cursor: 'pointer', color: 'var(--text-1)',
                 }}
               >
-                <div style={{ fontSize: 13.5, fontWeight: 600 }}>{p.name}</div>
-                {p.address && (
+                <div style={{ fontSize: 13.5, fontWeight: 600 }}>{s.primary}</div>
+                {s.secondary && (
                   <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {p.address}
+                    {s.secondary}
                   </div>
                 )}
               </button>

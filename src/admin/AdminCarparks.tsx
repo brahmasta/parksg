@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminFetch, AdminError, type CarparkLite, type CarparkFull, type RateRow } from './api';
 import { RateGridEditor } from '../components/RateGridEditor';
-import { OneMapSearch } from '../components/OneMapSearch';
+import { PlaceSearch } from '../components/PlaceSearch';
 import { LatLngPicker } from '../components/LatLngPicker';
 
 const SYSTEMS = ['EPS', 'COUPON', 'GANTRY_PRIVATE', 'FLAT'];
@@ -212,7 +212,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
 
           {/* Location: search OneMap or drop a pin — both fill lat/lng below. */}
           <div>
-            <OneMapSearch
+            <PlaceSearch
               onSelect={(p) =>
                 setNewCp((prev) => ({
                   ...prev,

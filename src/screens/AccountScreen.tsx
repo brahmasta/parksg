@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { User } from '../lib/types';
+import { AddCarparkDialog } from '../components/AddCarparkDialog';
 import {
   IconBookmark,
   IconChevronLeft,
@@ -7,6 +8,7 @@ import {
   IconCloud,
   IconGoogleG,
   IconInfo,
+  IconPlus,
   IconShield,
   IconSignOut,
   IconStar,
@@ -64,16 +66,20 @@ export function AccountScreen({
   );
 }
 
-/** Saved · Coverage · About — the in-menu navigation (mobile lacks a top nav). */
+/** Saved · Add a carpark · About — the in-menu navigation (mobile lacks a top
+ * nav). "Add a carpark" opens the submit-for-review dialog. */
 function ExploreGroup({
   onOpenSaved,
   onOpenAbout,
   savedSub,
+  user = null,
 }: {
   onOpenSaved?: () => void;
   onOpenAbout: () => void;
   savedSub?: string;
+  user?: User | null;
 }) {
+  const [addOpen, setAddOpen] = useState(false);
   return (
     <div style={{ marginTop: 22 }}>
       <MonoLabel>Explore</MonoLabel>
@@ -81,8 +87,16 @@ function ExploreGroup({
         {onOpenSaved && (
           <NavRow icon={<IconBookmark filled size={16} />} title="Saved" sub={savedSub} onClick={onOpenSaved} />
         )}
+        <NavRow icon={<IconPlus size={16} stroke={2} />} title="Add a carpark" sub="Missing one? Submit it for review" onClick={() => setAddOpen(true)} />
         <NavRow icon={<IconInfo size={16} stroke={2} />} title="About" sub="How it works · data coverage" onClick={onOpenAbout} last />
       </div>
+      <AddCarparkDialog
+        key={addOpen ? 'add-open' : 'add-closed'}
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        variant="sheet"
+        user={user}
+      />
     </div>
   );
 }
@@ -304,6 +318,7 @@ function SignedOutBody({
         onOpenSaved={onOpenSaved}
         onOpenAbout={onOpenAbout}
         savedSub="Carparks & destinations you bookmark on this device"
+        user={null}
       />
     </>
   );
@@ -316,7 +331,7 @@ function SignedInBody({
   onRequestSignOut,
   onOpenAbout,
 }: {
-  user: { name: string; email: string; initials: string };
+  user: User;
   savedItemCount: number;
   onOpenSaved: () => void;
   onRequestSignOut: () => void;
@@ -465,7 +480,7 @@ function SignedInBody({
         </div>
       </div>
 
-      <ExploreGroup onOpenAbout={onOpenAbout} />
+      <ExploreGroup onOpenAbout={onOpenAbout} user={user} />
 
       <button
         type="button"
