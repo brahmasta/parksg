@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { adminFetch, AdminError, type CarparkLite, type CarparkFull, type RateRow } from './api';
 import { RateGridEditor } from '../components/RateGridEditor';
+import { OneMapSearch } from '../components/OneMapSearch';
+import { LatLngPicker } from '../components/LatLngPicker';
 
 const SYSTEMS = ['EPS', 'COUPON', 'GANTRY_PRIVATE', 'FLAT'];
 const AGENCIES = ['OPERATOR', 'HDB', 'URA', 'LTA', 'JTC', 'NPARKS'];
@@ -206,6 +208,29 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
 
           <div style={{ fontSize: 13, fontWeight: 700 }}>
             New carpark <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>(saved as MANUAL)</span>
+          </div>
+
+          {/* Location: search OneMap or drop a pin — both fill lat/lng below. */}
+          <div>
+            <OneMapSearch
+              onSelect={(p) =>
+                setNewCp((prev) => ({
+                  ...prev,
+                  name: prev.name?.trim() ? prev.name : p.name,
+                  address: p.address || prev.address,
+                  lat: String(p.lat),
+                  lng: String(p.lng),
+                }))
+              }
+            />
+            <div style={{ marginTop: 10 }}>
+              <LatLngPicker
+                lat={newCp.lat !== '' && Number.isFinite(Number(newCp.lat)) ? Number(newCp.lat) : null}
+                lng={newCp.lng !== '' && Number.isFinite(Number(newCp.lng)) ? Number(newCp.lng) : null}
+                onChange={(la, ln) => setNewCp((prev) => ({ ...prev, lat: String(la), lng: String(ln) }))}
+                height={240}
+              />
+            </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>

@@ -30,13 +30,16 @@ export type Report = {
   status: string;
 };
 
-/** A community-proposed carpark edit awaiting moderation. */
+/** A community-proposed carpark edit ('edit') or brand-new carpark ('new')
+ * awaiting moderation. */
 export type EditSubmission = {
   id: string;
   created_at: string;
-  carpark_id: string;
+  kind: 'edit' | 'new';
+  carpark_id: string | null;
   carpark_name: string | null;
   carpark_source: string | null;
+  proposed_carpark: { name?: string; lat?: number; lng?: number; address?: string } | null;
   submitter_user_id: string | null;
   submitter_email: string | null;
   submitter_name: string | null;

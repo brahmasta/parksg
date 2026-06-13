@@ -10,10 +10,13 @@
  * it.
  */
 
+import type { User } from '../lib/types';
+import { AddCarparkLink } from './AddCarparkLink';
+
 /** Single source of truth for the feedback destination. */
 export const FEEDBACK_URL = 'https://x.com/wheretoparksg';
 
-export function AppFooter() {
+export function AppFooter({ user = null }: { user?: User | null }) {
   return (
     <footer
       style={{
@@ -26,7 +29,10 @@ export function AppFooter() {
         textAlign: 'center',
       }}
     >
-      Spotted a wrong rate or a missing carpark?{' '}
+      Missing a carpark?{' '}
+      <AddCarparkLink user={user} variant="modal" label="Add it →" style={{ fontSize: 10, fontWeight: 600, whiteSpace: 'nowrap' }} />
+      {'  ·  '}
+      Spotted a wrong rate?{' '}
       <a
         href={FEEDBACK_URL}
         target="_blank"

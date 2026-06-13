@@ -11,7 +11,7 @@
  */
 import { verifyAdmin, json } from '../_admin/auth';
 import { SB_URL, sbHeaders, hasServiceConfig } from '../_admin/db';
-import { parseRates, replaceRateRows, SYSTEMS } from '../_admin/carparkWrite';
+import { parseRates, replaceRateRows, createCarpark } from '../_admin/carparkWrite';
 
 export const config = { runtime: 'edge' };
 
@@ -19,18 +19,6 @@ const CARPARK_FIELDS =
   'id,slug,agency,source,source_code,name,address,lat,lng,total_lots,central_area,car_park_type,parking_system';
 const RATE_FIELDS =
   'id,day_type,start_time,end_time,first_hour_cents,per_block_cents,block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from';
-
-const AGENCIES = ['HDB', 'URA', 'LTA', 'JTC', 'NPARKS', 'OPERATOR'];
-
-/** Build a url-safe slug from free text (lowercase, underscores). */
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 60);
-}
 
 export default async function handler(req: Request): Promise<Response> {
   const admin = await verifyAdmin(req);
@@ -120,84 +108,10 @@ export default async function handler(req: Request): Promise<Response> {
     const body = (await req.json().catch(() => null)) as
       | { meta?: Record<string, unknown>; rates?: unknown[] }
       | null;
-    const m = body?.meta;
-    if (!m) return json({ error: 'Missing carpark details.' }, 400);
-
-    const name = typeof m.name === 'string' ? m.name.trim() : '';
-    if (!name) return json({ error: 'Name is required.' }, 400);
-
-    const agency = String(m.agency || 'OPERATOR').toUpperCase();
-    if (!AGENCIES.includes(agency)) return json({ error: `Invalid agency: ${agency}` }, 400);
-
-    // source_code defaults to a slug of the name; id defaults to MANUAL:<code>.
-    const sourceCode = (typeof m.source_code === 'string' && m.source_code.trim()
-      ? slugify(m.source_code)
-      : slugify(name)) || 'carpark';
-    const id =
-      typeof m.id === 'string' && m.id.trim()
-        ? m.id.trim().slice(0, 80)
-        : `MANUAL:${sourceCode}`;
-
-    const parkingSystem =
-      typeof m.parking_system === 'string' && SYSTEMS.includes(m.parking_system)
-        ? m.parking_system
-        : null;
-
-    // Reject duplicates so we never silently overwrite an existing carpark.
-    const existing = await fetch(
-      `${SB_URL}/rest/v1/carparks?id=eq.${encodeURIComponent(id)}&select=id&limit=1`,
-      { headers: sbHeaders() },
-    );
-    if (existing.ok) {
-      const rows = (await existing.json()) as unknown[];
-      if (rows[0]) return json({ error: `A carpark with id ${id} already exists.` }, 409);
-    }
-
-    const cp = {
-      id,
-      agency,
-      source_code: sourceCode,
-      name: name.slice(0, 200),
-      address: typeof m.address === 'string' && m.address.trim() ? m.address.trim().slice(0, 300) : null,
-      lat: typeof m.lat === 'number' && Number.isFinite(m.lat) ? m.lat : null,
-      lng: typeof m.lng === 'number' && Number.isFinite(m.lng) ? m.lng : null,
-      car_park_type: typeof m.car_park_type === 'string' && m.car_park_type.trim() ? m.car_park_type.trim().slice(0, 60) : null,
-      parking_system: parkingSystem,
-      central_area: m.central_area === true,
-      total_lots: typeof m.total_lots === 'number' && Number.isFinite(m.total_lots) ? Math.round(m.total_lots) : null,
-      source: 'MANUAL',
-      slug: slugify(name),
-      last_synced: new Date().toISOString(),
-    };
-
-    const ins = await fetch(`${SB_URL}/rest/v1/carparks`, {
-      method: 'POST',
-      headers: sbHeaders({ Prefer: 'return=minimal' }),
-      body: JSON.stringify(cp),
-    });
-    if (!ins.ok)
-      return json({ error: 'Could not create carpark.', detail: (await ins.text()).slice(0, 300) }, 502);
-
-    // Optional initial rate schedule.
-    if (Array.isArray(body?.rates) && body.rates.length > 0) {
-      let rows: Record<string, unknown>[];
-      try {
-        rows = parseRates(body.rates, id);
-      } catch (e) {
-        // Carpark was created; surface the rate problem but report the id so
-        // the client can open it and fix the schedule.
-        return json({ ok: true, id, warning: `Carpark created, but rates were rejected: ${(e as Error).message}` });
-      }
-      const rIns = await fetch(`${SB_URL}/rest/v1/rate_rows`, {
-        method: 'POST',
-        headers: sbHeaders({ Prefer: 'return=minimal' }),
-        body: JSON.stringify(rows),
-      });
-      if (!rIns.ok)
-        return json({ ok: true, id, warning: 'Carpark created, but saving rates failed.' });
-    }
-
-    return json({ ok: true, id });
+    if (!body?.meta) return json({ error: 'Missing carpark details.' }, 400);
+    const res = await createCarpark(body.meta, body.rates);
+    if (!res.ok) return json({ error: res.error }, res.status);
+    return json({ ok: true, id: res.id, warning: res.warning });
   }
 
   return json({ error: 'Method not allowed.' }, 405);

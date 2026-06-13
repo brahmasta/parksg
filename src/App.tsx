@@ -723,6 +723,7 @@ function App() {
         onScrollChange={(y) => {
           resultsScrollRef.current = y;
         }}
+        user={user}
       />
     );
   } else if (screen === 'detail' && selectedCarpark) {

@@ -63,16 +63,20 @@ function SubmissionCard({
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // Load the carpark's current state for the diff.
+  const isNew = sub.kind === 'new';
+
+  // Load the carpark's current state for the diff (edit submissions only).
   useEffect(() => {
+    if (isNew || !sub.carpark_id) return;
     let alive = true;
-    adminFetch<{ carpark: CarparkFull }>(`/api/admin/carparks?id=${encodeURIComponent(sub.carpark_id)}`, token)
+    const cid = sub.carpark_id;
+    adminFetch<{ carpark: CarparkFull }>(`/api/admin/carparks?id=${encodeURIComponent(cid)}`, token)
       .then((d2) => alive && setCurrent(d2.carpark))
       .catch((e: AdminError) => (e.status === 401 ? onAuthError() : void 0));
     return () => {
       alive = false;
     };
-  }, [sub.carpark_id, token, onAuthError]);
+  }, [isNew, sub.carpark_id, token, onAuthError]);
 
   const act = async (action: 'approve' | 'reject') => {
     setBusy(true);
@@ -97,9 +101,16 @@ function SubmissionCard({
     <div style={card}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 14.5 }}>{sub.carpark_name || sub.carpark_id}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {isNew && (
+              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', border: '1px solid var(--accent)', borderRadius: 999, padding: '1px 7px', letterSpacing: 0.5 }}>
+                NEW
+              </span>
+            )}
+            <span style={{ fontWeight: 700, fontSize: 14.5 }}>{sub.carpark_name || sub.carpark_id || 'New carpark'}</span>
+          </div>
           <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
-            {sub.carpark_id.toUpperCase()}
+            {sub.carpark_id ? sub.carpark_id.toUpperCase() : 'proposed'}
             {sub.carpark_source ? ` · ${sub.carpark_source}` : ''}
             {' · '}
             {new Date(sub.created_at).toLocaleString('en-SG', { dateStyle: 'medium', timeStyle: 'short' })}
@@ -129,17 +140,39 @@ function SubmissionCard({
         <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.5, color: 'var(--text-1)', whiteSpace: 'pre-wrap' }}>“{sub.note}”</p>
       )}
 
-      {/* Diff */}
+      {/* Proposed details */}
       <div style={{ marginTop: 12, padding: 12, background: 'var(--bg-2)', borderRadius: 10, border: '0.5px solid var(--line)' }}>
-        <div style={{ fontSize: 13, marginBottom: 10 }}>
-          <span style={{ color: 'var(--text-3)' }}>Total lots: </span>
-          <span style={{ color: 'var(--text-2)' }}>{current ? (current.total_lots ?? '—') : '…'}</span>
-          <span style={{ color: 'var(--text-3)' }}> → </span>
-          <span style={{ fontWeight: 700, color: lotsChanged ? 'var(--accent)' : 'var(--text-1)' }}>{sub.proposed_total_lots ?? '—'}</span>
-        </div>
+        {isNew ? (
+          <div style={{ fontSize: 13, marginBottom: 10, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {sub.proposed_carpark?.address && (
+              <div><span style={{ color: 'var(--text-3)' }}>Address: </span>{sub.proposed_carpark.address}</div>
+            )}
+            <div>
+              <span style={{ color: 'var(--text-3)' }}>Location: </span>
+              {sub.proposed_carpark?.lat != null && sub.proposed_carpark?.lng != null ? (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${sub.proposed_carpark.lat},${sub.proposed_carpark.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--accent)', fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {sub.proposed_carpark.lat.toFixed(5)}, {sub.proposed_carpark.lng.toFixed(5)} ↗
+                </a>
+              ) : '—'}
+            </div>
+            <div><span style={{ color: 'var(--text-3)' }}>Total lots: </span><strong>{sub.proposed_total_lots ?? '—'}</strong></div>
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, marginBottom: 10 }}>
+            <span style={{ color: 'var(--text-3)' }}>Total lots: </span>
+            <span style={{ color: 'var(--text-2)' }}>{current ? (current.total_lots ?? '—') : '…'}</span>
+            <span style={{ color: 'var(--text-3)' }}> → </span>
+            <span style={{ fontWeight: 700, color: lotsChanged ? 'var(--accent)' : 'var(--text-1)' }}>{sub.proposed_total_lots ?? '—'}</span>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-          <RateList title="Current" rows={current?.rate_rows ?? []} muted />
-          <RateList title="Proposed" rows={sub.proposed_rates ?? []} />
+          {!isNew && <RateList title="Current" rows={current?.rate_rows ?? []} muted />}
+          <RateList title={isNew ? 'Proposed rates' : 'Proposed'} rows={sub.proposed_rates ?? []} />
         </div>
       </div>
 

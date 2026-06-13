@@ -38,6 +38,50 @@ export type CarparkEditSubmission = {
   name?: string | null;
 };
 
+export type NewCarparkSubmission = {
+  name: string;
+  lat: number;
+  lng: number;
+  address?: string | null;
+  totalLots: number | null;
+  rates: ProposedRate[];
+  note?: string | null;
+  userId?: string | null;
+  email?: string | null;
+  contactName?: string | null;
+};
+
+/** Propose a brand-new carpark for review. Resolves true when stored. */
+export async function submitNewCarpark(s: NewCarparkSubmission): Promise<boolean> {
+  if (!URL_BASE || !ANON_KEY) return false;
+  try {
+    const res = await fetch(`${URL_BASE}/rest/v1/rpc/submit_new_carpark`, {
+      method: 'POST',
+      headers: {
+        apikey: ANON_KEY,
+        Authorization: `Bearer ${ANON_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        p_name: s.name,
+        p_lat: s.lat,
+        p_lng: s.lng,
+        p_address: s.address ?? null,
+        p_total_lots: s.totalLots,
+        p_rates: s.rates,
+        p_note: s.note ?? null,
+        p_user_id: s.userId ?? null,
+        p_email: s.email ?? null,
+        p_contact_name: s.contactName ?? null,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 /** Submit a proposed edit. Resolves true when stored, false on any failure. */
 export async function submitCarparkEdit(s: CarparkEditSubmission): Promise<boolean> {
   if (!URL_BASE || !ANON_KEY) return false;

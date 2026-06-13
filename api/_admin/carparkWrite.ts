@@ -9,6 +9,17 @@ import { SB_URL, sbHeaders } from './db';
 export const DAY_TYPES = ['WEEKDAY', 'SAT', 'SUN_PH'];
 export const SYSTEMS = ['EPS', 'COUPON', 'GANTRY_PRIVATE', 'FLAT'];
 export const VEH = ['CAR', 'MOTORCYCLE', 'HEAVY'];
+export const AGENCIES = ['HDB', 'URA', 'LTA', 'JTC', 'NPARKS', 'OPERATOR'];
+
+/** Build a url-safe slug from free text (lowercase, underscores). */
+export function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 60);
+}
 
 const intOrNull = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : null;
@@ -77,6 +88,88 @@ async function patchTotalLots(carparkId: string, total: number | null): Promise<
     }),
   });
   return r.ok ? { ok: true } : { ok: false, error: 'total_lots update failed.' };
+}
+
+type CreateResult =
+  | { ok: true; id: string; warning?: string }
+  | { ok: false; status: number; error: string };
+
+/**
+ * Create a new carpark (source='MANUAL') from a metadata object + optional
+ * rates. Derives id (`MANUAL:<slug>`) and source_code from the name when not
+ * given, and rejects duplicates. Shared by the admin PUT create path and the
+ * approval of a community 'new carpark' submission.
+ */
+export async function createCarpark(
+  m: Record<string, unknown>,
+  rates?: unknown[],
+): Promise<CreateResult> {
+  const name = typeof m.name === 'string' ? m.name.trim() : '';
+  if (!name) return { ok: false, status: 400, error: 'Name is required.' };
+
+  const agency = String(m.agency || 'OPERATOR').toUpperCase();
+  if (!AGENCIES.includes(agency)) return { ok: false, status: 400, error: `Invalid agency: ${agency}` };
+
+  const sourceCode =
+    (typeof m.source_code === 'string' && m.source_code.trim() ? slugify(m.source_code) : slugify(name)) ||
+    'carpark';
+  const id =
+    typeof m.id === 'string' && m.id.trim() ? m.id.trim().slice(0, 80) : `MANUAL:${sourceCode}`;
+
+  const parkingSystem =
+    typeof m.parking_system === 'string' && SYSTEMS.includes(m.parking_system) ? m.parking_system : null;
+
+  // Reject duplicates so we never silently overwrite an existing carpark.
+  const existing = await fetch(
+    `${SB_URL}/rest/v1/carparks?id=eq.${encodeURIComponent(id)}&select=id&limit=1`,
+    { headers: sbHeaders() },
+  );
+  if (existing.ok) {
+    const rows = (await existing.json()) as unknown[];
+    if (rows[0]) return { ok: false, status: 409, error: `A carpark with id ${id} already exists.` };
+  }
+
+  const cp = {
+    id,
+    agency,
+    source_code: sourceCode,
+    name: name.slice(0, 200),
+    address: typeof m.address === 'string' && m.address.trim() ? m.address.trim().slice(0, 300) : null,
+    lat: typeof m.lat === 'number' && Number.isFinite(m.lat) ? m.lat : null,
+    lng: typeof m.lng === 'number' && Number.isFinite(m.lng) ? m.lng : null,
+    car_park_type: typeof m.car_park_type === 'string' && m.car_park_type.trim() ? m.car_park_type.trim().slice(0, 60) : null,
+    parking_system: parkingSystem,
+    central_area: m.central_area === true,
+    total_lots: typeof m.total_lots === 'number' && Number.isFinite(m.total_lots) ? Math.round(m.total_lots) : null,
+    source: 'MANUAL',
+    // `slug` is a GENERATED column in Postgres — never insert it.
+    last_synced: new Date().toISOString(),
+  };
+
+  const ins = await fetch(`${SB_URL}/rest/v1/carparks`, {
+    method: 'POST',
+    headers: sbHeaders({ Prefer: 'return=minimal' }),
+    body: JSON.stringify(cp),
+  });
+  if (!ins.ok)
+    return { ok: false, status: 502, error: `Could not create carpark: ${(await ins.text()).slice(0, 200)}` };
+
+  if (Array.isArray(rates) && rates.length > 0) {
+    let rows: Record<string, unknown>[];
+    try {
+      rows = parseRates(rates, id);
+    } catch (e) {
+      return { ok: true, id, warning: `Carpark created, but rates were rejected: ${(e as Error).message}` };
+    }
+    const rIns = await fetch(`${SB_URL}/rest/v1/rate_rows`, {
+      method: 'POST',
+      headers: sbHeaders({ Prefer: 'return=minimal' }),
+      body: JSON.stringify(rows),
+    });
+    if (!rIns.ok) return { ok: true, id, warning: 'Carpark created, but saving rates failed.' };
+  }
+
+  return { ok: true, id };
 }
 
 /**

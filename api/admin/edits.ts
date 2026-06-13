@@ -7,19 +7,21 @@
  */
 import { verifyAdmin, json } from '../_admin/auth';
 import { SB_URL, sbHeaders, hasServiceConfig } from '../_admin/db';
-import { applyCarparkEdit } from '../_admin/carparkWrite';
+import { applyCarparkEdit, createCarpark } from '../_admin/carparkWrite';
 
 export const config = { runtime: 'edge' };
 
 const STATUSES = ['pending', 'approved', 'rejected'];
 const FIELDS =
-  'id,created_at,carpark_id,carpark_name,carpark_source,submitter_user_id,submitter_email,submitter_name,proposed_total_lots,proposed_rates,note,status,reviewed_by,reviewed_at,review_note';
+  'id,created_at,kind,carpark_id,carpark_name,carpark_source,submitter_user_id,submitter_email,submitter_name,proposed_total_lots,proposed_rates,proposed_carpark,note,status,reviewed_by,reviewed_at,review_note';
 
 type Submission = {
   id: string;
-  carpark_id: string;
+  kind: 'edit' | 'new';
+  carpark_id: string | null;
   proposed_total_lots: number | null;
   proposed_rates: unknown[];
+  proposed_carpark: { name?: string; lat?: number; lng?: number; address?: string } | null;
   status: string;
 };
 
@@ -48,11 +50,28 @@ export default async function handler(req: Request): Promise<Response> {
       return json({ error: `Already ${sub.status}.` }, 409);
 
     if (body.action === 'approve') {
-      const applied = await applyCarparkEdit(sub.carpark_id, {
-        total_lots: sub.proposed_total_lots,
-        rates: Array.isArray(sub.proposed_rates) ? sub.proposed_rates : [],
-      });
-      if (!applied.ok) return json({ error: applied.error }, 502);
+      const rates = Array.isArray(sub.proposed_rates) ? sub.proposed_rates : [];
+      if (sub.kind === 'new') {
+        const pc = sub.proposed_carpark || {};
+        const created = await createCarpark(
+          {
+            name: pc.name,
+            lat: pc.lat,
+            lng: pc.lng,
+            address: pc.address ?? null,
+            total_lots: sub.proposed_total_lots ?? undefined,
+          },
+          rates,
+        );
+        if (!created.ok) return json({ error: created.error }, created.status);
+      } else {
+        if (!sub.carpark_id) return json({ error: 'Edit submission has no carpark id.' }, 400);
+        const applied = await applyCarparkEdit(sub.carpark_id, {
+          total_lots: sub.proposed_total_lots,
+          rates,
+        });
+        if (!applied.ok) return json({ error: applied.error }, 502);
+      }
     }
 
     const patch = {

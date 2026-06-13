@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { Carpark, ResultsState, ViewMode } from '../lib/types';
+import type { Carpark, ResultsState, ViewMode, User } from '../lib/types';
 import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { Spinner } from '../components/atoms';
@@ -9,6 +9,7 @@ import { FilterBar } from '../components/FilterBar';
 import { DegradedBanner } from '../components/DegradedBanner';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
+import { AddCarparkLink } from '../components/AddCarparkLink';
 import { FilterPill } from '../components/FilterPill';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { PoweredByGoogle } from '../components/PoweredByGoogle';
@@ -44,6 +45,7 @@ export function ResultsScreen({
   onSaveDestination,
   initialScrollTop = 0,
   onScrollChange,
+  user = null,
 }: {
   destination: string;
   destinationCoords: [number, number] | null;
@@ -69,6 +71,8 @@ export function ResultsScreen({
   initialScrollTop?: number;
   /** Report the live scroll offset so the parent can preserve it. */
   onScrollChange?: (y: number) => void;
+  /** Signed-in user (pre-fills the "Add a carpark" contact); null = anonymous. */
+  user?: User | null;
 }) {
   // Ranking (nearest-first) + which filter, if any, emptied the list. Pure so
   // it's unit-tested in resultsView.test.ts; see selectResultsView for why the
@@ -284,7 +288,7 @@ export function ResultsScreen({
         {state === 'loading' && <ResultsLoading />}
 
         {state === 'empty' && (
-          <EmptyResults destination={destination} onExpandRadius={onExpandRadius} onBack={onBack} />
+          <EmptyResults destination={destination} onExpandRadius={onExpandRadius} onBack={onBack} user={user} />
         )}
 
         {evFilterEmpty && (
@@ -402,10 +406,12 @@ function EmptyResults({
   destination,
   onExpandRadius,
   onBack,
+  user = null,
 }: {
   destination: string;
   onExpandRadius: () => void;
   onBack: () => void;
+  user?: User | null;
 }) {
   return (
     <div
@@ -497,6 +503,10 @@ function EmptyResults({
       >
         Change destination
       </button>
+      <div style={{ marginTop: 18, fontSize: 13, color: 'var(--text-3)' }}>
+        Know a carpark here?{' '}
+        <AddCarparkLink user={user} variant="modal" label="Add it →" />
+      </div>
     </div>
   );
 }
