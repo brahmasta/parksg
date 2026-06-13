@@ -75,7 +75,9 @@ export function PlaceSearch({
   };
 
   return (
-    <div ref={boxRef} style={{ position: 'relative' }}>
+    // High z-index so the suggestions dropdown paints above the Leaflet map
+    // rendered just below it (Leaflet's control corners sit at z-index 1000).
+    <div ref={boxRef} style={{ position: 'relative', zIndex: 1200 }}>
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
