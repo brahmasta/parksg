@@ -852,6 +852,13 @@ function slugifyId(name: string): string {
     .slice(0, 60);
 }
 
+// LTA 2018-CSV carpark names that must NEVER be (re)created as standalones —
+// defunct or superseded by a live carpark from a better source. Values are
+// normaliseName() output. Keep in sync with any future de-duplication.
+const LTA_CSV_SKIP_NORM = new Set<string>([
+  'funan digitalife mall', // closed 2016; reopened 2019 as "Funan Mall" (LTA:66, live lots)
+]);
+
 async function migrateLtaCsv(
   supabase: SupabaseClient,
   existingNamesById: Map<string, string>,
@@ -863,7 +870,14 @@ async function migrateLtaCsv(
   // authoritative HDB / URA / LTA_DATAMALL carparks. Without this, a CSV
   // row exact-matches its own previous insertion (e.g. "Vivocity" →
   // "LTA:vivocity") and never bubbles up to the better "Vivocity P3" match.
-  const wiped = await wipeLtaDataGovCarparks(supabase);
+  // Curated MANUAL carparks must not have their fresh rates overwritten by the
+  // stale 2018 CSV (even when the CSV name matches a reused "LTA:" id), nor be
+  // wiped below. The wipe is keyed on carpark.source, but a carpark can carry
+  // MANUAL rate_rows while still tagged with its original feed source — e.g. a
+  // hand-corrected airport/MBS row whose carpark.source is still LTA_DATAGOV.
+  const manualIds = await loadManualCarparkIds(supabase);
+
+  const wiped = await wipeLtaDataGovCarparks(supabase, manualIds);
   if (wiped > 0) {
     process.stderr.write(`  cleared ${wiped} previous LTA_DATAGOV standalones\n`);
   }
@@ -871,10 +885,6 @@ async function migrateLtaCsv(
   // anything we just deleted.
   const existingAfterWipe = await loadExistingCarparkNames(supabase);
   void existingNamesById;
-
-  // Curated MANUAL carparks must not have their fresh rates overwritten by the
-  // stale 2018 CSV (even when the CSV name matches a reused "LTA:" id).
-  const manualIds = await loadManualCarparkIds(supabase);
 
   const records = await fetchLtaCsvRecords();
   process.stderr.write(`  fetched ${records.length} CSV rows\n`);
@@ -902,10 +912,16 @@ async function migrateLtaCsv(
   };
 
   const today = new Date().toISOString();
+  let skippedDefunct = 0;
   for (const r of records) {
     const name = (r.carpark ?? '').trim();
     if (!name) {
       result.errors += 1;
+      continue;
+    }
+    // Defunct / superseded names: never (re)create these standalones.
+    if (LTA_CSV_SKIP_NORM.has(normaliseName(name))) {
+      skippedDefunct += 1;
       continue;
     }
     const normKey = normaliseName(name);
@@ -1007,6 +1023,9 @@ async function migrateLtaCsv(
     } else {
       result.errors += 1;
     }
+  }
+  if (skippedDefunct > 0) {
+    process.stderr.write(`  skipped ${skippedDefunct} defunct/duplicate CSV name(s)\n`);
   }
   return result;
 }
@@ -1198,6 +1217,7 @@ async function main(): Promise<void> {
 
 async function wipeLtaDataGovCarparks(
   supabase: SupabaseClient,
+  protectedIds: Set<string>,
 ): Promise<number> {
   // Get the ids first so we can delete child rate_rows in one call,
   // then drop the carpark rows. Two-step keeps the FK happy.
@@ -1210,7 +1230,13 @@ async function wipeLtaDataGovCarparks(
     return 0;
   }
   if (!data || data.length === 0) return 0;
-  const ids = (data as Array<{ id: string }>).map((r) => r.id);
+  // Never wipe a carpark that carries curated MANUAL rate_rows — its
+  // carpark.source may still read LTA_DATAGOV even after the rates were
+  // hand-corrected (e.g. Changi/MBS).
+  const ids = (data as Array<{ id: string }>)
+    .map((r) => r.id)
+    .filter((id) => !protectedIds.has(id));
+  if (ids.length === 0) return 0;
 
   const chunkSize = 500;
   for (let i = 0; i < ids.length; i += chunkSize) {
