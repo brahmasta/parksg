@@ -3,12 +3,14 @@ import { useSession } from '../lib/auth';
 import { Wordmark } from '../components/atoms';
 import { AdminDashboard } from './AdminDashboard';
 import { AdminCarparks } from './AdminCarparks';
+import { AdminEdits } from './AdminEdits';
 import { AdminFeedback } from './AdminFeedback';
 
-type Tab = 'dashboard' | 'carparks' | 'feedback';
+type Tab = 'dashboard' | 'carparks' | 'edits' | 'feedback';
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'carparks', label: 'Carparks' },
+  { key: 'edits', label: 'Edit requests' },
   { key: 'feedback', label: 'Feedback' },
 ];
 
@@ -84,6 +86,7 @@ export function AdminApp() {
       <main style={{ maxWidth: 1080, margin: '0 auto', padding: '24px 20px 80px' }}>
         {tab === 'dashboard' && <AdminDashboard token={accessToken} onAuthError={signOut} />}
         {tab === 'carparks' && <AdminCarparks token={accessToken} onAuthError={signOut} />}
+        {tab === 'edits' && <AdminEdits token={accessToken} onAuthError={signOut} />}
         {tab === 'feedback' && <AdminFeedback token={accessToken} onAuthError={signOut} />}
       </main>
     </div>

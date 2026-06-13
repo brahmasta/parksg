@@ -11,6 +11,7 @@
  */
 import { verifyAdmin, json } from '../_admin/auth';
 import { SB_URL, sbHeaders, hasServiceConfig } from '../_admin/db';
+import { parseRates, replaceRateRows, SYSTEMS } from '../_admin/carparkWrite';
 
 export const config = { runtime: 'edge' };
 
@@ -19,42 +20,7 @@ const CARPARK_FIELDS =
 const RATE_FIELDS =
   'id,day_type,start_time,end_time,first_hour_cents,per_block_cents,block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from';
 
-const DAY_TYPES = ['WEEKDAY', 'SAT', 'SUN_PH'];
-const SYSTEMS = ['EPS', 'COUPON', 'GANTRY_PRIVATE', 'FLAT'];
-const VEH = ['CAR', 'MOTORCYCLE', 'HEAVY'];
 const AGENCIES = ['HDB', 'URA', 'LTA', 'JTC', 'NPARKS', 'OPERATOR'];
-
-const intOrNull = (v: unknown): number | null =>
-  typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : null;
-const timeOrNull = (v: unknown): string | null =>
-  typeof v === 'string' && /^\d{1,2}:\d{2}(:\d{2})?$/.test(v.trim()) ? v.trim() : null;
-
-/** Normalize a raw rate-row array into DB rows (source=MANUAL). Throws on a
- * bad day_type. Shared by the create (PUT) and edit (POST) paths. */
-function parseRates(raw: unknown[], carparkId: string): Record<string, unknown>[] {
-  return raw.map((r) => {
-    const row = r as Record<string, unknown>;
-    if (!DAY_TYPES.includes(String(row.day_type)))
-      throw new Error(`bad day_type: ${row.day_type}`);
-    return {
-      carpark_id: carparkId,
-      day_type: row.day_type,
-      start_time: timeOrNull(row.start_time),
-      end_time: timeOrNull(row.end_time),
-      first_hour_cents: intOrNull(row.first_hour_cents),
-      per_block_cents: intOrNull(row.per_block_cents),
-      block_minutes: intOrNull(row.block_minutes),
-      per_entry_cents: intOrNull(row.per_entry_cents),
-      cap_cents: intOrNull(row.cap_cents),
-      grace_minutes: intOrNull(row.grace_minutes),
-      system: SYSTEMS.includes(String(row.system)) ? row.system : 'EPS',
-      veh_cat: VEH.includes(String(row.veh_cat)) ? row.veh_cat : 'CAR',
-      source: 'MANUAL',
-      effective_from:
-        typeof row.effective_from === 'string' && row.effective_from ? row.effective_from : null,
-    };
-  });
-}
 
 /** Build a url-safe slug from free text (lowercase, underscores). */
 function slugify(s: string): string {
@@ -142,21 +108,8 @@ export default async function handler(req: Request): Promise<Response> {
       } catch (e) {
         return json({ error: (e as Error).message || 'Invalid rate row.' }, 400);
       }
-
-      const del = await fetch(
-        `${SB_URL}/rest/v1/rate_rows?carpark_id=eq.${encodeURIComponent(id)}`,
-        { method: 'DELETE', headers: sbHeaders({ Prefer: 'return=minimal' }) },
-      );
-      if (!del.ok) return json({ error: 'Could not clear existing rates.' }, 502);
-      if (rows.length > 0) {
-        const ins = await fetch(`${SB_URL}/rest/v1/rate_rows`, {
-          method: 'POST',
-          headers: sbHeaders({ Prefer: 'return=minimal' }),
-          body: JSON.stringify(rows),
-        });
-        if (!ins.ok)
-          return json({ error: 'Rate save failed.', detail: (await ins.text()).slice(0, 300) }, 502);
-      }
+      const res = await replaceRateRows(id, rows);
+      if (!res.ok) return json({ error: res.error }, 502);
     }
 
     return json({ ok: true });

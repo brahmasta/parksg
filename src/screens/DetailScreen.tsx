@@ -14,6 +14,8 @@ import { isApplePlatform } from '../lib/platform';
 import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
 import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
+import { SuggestEditDialog } from '../components/SuggestEditDialog';
+import type { EditableRate } from '../components/rateGrid';
 import { CheckinCard } from '../components/CheckinCard';
 import {
   availabilityColorVar,
@@ -42,6 +44,34 @@ import {
   IconWarning,
 } from '../components/icons';
 import { useWalkRoute } from '../hooks/useWalkRoute';
+
+/** Flatten a carpark's display rate buckets into editable rows for the
+ * "Suggest an edit" dialog (cents fields already live on the frontend RateRow). */
+function toEditableRates(cp: Carpark): EditableRate[] {
+  const buckets: [keyof Carpark['rates'], EditableRate['day_type']][] = [
+    ['weekday', 'WEEKDAY'],
+    ['saturday', 'SAT'],
+    ['sundayPH', 'SUN_PH'],
+  ];
+  const out: EditableRate[] = [];
+  for (const [key, dayType] of buckets) {
+    for (const r of cp.rates[key] ?? []) {
+      out.push({
+        day_type: dayType,
+        start_time: r.startTime ?? null,
+        end_time: r.endTime ?? null,
+        first_hour_cents: r.firstHourCents ?? null,
+        per_block_cents: r.perBlockCents ?? null,
+        block_minutes: r.blockMinutes ?? null,
+        per_entry_cents: r.perEntryCents ?? null,
+        cap_cents: r.capCents ?? null,
+        grace_minutes: r.graceMinutes ?? null,
+        system: r.system ?? 'EPS',
+      });
+    }
+  }
+  return out;
+}
 
 export function DetailScreen({
   cp,
@@ -103,6 +133,7 @@ export function DetailScreen({
   // (the chevron always re-opens the picker). See src/lib/maps.ts.
   const [navSheetOpen, setNavSheetOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const [suggestOpen, setSuggestOpen] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [lastProvider, setLastProviderState] = useState<MapsProvider | null>(() => getLastProvider());
 
@@ -743,6 +774,35 @@ export function DetailScreen({
           )}
         </div>
 
+        {/* Suggest an edit — structured rate/lots proposal for admin review.
+            Hidden for Google carparks (no DB row to edit). Open to everyone. */}
+        {!isGoogle && (
+          <button
+            type="button"
+            onClick={() => setSuggestOpen(true)}
+            style={{
+              appearance: 'none',
+              width: '100%',
+              marginTop: 16,
+              padding: '11px 14px',
+              borderRadius: 12,
+              border: '0.5px solid var(--line-strong)',
+              background: 'var(--bg-1)',
+              color: 'var(--text-1)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              fontSize: 13.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <IconWarning size={15} stroke={2} />
+            Suggest an edit
+          </button>
+        )}
+
         {/* Report a data inaccuracy — opens the report form. */}
         <button
           type="button"
@@ -860,6 +920,19 @@ export function DetailScreen({
         variant={navVariant}
         carpark={{ id: cp.id, name: cp.name, source: isGoogle ? 'GOOGLE' : cp.operator }}
       />
+
+      {!isGoogle && (
+        <SuggestEditDialog
+          key={suggestOpen ? 'suggest-open' : 'suggest-closed'}
+          open={suggestOpen}
+          onClose={() => setSuggestOpen(false)}
+          variant={navVariant}
+          carpark={{ id: cp.id, name: cp.name, source: cp.operator }}
+          currentTotalLots={cp.lotsTotal > 0 ? cp.lotsTotal : null}
+          initialRates={toEditableRates(cp)}
+          user={user}
+        />
+      )}
 
       {shareNote && (
         <div

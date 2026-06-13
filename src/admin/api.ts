@@ -30,6 +30,25 @@ export type Report = {
   status: string;
 };
 
+/** A community-proposed carpark edit awaiting moderation. */
+export type EditSubmission = {
+  id: string;
+  created_at: string;
+  carpark_id: string;
+  carpark_name: string | null;
+  carpark_source: string | null;
+  submitter_user_id: string | null;
+  submitter_email: string | null;
+  submitter_name: string | null;
+  proposed_total_lots: number | null;
+  proposed_rates: RateRow[];
+  note: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_note: string | null;
+};
+
 export type RateRow = {
   id?: number;
   day_type: 'WEEKDAY' | 'SAT' | 'SUN_PH';

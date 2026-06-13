@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminFetch, AdminError, type CarparkLite, type CarparkFull, type RateRow } from './api';
+import { RateGridEditor } from '../components/RateGridEditor';
 
-const DAY_TYPES = ['WEEKDAY', 'SAT', 'SUN_PH'];
 const SYSTEMS = ['EPS', 'COUPON', 'GANTRY_PRIVATE', 'FLAT'];
 const AGENCIES = ['OPERATOR', 'HDB', 'URA', 'LTA', 'JTC', 'NPARKS'];
 
@@ -15,27 +15,8 @@ const field: React.CSSProperties = {
   fontSize: 13.5,
   outline: 'none',
 };
-const cell: React.CSSProperties = {
-  padding: '6px 7px',
-  borderRadius: 8,
-  border: '0.5px solid var(--line-strong)',
-  background: 'var(--bg-2)',
-  color: 'var(--text-1)',
-  fontSize: 12.5,
-  outline: 'none',
-  width: '100%',
-};
 const label: React.CSSProperties = { fontSize: 11.5, fontWeight: 600, color: 'var(--text-2)', marginBottom: 5, display: 'block' };
 
-const toDollar = (c: number | null) => (c == null ? '' : (c / 100).toFixed(2));
-const toCents = (s: string): number | null => {
-  const v = parseFloat(s);
-  return Number.isFinite(v) ? Math.round(v * 100) : null;
-};
-const toIntOrNull = (s: string): number | null => {
-  const v = parseInt(s, 10);
-  return Number.isFinite(v) ? v : null;
-};
 const blankRate = (): RateRow => ({
   day_type: 'WEEKDAY', start_time: null, end_time: null,
   first_hour_cents: null, per_block_cents: null, block_minutes: 30,
@@ -254,7 +235,12 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
             </Labeled>
           </div>
 
-          <RateEditor rates={rates} setRates={setRates} />
+          <RateGridEditor
+            rates={rates}
+            setRates={setRates}
+            makeBlank={blankRate}
+            note="Saving replaces all of this carpark’s rate rows (marked MANUAL). Leave a field blank for “none”. Times in 24h HH:MM; blank = all day."
+          />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button type="button" onClick={create} disabled={saving} style={{ appearance: 'none', border: 0, padding: '12px 22px', borderRadius: 12, background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 14, fontWeight: 600, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>
@@ -295,7 +281,12 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
           </div>
 
           {/* Rates */}
-          <RateEditor rates={rates} setRates={setRates} />
+          <RateGridEditor
+            rates={rates}
+            setRates={setRates}
+            makeBlank={blankRate}
+            note="Saving replaces all of this carpark’s rate rows (marked MANUAL). Leave a field blank for “none”. Times in 24h HH:MM; blank = all day."
+          />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button type="button" onClick={save} disabled={saving} style={{ appearance: 'none', border: 0, padding: '12px 22px', borderRadius: 12, background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 14, fontWeight: 600, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>
@@ -310,53 +301,6 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
 }
 
 /** The MANUAL rate-schedule grid, shared by the create + edit views. */
-function RateEditor({ rates, setRates }: { rates: RateRow[]; setRates: React.Dispatch<React.SetStateAction<RateRow[]>> }) {
-  const setRate = (i: number, patch: Partial<RateRow>) =>
-    setRates((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ fontSize: 13, fontWeight: 700 }}>Rate schedule <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>(saved as MANUAL)</span></div>
-        <button type="button" onClick={() => setRates((prev) => [...prev, blankRate()])} style={addBtn}>+ Add row</button>
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ borderCollapse: 'separate', borderSpacing: '4px 4px', fontSize: 12 }}>
-          <thead>
-            <tr style={{ color: 'var(--text-3)', textAlign: 'left' }}>
-              {['Day', 'Start', 'End', '1st hr $', 'Block $', 'Block min', 'Entry $', 'Cap $', 'Grace', 'System', ''].map((h) => (
-                <th key={h} style={{ padding: '2px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rates.map((r, i) => (
-              <tr key={i}>
-                <td><select style={{ ...cell, minWidth: 90 }} value={r.day_type} onChange={(e) => setRate(i, { day_type: e.target.value as RateRow['day_type'] })}>{DAY_TYPES.map((d) => <option key={d}>{d}</option>)}</select></td>
-                <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.start_time ?? ''} onChange={(e) => setRate(i, { start_time: e.target.value || null })} /></td>
-                <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.end_time ?? ''} onChange={(e) => setRate(i, { end_time: e.target.value || null })} /></td>
-                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.first_hour_cents)} onChange={(e) => setRate(i, { first_hour_cents: toCents(e.target.value) })} /></td>
-                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_block_cents)} onChange={(e) => setRate(i, { per_block_cents: toCents(e.target.value) })} /></td>
-                <td><input style={{ ...cell, width: 52 }} value={r.block_minutes ?? ''} onChange={(e) => setRate(i, { block_minutes: toIntOrNull(e.target.value) })} /></td>
-                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_entry_cents)} onChange={(e) => setRate(i, { per_entry_cents: toCents(e.target.value) })} /></td>
-                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.cap_cents)} onChange={(e) => setRate(i, { cap_cents: toCents(e.target.value) })} /></td>
-                <td><input style={{ ...cell, width: 48 }} value={r.grace_minutes ?? ''} onChange={(e) => setRate(i, { grace_minutes: toIntOrNull(e.target.value) })} /></td>
-                <td><select style={{ ...cell, minWidth: 90 }} value={r.system} onChange={(e) => setRate(i, { system: e.target.value })}>{SYSTEMS.map((s) => <option key={s}>{s}</option>)}</select></td>
-                <td><button type="button" onClick={() => setRates((prev) => prev.filter((_, j) => j !== i))} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--bad)', cursor: 'pointer', fontSize: 16, padding: '0 4px' }}>×</button></td>
-              </tr>
-            ))}
-            {rates.length === 0 && (
-              <tr><td colSpan={11} style={{ color: 'var(--text-3)', padding: 10 }}>No rate rows. Add one, or this carpark uses the operator fallback.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 8, lineHeight: 1.5 }}>
-        Saving replaces all of this carpark’s rate rows with the set above (marked MANUAL). Leave a field blank for “none”. Times in 24h HH:MM; blank = all day.
-      </div>
-    </div>
-  );
-}
-
 function Labeled({ label: l, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -365,8 +309,3 @@ function Labeled({ label: l, children }: { label: string; children: React.ReactN
     </div>
   );
 }
-
-const addBtn: React.CSSProperties = {
-  appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)',
-  color: 'var(--accent)', borderRadius: 999, padding: '6px 12px', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-};
