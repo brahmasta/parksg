@@ -3,6 +3,7 @@ import { adminFetch, AdminError, type CarparkLite, type CarparkFull, type RateRo
 
 const DAY_TYPES = ['WEEKDAY', 'SAT', 'SUN_PH'];
 const SYSTEMS = ['EPS', 'COUPON', 'GANTRY_PRIVATE', 'FLAT'];
+const AGENCIES = ['OPERATOR', 'HDB', 'URA', 'LTA', 'JTC', 'NPARKS'];
 
 const field: React.CSSProperties = {
   width: '100%',
@@ -46,11 +47,60 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
   const [q, setQ] = useState('');
   const [results, setResults] = useState<CarparkLite[]>([]);
   const [selected, setSelected] = useState<CarparkFull | null>(null);
+  const [creating, setCreating] = useState(false);
   const [meta, setMeta] = useState<Record<string, string>>({});
+  const [newCp, setNewCp] = useState<Record<string, string>>({});
   const [centralArea, setCentralArea] = useState(false);
   const [rates, setRates] = useState<RateRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  const startCreate = () => {
+    setSelected(null);
+    setMsg(null);
+    setCentralArea(false);
+    setRates([]);
+    setNewCp({
+      name: '', id: '', agency: 'OPERATOR', source_code: '', address: '',
+      lat: '', lng: '', total_lots: '', car_park_type: '', parking_system: '',
+    });
+    setCreating(true);
+  };
+
+  const create = async () => {
+    if (!newCp.name.trim()) { setMsg('Name is required.'); return; }
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await adminFetch<{ ok: boolean; id: string; warning?: string }>(`/api/admin/carparks`, token, {
+        method: 'PUT',
+        body: JSON.stringify({
+          meta: {
+            name: newCp.name,
+            id: newCp.id.trim() || undefined,
+            agency: newCp.agency,
+            source_code: newCp.source_code.trim() || undefined,
+            address: newCp.address || null,
+            lat: newCp.lat === '' ? null : Number(newCp.lat),
+            lng: newCp.lng === '' ? null : Number(newCp.lng),
+            total_lots: newCp.total_lots === '' ? null : Number(newCp.total_lots),
+            central_area: centralArea,
+            car_park_type: newCp.car_park_type || null,
+            parking_system: newCp.parking_system || undefined,
+          },
+          rates,
+        }),
+      });
+      setCreating(false);
+      void open(res.id);
+      if (res.warning) setMsg(res.warning);
+    } catch (e) {
+      if ((e as AdminError).status === 401) onAuthError();
+      else setMsg((e as AdminError).message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Debounced search. (Render gates on q length, so no need to clear results
   // synchronously here.)
@@ -117,21 +167,31 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
     }
   };
 
-  const setRate = (i: number, patch: Partial<RateRow>) =>
-    setRates((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)));
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: -0.4 }}>Carparks</h2>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: -0.4 }}>Carparks</h2>
+        {!selected && !creating && (
+          <button
+            type="button"
+            onClick={startCreate}
+            style={{ appearance: 'none', border: 0, padding: '9px 16px', borderRadius: 10, background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
+          >
+            + New carpark
+          </button>
+        )}
+      </div>
 
-      <input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Search by name, id, slug or address…"
-        style={field}
-      />
+      {!selected && !creating && (
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search by name, id, slug or address…"
+          style={field}
+        />
+      )}
 
-      {!selected && q.trim().length >= 2 && results.length > 0 && (
+      {!selected && !creating && q.trim().length >= 2 && results.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {results.map((c) => (
             <button
@@ -150,6 +210,58 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
               </div>
             </button>
           ))}
+        </div>
+      )}
+
+      {creating && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <button
+            type="button"
+            onClick={() => { setCreating(false); setMsg(null); }}
+            style={{ appearance: 'none', alignSelf: 'flex-start', background: 'transparent', border: 0, color: 'var(--accent)', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+          >
+            ← Back to search
+          </button>
+
+          <div style={{ fontSize: 13, fontWeight: 700 }}>
+            New carpark <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>(saved as MANUAL)</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+            <Labeled label="Name *"><input style={field} value={newCp.name} onChange={(e) => setNewCp({ ...newCp, name: e.target.value })} placeholder="e.g. Marina Square" /></Labeled>
+            <Labeled label="Agency">
+              <select style={field} value={newCp.agency} onChange={(e) => setNewCp({ ...newCp, agency: e.target.value })}>
+                {AGENCIES.map((a) => <option key={a}>{a}</option>)}
+              </select>
+            </Labeled>
+            <Labeled label="ID (optional)"><input style={field} value={newCp.id} onChange={(e) => setNewCp({ ...newCp, id: e.target.value })} placeholder="auto: MANUAL:<slug of name>" /></Labeled>
+            <Labeled label="Source code (optional)"><input style={field} value={newCp.source_code} onChange={(e) => setNewCp({ ...newCp, source_code: e.target.value })} placeholder="auto: slug of name" /></Labeled>
+            <Labeled label="Total lots"><input style={field} inputMode="numeric" value={newCp.total_lots} onChange={(e) => setNewCp({ ...newCp, total_lots: e.target.value })} /></Labeled>
+            <Labeled label="Address"><input style={field} value={newCp.address} onChange={(e) => setNewCp({ ...newCp, address: e.target.value })} /></Labeled>
+            <Labeled label="Latitude"><input style={field} inputMode="decimal" value={newCp.lat} onChange={(e) => setNewCp({ ...newCp, lat: e.target.value })} /></Labeled>
+            <Labeled label="Longitude"><input style={field} inputMode="decimal" value={newCp.lng} onChange={(e) => setNewCp({ ...newCp, lng: e.target.value })} /></Labeled>
+            <Labeled label="Car park type"><input style={field} value={newCp.car_park_type} onChange={(e) => setNewCp({ ...newCp, car_park_type: e.target.value })} placeholder="e.g. SURFACE / MULTISTOREY" /></Labeled>
+            <Labeled label="Parking system">
+              <select style={field} value={newCp.parking_system} onChange={(e) => setNewCp({ ...newCp, parking_system: e.target.value })}>
+                <option value="">—</option>
+                {SYSTEMS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </Labeled>
+            <Labeled label="Central area">
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13.5, color: 'var(--text-1)', height: 38 }}>
+                <input type="checkbox" checked={centralArea} onChange={(e) => setCentralArea(e.target.checked)} /> Central area
+              </label>
+            </Labeled>
+          </div>
+
+          <RateEditor rates={rates} setRates={setRates} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button type="button" onClick={create} disabled={saving} style={{ appearance: 'none', border: 0, padding: '12px 22px', borderRadius: 12, background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 14, fontWeight: 600, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+              {saving ? 'Creating…' : 'Create carpark'}
+            </button>
+            {msg && <span style={{ fontSize: 13, color: msg.includes('✓') ? 'var(--ok)' : 'var(--bad)' }}>{msg}</span>}
+          </div>
         </div>
       )}
 
@@ -183,46 +295,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
           </div>
 
           {/* Rates */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>Rate schedule <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>(saved as MANUAL)</span></div>
-              <button type="button" onClick={() => setRates([...rates, blankRate()])} style={addBtn}>+ Add row</button>
-            </div>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ borderCollapse: 'separate', borderSpacing: '4px 4px', fontSize: 12 }}>
-                <thead>
-                  <tr style={{ color: 'var(--text-3)', textAlign: 'left' }}>
-                    {['Day', 'Start', 'End', '1st hr $', 'Block $', 'Block min', 'Entry $', 'Cap $', 'Grace', 'System', ''].map((h) => (
-                      <th key={h} style={{ padding: '2px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rates.map((r, i) => (
-                    <tr key={i}>
-                      <td><select style={{ ...cell, minWidth: 90 }} value={r.day_type} onChange={(e) => setRate(i, { day_type: e.target.value as RateRow['day_type'] })}>{DAY_TYPES.map((d) => <option key={d}>{d}</option>)}</select></td>
-                      <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.start_time ?? ''} onChange={(e) => setRate(i, { start_time: e.target.value || null })} /></td>
-                      <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.end_time ?? ''} onChange={(e) => setRate(i, { end_time: e.target.value || null })} /></td>
-                      <td><input style={{ ...cell, width: 56 }} value={toDollar(r.first_hour_cents)} onChange={(e) => setRate(i, { first_hour_cents: toCents(e.target.value) })} /></td>
-                      <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_block_cents)} onChange={(e) => setRate(i, { per_block_cents: toCents(e.target.value) })} /></td>
-                      <td><input style={{ ...cell, width: 52 }} value={r.block_minutes ?? ''} onChange={(e) => setRate(i, { block_minutes: toIntOrNull(e.target.value) })} /></td>
-                      <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_entry_cents)} onChange={(e) => setRate(i, { per_entry_cents: toCents(e.target.value) })} /></td>
-                      <td><input style={{ ...cell, width: 56 }} value={toDollar(r.cap_cents)} onChange={(e) => setRate(i, { cap_cents: toCents(e.target.value) })} /></td>
-                      <td><input style={{ ...cell, width: 48 }} value={r.grace_minutes ?? ''} onChange={(e) => setRate(i, { grace_minutes: toIntOrNull(e.target.value) })} /></td>
-                      <td><select style={{ ...cell, minWidth: 90 }} value={r.system} onChange={(e) => setRate(i, { system: e.target.value })}>{SYSTEMS.map((s) => <option key={s}>{s}</option>)}</select></td>
-                      <td><button type="button" onClick={() => setRates(rates.filter((_, j) => j !== i))} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--bad)', cursor: 'pointer', fontSize: 16, padding: '0 4px' }}>×</button></td>
-                    </tr>
-                  ))}
-                  {rates.length === 0 && (
-                    <tr><td colSpan={11} style={{ color: 'var(--text-3)', padding: 10 }}>No rate rows. Add one, or this carpark uses the operator fallback.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 8, lineHeight: 1.5 }}>
-              Saving replaces all of this carpark’s rate rows with the set above (marked MANUAL). Leave a field blank for “none”. Times in 24h HH:MM; blank = all day.
-            </div>
-          </div>
+          <RateEditor rates={rates} setRates={setRates} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button type="button" onClick={save} disabled={saving} style={{ appearance: 'none', border: 0, padding: '12px 22px', borderRadius: 12, background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 14, fontWeight: 600, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.7 : 1 }}>
@@ -232,6 +305,54 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** The MANUAL rate-schedule grid, shared by the create + edit views. */
+function RateEditor({ rates, setRates }: { rates: RateRow[]; setRates: React.Dispatch<React.SetStateAction<RateRow[]>> }) {
+  const setRate = (i: number, patch: Partial<RateRow>) =>
+    setRates((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 700 }}>Rate schedule <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>(saved as MANUAL)</span></div>
+        <button type="button" onClick={() => setRates((prev) => [...prev, blankRate()])} style={addBtn}>+ Add row</button>
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ borderCollapse: 'separate', borderSpacing: '4px 4px', fontSize: 12 }}>
+          <thead>
+            <tr style={{ color: 'var(--text-3)', textAlign: 'left' }}>
+              {['Day', 'Start', 'End', '1st hr $', 'Block $', 'Block min', 'Entry $', 'Cap $', 'Grace', 'System', ''].map((h) => (
+                <th key={h} style={{ padding: '2px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rates.map((r, i) => (
+              <tr key={i}>
+                <td><select style={{ ...cell, minWidth: 90 }} value={r.day_type} onChange={(e) => setRate(i, { day_type: e.target.value as RateRow['day_type'] })}>{DAY_TYPES.map((d) => <option key={d}>{d}</option>)}</select></td>
+                <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.start_time ?? ''} onChange={(e) => setRate(i, { start_time: e.target.value || null })} /></td>
+                <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.end_time ?? ''} onChange={(e) => setRate(i, { end_time: e.target.value || null })} /></td>
+                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.first_hour_cents)} onChange={(e) => setRate(i, { first_hour_cents: toCents(e.target.value) })} /></td>
+                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_block_cents)} onChange={(e) => setRate(i, { per_block_cents: toCents(e.target.value) })} /></td>
+                <td><input style={{ ...cell, width: 52 }} value={r.block_minutes ?? ''} onChange={(e) => setRate(i, { block_minutes: toIntOrNull(e.target.value) })} /></td>
+                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_entry_cents)} onChange={(e) => setRate(i, { per_entry_cents: toCents(e.target.value) })} /></td>
+                <td><input style={{ ...cell, width: 56 }} value={toDollar(r.cap_cents)} onChange={(e) => setRate(i, { cap_cents: toCents(e.target.value) })} /></td>
+                <td><input style={{ ...cell, width: 48 }} value={r.grace_minutes ?? ''} onChange={(e) => setRate(i, { grace_minutes: toIntOrNull(e.target.value) })} /></td>
+                <td><select style={{ ...cell, minWidth: 90 }} value={r.system} onChange={(e) => setRate(i, { system: e.target.value })}>{SYSTEMS.map((s) => <option key={s}>{s}</option>)}</select></td>
+                <td><button type="button" onClick={() => setRates((prev) => prev.filter((_, j) => j !== i))} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--bad)', cursor: 'pointer', fontSize: 16, padding: '0 4px' }}>×</button></td>
+              </tr>
+            ))}
+            {rates.length === 0 && (
+              <tr><td colSpan={11} style={{ color: 'var(--text-3)', padding: 10 }}>No rate rows. Add one, or this carpark uses the operator fallback.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 8, lineHeight: 1.5 }}>
+        Saving replaces all of this carpark’s rate rows with the set above (marked MANUAL). Leave a field blank for “none”. Times in 24h HH:MM; blank = all day.
+      </div>
     </div>
   );
 }

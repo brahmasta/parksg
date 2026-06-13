@@ -14,7 +14,7 @@ export type AdminResult =
   | { ok: true; email: string }
   | { ok: false; status: number; message: string };
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);

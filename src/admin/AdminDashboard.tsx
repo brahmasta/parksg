@@ -26,12 +26,14 @@ export function AdminDashboard({
 }) {
   const [data, setData] = useState<Analytics | null>(null);
   const [days, setDays] = useState(30);
+  const [excludeAdmin, setExcludeAdmin] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
-    adminFetch<Analytics>(`/api/admin/analytics?days=${days}`, token)
+    const url = `/api/admin/analytics?days=${days}${excludeAdmin ? '&exclude_admin=1' : ''}`;
+    adminFetch<Analytics>(url, token)
       .then((d) => {
         if (alive) {
           setData(d);
@@ -49,33 +51,52 @@ export function AdminDashboard({
     return () => {
       alive = false;
     };
-  }, [token, days, onAuthError]);
+  }, [token, days, excludeAdmin, onAuthError]);
 
   if (loading && !data) return <div style={{ color: 'var(--text-3)', padding: 20 }}>Loading analytics…</div>;
   if (err) return <div style={{ color: 'var(--bad)', padding: 20 }}>{err}</div>;
   if (!data) return null;
 
   const t = data.totals;
+  // Per-day rollups for the headline tiles. Active users isn't additive, so we
+  // average the daily-unique series; searches/visits divide the window total.
+  const win = Math.max(1, data.window_days);
+  const avgDau = data.dau.length
+    ? Math.round(data.dau.reduce((s, d) => s + d.users, 0) / data.dau.length)
+    : 0;
+  const perDay = (n: number) => {
+    const v = n / win;
+    return v >= 10 ? Math.round(v).toLocaleString() : v.toFixed(1);
+  };
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: -0.4 }}>Overview</h2>
-        <select
-          value={days}
-          onChange={(e) => setDays(Number(e.target.value))}
-          style={selectStyle}
-        >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <label
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: 'var(--text-2)', cursor: 'pointer', userSelect: 'none' }}
+            title="Exclude admin accounts (and their devices) from every metric"
+          >
+            <input type="checkbox" checked={excludeAdmin} onChange={(e) => setExcludeAdmin(e.target.checked)} />
+            Exclude admin
+          </label>
+          <select
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            style={selectStyle}
+          >
+            <option value={7}>Last 7 days</option>
+            <option value={30}>Last 30 days</option>
+            <option value={90}>Last 90 days</option>
+          </select>
+        </div>
       </div>
 
       {/* Stat tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-        <Stat label="Active users" value={t.active_users} sub={`${data.window_days}-day unique`} accent />
-        <Stat label="Searches" value={t.searches} sub={`${t.searches_all_time.toLocaleString()} all-time`} />
-        <Stat label="Visits" value={t.visits} sub="page loads" />
+        <Stat label="Active users" value={t.active_users} sub={`${data.window_days}-day unique · ~${avgDau.toLocaleString()}/day`} accent />
+        <Stat label="Searches" value={t.searches} sub={`~${perDay(t.searches)}/day · ${t.searches_all_time.toLocaleString()} all-time`} />
+        <Stat label="Visits" value={t.visits} sub={`page loads · ~${perDay(t.visits)}/day`} />
         <Stat label="Registered" value={t.registered_users} sub="signed-in accounts" />
         <Stat label="Open reports" value={t.reports_open} sub="needs review" />
       </div>
