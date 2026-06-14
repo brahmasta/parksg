@@ -112,6 +112,28 @@ button {
   color: inherit;
 }
 
+/* Keyboard focus — a visible accent ring for keyboard/AT users only
+ * (:focus-visible keeps mouse clicks clean). !important is deliberate: many
+ * inputs set `outline: none` inline, and this is an accessibility guarantee. */
+:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}
+
+/* Text selection picks up the brand accent instead of the OS default blue. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* App shell — every number renders in tabular figures */
 .psg-app {
   position: relative;
@@ -150,6 +172,28 @@ button {
 .psg-stagger > *:nth-child(5) { animation-delay: 180ms; }
 .psg-stagger > *:nth-child(6) { animation-delay: 220ms; }
 .psg-stagger > *:nth-child(7) { animation-delay: 260ms; }
+
+/* Interaction feedback for token-styled surfaces (admin panel + dialogs).
+ * Scoped to a `.psg-rich` container so every button inside gains a consistent
+ * hover/press without per-button inline handlers. Uses filter/transform/shadow
+ * (not background) so it layers over inline-set colors instead of fighting them. */
+.psg-rich button,
+.psg-rich a[role='button'] {
+  transition:
+    transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 160ms ease,
+    box-shadow 160ms ease;
+}
+.psg-rich button:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+.psg-rich button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  .psg-rich button { transition: none; }
+  .psg-rich button:active:not(:disabled) { transform: none; }
+}
 
 /* Limited-availability dot pulse */
 @keyframes psg-pulse {

@@ -87,7 +87,7 @@ export function SuggestEditDialog({
         </div>
       </div>
     ) : (
-      <div style={{ padding: '4px 20px 22px' }}>
+      <div className="psg-rich" style={{ padding: '4px 20px 22px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, color: 'var(--text-1)', letterSpacing: -0.3 }}>
             Suggest an edit

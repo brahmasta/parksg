@@ -267,7 +267,7 @@ export function AdminEdits({ token, onAuthError }: { token: string; onAuthError:
       ) : subs.length === 0 ? (
         <div style={{ color: 'var(--text-3)', padding: 20 }}>No {filter || ''} edit requests.</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="psg-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {subs.map((s) => (
             <SubmissionCard key={s.id} sub={s} token={token} onAuthError={onAuthError} onActed={onActed} />
           ))}

@@ -175,7 +175,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
       )}
 
       {!selected && !creating && q.trim().length >= 2 && results.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className="psg-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {results.map((c) => (
             <button
               key={c.id}

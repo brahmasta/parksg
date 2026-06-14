@@ -84,7 +84,7 @@ export function AdminFeedback({
       ) : reports.length === 0 ? (
         <div style={{ color: 'var(--text-3)', padding: 20 }}>No reports{filter ? ` with status “${filter}”` : ''} yet.</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="psg-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {reports.map((r) => (
             <div
               key={r.id}

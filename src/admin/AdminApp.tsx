@@ -20,7 +20,7 @@ export function AdminApp() {
 
   if (!accessToken) {
     return (
-      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-0)', padding: 20 }}>
+      <div className="psg-rich" style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-0)', padding: 20 }}>
         <div style={{ width: 'min(400px, 100%)', background: 'var(--bg-1)', border: '0.5px solid var(--line-strong)', borderRadius: 18, padding: 28, boxShadow: 'var(--shadow-card)', textAlign: 'center' }}>
           <div style={{ display: 'inline-flex', marginBottom: 18 }}><Wordmark size={20} /></div>
           <h1 style={{ margin: '0 0 6px', fontSize: 22, fontWeight: 700, letterSpacing: -0.4 }}>Admin control panel</h1>
@@ -41,7 +41,7 @@ export function AdminApp() {
   }
 
   return (
-    <div className="psg" style={{ minHeight: '100dvh', background: 'var(--bg-0)', color: 'var(--text-1)', fontFamily: 'var(--font-body)' }}>
+    <div className="psg psg-rich" style={{ minHeight: '100dvh', background: 'var(--bg-0)', color: 'var(--text-1)', fontFamily: 'var(--font-body)' }}>
       <header
         style={{
           position: 'sticky', top: 0, zIndex: 10,
