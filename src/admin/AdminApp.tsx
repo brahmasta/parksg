@@ -84,7 +84,7 @@ export function AdminApp() {
       </header>
 
       <main style={{ maxWidth: 1080, margin: '0 auto', padding: '24px 20px 80px' }}>
-        {tab === 'dashboard' && <AdminDashboard token={accessToken} onAuthError={signOut} />}
+        {tab === 'dashboard' && <AdminDashboard token={accessToken} onAuthError={signOut} onOpenReports={() => setTab('feedback')} />}
         {tab === 'carparks' && <AdminCarparks token={accessToken} onAuthError={signOut} />}
         {tab === 'edits' && <AdminEdits token={accessToken} onAuthError={signOut} />}
         {tab === 'feedback' && <AdminFeedback token={accessToken} onAuthError={signOut} />}
