@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { track } from '@vercel/analytics/react';
+import { trackEvent } from '../lib/api/events';
 import type { Carpark, DurationHours, User } from '../lib/types';
 import { isStaleRates } from '../lib/rateSource';
 import {
@@ -153,7 +153,14 @@ export function DetailScreen({
       a.remove();
       setLastProvider(provider);
       setLastProviderState(provider);
-      track('navigate', { provider, carpark: cp.id });
+      // Funnel step 5, and the last thing that happens before the user leaves
+      // for an external maps app — flush immediately rather than waiting out
+      // the buffer debounce, which the page unload would cut short.
+      trackEvent(
+        'navigate_clicked',
+        { provider, carpark: cp.id, source: cp.source },
+        { immediate: true },
+      );
     },
     [cp],
   );

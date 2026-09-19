@@ -18,6 +18,53 @@ export type Analytics = {
   top_searches: { query: string; count: number }[];
 };
 
+/**
+ * The traffic audit (/api/admin/traffic).
+ *
+ * `populations` deliberately reports several different denominators side by
+ * side, because "active users" was previously a single number that conflated
+ * crawlers indexing the SSR/SEO routes with real people. See db migration 007.
+ */
+export type Traffic = {
+  window_days: number;
+  populations: {
+    /** Every distinct client_id that loaded a page — the OLD "active users". */
+    visitors: number;
+    /** Direct + deep-path + single-visit + never interacted. Almost all bots. */
+    likely_automated: number;
+    /** visitors - likely_automated. */
+    humans: number;
+    /** Humans who searched or took any in-app action. The honest number. */
+    engaged: number;
+    page_loads: number;
+    human_page_loads: number;
+    searches: number;
+    distinct_searchers: number;
+  };
+  sources: {
+    source: 'search_engine' | 'direct' | 'ai_assistant' | 'social' | 'internal' | 'other';
+    clients: number;
+    visits: number;
+    automated: number;
+    human: number;
+    searched: number;
+    pct_human_searched: number;
+  }[];
+  funnel: { step: number; label: string; clients: number; pct: number }[];
+  return_7d: { eligible: number; returned: number; pct: number };
+  device: { device: string; human: number; automated: number }[];
+  /** null when the event RPC fails; empty-but-valid before instrumented traffic lands. */
+  events: {
+    totals: { events: number; clients: number; sessions: number };
+    funnel: { step: number; name: string; label: string; clients: number; pct_of_top: number }[];
+    top_events: { name: string; count: number; clients: number }[];
+    /** Every control the delegated click tracker saw. What is ABSENT from this
+     *  list is the point: an unlisted feature is one nobody is using. */
+    ui_clicks: { target: string; screen: string; count: number; clients: number }[];
+    navigate_providers: { provider: string; count: number }[];
+  } | null;
+};
+
 export type Report = {
   id: string;
   created_at: string;

@@ -1,36 +1,9 @@
 import { useEffect, useState } from 'react';
-import { adminFetch, AdminError, type Analytics } from './api';
+import { adminFetch, AdminError, type Analytics, type Traffic } from './api';
 
-/* ── Type scale (one deliberate ladder, used everywhere below) ───────────── */
-const TYPE = {
-  hero: { fontSize: 32, fontWeight: 700, letterSpacing: -1, lineHeight: 1 } as React.CSSProperties,
-  metric: { fontSize: 22, fontWeight: 700, letterSpacing: -0.5, lineHeight: 1 } as React.CSSProperties,
-  total: { fontSize: 26, fontWeight: 700, letterSpacing: -0.6, lineHeight: 1 } as React.CSSProperties,
-  caption: { fontSize: 11.5, fontWeight: 500 } as React.CSSProperties,
-};
-
-const card: React.CSSProperties = {
-  background: 'var(--bg-1)',
-  border: '0.5px solid var(--line-strong)',
-  borderRadius: 14,
-  padding: 20,
-  boxShadow: 'var(--shadow-card)',
-};
-/* Breakdowns sit one tier down: lighter elevation + tighter padding. */
-const cardSoft: React.CSSProperties = {
-  ...card,
-  padding: 16,
-  boxShadow: 'var(--shadow-sm)',
-};
-const eyebrow: React.CSSProperties = {
-  fontFamily: 'var(--font-mono)',
-  fontSize: 10.5,
-  fontWeight: 600,
-  letterSpacing: 1,
-  textTransform: 'uppercase',
-  color: 'var(--text-3)',
-  marginBottom: 12,
-};
+import { TrafficSection } from './TrafficSection';
+import { GroupHeading, Stat, MiniStat, Empty, Bars } from './ui';
+import { TYPE, card, cardSoft, eyebrow, selectStyle } from './uiTokens';
 
 export function AdminDashboard({
   token,
@@ -43,6 +16,7 @@ export function AdminDashboard({
   onOpenReports?: () => void;
 }) {
   const [data, setData] = useState<Analytics | null>(null);
+  const [traffic, setTraffic] = useState<Traffic | null>(null);
   const [days, setDays] = useState(30);
   const [excludeAdmin, setExcludeAdmin] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -70,6 +44,23 @@ export function AdminDashboard({
       alive = false;
     };
   }, [token, days, excludeAdmin, onAuthError]);
+
+  // The traffic audit loads independently: it is slower (it classifies every
+  // client in the window) and must never hold up the headline tiles.
+  useEffect(() => {
+    let alive = true;
+    const url = `/api/admin/traffic?days=${days}${excludeAdmin ? '&exclude_admin=1' : ''}`;
+    adminFetch<Traffic>(url, token)
+      .then((d) => {
+        if (alive) setTraffic(d);
+      })
+      .catch(() => {
+        /* non-fatal: the rest of the dashboard still renders */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [token, days, excludeAdmin]);
 
   if (loading && !data) return <div style={{ color: 'var(--text-3)', padding: 20 }}>Loading analytics…</div>;
   if (err) return <div style={{ color: 'var(--bad)', padding: 20 }}>{err}</div>;
@@ -127,6 +118,10 @@ export function AdminDashboard({
         />
       </div>
 
+      {/* Reality check — what the tiles above mean once crawler traffic on
+          the SSR/SEO routes is separated out. */}
+      {traffic && <TrafficSection t={traffic} />}
+
       {/* Engagement — the trends lead (hero charts) */}
       <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <GroupHeading>Engagement</GroupHeading>
@@ -172,118 +167,6 @@ export function AdminDashboard({
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-const selectStyle: React.CSSProperties = {
-  appearance: 'none',
-  padding: '8px 12px',
-  borderRadius: 10,
-  border: '0.5px solid var(--line-strong)',
-  background: 'var(--bg-1)',
-  color: 'var(--text-1)',
-  fontSize: 13,
-  cursor: 'pointer',
-};
-
-/** Section divider: a small mono label with a hairline rule running off to the right. */
-function GroupHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
-        {children}
-      </span>
-      <span style={{ flex: 1, height: 0, borderTop: '0.5px solid var(--line)' }} />
-    </div>
-  );
-}
-
-const statLabel: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: 0.3,
-  textTransform: 'uppercase',
-  fontFamily: 'var(--font-mono)',
-};
-
-function Stat({ label, value, sub, accent }: { label: string; value: number; sub?: string; accent?: boolean }) {
-  return (
-    <div
-      style={{
-        ...card,
-        background: accent ? 'var(--accent)' : 'var(--bg-1)',
-        border: accent ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)',
-      }}
-    >
-      <div style={{ ...statLabel, color: accent ? 'color-mix(in srgb, var(--accent-on) 80%, transparent)' : 'var(--text-3)' }}>{label}</div>
-      <div style={{ ...TYPE.hero, marginTop: 10, color: accent ? 'var(--accent-on)' : 'var(--text-1)' }}>{value.toLocaleString()}</div>
-      {sub && <div style={{ ...TYPE.caption, marginTop: 7, color: accent ? 'color-mix(in srgb, var(--accent-on) 70%, transparent)' : 'var(--text-2)' }}>{sub}</div>}
-    </div>
-  );
-}
-
-/** Tier-2 stat: smaller number, lighter card; optionally actionable (warn tone). */
-function MiniStat({
-  label,
-  value,
-  sub,
-  tone = 'default',
-  onClick,
-}: {
-  label: string;
-  value: number;
-  sub?: string;
-  tone?: 'default' | 'warn';
-  onClick?: () => void;
-}) {
-  const warn = tone === 'warn';
-  const inner = (
-    <>
-      <div style={{ ...statLabel, color: warn ? 'var(--warn)' : 'var(--text-3)' }}>{label}</div>
-      <div style={{ ...TYPE.metric, marginTop: 8, color: warn ? 'var(--warn)' : 'var(--text-1)' }}>{value.toLocaleString()}</div>
-      {sub && <div style={{ ...TYPE.caption, marginTop: 6, color: warn ? 'var(--warn)' : 'var(--text-3)' }}>{sub}</div>}
-    </>
-  );
-  const style: React.CSSProperties = {
-    ...cardSoft,
-    textAlign: 'left',
-    width: '100%',
-    background: warn ? 'var(--warn-bg)' : 'var(--bg-1)',
-    border: warn ? '0.5px solid color-mix(in srgb, var(--warn) 35%, transparent)' : '0.5px solid var(--line-strong)',
-    cursor: onClick ? 'pointer' : 'default',
-  };
-  return onClick ? (
-    <button type="button" onClick={onClick} style={{ ...style, appearance: 'none', font: 'inherit' }}>
-      {inner}
-    </button>
-  ) : (
-    <div style={style}>{inner}</div>
-  );
-}
-
-function Empty({ children }: { children: React.ReactNode }) {
-  return <div style={{ fontSize: 12.5, color: 'var(--text-3)', padding: '8px 0' }}>{children}</div>;
-}
-
-/** Horizontal labelled bars (top-N lists). */
-function Bars({ rows, color = 'var(--accent)' }: { rows: { label: string; value: number }[]; color?: string }) {
-  const max = Math.max(1, ...rows.map((r) => r.value));
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-      {rows.map((r, i) => (
-        <div key={`${r.label}-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 110, flexShrink: 0, fontSize: 12.5, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.label}>
-            {r.label}
-          </div>
-          <div style={{ flex: 1, height: 14, background: 'var(--bg-3)', borderRadius: 999, overflow: 'hidden' }}>
-            <div style={{ width: `${(r.value / max) * 100}%`, height: '100%', background: color, borderRadius: 999 }} />
-          </div>
-          <div style={{ width: 38, flexShrink: 0, textAlign: 'right', fontSize: 12.5, fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: 'var(--text-2)' }}>
-            {r.value.toLocaleString()}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

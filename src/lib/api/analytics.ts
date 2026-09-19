@@ -54,8 +54,9 @@ export function getClientId(): string | null {
   }
 }
 
-/** Coarse device class from UA + viewport. */
-function getDevice(): string {
+/** Coarse device class from UA + viewport. Shared with events.ts so both
+ *  streams classify a device identically. */
+export function getDevice(): string {
   if (typeof navigator === 'undefined') return 'desktop';
   const ua = navigator.userAgent || '';
   if (/iPad|Tablet|PlayBook|Silk/i.test(ua)) return 'tablet';

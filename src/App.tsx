@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Analytics, track } from '@vercel/analytics/react';
+import { Analytics } from '@vercel/analytics/react';
 import type {
   Carpark,
   MergedSaveItem,
@@ -31,6 +31,13 @@ import { haversineMeters, walkMinutesFromMeters } from './lib/geo';
 import { loadRecents, pushRecent } from './lib/recents';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
+import {
+  trackAppOpen,
+  trackEvent,
+  setEventUser,
+  initClickTracking,
+  setCurrentScreen,
+} from './lib/api/events';
 import { snapshotFromCarpark, useSaves } from './lib/saves';
 import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
@@ -139,14 +146,11 @@ function App() {
       (initialRoute?.kind === 'share' && !!initialRoute.cpId),
   );
 
-  // Vercel Analytics — fire a custom event on every screen change. The
-  // app is a single-page state-machine router so the URL never changes;
-  // tracking screen transitions as events lets us see the home → results
-  // → detail funnel in the Vercel dashboard. In dev this logs to the
-  // console and never leaves the browser.
-  useEffect(() => {
-    track('screen_view', { screen });
-  }, [screen]);
+  // The home → results → detail funnel is tracked through lib/api/events.ts
+  // (Supabase `app_events`), not Vercel. Vercel's track() custom events are a
+  // Pro-plan feature — on Hobby they are silently dropped, so the screen_view
+  // events that used to fire here never reached any dashboard. <Analytics />
+  // stays for page views, which Hobby does include.
 
   const [viewMode, setViewModeState] = useState<ViewMode>(() =>
     readStored<ViewMode>(VIEW_MODE_KEY, 'list', (raw) =>
@@ -258,6 +262,7 @@ function App() {
     if (!query) return;
     setDestinationInput(query);
     resultsScrollRef.current = 0;
+    trackEvent('search_submitted', { via: 'typed' });
     setScreen('results');
     search(query);
   };
@@ -273,6 +278,7 @@ function App() {
     // a programmatic value change to trigger another autocomplete fetch.
     // The results screen header uses result.destination.label anyway.
     resultsScrollRef.current = 0;
+    trackEvent('search_submitted', { via: 'place_pick' });
     setScreen('results');
     searchAtCoords(place.label, place.lat, place.lng, place.address);
   };
@@ -295,6 +301,7 @@ function App() {
         const { latitude, longitude } = pos.coords;
         setDestinationInput('My location');
         resultsScrollRef.current = 0;
+        trackEvent('search_submitted', { via: 'near_me' });
         setScreen('results');
         searchAtCoords('My location', latitude, longitude);
       },
@@ -313,10 +320,43 @@ function App() {
   });
   const { toast, pop } = useToast();
 
-  // Log one visit per app load (DAU / device / referrer for all visitors).
+  // Funnel step 4. Keyed on the id rather than the object so the periodic
+  // live-lots refresh (which swaps in a new Carpark with the same id) doesn't
+  // re-fire, and placed here rather than in goDetail because the desktop shell
+  // and the deep-link loaders set the carpark directly.
+  useEffect(() => {
+    if (!selectedCarpark) return;
+    trackEvent('carpark_viewed', {
+      carpark: selectedCarpark.id,
+      source: selectedCarpark.source,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCarpark?.id]);
+
+  // Stamp later events with the Google `sub` once signed in (and clear it on
+  // sign-out), so a funnel can be split by signed-in vs anonymous.
+  useEffect(() => {
+    setEventUser(user?.id ?? null);
+  }, [user?.id]);
+
+  // Log one visit per app load (DAU / device / referrer for all visitors),
+  // plus funnel step 1. `entry` distinguishes a deep-linked carpark/area page
+  // from a real home-screen arrival — the admin traffic audit leans on that
+  // split to tell crawlers apart from people.
   useEffect(() => {
     recordVisit();
+    trackAppOpen(
+      window.location.pathname === '/' ? 'home' : 'deep_link',
+    );
+    // Blanket click coverage, so "which features does nobody use?" is
+    // answerable without hand-instrumenting all 89 buttons.
+    initClickTracking();
   }, []);
+
+  // Stamp each click with the screen it happened on.
+  useEffect(() => {
+    setCurrentScreen(screen);
+  }, [screen]);
 
   // Best-effort: log every resolved destination search to Supabase so the
   // owner can query top searches. Fires once per resolved destination (the
@@ -329,6 +369,8 @@ function App() {
         lng: result.destination.lng,
         userId: user?.id ?? null,
       });
+      // Funnel step 3: a resolved destination means results are on screen.
+      trackEvent('results_viewed', { count: result.carparks.length });
     }
     // Intentionally keyed only on the resolved destination so re-renders
     // (e.g. a later sign-in) don't double-count the same search.
@@ -356,6 +398,7 @@ function App() {
       // The UI hides the save affordance; this guards the path defensively.
       if (cp.source === 'GOOGLE') return;
       const isSaved = saves.isCarparkSaved(cp.id);
+      trackEvent('carpark_saved', { carpark: cp.id, removed: isSaved });
       const snapshot = snapshotFromCarpark(cp, estCostForStay(cp, stay) ?? 0);
       saves.toggleCarpark(cp.id, snapshot);
       pop({
