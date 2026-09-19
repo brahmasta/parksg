@@ -102,3 +102,11 @@ export const FEATURES: Feature[] = [
 export const FEATURE_BY_ID: Record<string, Feature> = Object.fromEntries(
   FEATURES.map((f) => [f.id, f]),
 );
+
+/** Phrase a tracking age the same way everywhere it is shown. */
+export function formatTrackingAge(hours: number | null | undefined): string {
+  if (hours == null) return 'not started';
+  if (hours < 1) return 'under an hour';
+  if (hours < 48) return `${Math.round(hours)} hours`;
+  return `${Math.round(hours / 24)} days`;
+}

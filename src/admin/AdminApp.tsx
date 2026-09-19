@@ -5,10 +5,12 @@ import { AdminDashboard } from './AdminDashboard';
 import { AdminCarparks } from './AdminCarparks';
 import { AdminEdits } from './AdminEdits';
 import { AdminFeedback } from './AdminFeedback';
+import { AdminFeatures } from './AdminFeatures';
 
-type Tab = 'dashboard' | 'carparks' | 'edits' | 'feedback';
+type Tab = 'dashboard' | 'features' | 'carparks' | 'edits' | 'feedback';
 const TABS: { key: Tab; label: string }[] = [
   { key: 'dashboard', label: 'Dashboard' },
+  { key: 'features', label: 'Features' },
   { key: 'carparks', label: 'Carparks' },
   { key: 'edits', label: 'Edit requests' },
   { key: 'feedback', label: 'Feedback' },
@@ -84,7 +86,8 @@ export function AdminApp() {
       </header>
 
       <main style={{ maxWidth: 1080, margin: '0 auto', padding: '24px 20px 80px' }}>
-        {tab === 'dashboard' && <AdminDashboard token={accessToken} onAuthError={signOut} onOpenReports={() => setTab('feedback')} />}
+        {tab === 'dashboard' && <AdminDashboard token={accessToken} onAuthError={signOut} onOpenReports={() => setTab('feedback')} onOpenFeatures={() => setTab('features')} />}
+        {tab === 'features' && <AdminFeatures token={accessToken} onAuthError={signOut} />}
         {tab === 'carparks' && <AdminCarparks token={accessToken} onAuthError={signOut} />}
         {tab === 'edits' && <AdminEdits token={accessToken} onAuthError={signOut} />}
         {tab === 'feedback' && <AdminFeedback token={accessToken} onAuthError={signOut} />}

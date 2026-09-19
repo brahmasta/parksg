@@ -100,7 +100,23 @@ export type Traffic = {
   events: {
     totals: { events: number; clients: number; sessions: number };
     funnel: { step: number; name: string; label: string; clients: number; pct_of_top: number }[];
-    ui_clicks: { target: string; screen: string; count: number; clients: number }[];
+    ui_clicks: {
+      target: string;
+      screen: string;
+      count: number;
+      clients: number;
+      last_seen?: string | null;
+    }[];
+    /** How long click tracking has actually been running. Without this, an
+     *  unused feature and an unobserved one are indistinguishable. */
+    tracking?: {
+      first_event_at: string | null;
+      first_click_at: string | null;
+      ui_clicks: number;
+      /** Hours since the first click, computed server-side — the server owns
+       *  the clock, and Date.now() in a React render is impure. */
+      hours_tracked?: number | null;
+    };
     top_events: { name: string; count: number; clients: number }[];
     navigate_providers: { provider: string; count: number }[];
   } | null;

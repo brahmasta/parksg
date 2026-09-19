@@ -1,23 +1,18 @@
 /**
- * Audience detail: where real people come from, how far they get, and which
- * features go untouched.
+ * Audience detail: where real people come from and how far they get.
  *
  * The headline population tiles live in AdminDashboard; this section is the
- * supporting evidence. Two things here are deliberately awkward rather than
- * tidy:
+ * supporting evidence, and the full feature roster lives on its own tab
+ * (AdminFeatures) because judging a feature needs room to show how long we have
+ * been watching it.
  *
- *  - The funnel states the cohort it is measured over. app_events began on a
- *    specific date while visits/search_events go back months, so an earlier
- *    version showed "Searched 345 → Opened a carpark 4, −341 dropped off" when
- *    those 341 people simply predated the instrumentation. Nobody abandoned.
- *
- *  - Feature usage is a join against src/lib/featureInventory.ts, not a ranked
- *    list of what was pressed. A ranking can only show what IS used; the
- *    question is what ISN'T, and that can only be answered against a roster of
- *    what exists.
+ * The funnel states the cohort it is measured over. app_events began on a
+ * specific date while visits/search_events go back months, so an earlier
+ * version showed "Searched 345 → Opened a carpark 4, −341 dropped off" when
+ * those 341 people simply predated the instrumentation. Nobody abandoned.
  */
 import type { Traffic } from './api';
-import { FEATURES, FEATURE_BY_ID, type FeatureArea } from '../lib/featureInventory';
+import { FEATURES, FEATURE_BY_ID, formatTrackingAge } from '../lib/featureInventory';
 import { GroupHeading, Empty, Bars } from './ui';
 import { card, cardSoft, eyebrow } from './uiTokens';
 
@@ -30,7 +25,14 @@ const SOURCE_LABEL: Record<string, string> = {
   other: 'Other sites',
 };
 
-export function TrafficSection({ t }: { t: Traffic }) {
+export function TrafficSection({
+  t,
+  onOpenFeatures,
+}: {
+  t: Traffic;
+  /** Jump to the Features tab, where the full roster lives. */
+  onOpenFeatures?: () => void;
+}) {
   const sources = t.sources
     .filter((s) => (s.person ?? 0) > 0)
     .sort((a, b) => (b.person ?? 0) - (a.person ?? 0));
@@ -106,104 +108,61 @@ export function TrafficSection({ t }: { t: Traffic }) {
         </div>
       </section>
 
-      <FeatureUsage clicks={events?.ui_clicks ?? []} />
+      <FeatureSummary events={events} onOpenFeatures={onOpenFeatures} />
     </>
   );
 }
 
 /**
- * Which features get used, and — the point — which do not.
+ * A one-line read on feature coverage, deferring to the Features tab.
  *
- * Joins the click counts against the full roster in featureInventory.ts, so an
- * untouched feature appears explicitly instead of being invisible by omission.
+ * This deliberately does NOT list untouched features. The earlier version did,
+ * under a caption inviting the reader to conclude they were unwanted — one hour
+ * after tracking shipped, when all 45 were simply unobserved. Whether absence
+ * means anything depends on how long we have been watching, which is a question
+ * the Features page has the room to answer properly.
  */
-function FeatureUsage({ clicks }: { clicks: NonNullable<Traffic['events']>['ui_clicks'] }) {
-  // A few ids are tagged on more than one control (Save sits on both the detail
-  // header and the result card), and ui_clicks is grouped by screen, so roll up.
-  const counts = new Map<string, number>();
-  for (const c of clicks) {
-    if (!FEATURE_BY_ID[c.target]) continue; // stale id from an older build
-    counts.set(c.target, (counts.get(c.target) ?? 0) + c.count);
-  }
-
-  const used = FEATURES.filter((f) => (counts.get(f.id) ?? 0) > 0)
-    .map((f) => ({ ...f, count: counts.get(f.id) ?? 0 }))
-    .sort((a, b) => b.count - a.count);
-
-  const unused = FEATURES.filter((f) => (counts.get(f.id) ?? 0) === 0);
-
-  // Group the untouched ones by area — a whole quiet area is a different signal
-  // from one quiet button.
-  const byArea = new Map<FeatureArea, string[]>();
-  for (const f of unused) {
-    const list = byArea.get(f.area) ?? [];
-    list.push(f.label);
-    byArea.set(f.area, list);
-  }
+function FeatureSummary({
+  events,
+  onOpenFeatures,
+}: {
+  events: Traffic['events'];
+  onOpenFeatures?: () => void;
+}) {
+  const clicks = events?.ui_clicks ?? [];
+  const seen = new Set(clicks.map((c) => c.target).filter((t) => FEATURE_BY_ID[t]));
+  const totalClicks = events?.tracking?.ui_clicks ?? clicks.reduce((s, c) => s + c.count, 0);
+  const age = formatTrackingAge(events?.tracking?.hours_tracked);
 
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <GroupHeading>Feature usage</GroupHeading>
-
-      {clicks.length === 0 ? (
-        <div style={cardSoft}>
-          <Empty>
-            No interactions recorded yet. {FEATURES.length} features are tracked; counts appear here
-            as people use them.
-          </Empty>
+      <div style={cardSoft}>
+        <div style={{ fontSize: 12.5, color: 'var(--text-1)', lineHeight: 1.6 }}>
+          <strong>{seen.size}</strong> of <strong>{FEATURES.length}</strong> tracked features have
+          been used, from <strong>{totalClicks.toLocaleString()}</strong> recorded click
+          {totalClicks === 1 ? '' : 's'} over <strong>{age}</strong> of tracking.
         </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
-          <div style={cardSoft}>
-            <div style={eyebrow}>
-              Used — {used.length} of {FEATURES.length}
-            </div>
-            {used.length === 0 ? (
-              <Empty>Nothing pressed yet in this window.</Empty>
-            ) : (
-              <Bars
-                rows={used.slice(0, 14).map((f) => ({ label: f.label, value: f.count }))}
-                color="var(--src-ura)"
-              />
-            )}
-          </div>
-
-          <div style={cardSoft}>
-            <div style={eyebrow}>
-              Untouched — {unused.length} of {FEATURES.length}
-            </div>
-            {unused.length === 0 ? (
-              <Empty>Every tracked feature was used at least once.</Empty>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[...byArea.entries()].map(([area, labels]) => (
-                  <div key={area}>
-                    <div
-                      style={{
-                        fontSize: 10.5,
-                        fontFamily: 'var(--font-mono)',
-                        letterSpacing: 0.6,
-                        textTransform: 'uppercase',
-                        color: 'var(--text-3)',
-                        marginBottom: 4,
-                      }}
-                    >
-                      {area}
-                    </div>
-                    <div style={{ fontSize: 12.5, color: 'var(--text-2)', lineHeight: 1.6 }}>
-                      {labels.join(' · ')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 14, lineHeight: 1.5 }}>
-              Nobody pressed these in this window. Either the feature is not wanted, or it cannot be
-              found — worth telling apart before building more.
-            </div>
-          </div>
-        </div>
-      )}
+        {onOpenFeatures && (
+          <button
+            type="button"
+            onClick={onOpenFeatures}
+            style={{
+              appearance: 'none',
+              border: 0,
+              background: 'transparent',
+              color: 'var(--accent)',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+              padding: '10px 0 0',
+              font: 'inherit',
+            }}
+          >
+            See every feature →
+          </button>
+        )}
+      </div>
     </section>
   );
 }

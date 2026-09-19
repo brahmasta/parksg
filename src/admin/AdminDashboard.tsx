@@ -23,11 +23,14 @@ export function AdminDashboard({
   token,
   onAuthError,
   onOpenReports,
+  onOpenFeatures,
 }: {
   token: string;
   onAuthError: () => void;
   /** Jump to the queue that holds open reports (the Feedback tab). */
   onOpenReports?: () => void;
+  /** Jump to the Features tab, where the full roster lives. */
+  onOpenFeatures?: () => void;
 }) {
   const [data, setData] = useState<Analytics | null>(null);
   const [traffic, setTraffic] = useState<Traffic | null>(null);
@@ -143,14 +146,20 @@ export function AdminDashboard({
             </div>
 
             {series && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 14 }}>
                 <div style={card}>
                   <div style={eyebrow}>Daily active people</div>
-                  <DayBars data={series.people_dau} accent />
+                  {/* summable={false}: adding up daily-unique counts double-counts
+                      everyone who came back, so a total would be nonsense. */}
+                  <DayBars data={series.people_dau} avg={people.avg_dau} summable={false} accent />
                 </div>
                 <div style={card}>
                   <div style={eyebrow}>Searches per day</div>
-                  <DayBars data={series.people_searches} />
+                  <DayBars data={series.people_searches} avg={people.avg_searches} />
+                </div>
+                <div style={card}>
+                  <div style={eyebrow}>Visits per day</div>
+                  <DayBars data={series.people_visits} avg={people.avg_visits} />
                 </div>
               </div>
             )}
@@ -177,7 +186,7 @@ export function AdminDashboard({
           {series && (
             <div style={cardSoft}>
               <div style={eyebrow}>Bot visits per day</div>
-              <DayBars data={series.bot_visits} />
+              <DayBars data={series.bot_visits} avg={bots.avg_visits} />
               <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 12, lineHeight: 1.55 }}>
                 Crawlers indexing <code>/carpark/…</code> and <code>/parking-near/…</code>. They
                 arrive direct on a deep link, never reach the home screen, visit once and never
@@ -193,7 +202,7 @@ export function AdminDashboard({
       )}
 
       {/* Audience detail, conversion funnel and feature usage. */}
-      {traffic && <TrafficSection t={traffic} />}
+      {traffic && <TrafficSection t={traffic} onOpenFeatures={onOpenFeatures} />}
 
       {/* ── Operational ───────────────────────────────────────────────────── */}
       <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -220,32 +229,112 @@ export function AdminDashboard({
   );
 }
 
-/** Vertical day-by-day mini bar chart (the hero trend view). */
-function DayBars({ data, accent }: { data: { day: string; value: number }[]; accent?: boolean }) {
-  const max = Math.max(1, ...data.map((d) => d.value));
+/**
+ * Vertical day-by-day mini bar chart.
+ *
+ * The headline is the AVERAGE per day, not the sum. For daily-active-people the
+ * sum is not merely unwanted, it is wrong: adding up daily-unique counts
+ * double-counts everyone who returned, so "1,860 total" over 90 days described
+ * nobody. `summable` marks the series where a total does mean something
+ * (searches, visits), and it is demoted to a footnote either way.
+ *
+ * A dashed line marks the average across the plot, so a day reads against the
+ * norm rather than only against the peak. That matters here because a couple of
+ * early days carry a few hundred searches from one client hammering the box
+ * during development — without the line, every ordinary day looks like zero.
+ */
+function DayBars({
+  data,
+  avg,
+  accent,
+  summable = true,
+}: {
+  data: { day: string; value: number }[];
+  /** Mean over complete days, from the RPC — today is charted but not averaged. */
+  avg?: number | null;
+  accent?: boolean;
+  /** False when summing the series is meaningless (daily-unique counts). */
+  summable?: boolean;
+}) {
   const total = data.reduce((s, d) => s + d.value, 0);
+  const peak = Math.max(0, ...data.map((d) => d.value));
+
+  // One outlier can flatten everything else: two days in this dataset carry a
+  // few hundred searches from a single client hammering the box during
+  // development, against an ~18/day norm, which renders every ordinary day as a
+  // 4px stub. So scale to the 95th percentile when the peak dwarfs it, let the
+  // outliers overflow the axis, and mark them — the day is still charted and
+  // the real peak is still stated, but the other 88 days become readable.
+  const sorted = data.map((d) => d.value).sort((a, b) => a - b);
+  const p95 = sorted.length ? sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))] : 0;
+  const clipped = p95 > 0 && peak > p95 * 3;
+  const scaleMax = Math.max(1, clipped ? p95 : peak);
+  const over = clipped ? data.filter((d) => d.value > scaleMax).length : 0;
+
+  const max = scaleMax;
+  const avgPct = avg != null && avg > 0 ? Math.min(100, (avg / scaleMax) * 100) : null;
+
+  // At 90 days a 2px gap eats ~40% of each bar's pitch and the series reads as
+  // stripes with holes in it. Tighten as the window grows so every day shows.
+  const dense = data.length > 45;
+  const gap = dense ? 1 : 2;
+
+  const fmt = (n: number) =>
+    n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(1).replace(/\.0$/, '');
+
   return (
     <div>
-      <div style={{ ...TYPE.total, margin: '4px 0 14px', color: 'var(--text-1)' }}>
-        {total.toLocaleString()}
-        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-3)', marginLeft: 6, letterSpacing: 0 }}>total</span>
+      <div style={{ ...TYPE.total, margin: '4px 0 4px', color: 'var(--text-1)' }}>
+        {avg == null ? '—' : fmt(avg)}
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-3)', marginLeft: 6, letterSpacing: 0 }}>
+          / day avg
+        </span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 84 }}>
-        {data.map((d) => (
+      <div style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 10, fontVariantNumeric: 'tabular-nums' }}>
+        peak {peak.toLocaleString()}
+        {summable && <> · {total.toLocaleString()} total</>}
+        <> · {data.length} days</>
+        {over > 0 && (
+          <> · {over} day{over === 1 ? '' : 's'} above axis</>
+        )}
+      </div>
+
+      <div style={{ position: 'relative', height: 84 }}>
+        {avgPct != null && (
           <div
-            key={d.day}
-            title={`${d.day}: ${d.value}`}
+            title={`average ${fmt(avg as number)}/day`}
             style={{
-              flex: 1,
-              height: `${Math.max(2, (d.value / max) * 100)}%`,
-              background: accent ? 'var(--accent)' : 'var(--text-3)',
-              borderRadius: 2,
-              minWidth: 2,
-              opacity: d.value === 0 ? 0.25 : 1,
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: `${avgPct}%`,
+              borderTop: '1px dashed var(--text-3)',
+              opacity: 0.55,
+              pointerEvents: 'none',
             }}
           />
-        ))}
+        )}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap, height: '100%' }}>
+          {data.map((d) => (
+            <div
+              key={d.day}
+              title={`${d.day}: ${d.value.toLocaleString()}`}
+              style={{
+                flex: 1,
+                height: `${Math.min(100, Math.max(2, (d.value / max) * 100))}%`,
+                background: accent ? 'var(--accent)' : 'var(--text-3)',
+                borderRadius: dense ? 1 : 2,
+                minWidth: 1,
+                opacity: d.value === 0 ? 0.25 : 1,
+                // An overflowing day keeps its bar but gets a cap, so it reads
+                // as "off the top" rather than merely "tallest".
+                borderTop: d.value > max ? '2px solid var(--warn)' : undefined,
+              }}
+            />
+          ))}
+        </div>
       </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>
         <span>{data[0]?.day.slice(5)}</span>
         <span>{data[data.length - 1]?.day.slice(5)}</span>
