@@ -21,6 +21,7 @@ export function AddCarparkLink({
       <button
         type="button"
         onClick={() => setOpen(true)}
+        data-track="nav_add_carpark"
         style={{
           appearance: 'none',
           border: 0,

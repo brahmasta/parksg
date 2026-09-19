@@ -175,6 +175,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             />
             <button
               type="button"
+              data-track="search_near_me"
               onClick={onNearMe}
               disabled={nearMeBusy}
               style={{
@@ -205,12 +206,14 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
                   {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
                   {headerDestination ? ` near ${headerDestination}` : ''}
                 </MonoLabel>
-                <FilterPill
-                  active={evOnly}
-                  onClick={() => setEvOnly(!evOnly)}
-                  icon={<IconBolt size={11} stroke={2.25} />}
-                  label="EV"
-                />
+                <span data-track="filter_ev" style={{ display: 'inline-flex', flexShrink: 0 }}>
+                  <FilterPill
+                    active={evOnly}
+                    onClick={() => setEvOnly(!evOnly)}
+                    icon={<IconBolt size={11} stroke={2.25} />}
+                    label="EV"
+                  />
+                </span>
               </div>
               <FilterBar
                 sortBy={sortBy}
@@ -346,6 +349,7 @@ function LandingDesktop({
         />
         <button
           type="button"
+          data-track="search_near_me"
           onClick={onNearMe}
           disabled={nearMeBusy}
           style={{
@@ -363,7 +367,7 @@ function LandingDesktop({
         {/* Saved places */}
         <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <MonoLabel>Saved places</MonoLabel>
-          <button type="button" onClick={saved.onAddDestination} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+          <button type="button" data-track="add_destination" onClick={saved.onAddDestination} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
             + Add destination
           </button>
         </div>
@@ -379,6 +383,7 @@ function LandingDesktop({
               item.kind === 'destination' ? (
                 <SavedRow
                   key={`d:${item.id}`}
+                  track="saved_dest_chip"
                   icon={<IconStar size={16} stroke={2} />}
                   title={item.destination.name}
                   sub={item.destination.address}
@@ -387,6 +392,7 @@ function LandingDesktop({
               ) : (
                 <SavedRow
                   key={`c:${item.id}`}
+                  track="saved_carpark_chip"
                   icon={<IconBookmark filled size={16} />}
                   title={item.carpark.name}
                   sub={item.carpark.area || item.carpark.block}
@@ -401,10 +407,11 @@ function LandingDesktop({
   );
 }
 
-function SavedRow({ icon, title, sub, onClick }: { icon: React.ReactNode; title: string; sub?: string; onClick: () => void }) {
+function SavedRow({ icon, title, sub, onClick, track }: { icon: React.ReactNode; title: string; sub?: string; onClick: () => void; track?: string }) {
   return (
     <button
       type="button"
+      data-track={track}
       onClick={onClick}
       style={{
         appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', borderRadius: 12,

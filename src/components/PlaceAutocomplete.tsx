@@ -232,6 +232,7 @@ export function PlaceAutocomplete({
               setHighlight(-1);
             }}
             aria-label="Clear search"
+            data-track="search_clear"
             style={{
               appearance: 'none',
               border: 0,
@@ -255,6 +256,7 @@ export function PlaceAutocomplete({
           <button
             type="submit"
             aria-label="Search"
+            data-track="search_submit"
             style={{
               appearance: 'none',
               border: 0,
@@ -305,6 +307,7 @@ export function PlaceAutocomplete({
                 <button
                   id={`${listId}-opt-${i}`}
                   role="option"
+                  data-track="search_suggestion"
                   aria-selected={active}
                   onMouseDown={(e) => {
                     // Prevent input blur before click handler fires.

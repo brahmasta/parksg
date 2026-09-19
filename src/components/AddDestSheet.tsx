@@ -102,6 +102,7 @@ export function AddDestSheet({
               })
             }
             disabled={!canSave}
+            data-track="add_destination_submit"
             style={{
               appearance: 'none',
               border: 0,

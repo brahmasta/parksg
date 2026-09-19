@@ -128,6 +128,7 @@ export function CheckinCard({
             <button
               key={s}
               type="button"
+              data-track="checkin_submit"
               onClick={() => void report(s)}
               disabled={submitting !== null}
               style={{

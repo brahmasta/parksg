@@ -85,6 +85,7 @@ export function NavigateModal({
             <button
               key={p}
               type="button"
+              data-track="detail_nav_provider"
               onClick={() => {
                 onPick(p);
                 onClose();

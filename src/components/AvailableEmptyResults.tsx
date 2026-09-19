@@ -74,6 +74,7 @@ export function AvailableEmptyResults({
       <div style={{ display: 'flex', gap: 8 }}>
         <button
           type="button"
+          data-track="filter_available_only"
           onClick={onClearFilter}
           style={{
             appearance: 'none',

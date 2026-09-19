@@ -67,6 +67,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           type="button"
           onClick={onBack}
           aria-label="Back"
+          data-track="nav_back"
           style={{
             appearance: 'none',
             width: 36,
@@ -254,6 +255,7 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           <button
             type="button"
             onClick={onStartSearch ?? onBack}
+            data-track="nav_find_parking"
             style={{
               appearance: 'none',
               border: 0,

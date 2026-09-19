@@ -247,6 +247,7 @@ export function DurationStrip({
             type="button"
             role="radio"
             aria-checked={active}
+            data-track="stay_duration_preset"
             onClick={() => onChange(d.value)}
             style={{
               appearance: 'none',
@@ -335,6 +336,7 @@ export function SearchField({
             type="button"
             onClick={() => onChange('')}
             aria-label="Clear search"
+            data-track="search_clear"
             style={{
               appearance: 'none',
               border: 0,
@@ -356,6 +358,7 @@ export function SearchField({
           <button
             type="submit"
             aria-label="Search"
+            data-track="search_submit"
             style={{
               appearance: 'none',
               border: 0,

@@ -179,6 +179,7 @@ export function SuggestEditDialog({
             type="button"
             onClick={submit}
             disabled={status === 'submitting'}
+            data-track="suggest_edit_submit"
             style={{ appearance: 'none', flex: 1, padding: '12px 18px', borderRadius: 12, border: 0, background: 'var(--accent)', color: 'var(--accent-on)', fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 600, cursor: status === 'submitting' ? 'wait' : 'pointer', opacity: status === 'submitting' ? 0.7 : 1 }}
           >
             {status === 'submitting' ? 'Submitting…' : 'Submit for review'}

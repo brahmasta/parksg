@@ -13,6 +13,7 @@ export function BookmarkToggle({
   return (
     <button
       type="button"
+      data-track="detail_save"
       onClick={(e: MouseEvent) => {
         e.stopPropagation();
         onToggle();

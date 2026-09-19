@@ -226,6 +226,15 @@ function App() {
   // starts at the top. See BUG-1.
   const resultsScrollRef = useRef(0);
 
+  // Deep-link cold loads open a carpark and resolve a search without anyone
+  // touching anything. Crawlers hitting /carpark/:slug and /parking-near/:area
+  // do exactly that, and they demonstrably run JS (they are in `visits`, which
+  // only client JS writes). Left untagged, those auto-fired events would count
+  // as human interaction and unpick the bot classifier. These refs mark which
+  // events came from a real gesture; `auto: true` rides along on the rest.
+  const carparkOpenedByUser = useRef(false);
+  const searchStartedByUser = useRef(false);
+
   // Once a destination resolves, remember it — coords included so the
   // next tap on this recent replays the exact same location instead of
   // re-geocoding the label (which may resolve to a different place).
@@ -262,6 +271,7 @@ function App() {
     if (!query) return;
     setDestinationInput(query);
     resultsScrollRef.current = 0;
+    searchStartedByUser.current = true;
     trackEvent('search_submitted', { via: 'typed' });
     setScreen('results');
     search(query);
@@ -278,12 +288,14 @@ function App() {
     // a programmatic value change to trigger another autocomplete fetch.
     // The results screen header uses result.destination.label anyway.
     resultsScrollRef.current = 0;
+    searchStartedByUser.current = true;
     trackEvent('search_submitted', { via: 'place_pick' });
     setScreen('results');
     searchAtCoords(place.label, place.lat, place.lng, place.address);
   };
 
   const goDetail = (cp: Carpark) => {
+    carparkOpenedByUser.current = true;
     setSelectedCarpark(cp);
     setScreen('detail');
   };
@@ -301,6 +313,7 @@ function App() {
         const { latitude, longitude } = pos.coords;
         setDestinationInput('My location');
         resultsScrollRef.current = 0;
+        searchStartedByUser.current = true;
         trackEvent('search_submitted', { via: 'near_me' });
         setScreen('results');
         searchAtCoords('My location', latitude, longitude);
@@ -326,9 +339,12 @@ function App() {
   // and the deep-link loaders set the carpark directly.
   useEffect(() => {
     if (!selectedCarpark) return;
+    const byUser = carparkOpenedByUser.current;
+    carparkOpenedByUser.current = false;
     trackEvent('carpark_viewed', {
       carpark: selectedCarpark.id,
       source: selectedCarpark.source,
+      ...(byUser ? {} : { auto: true }),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCarpark?.id]);
@@ -370,7 +386,12 @@ function App() {
         userId: user?.id ?? null,
       });
       // Funnel step 3: a resolved destination means results are on screen.
-      trackEvent('results_viewed', { count: result.carparks.length });
+      const byUser = searchStartedByUser.current;
+      searchStartedByUser.current = false;
+      trackEvent('results_viewed', {
+        count: result.carparks.length,
+        ...(byUser ? {} : { auto: true }),
+      });
     }
     // Intentionally keyed only on the resolved destination so re-renders
     // (e.g. a later sign-in) don't double-count the same search.
@@ -658,7 +679,10 @@ function App() {
       setAvailableOnly,
       detailCp: selectedCarpark,
       detailLoading,
-      onOpenDetail: (cp) => setSelectedCarpark(cp),
+      onOpenDetail: (cp) => {
+        carparkOpenedByUser.current = true;
+        setSelectedCarpark(cp);
+      },
       onCloseDetail: () => setSelectedCarpark(null),
       isCarparkSaved: (id) => saves.isCarparkSaved(id),
       onToggleSaveCarpark: toggleSaveCarpark,

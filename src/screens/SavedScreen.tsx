@@ -99,6 +99,7 @@ export function SavedScreen({
               type="button"
               onClick={onAddDestination}
               aria-label="Add destination"
+              data-track="add_destination"
               style={{
                 appearance: 'none',
                 width: 36,
@@ -251,6 +252,7 @@ function TopBar({
       <button
         type="button"
         onClick={onBack}
+        data-track="nav_back"
         aria-label="Back"
         style={{
           appearance: 'none',
@@ -379,6 +381,7 @@ function SavedAllEmptyState({
         <button
           type="button"
           onClick={onAddDestination}
+          data-track="add_destination"
           style={{
             appearance: 'none',
             border: 0,
@@ -402,6 +405,7 @@ function SavedAllEmptyState({
         <button
           type="button"
           onClick={onGoFindCarpark}
+          data-track="nav_find_parking"
           style={{
             appearance: 'none',
             padding: '11px 18px',
@@ -490,6 +494,7 @@ function FilterEmptyState({
       <button
         type="button"
         onClick={isDest ? onAddDestination : onGoFindCarpark}
+        data-track={isDest ? 'add_destination' : 'nav_find_parking'}
         style={{
           appearance: 'none',
           border: 0,

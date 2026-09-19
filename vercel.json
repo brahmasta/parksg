@@ -10,6 +10,10 @@
     {
       "path": "/api/cron/ura-rates-ingest",
       "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/api/cron/prune-app-events",
+      "schedule": "0 19 * * *"
     }
   ]
 }

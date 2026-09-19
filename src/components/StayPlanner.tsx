@@ -76,6 +76,7 @@ export function StayPlanner({
       {collapsible ? (
         <button
           type="button"
+          data-track="stay_planner_toggle"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           style={{
@@ -115,7 +116,7 @@ export function StayPlanner({
         {([['now', 'Start now'], ['later', 'Start later']] as [StartMode, string][]).map(([m, label]) => {
           const active = startMode === m;
           return (
-            <button key={m} onClick={() => setMode(m)} style={{ appearance: 'none', border: 0, borderRadius: 8, padding: '9px 0', background: active ? 'var(--bg-1)' : 'transparent', color: active ? 'var(--text-1)' : 'var(--text-2)', fontSize: 13.5, fontWeight: active ? 600 : 500, cursor: 'pointer', boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all 120ms ease' }}>
+            <button key={m} data-track="stay_mode_change" onClick={() => setMode(m)} style={{ appearance: 'none', border: 0, borderRadius: 8, padding: '9px 0', background: active ? 'var(--bg-1)' : 'transparent', color: active ? 'var(--text-1)' : 'var(--text-2)', fontSize: 13.5, fontWeight: active ? 600 : 500, cursor: 'pointer', boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none', transition: 'all 120ms ease' }}>
               {label}
             </button>
           );
@@ -175,7 +176,7 @@ export function StayPlanner({
           {[1, 2, 3, 4, 8, 24].map((h) => {
             const active = hours === h;
             return (
-              <button key={h} onClick={() => onChange({ ...stay, hours: h })} aria-pressed={active} style={{ appearance: 'none', padding: '5px 11px', fontSize: 12.5, borderRadius: 999, cursor: 'pointer', fontWeight: active ? 600 : 500, border: active ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)', background: active ? 'var(--accent-tint-strong)' : 'var(--bg-1)', color: active ? 'var(--accent)' : 'var(--text-2)', transition: 'all 120ms ease' }}>
+              <button key={h} data-track="stay_duration_preset" onClick={() => onChange({ ...stay, hours: h })} aria-pressed={active} style={{ appearance: 'none', padding: '5px 11px', fontSize: 12.5, borderRadius: 999, cursor: 'pointer', fontWeight: active ? 600 : 500, border: active ? '1px solid var(--accent)' : '0.5px solid var(--line-strong)', background: active ? 'var(--accent-tint-strong)' : 'var(--bg-1)', color: active ? 'var(--accent)' : 'var(--text-2)', transition: 'all 120ms ease' }}>
                 {fmtDuration(h)}
               </button>
             );
@@ -211,7 +212,7 @@ export function StayPlanner({
 
 function StepBtn({ children, onClick, disabled, label }: { children: ReactNode; onClick: () => void; disabled?: boolean; label: string }) {
   return (
-    <button onClick={onClick} disabled={disabled} aria-label={label} style={{ appearance: 'none', width: 36, height: 36, borderRadius: 10, flexShrink: 0, border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: disabled ? 'var(--text-3)' : 'var(--text-1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, transition: 'all 120ms ease' }}>
+    <button data-track="stay_duration_step" onClick={onClick} disabled={disabled} aria-label={label} style={{ appearance: 'none', width: 36, height: 36, borderRadius: 10, flexShrink: 0, border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: disabled ? 'var(--text-3)' : 'var(--text-1)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1, transition: 'all 120ms ease' }}>
       {children}
     </button>
   );

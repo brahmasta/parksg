@@ -183,6 +183,7 @@ function ChargerGroupCard({
     >
       <button
         type="button"
+        data-track="ev_connector_expand"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-label={`${group.current} ${group.plugType} ${group.kw} kilowatt, ${formatPrice(

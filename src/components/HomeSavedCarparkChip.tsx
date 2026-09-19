@@ -12,6 +12,7 @@ export function HomeSavedCarparkChip({
     <button
       type="button"
       onClick={onClick}
+      data-track="saved_carpark_chip"
       style={{
         appearance: 'none',
         flexShrink: 0,

@@ -239,39 +239,31 @@ export function setCurrentScreen(screen: string): void {
 }
 
 /**
- * Collapse a label to something stable enough to group on.
+ * Identify the pressed control.
  *
- * Button text in this app often embeds live values ("4 of 4 available",
- * "$2.60"), which would otherwise explode into thousands of distinct targets.
- * Digits collapse to '#' so every variant rolls up into one row.
- */
-function normaliseTarget(raw: string): string {
-  return raw
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/\d+([.,]\d+)?/g, '#')
-    .slice(0, 48);
-}
-
-/**
- * Identify the pressed control, preferring the most stable name available:
- * an explicit `data-track`, then the accessible name, then visible text.
+ * ONLY `data-track` is read. The earlier version fell back to aria-label and
+ * then innerText, which silently captured personal data: SavedFeedRow labels
+ * its remove button `Remove ${destination.name}` (the user's own free-text
+ * name for a place), and PlaceAutocomplete's suggestion rows have no
+ * accessible name, so innerText yielded the street address the user was
+ * navigating to. Both were being stored against a client id and a Google sub.
+ *
+ * Reading an explicit opt-in attribute makes that impossible by construction
+ * rather than by redaction, and has two other benefits: the label is a stable
+ * feature id rather than live UI text, and controls that are not features
+ * (Leaflet marks its map pins role="button") drop out instead of becoming
+ * top-ranked noise.
+ *
+ * The cost is that a control must be tagged to be counted. That is the right
+ * trade: the question is "which FEATURES go unused", and a feature worth
+ * measuring is worth naming. See src/lib/featureInventory.ts for the roster.
  */
 function describeTarget(el: Element): string | null {
   const tracked = el.getAttribute('data-track');
-  if (tracked) return tracked.slice(0, 48);
-
-  const aria = el.getAttribute('aria-label');
-  if (aria) return normaliseTarget(aria);
-
-  const title = el.getAttribute('title');
-  if (title) return normaliseTarget(title);
-
-  const text = (el as HTMLElement).innerText || el.textContent || '';
-  const label = normaliseTarget(text);
-  // An icon-only button with no accessible name tells us nothing useful, and
-  // is worth fixing in the UI rather than recording as ''.
-  return label || null;
+  if (!tracked) return null;
+  const clean = tracked.trim();
+  // Must match the DB's own guard shape: short, lowercase, no user content.
+  return /^[a-z][a-z0-9_]{0,39}$/.test(clean) ? clean : null;
 }
 
 let clickTrackingBound = false;
@@ -292,9 +284,8 @@ export function initClickTracking(): void {
       const start = ev.target as Element | null;
       if (!start || typeof start.closest !== 'function') return;
 
-      const el = start.closest(
-        'button, a[href], [role="button"], [role="tab"], [role="switch"], summary',
-      );
+      // Only opted-in controls, or a child of one (an icon inside a button).
+      const el = start.closest('[data-track]');
       if (!el) return;
 
       const target = describeTarget(el);

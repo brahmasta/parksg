@@ -5,6 +5,20 @@ import { TrafficSection } from './TrafficSection';
 import { GroupHeading, Stat, MiniStat, Empty, Bars } from './ui';
 import { TYPE, card, cardSoft, eyebrow, selectStyle } from './uiTokens';
 
+/**
+ * The Overview.
+ *
+ * Every headline number here describes REAL PEOPLE, as a per-day average.
+ * The earlier version led with "Active users 6,034 — 30-day unique", which was
+ * wrong twice over: a 30-day total sitting under a per-day caption, and roughly
+ * three quarters of it crawlers indexing the SSR/SEO routes. Automated traffic
+ * now has its own section instead of being folded into the same tiles, and the
+ * genuinely ambiguous middle is reported rather than assigned to either side.
+ *
+ * Two endpoints feed this page, and they must never state the same fact twice:
+ *   /api/admin/traffic    audience, classification, funnel, feature usage
+ *   /api/admin/analytics  registered accounts, open reports, top searches
+ */
 export function AdminDashboard({
   token,
   onAuthError,
@@ -24,60 +38,55 @@ export function AdminDashboard({
 
   useEffect(() => {
     let alive = true;
-    const url = `/api/admin/analytics?days=${days}${excludeAdmin ? '&exclude_admin=1' : ''}`;
-    adminFetch<Analytics>(url, token)
-      .then((d) => {
-        if (alive) {
-          setData(d);
-          setErr(null);
-        }
-      })
-      .catch((e: AdminError) => {
+    const qs = `days=${days}${excludeAdmin ? '&exclude_admin=1' : ''}`;
+
+    // Both in flight together. The page's headline numbers come from /traffic,
+    // so resolving /analytics first would flash a half-empty Overview.
+    void Promise.allSettled([
+      adminFetch<Analytics>(`/api/admin/analytics?${qs}`, token),
+      adminFetch<Traffic>(`/api/admin/traffic?${qs}`, token),
+    ])
+      .then(([a, tr]) => {
         if (!alive) return;
-        if (e.status === 401) onAuthError();
-        else setErr(e.message);
+        if (a.status === 'fulfilled') {
+          setData(a.value);
+          setErr(null);
+        } else {
+          const e = a.reason as AdminError;
+          if (e?.status === 401) {
+            onAuthError();
+            return;
+          }
+          setErr(e?.message ?? 'Failed to load analytics.');
+        }
+        // The traffic audit is the slower, heavier query. If it fails, the rest
+        // of the page is still useful — degrade to a missing section.
+        setTraffic(tr.status === 'fulfilled' ? tr.value : null);
       })
       .finally(() => {
         if (alive) setLoading(false);
       });
+
     return () => {
       alive = false;
     };
   }, [token, days, excludeAdmin, onAuthError]);
-
-  // The traffic audit loads independently: it is slower (it classifies every
-  // client in the window) and must never hold up the headline tiles.
-  useEffect(() => {
-    let alive = true;
-    const url = `/api/admin/traffic?days=${days}${excludeAdmin ? '&exclude_admin=1' : ''}`;
-    adminFetch<Traffic>(url, token)
-      .then((d) => {
-        if (alive) setTraffic(d);
-      })
-      .catch(() => {
-        /* non-fatal: the rest of the dashboard still renders */
-      });
-    return () => {
-      alive = false;
-    };
-  }, [token, days, excludeAdmin]);
 
   if (loading && !data) return <div style={{ color: 'var(--text-3)', padding: 20 }}>Loading analytics…</div>;
   if (err) return <div style={{ color: 'var(--bad)', padding: 20 }}>{err}</div>;
   if (!data) return null;
 
   const t = data.totals;
-  // Per-day rollups for the headline tiles. Active users isn't additive, so we
-  // average the daily-unique series; searches/visits divide the window total.
-  const win = Math.max(1, data.window_days);
-  const avgDau = data.dau.length
-    ? Math.round(data.dau.reduce((s, d) => s + d.users, 0) / data.dau.length)
-    : 0;
-  const perDay = (n: number) => {
-    const v = n / win;
-    return v >= 10 ? Math.round(v).toLocaleString() : v.toFixed(1);
-  };
   const hasReports = t.reports_open > 0;
+
+  const people = traffic?.people;
+  const bots = traffic?.bots;
+  const uncertain = traffic?.uncertain;
+  const series = traffic?.series;
+  // Today is in-flight, so it is charted but excluded from every mean.
+  const completeDays = traffic?.complete_days ?? Math.max(1, days - 1);
+  const perDay = `avg/day over ${completeDays} full day${completeDays === 1 ? '' : 's'}`;
+  const num = (v: number | null | undefined) => (v == null ? 0 : v);
 
   return (
     <div className="psg-stagger" style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingBottom: 8 }}>
@@ -99,70 +108,110 @@ export function AdminDashboard({
         </div>
       </div>
 
-      {/* Tier 1 — primary engagement metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
-        <Stat label="Active users" value={t.active_users} sub={`${data.window_days}-day unique · ~${avgDau.toLocaleString()}/day`} accent />
-        <Stat label="Searches" value={t.searches} sub={`~${perDay(t.searches)}/day · ${t.searches_all_time.toLocaleString()} all-time`} />
-        <Stat label="Visits" value={t.visits} sub={`page loads · ~${perDay(t.visits)}/day`} />
-      </div>
-
-      {/* Tier 2 — secondary / operational (lighter, smaller) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
-        <MiniStat label="Registered" value={t.registered_users} sub="signed-in accounts" />
-        <MiniStat
-          label="Open reports"
-          value={t.reports_open}
-          sub={hasReports ? 'Needs review →' : 'all clear'}
-          tone={hasReports ? 'warn' : 'default'}
-          onClick={hasReports ? onOpenReports : undefined}
-        />
-      </div>
-
-      {/* Reality check — what the tiles above mean once crawler traffic on
-          the SSR/SEO routes is separated out. */}
-      {traffic && <TrafficSection t={traffic} />}
-
-      {/* Engagement — the trends lead (hero charts) */}
+      {/* ── People: the only numbers that describe an audience ─────────────── */}
       <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <GroupHeading>Engagement</GroupHeading>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
-          <div style={card}>
-            <div style={eyebrow}>Daily active users</div>
-            <DayBars data={data.dau.map((d) => ({ day: d.day, value: d.users }))} accent />
+        <GroupHeading>Real people · per day</GroupHeading>
+
+        {!people ? (
+          <div style={cardSoft}>
+            <Empty>
+              Audience data unavailable — the traffic audit failed to load. The
+              operational numbers below are unaffected.
+            </Empty>
           </div>
-          <div style={card}>
-            <div style={eyebrow}>Searches per day</div>
-            <DayBars data={data.searches_by_day.map((d) => ({ day: d.day, value: d.count }))} />
-          </div>
-        </div>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
+              <Stat label="Daily active people" value={num(people.avg_dau)} sub={perDay} accent />
+              <Stat label="Daily searches" value={num(people.avg_searches)} sub={perDay} />
+              <Stat label="Daily visits" value={num(people.avg_visits)} sub={perDay} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
+              <MiniStat
+                label="People reached"
+                value={people.clients}
+                sub={`unique over ${traffic?.window_days ?? days} days`}
+              />
+              <MiniStat label="Engaged" value={people.engaged} sub="searched or interacted" />
+              <MiniStat
+                label="Returned in 7d"
+                value={traffic?.return_7d?.returned ?? 0}
+                sub={`${traffic?.return_7d?.pct ?? 0}% of ${(traffic?.return_7d?.eligible ?? 0).toLocaleString()} eligible`}
+              />
+              <MiniStat label="Registered" value={t.registered_users} sub="signed-in accounts" />
+            </div>
+
+            {series && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+                <div style={card}>
+                  <div style={eyebrow}>Daily active people</div>
+                  <DayBars data={series.people_dau} accent />
+                </div>
+                <div style={card}>
+                  <div style={eyebrow}>Searches per day</div>
+                  <DayBars data={series.people_searches} />
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </section>
 
-      {/* Audience — secondary breakdowns (lighter cards, tinted bars) */}
+      {/* ── Bots & crawlers: kept entirely apart from the audience ─────────── */}
+      {bots && (
+        <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <GroupHeading>Bots &amp; crawlers · counted separately</GroupHeading>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
+            <MiniStat label="Daily bot visits" value={num(bots.avg_visits)} sub={perDay} />
+            <MiniStat label="Crawler clients" value={bots.clients} sub="direct · deep link · one visit" />
+            <MiniStat label="Uncertain" value={uncertain?.clients ?? 0} sub="search-engine deep landings" />
+            <MiniStat
+              label="All page loads"
+              value={traffic?.totals?.page_loads ?? 0}
+              sub="people + bots + uncertain"
+            />
+          </div>
+
+          {series && (
+            <div style={cardSoft}>
+              <div style={eyebrow}>Bot visits per day</div>
+              <DayBars data={series.bot_visits} />
+              <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 12, lineHeight: 1.55 }}>
+                Crawlers indexing <code>/carpark/…</code> and <code>/parking-near/…</code>. They
+                arrive direct on a deep link, never reach the home screen, visit once and never
+                interact. Good for search visibility — but not an audience, so they are counted here
+                and nowhere else.{' '}
+                <strong style={{ color: 'var(--text-2)' }}>Uncertain</strong> fits neither pattern:
+                mostly search-engine landings that read a rate and left. That may well be a satisfied
+                person, so it is reported rather than assigned to either side.
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Audience detail, conversion funnel and feature usage. */}
+      {traffic && <TrafficSection t={traffic} />}
+
+      {/* ── Operational ───────────────────────────────────────────────────── */}
       <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <GroupHeading>Audience</GroupHeading>
+        <GroupHeading>Operations</GroupHeading>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
+          <MiniStat
+            label="Open reports"
+            value={t.reports_open}
+            sub={hasReports ? 'Needs review →' : 'all clear'}
+            tone={hasReports ? 'warn' : 'default'}
+            onClick={hasReports ? onOpenReports : undefined}
+          />
           <div style={cardSoft}>
             <div style={eyebrow}>Top searches</div>
             {data.top_searches.length === 0 ? (
               <Empty>No searches in this window.</Empty>
             ) : (
               <Bars rows={data.top_searches.map((d) => ({ label: d.query, value: d.count }))} color="var(--accent)" />
-            )}
-          </div>
-          <div style={cardSoft}>
-            <div style={eyebrow}>Device</div>
-            {data.device.length === 0 ? (
-              <Empty>No device data yet — fills in as visitors arrive.</Empty>
-            ) : (
-              <Bars rows={data.device.map((d) => ({ label: d.device, value: d.count }))} color="var(--src-ura)" />
-            )}
-          </div>
-          <div style={cardSoft}>
-            <div style={eyebrow}>Where visitors come from</div>
-            {data.referrers.length === 0 ? (
-              <Empty>No referrer data yet — fills in as visitors arrive.</Empty>
-            ) : (
-              <Bars rows={data.referrers.map((d) => ({ label: d.referrer, value: d.count }))} color="var(--src-lta)" />
             )}
           </div>
         </div>

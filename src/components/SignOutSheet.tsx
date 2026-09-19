@@ -64,6 +64,7 @@ export function SignOutSheet({
         <button
           type="button"
           onClick={onConfirm}
+          data-track="sign_out"
           style={{
             appearance: 'none',
             border: 0,

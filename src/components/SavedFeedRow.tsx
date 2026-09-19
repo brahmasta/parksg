@@ -52,6 +52,7 @@ export function SavedFeedRow({
       <button
         type="button"
         onClick={onPrimary}
+        data-track="saved_open"
         style={{
           appearance: 'none',
           border: 0,
@@ -189,6 +190,7 @@ export function SavedFeedRow({
             ? `Remove ${item.destination.name}`
             : `Remove from saved · ${item.carpark.name}`
         }
+        data-track="saved_remove"
         style={{
           appearance: 'none',
           border: 0,

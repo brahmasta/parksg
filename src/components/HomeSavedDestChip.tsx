@@ -12,6 +12,7 @@ export function HomeSavedDestChip({
     <button
       type="button"
       onClick={onClick}
+      data-track="saved_dest_chip"
       style={{
         appearance: 'none',
         flexShrink: 0,

@@ -53,7 +53,7 @@ function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; sa
       </div>
 
       <Group label="Your saves">
-        <Row icon={<IconBookmark filled size={16} />} title="Saved" sub={`${savedCount} item${savedCount === 1 ? '' : 's'} · destinations + carparks`} onClick={onOpenSaved} last />
+        <Row icon={<IconBookmark filled size={16} />} title="Saved" sub={`${savedCount} item${savedCount === 1 ? '' : 's'} · destinations + carparks`} onClick={onOpenSaved} track="saved_open" last />
       </Group>
 
       <Group label="Account">
@@ -61,7 +61,7 @@ function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; sa
         <Row icon={<IconShield size={16} />} title="Privacy & data" sub="What we store, and how to export" last />
       </Group>
 
-      <button onClick={onSignOut} style={{ appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: 'var(--bad)', width: '100%', marginTop: 22, padding: '14px 16px', borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+      <button onClick={onSignOut} data-track="sign_out" style={{ appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: 'var(--bad)', width: '100%', marginTop: 22, padding: '14px 16px', borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
         <IconSignOut size={16} stroke={2} /> Sign out
       </button>
 
@@ -81,7 +81,7 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, color: 'var(--text-1)', letterSpacing: -0.5, lineHeight: 1.2 }}>Save carparks and destinations across devices</div>
         <p style={{ margin: '12px auto 0', fontSize: 14, color: 'var(--text-2)', lineHeight: 1.5, maxWidth: 360 }}>Sign in so your favourites and recent searches follow you between desktop, tablet and phone.</p>
-        <button onClick={onSignIn} style={{ appearance: 'none', border: 0, width: '100%', maxWidth: 320, marginTop: 24, padding: '14px 18px', background: 'var(--text-1)', color: 'var(--bg-1)', borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 6px 14px rgba(14,16,20,0.10)' }}>
+        <button onClick={onSignIn} data-track="sign_in" style={{ appearance: 'none', border: 0, width: '100%', maxWidth: 320, marginTop: 24, padding: '14px 18px', background: 'var(--text-1)', color: 'var(--bg-1)', borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 6px 14px rgba(14,16,20,0.10)' }}>
           <span style={{ width: 22, height: 22, borderRadius: 999, background: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IconGoogleG size={16} /></span>
           Continue with Google
         </button>
@@ -111,7 +111,7 @@ function Group({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function Row({ icon, title, sub, detail, onClick, last }: { icon: ReactNode; title: string; sub?: string; detail?: string; onClick?: () => void; last?: boolean }) {
+function Row({ icon, title, sub, detail, onClick, last, track }: { icon: ReactNode; title: string; sub?: string; detail?: string; onClick?: () => void; last?: boolean; track?: string }) {
   const interactive = !!onClick;
   const common = {
     display: 'flex' as const, alignItems: 'center' as const, gap: 12, padding: '14px 16px',
@@ -129,7 +129,7 @@ function Row({ icon, title, sub, detail, onClick, last }: { icon: ReactNode; tit
     </>
   );
   return interactive ? (
-    <button type="button" onClick={onClick} style={{ appearance: 'none', background: 'transparent', border: 0, width: '100%', textAlign: 'left', cursor: 'pointer', ...common }}>{inner}</button>
+    <button type="button" data-track={track} onClick={onClick} style={{ appearance: 'none', background: 'transparent', border: 0, width: '100%', textAlign: 'left', cursor: 'pointer', ...common }}>{inner}</button>
   ) : (
     <div style={common}>{inner}</div>
   );

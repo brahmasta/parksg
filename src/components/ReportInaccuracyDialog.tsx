@@ -268,6 +268,7 @@ export function ReportInaccuracyDialog({
             type="button"
             onClick={submit}
             disabled={status === 'submitting'}
+            data-track="report_inaccuracy_submit"
             style={{
               appearance: 'none',
               flex: 1,

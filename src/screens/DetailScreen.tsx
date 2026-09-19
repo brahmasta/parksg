@@ -266,6 +266,7 @@ export function DetailScreen({
         }}
       >
         <button
+          data-track="nav_back"
           onClick={onBack}
           aria-label="Back"
           style={{
@@ -287,6 +288,7 @@ export function DetailScreen({
         <div style={{ flex: 1 }} />
         <button
           type="button"
+          data-track="detail_share"
           onClick={() => void onShare()}
           aria-label="Share carpark"
           style={{
@@ -309,6 +311,7 @@ export function DetailScreen({
         {!isGoogle && (
           <button
             type="button"
+            data-track="detail_save"
             onClick={onToggleSave}
             aria-pressed={saved}
             aria-label={saved ? 'Remove from saved' : 'Save carpark'}
@@ -786,6 +789,7 @@ export function DetailScreen({
         {!isGoogle && (
           <button
             type="button"
+            data-track="suggest_edit"
             onClick={() => setSuggestOpen(true)}
             style={{
               appearance: 'none',
@@ -813,6 +817,7 @@ export function DetailScreen({
         {/* Report a data inaccuracy — opens the report form. */}
         <button
           type="button"
+          data-track="report_inaccuracy"
           onClick={() => setReportOpen(true)}
           style={{
             appearance: 'none',
@@ -852,6 +857,7 @@ export function DetailScreen({
       >
         <div style={{ display: 'flex', gap: 8 }}>
           <button
+            data-track="detail_navigate"
             onClick={onNavigatePrimary}
             style={{
               pointerEvents: 'auto',
@@ -881,6 +887,7 @@ export function DetailScreen({
           </button>
           <button
             type="button"
+            data-track="detail_choose_nav_app"
             aria-label="Choose navigation app"
             onClick={() => setNavSheetOpen(true)}
             style={{

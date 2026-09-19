@@ -158,7 +158,7 @@ export function AddCarparkDialog({ open, onClose, variant = 'sheet', user = null
           <button type="button" onClick={onClose} disabled={status === 'submitting'} style={{ appearance: 'none', flex: '0 0 auto', padding: '12px 18px', borderRadius: 12, border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: 'var(--text-2)', fontSize: 14, fontWeight: 600, cursor: status === 'submitting' ? 'default' : 'pointer' }}>
             Cancel
           </button>
-          <button type="button" onClick={submit} disabled={status === 'submitting'} style={{ appearance: 'none', flex: 1, padding: '12px 18px', borderRadius: 12, border: 0, background: 'var(--accent)', color: 'var(--accent-on)', fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 600, cursor: status === 'submitting' ? 'wait' : 'pointer', opacity: status === 'submitting' ? 0.7 : 1 }}>
+          <button type="button" onClick={submit} disabled={status === 'submitting'} data-track="add_carpark_submit" style={{ appearance: 'none', flex: 1, padding: '12px 18px', borderRadius: 12, border: 0, background: 'var(--accent)', color: 'var(--accent-on)', fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 600, cursor: status === 'submitting' ? 'wait' : 'pointer', opacity: status === 'submitting' ? 0.7 : 1 }}>
             {status === 'submitting' ? 'Submitting…' : 'Submit for review'}
           </button>
         </div>

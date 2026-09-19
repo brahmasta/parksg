@@ -115,6 +115,7 @@ export function ResultsScreen({
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             onClick={onBack}
+            data-track="nav_back"
             aria-label="Back"
             style={{
               appearance: 'none',
@@ -163,6 +164,7 @@ export function ResultsScreen({
           </div>
           <button
             type="button"
+            data-track="add_destination"
             onClick={onSaveDestination}
             disabled={destinationSaved}
             aria-pressed={destinationSaved}
@@ -200,6 +202,7 @@ export function ResultsScreen({
           </button>
           <button
             onClick={onToggleView}
+            data-track={viewMode === 'map' ? 'view_mode_list' : 'view_mode_map'}
             aria-label="Toggle map view"
             style={{
               appearance: 'none',
@@ -240,7 +243,7 @@ export function ResultsScreen({
             <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
             sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
           </div>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} data-track="filter_ev">
             <FilterPill
               active={evOnly}
               onClick={() => setEvOnly(!evOnly)}
@@ -489,6 +492,7 @@ function EmptyResults({
       </button>
       <button
         onClick={onBack}
+        data-track="nav_back"
         style={{
           appearance: 'none',
           border: 0,

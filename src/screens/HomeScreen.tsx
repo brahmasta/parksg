@@ -141,6 +141,7 @@ export function HomeScreen({
             type="button"
             onClick={onOpenAccount}
             aria-label="Account"
+            data-track="nav_account"
             style={{
               appearance: 'none',
               width: 36,
@@ -223,6 +224,7 @@ export function HomeScreen({
           <button
             onClick={onNearMe}
             disabled={nearMeBusy}
+            data-track="search_near_me"
             style={{
               appearance: 'none',
               flex: 1,
@@ -264,9 +266,11 @@ export function HomeScreen({
               }
               label="Saved"
               link={
-                <SectionLink color="var(--accent)" onClick={onOpenSaved}>
-                  View all
-                </SectionLink>
+                <span data-track="nav_saved" style={{ display: 'inline-flex' }}>
+                  <SectionLink color="var(--accent)" onClick={onOpenSaved}>
+                    View all
+                  </SectionLink>
+                </span>
               }
             />
             <div
@@ -315,12 +319,14 @@ export function HomeScreen({
               }
               label={user ? 'Recent · synced' : 'Recent'}
               link={
-                <SectionLink
-                  color="var(--text-3)"
-                  onClick={() => setRecentsExpanded((v) => !v)}
-                >
-                  See all
-                </SectionLink>
+                <span data-track="recents_see_all" style={{ display: 'inline-flex' }}>
+                  <SectionLink
+                    color="var(--text-3)"
+                    onClick={() => setRecentsExpanded((v) => !v)}
+                  >
+                    See all
+                  </SectionLink>
+                </span>
               }
             />
             <div
@@ -362,6 +368,7 @@ export function HomeScreen({
               <button
                 type="button"
                 onClick={onOpenAccount}
+                data-track="sign_in"
                 style={{
                   appearance: 'none',
                   border: '0.5px solid var(--line)',
@@ -475,6 +482,7 @@ export function HomeScreen({
               <button
                 type="button"
                 onClick={onOpenAccount}
+                data-track="sign_in"
                 style={{
                   appearance: 'none',
                   border: 0,
@@ -520,6 +528,7 @@ function RecentRow({
     <button
       type="button"
       onClick={onClick}
+      data-track="recent_dest_chip"
       style={{
         appearance: 'none',
         textAlign: 'left',

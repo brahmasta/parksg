@@ -68,6 +68,7 @@ export function EVEmptyResults({
       </p>
       <button
         type="button"
+        data-track="filter_ev"
         onClick={onClearFilter}
         style={{
           appearance: 'none',

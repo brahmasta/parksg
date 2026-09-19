@@ -56,6 +56,7 @@ export function CarparkCard({
     <div
       role="button"
       tabIndex={0}
+      data-track="result_card_open"
       onClick={onClick}
       onMouseEnter={onHoverChange ? () => onHoverChange(cp.id) : undefined}
       onMouseLeave={onHoverChange ? () => onHoverChange(null) : undefined}

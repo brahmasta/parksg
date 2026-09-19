@@ -94,6 +94,7 @@ export function InstallPrompt() {
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
+          data-track="install_dismiss"
           style={{
             appearance: 'none',
             border: 0,
@@ -114,6 +115,7 @@ export function InstallPrompt() {
         <button
           type="button"
           onClick={onInstall}
+          data-track="install_accept"
           style={{
             appearance: 'none',
             border: 0,

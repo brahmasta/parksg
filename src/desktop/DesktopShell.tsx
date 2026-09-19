@@ -105,11 +105,11 @@ const circleBtn: CSSProperties = {
 
 function TopNav({ route, setRoute, user, onAddCarpark }: { route: DesktopRoute; setRoute: (r: DesktopRoute) => void; user: User | null; onAddCarpark: () => void }) {
   // 'add' is an action (opens the submit dialog), not a route — placed after Saved.
-  const items: { key: DesktopRoute | 'add'; label: string }[] = [
-    { key: 'find', label: 'Find parking' },
-    { key: 'saved', label: 'Saved' },
-    { key: 'add', label: 'Add carpark' },
-    { key: 'about', label: 'About' },
+  const items: { key: DesktopRoute | 'add'; label: string; track: string }[] = [
+    { key: 'find', label: 'Find parking', track: 'nav_find_parking' },
+    { key: 'saved', label: 'Saved', track: 'nav_saved' },
+    { key: 'add', label: 'Add carpark', track: 'nav_add_carpark' },
+    { key: 'about', label: 'About', track: 'nav_about' },
   ];
   return (
     <header
@@ -130,15 +130,16 @@ function TopNav({ route, setRoute, user, onAddCarpark }: { route: DesktopRoute; 
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-        <button onClick={() => setRoute('find')} aria-label="wheretopark.sg home" style={{ appearance: 'none', border: 0, background: 'transparent', cursor: 'pointer', padding: 0 }}>
+        <button onClick={() => setRoute('find')} data-track="nav_home_wordmark" aria-label="wheretopark.sg home" style={{ appearance: 'none', border: 0, background: 'transparent', cursor: 'pointer', padding: 0 }}>
           <Wordmark size={19} />
         </button>
         <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {items.map(({ key, label }) => {
+          {items.map(({ key, label, track }) => {
             const active = key !== 'add' && route === key;
             return (
               <button
                 key={key}
+                data-track={track}
                 onClick={() => (key === 'add' ? onAddCarpark() : setRoute(key))}
                 aria-current={active ? 'page' : undefined}
                 style={{
@@ -163,6 +164,7 @@ function TopNav({ route, setRoute, user, onAddCarpark }: { route: DesktopRoute; 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <button
           aria-label="Account"
+          data-track="nav_account"
           onClick={() => setRoute('account')}
           style={{
             ...circleBtn,

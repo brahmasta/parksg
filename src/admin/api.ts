@@ -19,48 +19,89 @@ export type Analytics = {
 };
 
 /**
- * The traffic audit (/api/admin/traffic).
+ * The traffic audit (/api/admin/traffic) — see db/migrations/009.
  *
- * `populations` deliberately reports several different denominators side by
- * side, because "active users" was previously a single number that conflated
- * crawlers indexing the SSR/SEO routes with real people. See db migration 007.
+ * Clients are split three ways rather than human-vs-bot, because a chunk of
+ * traffic is genuinely ambiguous: someone who taps a Google result, reads a
+ * carpark's rate and leaves looks identical to a crawler, and for this app that
+ * visit is a success, not a bounce. Forcing it into either bucket would be a
+ * guess presented as a fact.
+ *
+ * Every field the dashboard reads is optional and defaulted at the call site.
+ * SQL is applied by hand while the SPA auto-deploys on push, so the client can
+ * briefly be newer than the function — an un-migrated DB must degrade to a
+ * missing number, not a crash that takes the whole admin panel down.
  */
+export type DayPoint = { day: string; value: number };
+
 export type Traffic = {
   window_days: number;
-  populations: {
-    /** Every distinct client_id that loaded a page — the OLD "active users". */
-    visitors: number;
-    /** Direct + deep-path + single-visit + never interacted. Almost all bots. */
-    likely_automated: number;
-    /** visitors - likely_automated. */
-    humans: number;
-    /** Humans who searched or took any in-app action. The honest number. */
+  first_day?: string;
+  last_day?: string;
+  /** Complete days in the window — today is excluded from every average. */
+  complete_days?: number;
+  /** First app_events row; the funnel can only speak from here onward. */
+  instrumented_since?: string | null;
+
+  /** Real people: reached the home screen, returned, signed in, or acted. */
+  people?: {
+    clients: number;
     engaged: number;
-    page_loads: number;
-    human_page_loads: number;
-    searches: number;
-    distinct_searchers: number;
+    avg_dau: number | null;
+    avg_visits: number | null;
+    avg_searches: number | null;
+    total_visits: number;
+    total_searches: number;
   };
+  /** Crawler signature: direct + deep path only + one visit + no human signal. */
+  bots?: {
+    clients: number;
+    avg_dau: number | null;
+    avg_visits: number | null;
+    total_visits: number;
+  };
+  /** Neither — mostly search-engine deep landings. Never silently merged. */
+  uncertain?: { clients: number; total_visits: number };
+
+  /** Unclassified totals, so the three buckets always reconcile. */
+  totals?: { clients: number; page_loads: number; searches: number; events: number };
+
+  series?: {
+    people_dau: DayPoint[];
+    people_visits: DayPoint[];
+    people_searches: DayPoint[];
+    bot_visits: DayPoint[];
+  };
+
   sources: {
     source: 'search_engine' | 'direct' | 'ai_assistant' | 'social' | 'internal' | 'other';
     clients: number;
     visits: number;
-    automated: number;
-    human: number;
+    person?: number;
+    automated?: number;
+    uncertain?: number;
     searched: number;
-    pct_human_searched: number;
+    pct_person_searched?: number;
   }[];
+
   funnel: { step: number; label: string; clients: number; pct: number }[];
+  /** What the funnel is measured over, so the UI never implies that
+   *  un-instrumented clients abandoned. */
+  funnel_basis?: {
+    cohort: number;
+    since: string | null;
+    direct_to_carpark: number;
+    direct_to_navigate: number;
+  };
+
   return_7d: { eligible: number; returned: number; pct: number };
-  device: { device: string; human: number; automated: number }[];
-  /** null when the event RPC fails; empty-but-valid before instrumented traffic lands. */
+  device: { device: string; person?: number; automated?: number; uncertain?: number }[];
+
   events: {
     totals: { events: number; clients: number; sessions: number };
     funnel: { step: number; name: string; label: string; clients: number; pct_of_top: number }[];
-    top_events: { name: string; count: number; clients: number }[];
-    /** Every control the delegated click tracker saw. What is ABSENT from this
-     *  list is the point: an unlisted feature is one nobody is using. */
     ui_clicks: { target: string; screen: string; count: number; clients: number }[];
+    top_events: { name: string; count: number; clients: number }[];
     navigate_providers: { provider: string; count: number }[];
   } | null;
 };

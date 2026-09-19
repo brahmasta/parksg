@@ -85,10 +85,16 @@ function ExploreGroup({
       <MonoLabel>Explore</MonoLabel>
       <div style={{ marginTop: 10, background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14, overflow: 'hidden' }}>
         {onOpenSaved && (
-          <NavRow icon={<IconBookmark filled size={16} />} title="Saved" sub={savedSub} onClick={onOpenSaved} />
+          <div data-track="nav_saved">
+            <NavRow icon={<IconBookmark filled size={16} />} title="Saved" sub={savedSub} onClick={onOpenSaved} />
+          </div>
         )}
-        <NavRow icon={<IconPlus size={16} stroke={2} />} title="Add a carpark" sub="Missing one? Submit it for review" onClick={() => setAddOpen(true)} />
-        <NavRow icon={<IconInfo size={16} stroke={2} />} title="About" sub="How it works · data coverage" onClick={onOpenAbout} last />
+        <div data-track="nav_add_carpark">
+          <NavRow icon={<IconPlus size={16} stroke={2} />} title="Add a carpark" sub="Missing one? Submit it for review" onClick={() => setAddOpen(true)} />
+        </div>
+        <div data-track="nav_about">
+          <NavRow icon={<IconInfo size={16} stroke={2} />} title="About" sub="How it works · data coverage" onClick={onOpenAbout} last />
+        </div>
       </div>
       <AddCarparkDialog
         key={addOpen ? 'add-open' : 'add-closed'}
@@ -116,6 +122,7 @@ function TopBar({ onBack, title }: { onBack: () => void; title: string }) {
         type="button"
         onClick={onBack}
         aria-label="Back"
+        data-track="nav_back"
         style={{
           appearance: 'none',
           width: 36,
@@ -214,6 +221,7 @@ function SignedOutBody({
         <button
           type="button"
           onClick={onSignIn}
+          data-track="sign_in"
           style={{
             appearance: 'none',
             border: 0,
@@ -438,19 +446,21 @@ function SignedInBody({
             overflow: 'hidden',
           }}
         >
-          <NavRow
-            icon={<IconBookmark filled size={16} />}
-            title="Saved"
-            sub={
-              savedItemCount === 0
-                ? 'Bookmark carparks and name destinations to find them here'
-                : `${savedItemCount} item${
-                    savedItemCount === 1 ? '' : 's'
-                  } · destinations + carparks`
-            }
-            onClick={onOpenSaved}
-            last
-          />
+          <div data-track="nav_saved">
+            <NavRow
+              icon={<IconBookmark filled size={16} />}
+              title="Saved"
+              sub={
+                savedItemCount === 0
+                  ? 'Bookmark carparks and name destinations to find them here'
+                  : `${savedItemCount} item${
+                      savedItemCount === 1 ? '' : 's'
+                    } · destinations + carparks`
+              }
+              onClick={onOpenSaved}
+              last
+            />
+          </div>
         </div>
       </div>
 

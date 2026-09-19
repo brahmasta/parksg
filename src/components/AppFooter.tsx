@@ -38,6 +38,7 @@ export function AppFooter({ user = null }: { user?: User | null }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Send feedback on X (@wheretoparksg)"
+        data-track="feedback_link"
         style={{
           color: 'var(--ok)',
           textDecoration: 'none',

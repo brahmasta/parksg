@@ -48,6 +48,7 @@ export function FilterBar({
                 type="button"
                 role="radio"
                 aria-checked={active}
+                data-track="sort_carparks"
                 onClick={() => onSortBy(key)}
                 style={{
                   appearance: 'none',
@@ -74,6 +75,7 @@ export function FilterBar({
       {/* Available-only toggle */}
       <button
         type="button"
+        data-track="filter_available_only"
         onClick={() => onAvailableOnly(!availableOnly)}
         aria-pressed={availableOnly}
         style={{
