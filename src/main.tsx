@@ -19,9 +19,12 @@ const isAdmin = /^\/admin(\/|$)/.test(window.location.pathname);
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID || 'unset.apps.googleusercontent.com';
 
-// Re-assert the theme the inline script in index.html already applied. A
-// no-op there, but it covers any document served without that script (an
-// SSR-injected shell) and keeps <meta name="theme-color"> in step.
+// Re-assert the theme the inline script in index.html already applied, and
+// start the listener that keeps the 'auto' preference tracking the device's
+// light/dark setting. The re-assert is a no-op when the inline script ran, but
+// it covers any document served without it (an SSR-injected shell) and keeps
+// <meta name="theme-color"> in step. Lives for the page's lifetime, so the
+// teardown it returns is deliberately unused.
 initTheme();
 
 createRoot(document.getElementById('root')!).render(

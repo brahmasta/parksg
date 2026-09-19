@@ -7,6 +7,7 @@ import { SavedScreen } from '../screens/SavedScreen';
 import { AboutDesktop } from './AboutDesktop';
 import { AccountDesktop } from './AccountDesktop';
 import { AddCarparkDialog } from '../components/AddCarparkDialog';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 
 type DesktopRoute = 'find' | 'saved' | 'about' | 'account';
 
@@ -162,6 +163,7 @@ function TopNav({ route, setRoute, user, onAddCarpark }: { route: DesktopRoute; 
         </nav>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <ThemeToggleButton />
         <button
           aria-label="Account"
           data-track="nav_account"

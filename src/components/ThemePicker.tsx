@@ -1,20 +1,28 @@
 import type { CSSProperties } from 'react';
 import { useTheme } from '../hooks/useTheme';
-import { THEMES, type Theme } from '../lib/theme';
-import { IconContrast, IconMoon, IconSun } from './icons';
+import { THEME_OPTIONS, type ThemePref } from '../lib/theme';
+import { IconContrast, IconDevice, IconMoon, IconSun } from './icons';
 
-function ThemeIcon({ theme, size = 18 }: { theme: Theme; size?: number }) {
-  if (theme === 'dark') return <IconMoon size={size} stroke={1.9} />;
-  if (theme === 'light') return <IconSun size={size} stroke={1.9} />;
-  return <IconContrast size={size} stroke={1.9} />;
+export function ThemeIcon({
+  pref,
+  size = 18,
+  stroke = 1.9,
+}: {
+  pref: ThemePref;
+  size?: number;
+  stroke?: number;
+}) {
+  if (pref === 'auto') return <IconDevice size={size} stroke={stroke} />;
+  if (pref === 'dark') return <IconMoon size={size} stroke={stroke} />;
+  if (pref === 'light') return <IconSun size={size} stroke={stroke} />;
+  return <IconContrast size={size} stroke={stroke} />;
 }
 
 const optionBase: CSSProperties = {
   appearance: 'none',
-  flex: 1,
   minWidth: 0,
-  // ≥44px tall: these are the one control most likely to be tapped outdoors.
-  padding: '12px 8px',
+  // ≥44px tall: the one control most likely to be tapped outdoors.
+  padding: '12px 6px',
   borderRadius: 11,
   display: 'inline-flex',
   flexDirection: 'column',
@@ -23,30 +31,29 @@ const optionBase: CSSProperties = {
   gap: 6,
   cursor: 'pointer',
   fontFamily: 'var(--font-body)',
-  fontSize: 13,
+  fontSize: 12.5,
   letterSpacing: -0.1,
 };
 
 /**
- * Three-way theme control: Sunlight (the default), Standard, Dark.
+ * Four-way theme control: Auto (the default, follows the device), Sunlight,
+ * Standard, Dark.
  *
  * A radiogroup of real <button>s rather than a switch, because the choice is
- * not binary — a driver wants to pick the one that suits the light they are
- * actually in, not toggle "dark on/off".
+ * not binary — a driver picks the one that suits the light they are in, and
+ * Auto is a distinct answer from any of the three palettes.
+ *
+ * Lays out 2×2 on a phone and 4-across from 520px; see .psg-theme-options.
  */
 export function ThemePicker() {
-  const [theme, setTheme] = useTheme();
-  const active = THEMES.find((t) => t.id === theme);
+  const { pref, setPref } = useTheme();
+  const active = THEME_OPTIONS.find((o) => o.id === pref);
 
   return (
     <div>
-      <div
-        role="radiogroup"
-        aria-label="Theme"
-        style={{ display: 'flex', gap: 8 }}
-      >
-        {THEMES.map(({ id, label }) => {
-          const selected = theme === id;
+      <div className="psg-theme-options" role="radiogroup" aria-label="Theme">
+        {THEME_OPTIONS.map(({ id, label }) => {
+          const selected = pref === id;
           return (
             <button
               key={id}
@@ -54,7 +61,7 @@ export function ThemePicker() {
               role="radio"
               aria-checked={selected}
               data-track={`theme_${id}`}
-              onClick={() => setTheme(id)}
+              onClick={() => setPref(id)}
               style={{
                 ...optionBase,
                 background: selected ? 'var(--accent-tint)' : 'var(--bg-2)',
@@ -65,7 +72,7 @@ export function ThemePicker() {
                 fontWeight: selected ? 700 : 500,
               }}
             >
-              <ThemeIcon theme={id} />
+              <ThemeIcon pref={id} />
               <span>{label}</span>
             </button>
           );

@@ -1,32 +1,54 @@
-// Theme system — three surfaces selected by one `data-theme` attribute on
-// <html>, which picks the matching token block in index.css:
+// Theme system — a preference the visitor picks, resolved to one of three
+// palettes and applied as `data-theme` on <html>, which selects the matching
+// token block in index.css:
 //
-//   sunlight — the max-legibility light theme, and the default. Every text
-//              tier and status colour clears WCAG AA (4.5:1) on its own
-//              surface, the page ground is grey so white cards read as
-//              objects instead of white-on-white, and shadows are heavy
-//              enough to mean something outdoors. Built for the real use
-//              case: a phone held at arm's length in Singapore daylight.
+//   sunlight — the max-legibility light theme. Every text tier and status
+//              colour clears WCAG AA (4.5:1) on its own surface, the page
+//              ground is grey so white cards read as objects instead of
+//              white-on-white, and shadows are heavy enough to mean something
+//              outdoors. Built for a phone held at arm's length in Singapore
+//              daylight.
 //   light    — the original soft theme. Lower contrast, calmer indoors.
 //   dark     — near-black, easier at night.
 //
-// The default is a DEPLOY-TIME choice: set `VITE_DEFAULT_THEME` (Vercel →
-// Project → Settings → Environment Variables, or .env.local) to sunlight |
-// light | dark and redeploy — Vite inlines VITE_* vars at build time. An
-// unset or unrecognised value falls back to 'sunlight'.
+// The PREFERENCE adds a fourth value, 'auto', which follows the device:
+// `prefers-color-scheme: dark` gives dark, anything else gives sunlight. Auto
+// is the default, because most people express "I want dark mode" through their
+// OS setting and never open an app's settings screen. It stays live — flipping
+// the device theme repaints immediately, no reload.
 //
-// A user's own pick is stored in localStorage and always beats the default.
+// The default preference is a DEPLOY-TIME choice: set `VITE_DEFAULT_THEME`
+// (Vercel → Project → Settings → Environment Variables, or .env.local) to
+// auto | sunlight | light | dark and redeploy. Vite inlines VITE_* vars at
+// build time; an unset or unrecognised value falls back to 'auto'.
+//
+// A visitor's own pick is stored in localStorage and always beats the default.
 //
 // A tiny inline script in index.html runs this same resolution before first
-// paint so the correct theme is on the document immediately (no flash of the
-// wrong palette). initTheme() re-applies it after boot, which covers any
-// document that did not carry the script — e.g. an SSR-injected shell — and
-// keeps the <meta name="theme-color"> in sync.
+// paint, so the correct palette is on the document immediately (no flash).
+// initTheme() re-applies it after boot — covering any document served without
+// that script, e.g. an SSR-injected shell — and starts the OS-change listener.
 
+/** A palette that can actually be painted. */
 export type Theme = 'sunlight' | 'light' | 'dark';
 
+/** What the visitor chose. 'auto' resolves against the device setting. */
+export type ThemePref = Theme | 'auto';
+
+/**
+ * Which palette 'auto' uses when the device is NOT in dark mode. Sunlight
+ * rather than light: someone who has expressed no preference is better served
+ * by the readable one.
+ */
+const AUTO_LIGHT: Theme = 'sunlight';
+
 /** Order here is the order shown in the picker. */
-export const THEMES: { id: Theme; label: string; blurb: string }[] = [
+export const THEME_OPTIONS: { id: ThemePref; label: string; blurb: string }[] = [
+  {
+    id: 'auto',
+    label: 'Auto',
+    blurb: 'Follows your device — dark at night if your phone is set that way.',
+  },
   {
     id: 'sunlight',
     label: 'Sunlight',
@@ -44,7 +66,7 @@ export const THEMES: { id: Theme; label: string; blurb: string }[] = [
   },
 ];
 
-/** localStorage key holding the user's explicit pick, if any. */
+/** localStorage key holding the visitor's explicit pick, if any. */
 export const STORAGE_KEY = 'psg:theme';
 
 /** Kept in sync with the `<meta name="theme-color">` the browser chrome uses. */
@@ -54,45 +76,71 @@ const META_THEME_COLOR: Record<Theme, string> = {
   dark: '#12151a',
 };
 
-export function isTheme(value: unknown): value is Theme {
-  return value === 'sunlight' || value === 'light' || value === 'dark';
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+
+export function isThemePref(value: unknown): value is ThemePref {
+  return (
+    value === 'auto' ||
+    value === 'sunlight' ||
+    value === 'light' ||
+    value === 'dark'
+  );
 }
 
 /**
- * Theme used when the visitor has not picked one. Set `VITE_DEFAULT_THEME` in
- * the deploy environment to change it without editing code.
+ * Preference used when the visitor has not picked one. Set
+ * `VITE_DEFAULT_THEME` in the deploy environment to change it without a code
+ * edit.
  */
-export const DEFAULT_THEME: Theme = resolveDefault();
+export const DEFAULT_PREF: ThemePref = resolveDefaultPref();
 
-function resolveDefault(): Theme {
+function resolveDefaultPref(): ThemePref {
   const configured = import.meta.env.VITE_DEFAULT_THEME;
-  return isTheme(configured) ? configured : 'sunlight';
+  return isThemePref(configured) ? configured : 'auto';
 }
 
-function readStored(): Theme | null {
+/** True when the device asks for a dark UI. */
+export function prefersDark(): boolean {
+  try {
+    return window.matchMedia(DARK_QUERY).matches;
+  } catch {
+    // No matchMedia (very old browser, some embedded webviews).
+    return false;
+  }
+}
+
+/** Turn a preference into the palette to paint. */
+export function resolveTheme(pref: ThemePref): Theme {
+  if (pref !== 'auto') return pref;
+  return prefersDark() ? 'dark' : AUTO_LIGHT;
+}
+
+function readStored(): ThemePref | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return isTheme(raw) ? raw : null;
+    return isThemePref(raw) ? raw : null;
   } catch {
     // Private mode, disabled storage, or a sandboxed iframe — not fatal.
     return null;
   }
 }
 
-/** The theme in effect right now: the user's pick, else the deploy default. */
+/** The visitor's preference: their pick, else the deploy default. */
+export function getPref(): ThemePref {
+  return readStored() ?? DEFAULT_PREF;
+}
+
+/** The palette in effect right now. */
 export function getTheme(): Theme {
-  return readStored() ?? DEFAULT_THEME;
+  return resolveTheme(getPref());
 }
 
-/** True when the visitor has never chosen — i.e. they are on the default. */
-export function isUsingDefault(): boolean {
-  return readStored() === null;
-}
-
-const listeners = new Set<(theme: Theme) => void>();
+const listeners = new Set<(pref: ThemePref, theme: Theme) => void>();
 
 /** Subscribe to theme changes. Returns an unsubscribe function. */
-export function subscribeTheme(fn: (theme: Theme) => void): () => void {
+export function subscribeTheme(
+  fn: (pref: ThemePref, theme: Theme) => void,
+): () => void {
   listeners.add(fn);
   return () => {
     listeners.delete(fn);
@@ -105,29 +153,47 @@ function paint(theme: Theme): void {
   if (meta) meta.setAttribute('content', META_THEME_COLOR[theme]);
 }
 
-/** Apply a theme, remember it, and notify subscribers. */
-export function setTheme(theme: Theme): void {
+function announce(): void {
+  const pref = getPref();
+  const theme = resolveTheme(pref);
+  paint(theme);
+  listeners.forEach((fn) => fn(pref, theme));
+}
+
+/** Record a preference, apply it, and notify subscribers. */
+export function setPref(pref: ThemePref): void {
   try {
-    localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem(STORAGE_KEY, pref);
   } catch {
     // Non-fatal: the choice just won't survive a reload.
   }
-  paint(theme);
-  listeners.forEach((fn) => fn(theme));
+  announce();
 }
 
-/** Forget the explicit pick and fall back to the deploy default. */
-export function clearThemeOverride(): void {
+/**
+ * One-tap dark toggle for the header. Explicitly picks dark or the readable
+ * light palette — it does not return to 'auto', which stays available in the
+ * Appearance picker.
+ */
+export function toggleDark(): void {
+  setPref(getTheme() === 'dark' ? AUTO_LIGHT : 'dark');
+}
+
+/**
+ * Apply the resolved theme and keep 'auto' live against the device setting.
+ * Safe to call more than once; returns a teardown for the OS listener.
+ */
+export function initTheme(): () => void {
+  announce();
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    const mql = window.matchMedia(DARK_QUERY);
+    const onChange = () => {
+      // Only 'auto' tracks the device; an explicit pick stays put.
+      if (getPref() === 'auto') announce();
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
   } catch {
-    /* non-fatal */
+    return () => {};
   }
-  paint(DEFAULT_THEME);
-  listeners.forEach((fn) => fn(DEFAULT_THEME));
-}
-
-/** Apply the resolved theme to the document. Safe to call more than once. */
-export function initTheme(): void {
-  paint(getTheme());
 }

@@ -294,6 +294,19 @@ html {
  * against a calmer map. Pairs with the tile layer's reduced opacity. */
 .psg-basemap { filter: saturate(0.85); }
 
+/* Appearance picker: 2x2 on a phone, 4-across once there is room. Lives here
+ * rather than inline because it needs a media query. */
+.psg-theme-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 520px) {
+  .psg-theme-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* Phone flow on a screen wider than a phone (481-767px: landscape phones,
  * narrow windows). A centred column on the page ground - no simulated
  * device bezel. Everything from 768px up gets the desktop shell instead. */

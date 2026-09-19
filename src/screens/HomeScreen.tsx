@@ -7,6 +7,7 @@ import type {
 import { AppFooter } from '../components/AppFooter';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 import { Wordmark } from '../components/Wordmark';
 import { pickHeroCopy } from '../lib/heroCopy';
 import { HomeSavedDestChip } from '../components/HomeSavedDestChip';
@@ -137,6 +138,7 @@ export function HomeScreen({
       >
         <Wordmark size={19} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ThemeToggleButton />
           <button
             type="button"
             onClick={onOpenAccount}

@@ -295,6 +295,8 @@ function SignedOutBody({
         </div>
       </div>
 
+      <AppearanceGroup />
+
       <div style={{ marginTop: 26 }}>
         <MonoLabel>What you'll unlock</MonoLabel>
         <div
@@ -343,8 +345,6 @@ function SignedOutBody({
           history or payment details.
         </span>
       </div>
-
-      <AppearanceGroup />
 
       <ExploreGroup
         onOpenSaved={onOpenSaved}
@@ -459,6 +459,8 @@ function SignedInBody({
         </span>
       </div>
 
+      <AppearanceGroup />
+
       <div style={{ marginTop: 22 }}>
         <MonoLabel>Your saves</MonoLabel>
         <div
@@ -513,8 +515,6 @@ function SignedInBody({
           />
         </div>
       </div>
-
-      <AppearanceGroup />
 
       <ExploreGroup onOpenAbout={onOpenAbout} user={user} />
 

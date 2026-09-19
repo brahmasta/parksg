@@ -9,26 +9,36 @@
     <!-- Theme, applied before first paint so no one sees the wrong palette
          flash. Mirrors src/lib/theme.ts: the visitor's stored pick wins, else
          the deploy default from VITE_DEFAULT_THEME (Vite substitutes the
-         %…% placeholder at build time), else 'sunlight'. Kept inline and
-         dependency-free on purpose — it has to run before the bundle. -->
+         %…% placeholder at build time), else 'auto'. 'auto' follows the
+         device. Kept inline and dependency-free — it runs before the bundle. -->
     <script>
       (function () {
-        var THEMES = { sunlight: 1, light: 1, dark: 1 };
+        var PREFS = { auto: 1, sunlight: 1, light: 1, dark: 1 };
         var COLORS = { sunlight: '#eef1f5', light: '#fafafa', dark: '#12151a' };
         // Unset at build time? Vite leaves the placeholder, which fails the
-        // lookup below and falls through to 'sunlight'.
+        // lookup below and falls through to 'auto'.
         var fallback = '%VITE_DEFAULT_THEME%';
-        if (!THEMES[fallback]) fallback = 'sunlight';
-        var picked;
+        if (!PREFS[fallback]) fallback = 'auto';
+        var pref;
         try {
-          picked = localStorage.getItem('psg:theme');
+          pref = localStorage.getItem('psg:theme');
         } catch (e) {
           /* private mode / storage blocked */
         }
-        if (!THEMES[picked]) picked = fallback;
-        document.documentElement.setAttribute('data-theme', picked);
+        if (!PREFS[pref]) pref = fallback;
+        var theme = pref;
+        if (pref === 'auto') {
+          var dark = false;
+          try {
+            dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          } catch (e) {
+            /* no matchMedia */
+          }
+          theme = dark ? 'dark' : 'sunlight';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
         var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute('content', COLORS[picked]);
+        if (meta) meta.setAttribute('content', COLORS[theme]);
       })();
     </script>
 

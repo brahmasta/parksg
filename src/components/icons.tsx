@@ -347,7 +347,14 @@ export const IconAppleMaps = ({ size = 38 }: { size?: number }) => (
   </svg>
 );
 
-/* Theme picker — Sunlight (half-filled disc), Standard (sun), Dark (moon). */
+/* Theme picker — Auto (device), Sunlight (half-filled disc), Standard
+   (sun), Dark (moon). */
+export const IconDevice = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="7" y="2.5" width="10" height="19" rx="2.4" />
+    <path d="M10.6 18.6h2.8" />
+  </Icon>
+);
 export const IconContrast = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="12" cy="12" r="9" />
