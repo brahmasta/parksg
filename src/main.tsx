@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css';
+import { initTheme } from './lib/theme.ts';
 import App from './App.tsx';
 import { AdminApp } from './admin/AdminApp.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
@@ -17,6 +18,11 @@ const isAdmin = /^\/admin(\/|$)/.test(window.location.pathname);
 // actionable error toast instead of letting the OAuth popup open.
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID || 'unset.apps.googleusercontent.com';
+
+// Re-assert the theme the inline script in index.html already applied. A
+// no-op there, but it covers any document served without that script (an
+// SSR-injected shell) and keeps <meta name="theme-color"> in step.
+initTheme();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { User } from '../lib/types';
+import { ThemePicker } from '../components/ThemePicker';
 import {
   IconBookmark,
   IconChevronRight,
@@ -61,6 +62,12 @@ function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; sa
         <Row icon={<IconShield size={16} />} title="Privacy & data" sub="What we store, and how to export" last />
       </Group>
 
+      <Group label="Appearance">
+        <div style={{ padding: 14 }}>
+          <ThemePicker />
+        </div>
+      </Group>
+
       <button onClick={onSignOut} data-track="sign_out" style={{ appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: 'var(--bad)', width: '100%', marginTop: 22, padding: '14px 16px', borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
         <IconSignOut size={16} stroke={2} /> Sign out
       </button>
@@ -92,6 +99,12 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
         <Perk icon={<IconBookmark filled size={15} />} title="Saved carparks" sub="Bookmark a carpark from any results screen." />
         <Perk icon={<IconStar size={15} />} title="Saved destinations" sub="Name favourites like Office or Mum's place — one tap to search." />
         <Perk icon={<IconCloud size={15} />} title="Synced recents" sub="Recent searches follow you across every device." last />
+      </Group>
+
+      <Group label="Appearance">
+        <div style={{ padding: 14 }}>
+          <ThemePicker />
+        </div>
       </Group>
 
       <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>

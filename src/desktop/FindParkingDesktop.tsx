@@ -128,7 +128,10 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
       {/* Left rail */}
       <div
         style={{
-          width: 'min(440px, 42vw)',
+          // Floor of 380px: below that the carpark cards start truncating
+          // names and squeezing the price block. 42vw alone gave a tablet in
+          // portrait (768px) a 322px rail, which was too tight to read.
+          width: 'clamp(380px, 42vw, 440px)',
           maxWidth: 460,
           flexShrink: 0,
           height: '100%',

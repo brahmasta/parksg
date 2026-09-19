@@ -111,8 +111,10 @@ function parseInitialRoute(): InitialRoute {
 }
 
 function App() {
-  // ≥960px renders the desktop/tablet shell; below keeps the phone flow.
-  const isDesktop = useMediaQuery('(min-width: 960px)');
+  // ≥768px renders the desktop/tablet shell; below keeps the phone flow.
+  // 768 rather than 960 so a tablet in portrait gets the real two-pane view
+  // instead of a 390px column centred in a screen with room to spare.
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   // Cold-load routing parsed once from the URL, so the app boots straight into
   // the right screen — no home flash before an effect redirects. An SEO URL
@@ -653,7 +655,7 @@ function App() {
     );
   }, [result.destination, saves]);
 
-  // ── Desktop/tablet shell (≥960px) ───────────────────────────────────
+  // ── Desktop/tablet shell (≥768px) ───────────────────────────────────
   // Shares every data hook + handler with the phone flow; only the
   // presentation layer forks. The desktop "Find parking" view manages its
   // own detail panel via selectedCarpark (the phone `screen` state is unused

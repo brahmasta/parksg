@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { User } from '../lib/types';
 import { AddCarparkDialog } from '../components/AddCarparkDialog';
+import { ThemePicker } from '../components/ThemePicker';
 import {
   IconBookmark,
   IconChevronLeft,
@@ -61,6 +62,27 @@ export function AccountScreen({
             onOpenAbout={onOpenAbout}
           />
         )}
+      </div>
+    </div>
+  );
+}
+
+/** Appearance — Sunlight / Standard / Dark. Shown to signed-out visitors too:
+ * the whole point of the theme is legibility, which is not an account perk. */
+function AppearanceGroup() {
+  return (
+    <div style={{ marginTop: 22 }}>
+      <MonoLabel>Appearance</MonoLabel>
+      <div
+        style={{
+          marginTop: 10,
+          background: 'var(--bg-1)',
+          border: '0.5px solid var(--line)',
+          borderRadius: 14,
+          padding: 14,
+        }}
+      >
+        <ThemePicker />
       </div>
     </div>
   );
@@ -322,6 +344,8 @@ function SignedOutBody({
         </span>
       </div>
 
+      <AppearanceGroup />
+
       <ExploreGroup
         onOpenSaved={onOpenSaved}
         onOpenAbout={onOpenAbout}
@@ -489,6 +513,8 @@ function SignedInBody({
           />
         </div>
       </div>
+
+      <AppearanceGroup />
 
       <ExploreGroup onOpenAbout={onOpenAbout} user={user} />
 

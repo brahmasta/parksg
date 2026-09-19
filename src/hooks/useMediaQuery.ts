@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 /**
  * Subscribe to a CSS media query. Used to fork the app between the phone flow
- * (< 960px) and the desktop/tablet shell (≥ 960px). SSR-safe: returns false
+ * (< 768px) and the desktop/tablet shell (≥ 768px). SSR-safe: returns false
  * until mounted, so the server-rendered markup matches the initial client paint.
  */
 export function useMediaQuery(query: string): boolean {

@@ -64,16 +64,29 @@
   --src-ev: #921fff; /* purple */
 }
 
+/* ── Themes ──────────────────────────────────────────────────────────────────
+ * `:root` above is the Standard (soft) light theme. The two blocks below are
+ * selected by `data-theme` on <html>, set by src/lib/theme.ts (and by an
+ * inline pre-paint script in index.html so there is no flash).
+ *
+ * Both are TOKEN-ONLY overrides: no component knows a theme exists, so a
+ * theme can be added or retuned without touching a single .tsx file.
+ * Ratios in the comments are measured WCAG contrast against the surface the
+ * token actually sits on. */
+
 [data-theme='dark'] {
   --bg-0: #12151a;
   --bg-1: #1a1e25;
   --bg-2: #20252e;
   --bg-3: #2a313c;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.16);
+  /* Raised from 0.08 / 0.16: dividers were near-invisible and control
+     outlines sat at 1.7:1, under the 3:1 that WCAG 1.4.11 asks of them. */
+  --line: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 255, 255, 0.34); /* 3.0:1 on --bg-1 */
   --text-1: #f5f7fa;
-  --text-2: rgba(245, 247, 250, 0.66);
-  --text-3: rgba(245, 247, 250, 0.42);
+  --text-2: rgba(245, 247, 250, 0.66); /* 7.4:1 */
+  /* Was 0.42 → 3.8:1, which failed AA for the addresses and source lines. */
+  --text-3: rgba(245, 247, 250, 0.52); /* 5.2:1 */
 
   --ok: #25d092;
   --ok-bg: rgba(37, 208, 146, 0.15);
@@ -87,6 +100,55 @@
   /* Brighter teal accent so it sings on near-black */
   --accent: #2dd4bf;
   --accent-on: #062925;
+}
+
+/* Sunlight — the default theme.
+ *
+ * Built for the actual use case: a phone held at arm's length in Singapore
+ * daylight, where a 6% shadow, a 1.13:1 hairline and a #fafafa page ground
+ * all disappear at once. Three things carry it:
+ *   1. a grey page ground, so white cards read as objects rather than
+ *      white-on-white (the single biggest daylight win, and free);
+ *   2. every text tier and status colour past 4.5:1 — several were under it;
+ *   3. borders and shadows strong enough that a 0.5px hairline still shows. */
+[data-theme='sunlight'] {
+  --bg-0: #eef1f5; /* grey ground — 1.13:1 against a white card (was 1.02:1) */
+  --bg-1: #ffffff;
+  --bg-2: #e4e9f1;
+  --bg-3: #dbe2ec;
+  --line: #9aa4b5; /* 2.5:1 — hairline dividers and card edges (was 1.13:1) */
+  --line-strong: #7d8798; /* 3.6:1 — control outlines (was 1.6:1) */
+  --text-1: #141a22; /* 16.6:1 */
+  --text-2: #4a5768; /* 7.4:1  (was 5.8:1) */
+  --text-3: #5f6d80; /* 5.3:1  (was 2.96:1 — the worst offender: addresses,
+                        source lines, search placeholder, section labels) */
+
+  --ok: #036347; /* 7.3:1 (was 3.4:1) — lot counts are the whole product */
+  --ok-bg: #d8f0e6;
+  --warn: #7a4e00; /* 7.2:1 (was 3.4:1) — amber is the first hue sun kills */
+  --warn-bg: #fbeacb;
+  --bad: #b00020; /* 7.3:1 (was 4.5:1) */
+  --bad-bg: #fbdde1;
+  --muted-status: #3a4657;
+  --muted-status-bg: #dde4ee;
+
+  --accent: #0b5c55; /* 7.9:1 as text; white on it is 7.9:1 too (was 3.7:1) */
+  --accent-on: #ffffff;
+  --accent-blue: #3636c9; /* 8.3:1 */
+  --accent-blue-bg: #e2e2fb;
+
+  /* Chips over the walk map need a near-solid backing outdoors. */
+  --glass: color-mix(in srgb, var(--bg-1) 94%, transparent);
+
+  --shadow-sm: 0 1px 2px rgba(20, 30, 60, 0.1);
+  --shadow-card: 0 2px 6px rgba(20, 30, 60, 0.14);
+  --shadow-raised: 0 10px 24px rgba(20, 30, 60, 0.22);
+  --shadow-modal: 0 20px 44px rgba(20, 30, 60, 0.32);
+
+  /* Chart series, darkened to match. --src-hdb tracks --accent already. */
+  --src-ura: #3636c9;
+  --src-lta: #7a4e00;
+  --src-ev: #6a10bd;
 }
 
 * {
@@ -232,39 +294,33 @@ html {
  * against a calmer map. Pairs with the tile layer's reduced opacity. */
 .psg-basemap { filter: saturate(0.85); }
 
-/* Frame around the mobile viewport when shown on larger screens */
+/* Phone flow on a screen wider than a phone (481-767px: landscape phones,
+ * narrow windows). A centred column on the page ground - no simulated
+ * device bezel. Everything from 768px up gets the desktop shell instead. */
 .psg-frame-wrap {
   min-height: 100dvh;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 24px 12px;
-  background: radial-gradient(120% 70% at 50% 0%, #e9edf3 0%, #d3dae6 70%);
+  background: var(--bg-0);
 }
 .psg-frame {
   width: 100%;
-  max-width: 390px;
-  height: min(844px, calc(100dvh - 48px));
+  /* Caps the measure on a landscape phone or a narrow window. Tablets and up
+     never reach here — they get the desktop shell from 768px. */
+  max-width: 480px;
+  height: 100dvh;
   background: var(--bg-0);
-  border-radius: 44px;
   overflow: hidden;
   position: relative;
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.35),
-    0 0 0 10px #1a1a1e,
-    0 0 0 11px rgba(255, 255, 255, 0.05);
+  /* Hairlines only, and only when there is gutter to separate from. */
+  border-inline: 0.5px solid var(--line);
 }
 
-/* On small mobile screens, drop the frame chrome and go edge-to-edge */
+/* Phones: edge-to-edge, nothing to delimit. */
 @media (max-width: 480px) {
-  .psg-frame-wrap {
-    padding: 0;
-    background: var(--bg-0);
-  }
   .psg-frame {
     max-width: none;
-    height: 100dvh;
-    border-radius: 0;
-    box-shadow: none;
+    border-inline: 0;
   }
 }

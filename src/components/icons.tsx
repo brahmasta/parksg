@@ -346,3 +346,22 @@ export const IconAppleMaps = ({ size = 38 }: { size?: number }) => (
     <circle cx="19.4" cy="15.8" r="2.1" fill="#fff" />
   </svg>
 );
+
+/* Theme picker — Sunlight (half-filled disc), Standard (sun), Dark (moon). */
+export const IconContrast = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none" />
+  </Icon>
+);
+export const IconSun = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="4.2" />
+    <path d="M12 2v2.4M12 19.6V22M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2 12h2.4M19.6 12H22M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" />
+  </Icon>
+);
+export const IconMoon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20.8 13.4A8.6 8.6 0 1 1 10.6 3.2a6.7 6.7 0 0 0 10.2 10.2Z" />
+  </Icon>
+);

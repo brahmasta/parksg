@@ -20,7 +20,7 @@ export type DesktopShellProps = {
 };
 
 /**
- * Desktop/tablet shell (≥960px): a sticky top nav over a routed content area.
+ * Desktop/tablet shell (≥768px): a sticky top nav over a routed content area.
  * Find parking is a two-pane view; About/Account are peer routes.
  * All data + handlers are shared with the phone flow (passed down from App).
  */

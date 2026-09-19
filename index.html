@@ -4,7 +4,33 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#F4F2EC" />
+    <meta name="theme-color" content="#eef1f5" />
+
+    <!-- Theme, applied before first paint so no one sees the wrong palette
+         flash. Mirrors src/lib/theme.ts: the visitor's stored pick wins, else
+         the deploy default from VITE_DEFAULT_THEME (Vite substitutes the
+         %…% placeholder at build time), else 'sunlight'. Kept inline and
+         dependency-free on purpose — it has to run before the bundle. -->
+    <script>
+      (function () {
+        var THEMES = { sunlight: 1, light: 1, dark: 1 };
+        var COLORS = { sunlight: '#eef1f5', light: '#fafafa', dark: '#12151a' };
+        // Unset at build time? Vite leaves the placeholder, which fails the
+        // lookup below and falls through to 'sunlight'.
+        var fallback = '%VITE_DEFAULT_THEME%';
+        if (!THEMES[fallback]) fallback = 'sunlight';
+        var picked;
+        try {
+          picked = localStorage.getItem('psg:theme');
+        } catch (e) {
+          /* private mode / storage blocked */
+        }
+        if (!THEMES[picked]) picked = fallback;
+        document.documentElement.setAttribute('data-theme', picked);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', COLORS[picked]);
+      })();
+    </script>
 
     <!-- PWA: installable as a home-screen app -->
     <link rel="manifest" href="/manifest.webmanifest" />
