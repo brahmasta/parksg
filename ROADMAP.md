@@ -212,6 +212,18 @@ Handles midnight wrap (minutes-from-midnight cursor `% 1440`). Falls back to
 
 ---
 
+## Parked — awaiting data
+
+- **Carpark detail page simplification** — 13 visible blocks reduced to 7, with low-use
+  features collapsed behind disclosures rather than deleted. Full proposal, evidence and a
+  paste-ready pickup prompt: [`docs/detail-page-simplification.md`](docs/detail-page-simplification.md).
+  **Do not decide before 2026-10-03** — per-control click tracking only went live 2026-09-19,
+  and the gates are 200+ clicks across 7+ days. One thing worth doing first: ungate check-ins
+  (`record_checkin` already allows `anon`; the block is UI-only in `CheckinCard.tsx`), so we
+  learn whether the gate or the feature is the problem.
+
+---
+
 ## Later (P3)
 
 ### Private operator scrapers
