@@ -14,7 +14,7 @@ import type { User } from '../lib/types';
 import { AddCarparkLink } from './AddCarparkLink';
 
 /** Single source of truth for the feedback destination. */
-export const FEEDBACK_URL = 'https://x.com/wheretoparksg';
+export const FEEDBACK_URL = 'https://x.com/brahmasta';
 
 export function AppFooter({ user = null }: { user?: User | null }) {
   return (
@@ -37,7 +37,7 @@ export function AppFooter({ user = null }: { user?: User | null }) {
         href={FEEDBACK_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Send feedback on X (@wheretoparksg)"
+        aria-label="Send feedback on X (@brahmasta)"
         data-track="feedback_link"
         style={{
           color: 'var(--ok)',
