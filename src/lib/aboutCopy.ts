@@ -3,7 +3,7 @@
  * desktop AboutDesktop so the personal story only lives in one place.
  */
 
-export const FOUNDER_NOTE_TITLE = 'A note from Bram';
+export const FOUNDER_NOTE_TITLE = 'Why I built this';
 
 export const FOUNDER_NOTE: string[] = [
   'Thanks for visiting wheretopark.sg! I’m Bram. I’ve called Singapore home for 16 years, but only started driving about four years ago.',
@@ -12,7 +12,7 @@ export const FOUNDER_NOTE: string[] = [
   'This is my small way of giving back to the community. I hope it saves you a few laps around the block and a bit of bill shock at the gantry.',
 ];
 
-export const FOUNDER_SIGNOFF = 'Happy parking, Bram';
+export const FOUNDER_SIGNOFF = 'Happy Parking!';
 
 /** Bram's personal X account (same destination as the footer's FEEDBACK_URL). */
 export const FOUNDER_X_URL = 'https://x.com/brahmasta';

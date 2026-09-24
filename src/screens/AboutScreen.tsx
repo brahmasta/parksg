@@ -87,16 +87,6 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
             </span>{' '}
             cheapest carpark, before you start driving.
           </p>
-          <p
-            style={{
-              margin: '10px 0 0',
-              fontSize: 13,
-              color: 'var(--text-2)',
-              lineHeight: 1.5,
-            }}
-          >
-            No more circling. No more bill shock at the gantry.
-          </p>
         </section>
 
         <Section title={FOUNDER_NOTE_TITLE}>
@@ -124,19 +114,22 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
               }}
             >
               {FOUNDER_SIGNOFF}
-              <span style={{ fontWeight: 400, color: 'var(--text-3)' }}>
-                {' · '}
-                <a
-                  href={FOUNDER_X_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-track="founder_x_link"
-                  style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}
-                >
-                  Say hi on X (@brahmasta) →
-                </a>
-              </span>
             </p>
+            <a
+              href={FOUNDER_X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="founder_x_link"
+              style={{
+                alignSelf: 'flex-start',
+                fontSize: 13.5,
+                color: 'var(--accent)',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Say hi on X (@brahmasta) →
+            </a>
           </div>
         </Section>
 
