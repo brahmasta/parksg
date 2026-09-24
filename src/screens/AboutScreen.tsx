@@ -5,9 +5,6 @@ import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from
 import {
   IconCheck,
   IconChevronLeft,
-  IconList,
-  IconNavigate,
-  IconSearch,
 } from '../components/icons';
 
 type AboutScreenProps = {
@@ -15,24 +12,6 @@ type AboutScreenProps = {
   /** Reuse the Home search entry point so the CTA does something real. */
   onStartSearch?: () => void;
 };
-
-const STEPS: { icon: ReactNode; title: string; body: string }[] = [
-  {
-    icon: <IconSearch size={15} stroke={2} />,
-    title: 'Search your destination',
-    body: 'Type where you’re headed, or tap “Use my location”.',
-  },
-  {
-    icon: <IconList size={15} stroke={2} />,
-    title: 'Compare by cost & distance',
-    body: 'Nearby carparks, ranked. The cheapest gets a BEST badge.',
-  },
-  {
-    icon: <IconNavigate size={15} stroke={2} />,
-    title: 'See the real cost, then go',
-    body: 'Set how long you’ll stay for an estimate, then navigate.',
-  },
-];
 
 const WHATS_NEW = [
   'Live lot counts for malls, not just public carparks',
@@ -172,53 +151,6 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
                 </a>
               </span>
             </p>
-          </div>
-        </Section>
-
-        <Section title="How it works">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {STEPS.map((s) => (
-              <div key={s.title} style={{ display: 'flex', gap: 12 }}>
-                <span
-                  style={{
-                    flexShrink: 0,
-                    width: 30,
-                    height: 30,
-                    borderRadius: 999,
-                    background: 'var(--accent-tint)',
-                    color: 'var(--accent)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {s.icon}
-                </span>
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: 'var(--text-1)',
-                      letterSpacing: -0.1,
-                    }}
-                  >
-                    {s.title}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12.5,
-                      color: 'var(--text-2)',
-                      lineHeight: 1.45,
-                      marginTop: 2,
-                    }}
-                  >
-                    {s.body}
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </Section>
 

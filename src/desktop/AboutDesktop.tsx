@@ -4,21 +4,8 @@ import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from
 import {
   IconArrowRight,
   IconCheck,
-  IconClock,
   IconInfo,
-  IconList,
-  IconNavigate,
-  IconSearch,
 } from '../components/icons';
-
-const DATA_SOURCES = ['data.gov.sg', 'LTA DataMall', 'URA Data Service', 'OneMap', 'Google Places'];
-
-const STEPS = [
-  { icon: <IconSearch size={18} stroke={2} />, title: 'Search your destination', body: 'Type where you’re headed, or use your location.' },
-  { icon: <IconClock size={18} stroke={2} />, title: 'Plan when & how long', body: 'Set a start time and duration — costs are estimated for your exact stay.' },
-  { icon: <IconList size={18} stroke={2} />, title: 'Compare by cost & distance', body: 'Nearby carparks ranked live. The cheapest gets a badge.' },
-  { icon: <IconNavigate size={18} stroke={2} />, title: 'See the real cost, then go', body: 'Open the entrance in Google Maps, Waze or Apple Maps.' },
-];
 
 const WHATS_NEW = [
   'Desktop & tablet layout with a live two-pane map',
@@ -59,35 +46,8 @@ export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
         </div>
       </Section>
 
-      <Section title="How it works">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
-          {STEPS.map((s, i) => (
-            <div key={s.title} style={{ display: 'flex', gap: 14, padding: 18, background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14 }}>
-              <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: 11, background: 'var(--accent-tint)', color: 'var(--accent-on)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</span>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 15.5, fontWeight: 600, color: 'var(--text-1)', letterSpacing: -0.2 }}>
-                  <span style={{ color: 'var(--text-3)', fontFamily: 'var(--font-mono)', fontSize: 12, marginRight: 6 }}>0{i + 1}</span>{s.title}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5, marginTop: 4 }}>{s.body}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Section>
-
       {/* Data coverage — merged in from the old Coverage page. */}
       <CoverageSections />
-
-      <Section title="Where the data comes from">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-          {DATA_SOURCES.map((src) => (
-            <span key={src} style={{ display: 'inline-flex', alignItems: 'center', padding: '7px 14px', borderRadius: 999, border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', fontSize: 13, color: 'var(--text-2)', fontWeight: 500 }}>{src}</span>
-          ))}
-        </div>
-        <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-3)', lineHeight: 1.55, maxWidth: 700 }}>
-          Carpark & availability data © Singapore Land Transport Authority, HDB and URA, under the Singapore Open Data Licence. Rates are estimates — always check the signboard.
-        </p>
-      </Section>
 
       <Section title="What's new">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px 24px' }}>
@@ -109,6 +69,10 @@ export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
           Find parking near me <IconArrowRight size={17} stroke={2.5} />
         </button>
       </div>
+
+      <p style={{ margin: '28px 0 0', fontSize: 12, color: 'var(--text-3)', lineHeight: 1.55, maxWidth: 700 }}>
+        Carpark & availability data © Singapore Land Transport Authority, HDB and URA, under the Singapore Open Data Licence. Rates are estimates — always check the signboard.
+      </p>
     </div>
   );
 }
