@@ -758,7 +758,6 @@ function App() {
     body = (
       <AboutScreen
         onBack={() => setScreen('home')}
-        onStartSearch={() => setScreen('home')}
       />
     );
   } else if (screen === 'results') {

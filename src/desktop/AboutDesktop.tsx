@@ -1,23 +1,10 @@
 import type { ReactNode } from 'react';
 import { CoverageSections } from '../components/CoverageSections';
 import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
-import {
-  IconArrowRight,
-  IconCheck,
-  IconInfo,
-} from '../components/icons';
-
-const WHATS_NEW = [
-  'Desktop & tablet layout with a live two-pane map',
-  'Plan a start time and duration up to 24 hours',
-  'Live lot counts for malls, not just public carparks',
-  'Live EV charger availability beside the cheapest lot',
-  'Open directions in Google Maps, Waze or Apple Maps',
-  'Save carparks & destinations, synced across devices',
-];
+import { IconInfo } from '../components/icons';
 
 /** Desktop About — centered column, nav peer of Find. Folds in data coverage. */
-export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
+export function AboutDesktop() {
   return (
     <div className="psg-screen" style={{ maxWidth: 920, margin: '0 auto', padding: '44px 28px 80px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -48,27 +35,6 @@ export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
 
       {/* Data coverage — merged in from the old Coverage page. */}
       <CoverageSections />
-
-      <Section title="What's new">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px 24px' }}>
-          {WHATS_NEW.map((item) => (
-            <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--text-2)' }}>
-              <span style={{ flexShrink: 0, width: 20, height: 20, borderRadius: 999, background: 'var(--accent-tint)', color: 'var(--accent-on)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IconCheck size={12} stroke={2.5} /></span>
-              {item}
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <div style={{ marginTop: 36, padding: 28, borderRadius: 18, background: 'var(--accent-tint)', border: '1px solid var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 600, letterSpacing: -0.4, color: 'var(--text-1)' }}>Ready to park smarter?</div>
-          <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 4 }}>Compare live cost & availability near you.</div>
-        </div>
-        <button onClick={onFindParking} data-track="nav_find_parking" style={{ appearance: 'none', border: 0, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 22px', borderRadius: 13, background: 'var(--accent)', color: 'var(--accent-on)', fontFamily: 'var(--font-display)', fontSize: 15.5, fontWeight: 600, cursor: 'pointer', boxShadow: 'var(--shadow-raised)' }}>
-          Find parking near me <IconArrowRight size={17} stroke={2.5} />
-        </button>
-      </div>
 
       <p style={{ margin: '28px 0 0', fontSize: 12, color: 'var(--text-3)', lineHeight: 1.55, maxWidth: 700 }}>
         Carpark & availability data © Singapore Land Transport Authority, HDB and URA, under the Singapore Open Data Licence. Rates are estimates — always check the signboard.

@@ -2,27 +2,13 @@ import type { ReactNode } from 'react';
 import { Wordmark } from '../components/Wordmark';
 import { CoverageSections } from '../components/CoverageSections';
 import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
-import {
-  IconCheck,
-  IconChevronLeft,
-} from '../components/icons';
+import { IconChevronLeft } from '../components/icons';
 
 type AboutScreenProps = {
   onBack: () => void;
-  /** Reuse the Home search entry point so the CTA does something real. */
-  onStartSearch?: () => void;
 };
 
-const WHATS_NEW = [
-  'Live lot counts for malls, not just public carparks',
-  'Verified 2025 rates + map pins for 50+ top malls',
-  'Live EV charger availability beside the cheapest lot',
-  'Real per-carpark rates with public-holiday pricing',
-  'Open directions in Google Maps, Waze or Apple Maps',
-  'Save carparks & destinations, synced across devices',
-];
-
-export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
+export function AboutScreen({ onBack }: AboutScreenProps) {
   return (
     <div
       className="psg-screen"
@@ -171,68 +157,6 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
             are estimates — always check the signboard.
           </p>
         </Section>
-
-        <Section title="What's new">
-          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-            {WHATS_NEW.map((item) => (
-              <li
-                key={item}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '6px 0',
-                  fontSize: 13,
-                  color: 'var(--text-2)',
-                }}
-              >
-                <span
-                  style={{
-                    flexShrink: 0,
-                    width: 18,
-                    height: 18,
-                    borderRadius: 999,
-                    background: 'var(--accent-tint)',
-                    color: 'var(--accent)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <IconCheck size={11} stroke={2.5} />
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        {/* CTA */}
-        <div style={{ paddingTop: 14 }}>
-          <button
-            type="button"
-            onClick={onStartSearch ?? onBack}
-            data-track="nav_find_parking"
-            style={{
-              appearance: 'none',
-              border: 0,
-              width: '100%',
-              padding: '14px 18px',
-              background: 'var(--accent)',
-              color: 'var(--accent-on)',
-              borderRadius: 14,
-              fontFamily: 'var(--font-display)',
-              fontSize: 15,
-              fontWeight: 600,
-              letterSpacing: -0.1,
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-raised)',
-              minHeight: 48,
-            }}
-          >
-            Find parking near me
-          </button>
-        </div>
       </div>
     </div>
   );

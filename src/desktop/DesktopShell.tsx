@@ -70,7 +70,7 @@ export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRe
 
       {route === 'about' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <AboutDesktop onFindParking={() => setRoute('find')} />
+          <AboutDesktop />
         </div>
       )}
 

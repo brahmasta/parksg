@@ -65,7 +65,7 @@ export function CoverageSections() {
           Data coverage
         </span>
       </div>
-      <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 600, letterSpacing: -0.6, lineHeight: 1.1, maxWidth: 560 }}>
+      <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 5vw, 30px)', fontWeight: 600, letterSpacing: -0.6, lineHeight: 1.1 }}>
         Every public carpark in Singapore, from the source.
       </h2>
 
