@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { CoverageSections } from '../components/CoverageSections';
-import { FEEDBACK_URL } from '../components/AppFooter';
-import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF } from '../lib/aboutCopy';
+import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
 import {
   IconArrowRight,
   IconCheck,
@@ -54,7 +53,7 @@ export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
             {FOUNDER_SIGNOFF}
             <span style={{ fontWeight: 400, color: 'var(--text-3)' }}>
               {' · '}
-              <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer" data-track="feedback_link" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Say hi on X →</a>
+              <a href={FOUNDER_X_URL} target="_blank" rel="noopener noreferrer" data-track="founder_x_link" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Say hi on X (@brahmasta) →</a>
             </span>
           </p>
         </div>

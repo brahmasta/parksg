@@ -13,3 +13,6 @@ export const FOUNDER_NOTE: string[] = [
 ];
 
 export const FOUNDER_SIGNOFF = 'Happy parking, Bram';
+
+/** Bram's personal X account — distinct from the project's FEEDBACK_URL. */
+export const FOUNDER_X_URL = 'https://x.com/brahmasta';
