@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Wordmark } from '../components/Wordmark';
 import { CoverageSections } from '../components/CoverageSections';
+import { FEEDBACK_URL } from '../components/AppFooter';
+import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF } from '../lib/aboutCopy';
 import {
   IconCheck,
   IconChevronLeft,
@@ -133,21 +135,45 @@ export function AboutScreen({ onBack, onStartSearch }: AboutScreenProps) {
           </p>
         </section>
 
-        <Section title="Why we built this">
-          <p
-            style={{
-              margin: 0,
-              fontSize: 13.5,
-              lineHeight: 1.55,
-              color: 'var(--text-2)',
-            }}
-          >
-            Singapore parking prices are scattered across HDB, URA and private
-            operators — and you usually only see the rate on a signboard{' '}
-            <em>after</em> you’ve committed to the ramp. We pull it all into one
-            place, so you can compare cost and availability at your destination
-            first.
-          </p>
+        <Section title={FOUNDER_NOTE_TITLE}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {FOUNDER_NOTE.map((para) => (
+              <p
+                key={para}
+                style={{
+                  margin: 0,
+                  fontSize: 13.5,
+                  lineHeight: 1.55,
+                  color: 'var(--text-2)',
+                }}
+              >
+                {para}
+              </p>
+            ))}
+            <p
+              style={{
+                margin: 0,
+                fontSize: 13.5,
+                lineHeight: 1.55,
+                color: 'var(--text-1)',
+                fontWeight: 600,
+              }}
+            >
+              {FOUNDER_SIGNOFF}
+              <span style={{ fontWeight: 400, color: 'var(--text-3)' }}>
+                {' · '}
+                <a
+                  href={FEEDBACK_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-track="feedback_link"
+                  style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}
+                >
+                  Say hi on X →
+                </a>
+              </span>
+            </p>
+          </div>
         </Section>
 
         <Section title="How it works">

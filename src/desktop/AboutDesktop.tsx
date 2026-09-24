@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { CoverageSections } from '../components/CoverageSections';
+import { FEEDBACK_URL } from '../components/AppFooter';
+import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF } from '../lib/aboutCopy';
 import {
   IconArrowRight,
   IconCheck,
@@ -43,10 +45,19 @@ export function AboutDesktop({ onFindParking }: { onFindParking: () => void }) {
         No more circling. No more bill shock at the gantry. wheretopark.sg pulls every public carpark’s live availability and rates into one place.
       </p>
 
-      <Section title="Why we built this">
-        <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)', maxWidth: 720 }}>
-          Singapore parking prices are scattered across HDB, URA and private operators — and you usually only see the rate on a signboard <em>after</em> you’ve committed to the ramp. We bring it all into one place, so you compare cost and availability at your destination first.
-        </p>
+      <Section title={FOUNDER_NOTE_TITLE}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 720 }}>
+          {FOUNDER_NOTE.map((para) => (
+            <p key={para} style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)' }}>{para}</p>
+          ))}
+          <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: 'var(--text-1)', fontWeight: 600 }}>
+            {FOUNDER_SIGNOFF}
+            <span style={{ fontWeight: 400, color: 'var(--text-3)' }}>
+              {' · '}
+              <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer" data-track="feedback_link" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Say hi on X →</a>
+            </span>
+          </p>
+        </div>
       </Section>
 
       <Section title="How it works">
