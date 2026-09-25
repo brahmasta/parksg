@@ -506,11 +506,6 @@ function SignedInBody({
             title="Sync across devices"
             sub="Last synced just now"
             detail="On"
-          />
-          <NavRow
-            icon={<IconShield size={16} />}
-            title="Privacy & data"
-            sub="What we store, and how to export"
             last
           />
         </div>

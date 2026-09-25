@@ -746,6 +746,7 @@ function App() {
         nearMeBusy={nearMeBusy}
         user={user}
         onOpenAccount={() => setScreen('account')}
+        onOpenAbout={() => setScreen('about')}
         merged={saves.merged}
         onOpenSaved={() => setScreen('saved')}
         onSearchSavedDestination={(item) =>

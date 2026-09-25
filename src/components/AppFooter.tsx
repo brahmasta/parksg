@@ -1,7 +1,7 @@
 /**
  * Global app footer — sits at the bottom of every screen's scrollable
- * body. Two lines of mono micro-copy: a credit line and a feedback CTA
- * linking to the project's X handle.
+ * body. A single line of mono micro-copy: a feedback CTA linking to the
+ * project's X handle.
  *
  * Kept small (10.5pt mono) so it never competes with the data-freshness
  * notes that sit just above it on Results / Detail. On Detail it lives
@@ -10,13 +10,10 @@
  * it.
  */
 
-import type { User } from '../lib/types';
-import { AddCarparkLink } from './AddCarparkLink';
-
 /** Single source of truth for the feedback destination. */
 export const FEEDBACK_URL = 'https://x.com/brahmasta';
 
-export function AppFooter({ user = null }: { user?: User | null }) {
+export function AppFooter() {
   return (
     <footer
       style={{
@@ -29,15 +26,12 @@ export function AppFooter({ user = null }: { user?: User | null }) {
         textAlign: 'center',
       }}
     >
-      Missing a carpark?{' '}
-      <AddCarparkLink user={user} variant="modal" label="Add it →" style={{ fontSize: 10, fontWeight: 600, whiteSpace: 'nowrap' }} />
-      {'  ·  '}
-      Spotted a wrong rate?{' '}
+      Feedback? share with me on{' '}
       <a
         href={FEEDBACK_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Send feedback on X (@brahmasta)"
+        aria-label="Share feedback on X (@brahmasta)"
         data-track="feedback_link"
         style={{
           color: 'var(--ok)',
@@ -46,7 +40,7 @@ export function AppFooter({ user = null }: { user?: User | null }) {
           whiteSpace: 'nowrap',
         }}
       >
-        Let me know →
+        X (@brahmasta)
       </a>
     </footer>
   );

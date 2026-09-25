@@ -36,14 +36,14 @@ const optionBase: CSSProperties = {
 };
 
 /**
- * Four-way theme control: Auto (the default, follows the device), Sunlight,
- * Standard, Dark.
+ * Theme control: Auto (the default, follows the device), Standard, Dark.
+ * Sunlight is hidden for now — see THEME_OPTIONS in lib/theme.ts.
  *
  * A radiogroup of real <button>s rather than a switch, because the choice is
  * not binary — a driver picks the one that suits the light they are in, and
- * Auto is a distinct answer from any of the three palettes.
+ * Auto is a distinct answer from either of the other palettes.
  *
- * Lays out 2×2 on a phone and 4-across from 520px; see .psg-theme-options.
+ * Lays out across the row; see .psg-theme-options.
  */
 export function ThemePicker() {
   const { pref, setPref } = useTheme();

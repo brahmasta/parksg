@@ -64,8 +64,7 @@ function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; sa
       </Group>
 
       <Group label="Account">
-        <Row icon={<IconCloud size={16} />} title="Sync across devices" sub="Last synced just now" detail="On" />
-        <Row icon={<IconShield size={16} />} title="Privacy & data" sub="What we store, and how to export" last />
+        <Row icon={<IconCloud size={16} />} title="Sync across devices" sub="Last synced just now" detail="On" last />
       </Group>
 
       <button onClick={onSignOut} data-track="sign_out" style={{ appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', color: 'var(--bad)', width: '100%', marginTop: 22, padding: '14px 16px', borderRadius: 14, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>

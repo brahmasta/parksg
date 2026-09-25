@@ -12,8 +12,9 @@
 //   dark     — near-black, easier at night.
 //
 // The PREFERENCE adds a fourth value, 'auto', which follows the device:
-// `prefers-color-scheme: dark` gives dark, anything else gives sunlight. Auto
-// is the default, because most people express "I want dark mode" through their
+// `prefers-color-scheme: dark` gives dark, anything else gives light (the
+// standard palette — sunlight is hidden from the picker for now). Auto is
+// the default, because most people express "I want dark mode" through their
 // OS setting and never open an app's settings screen. It stays live — flipping
 // the device theme repaints immediately, no reload.
 //
@@ -36,23 +37,23 @@ export type Theme = 'sunlight' | 'light' | 'dark';
 export type ThemePref = Theme | 'auto';
 
 /**
- * Which palette 'auto' uses when the device is NOT in dark mode. Sunlight
- * rather than light: someone who has expressed no preference is better served
- * by the readable one.
+ * Which palette 'auto' uses when the device is NOT in dark mode. Sunlight is
+ * retired from the picker for now (see THEME_OPTIONS below), so auto falls
+ * back to the standard light palette rather than sunlight.
  */
-const AUTO_LIGHT: Theme = 'sunlight';
+const AUTO_LIGHT: Theme = 'light';
 
-/** Order here is the order shown in the picker. */
+/**
+ * Order here is the order shown in the picker. Sunlight is hidden for now —
+ * only Auto, Standard and Dark are offered — but the palette itself stays in
+ * the `Theme` type and index.css so it can come back without a rewrite, and
+ * so a visitor who already picked it (stored pre-change) doesn't break.
+ */
 export const THEME_OPTIONS: { id: ThemePref; label: string; blurb: string }[] = [
   {
     id: 'auto',
     label: 'Auto',
     blurb: 'Follows your device — dark at night if your phone is set that way.',
-  },
-  {
-    id: 'sunlight',
-    label: 'Sunlight',
-    blurb: 'Highest contrast — stays readable in direct sun.',
   },
   {
     id: 'light',

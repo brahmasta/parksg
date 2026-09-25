@@ -1,9 +1,10 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type {
   MergedSaveItem,
   RecentDestination,
   User,
 } from '../lib/types';
+import { AddCarparkDialog } from '../components/AddCarparkDialog';
 import { AppFooter } from '../components/AppFooter';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
@@ -17,10 +18,26 @@ import {
   IconCloud,
   IconGoogleG,
   IconHistory,
+  IconInfo,
   IconLocation,
   IconPin,
+  IconPlus,
   IconUser,
 } from '../components/icons';
+
+const topBarIconBtn: CSSProperties = {
+  appearance: 'none',
+  width: 36,
+  height: 36,
+  borderRadius: 999,
+  background: 'var(--bg-1)',
+  border: '0.5px solid var(--line-strong)',
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+};
 
 export function HomeScreen({
   destination,
@@ -32,6 +49,7 @@ export function HomeScreen({
   nearMeBusy,
   user,
   onOpenAccount,
+  onOpenAbout,
   merged,
   onOpenSaved,
   onSearchSavedDestination,
@@ -46,6 +64,7 @@ export function HomeScreen({
   nearMeBusy?: boolean;
   user: User | null;
   onOpenAccount: () => void;
+  onOpenAbout: () => void;
   /** Merged Saved feed, latest-first. */
   merged: MergedSaveItem[];
   onOpenSaved: () => void;
@@ -63,6 +82,10 @@ export function HomeScreen({
   // Recent list shows the freshest 3 by default; "See all" reveals the rest.
   const [recentsExpanded, setRecentsExpanded] = useState(false);
 
+  // "Add a carpark" from the home top bar — phone flow otherwise only
+  // reaches this via Account → Explore.
+  const [addCarparkOpen, setAddCarparkOpen] = useState(false);
+
   return (
     <div
       className="psg-screen"
@@ -74,56 +97,6 @@ export function HomeScreen({
         position: 'relative',
       }}
     >
-      {/* Background grid + roads + P-pins (decorative) */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          opacity: 0.5,
-        }}
-      >
-        <svg width="100%" height="100%" viewBox="0 0 390 844" preserveAspectRatio="xMidYMin slice">
-          <defs>
-            <pattern id="psgHomeGrid" width="34" height="34" patternUnits="userSpaceOnUse">
-              <path d="M34 0 H0 V34" fill="none" stroke="var(--line)" strokeWidth="0.5" />
-            </pattern>
-            <radialGradient id="psgHomeFade" cx="50%" cy="0%" r="80%">
-              <stop offset="0%" stopColor="var(--bg-0)" stopOpacity="0" />
-              <stop offset="100%" stopColor="var(--bg-0)" stopOpacity="1" />
-            </radialGradient>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#psgHomeGrid)" />
-          <path d="M-20 220 Q 120 200 200 240 T 420 220" stroke="var(--bg-2)" strokeWidth="22" fill="none" />
-          <path d="M-20 460 Q 150 440 230 480 T 420 470" stroke="var(--bg-2)" strokeWidth="14" fill="none" />
-          <path d="M80 -20 Q 100 200 90 400 T 90 880" stroke="var(--bg-2)" strokeWidth="12" fill="none" />
-          <path d="M310 -20 Q 320 200 300 400 T 300 880" stroke="var(--bg-2)" strokeWidth="14" fill="none" />
-          {[
-            [55, 320],
-            [180, 180],
-            [240, 360],
-            [330, 280],
-            [120, 510],
-            [280, 600],
-            [55, 700],
-          ].map(([cx, cy], i) => (
-            <g key={i} transform={`translate(${cx} ${cy})`}>
-              <circle r="7" fill="var(--bg-1)" stroke="var(--line-strong)" strokeWidth="1" />
-              <text
-                textAnchor="middle"
-                y="3"
-                style={{ fontFamily: 'var(--font-mono)', fontSize: 8, fontWeight: 600 }}
-                fill="var(--text-3)"
-              >
-                P
-              </text>
-            </g>
-          ))}
-          <rect width="100%" height="100%" fill="url(#psgHomeFade)" />
-        </svg>
-      </div>
-
       {/* Top bar */}
       <div
         style={{
@@ -138,6 +111,24 @@ export function HomeScreen({
       >
         <Wordmark size={19} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            type="button"
+            onClick={onOpenAbout}
+            aria-label="About"
+            data-track="nav_about"
+            style={topBarIconBtn}
+          >
+            <IconInfo size={16} stroke={2} style={{ color: 'var(--text-2)' }} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setAddCarparkOpen(true)}
+            aria-label="Add a carpark"
+            data-track="nav_add_carpark"
+            style={topBarIconBtn}
+          >
+            <IconPlus size={17} stroke={2} style={{ color: 'var(--text-2)' }} />
+          </button>
           <ThemeToggleButton />
           <button
             type="button"
@@ -511,8 +502,16 @@ export function HomeScreen({
           </div>
         ) : null}
 
-        <AppFooter user={user} />
+        <AppFooter />
       </div>
+
+      <AddCarparkDialog
+        key={addCarparkOpen ? 'add-open' : 'add-closed'}
+        open={addCarparkOpen}
+        onClose={() => setAddCarparkOpen(false)}
+        variant="sheet"
+        user={user}
+      />
     </div>
   );
 }
