@@ -490,27 +490,6 @@ function SignedInBody({
         </div>
       </div>
 
-      <div style={{ marginTop: 22 }}>
-        <MonoLabel>Account</MonoLabel>
-        <div
-          style={{
-            marginTop: 10,
-            background: 'var(--bg-1)',
-            border: '0.5px solid var(--line)',
-            borderRadius: 14,
-            overflow: 'hidden',
-          }}
-        >
-          <NavRow
-            icon={<IconCloud size={16} />}
-            title="Sync across devices"
-            sub="Last synced just now"
-            detail="On"
-            last
-          />
-        </div>
-      </div>
-
       <ExploreGroup onOpenAbout={onOpenAbout} user={user} />
 
       <button

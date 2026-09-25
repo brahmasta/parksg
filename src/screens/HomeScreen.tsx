@@ -4,7 +4,6 @@ import type {
   RecentDestination,
   User,
 } from '../lib/types';
-import { AddCarparkDialog } from '../components/AddCarparkDialog';
 import { AppFooter } from '../components/AppFooter';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
@@ -21,7 +20,6 @@ import {
   IconInfo,
   IconLocation,
   IconPin,
-  IconPlus,
   IconUser,
 } from '../components/icons';
 
@@ -82,10 +80,6 @@ export function HomeScreen({
   // Recent list shows the freshest 3 by default; "See all" reveals the rest.
   const [recentsExpanded, setRecentsExpanded] = useState(false);
 
-  // "Add a carpark" from the home top bar — phone flow otherwise only
-  // reaches this via Account → Explore.
-  const [addCarparkOpen, setAddCarparkOpen] = useState(false);
-
   return (
     <div
       className="psg-screen"
@@ -119,15 +113,6 @@ export function HomeScreen({
             style={topBarIconBtn}
           >
             <IconInfo size={16} stroke={2} style={{ color: 'var(--text-2)' }} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setAddCarparkOpen(true)}
-            aria-label="Add a carpark"
-            data-track="nav_add_carpark"
-            style={topBarIconBtn}
-          >
-            <IconPlus size={17} stroke={2} style={{ color: 'var(--text-2)' }} />
           </button>
           <ThemeToggleButton />
           <button
@@ -504,14 +489,6 @@ export function HomeScreen({
 
         <AppFooter />
       </div>
-
-      <AddCarparkDialog
-        key={addCarparkOpen ? 'add-open' : 'add-closed'}
-        open={addCarparkOpen}
-        onClose={() => setAddCarparkOpen(false)}
-        variant="sheet"
-        user={user}
-      />
     </div>
   );
 }
