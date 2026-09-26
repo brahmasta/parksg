@@ -1,6 +1,11 @@
 import { useMemo, useState, useCallback } from 'react';
 import type { Carpark, MergedSaveItem, User } from '../lib/types';
-import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
+import {
+  pickCheapestId,
+  selectResultsView,
+  type SortBy,
+  type VehicleFilter,
+} from '../lib/resultsView';
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { MonoLabel, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
@@ -9,10 +14,11 @@ import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { DetailScreen } from '../screens/DetailScreen';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
-import { FilterPill } from '../components/FilterPill';
+import { ResultFilters } from '../components/ResultFilters';
+import { vehicleEmptyCopy } from '../lib/lotTypes';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 import { pickHeroCopy } from '../lib/heroCopy';
-import { IconBolt, IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
+import { IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
 
 export type DesktopSavedProps = {
   merged: MergedSaveItem[];
@@ -41,6 +47,9 @@ export type FindParkingDesktopProps = {
   setStay: (s: Stay) => void;
   availableOnly: boolean;
   setAvailableOnly: (v: boolean) => void;
+  /** Motorcycle / heavy-vehicle lot filter (shared + persisted by App). */
+  vehicles: VehicleFilter[];
+  setVehicles: (v: VehicleFilter[]) => void;
   detailCp: Carpark | null;
   /** True while a deep-linked carpark (/carpark/:slug) is still loading. */
   detailLoading?: boolean;
@@ -62,7 +71,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   const {
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
-    stay, setStay, availableOnly, setAvailableOnly,
+    stay, setStay, availableOnly, setAvailableOnly, vehicles, setVehicles,
     detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
     user, onRequireSignIn,
   } = props;
@@ -87,10 +96,11 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   );
   const walkGeometry = detailCp && walk.source === 'onemap' && walk.geometry.length >= 2 ? walk.geometry : null;
 
-  const { ranked, evFilterEmpty } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly, sortBy, costOf }),
-    [carparks, state, availableOnly, evOnly, sortBy, costOf],
+  const { ranked, vehicleFilterEmpty, evFilterEmpty } = useMemo(
+    () => selectResultsView({ carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf }),
+    [carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf],
   );
+  const vehicleEmpty = vehicleEmptyCopy(vehicles);
   const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
 
   // Before any destination is chosen, show a focused landing (search + saved
@@ -204,19 +214,11 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
 
             {/* Results header + filter/sort */}
             <div style={{ margin: '22px 0 12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
+              <div style={{ marginBottom: 12 }}>
                 <MonoLabel>
                   {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
                   {headerDestination ? ` near ${headerDestination}` : ''}
                 </MonoLabel>
-                <span data-track="filter_ev" style={{ display: 'inline-flex', flexShrink: 0 }}>
-                  <FilterPill
-                    active={evOnly}
-                    onClick={() => setEvOnly(!evOnly)}
-                    icon={<IconBolt size={11} stroke={2.25} />}
-                    label="EV"
-                  />
-                </span>
               </div>
               <FilterBar
                 sortBy={sortBy}
@@ -224,6 +226,14 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
                 availableOnly={availableOnly}
                 onAvailableOnly={setAvailableOnly}
               />
+              <div style={{ marginTop: 10 }}>
+                <ResultFilters
+                  evOnly={evOnly}
+                  onEvOnly={setEvOnly}
+                  vehicles={vehicles}
+                  onVehicles={setVehicles}
+                />
+              </div>
             </div>
 
             {/* Cards */}
@@ -234,10 +244,14 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             ) : ranked.length === 0 ? (
               <div style={{ marginTop: 8, padding: '28px 20px', textAlign: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
-                  {evFilterEmpty ? 'No carparks with EV charging' : availableOnly ? 'No carparks with free lots' : 'No carparks nearby'}
+                  {vehicleFilterEmpty
+                    ? vehicleEmpty.title
+                    : evFilterEmpty ? 'No carparks with EV charging' : availableOnly ? 'No carparks with free lots' : 'No carparks nearby'}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>
-                  {evFilterEmpty
+                  {vehicleFilterEmpty
+                    ? vehicleEmpty.hint
+                    : evFilterEmpty
                     ? 'Turn off the EV filter to see all carparks nearby.'
                     : availableOnly
                       ? 'Turn off “Available only” to see full carparks too.'

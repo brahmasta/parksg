@@ -1,4 +1,4 @@
-import type { Carpark, DurationHours, ResultsState } from './types';
+import type { Carpark, DurationHours, LotType, ResultsState } from './types';
 import { isStaleRates } from './rateSource';
 
 /**
@@ -13,16 +13,23 @@ import { isStaleRates } from './rateSource';
  *     it, applying EV first then Available.
  *  2. Makes the behaviour unit-testable without mounting React.
  *
- * Filters are applied EV → Available so the two empty-states are mutually
- * exclusive: `availFilterEmpty` only fires when EV left a non-empty set that
- * Available then cleared.
+ * Filters are applied vehicle → EV → Available so the empty-states are
+ * mutually exclusive: each only fires when the filters before it left a
+ * non-empty set that it then cleared.
  */
 export type SortBy = 'cost' | 'distance';
+
+/** Vehicle lot types the Results screen can filter by. Every carpark takes
+ * cars, so 'C' is never a filter. */
+export type VehicleFilter = Exclude<LotType, 'C'>;
 
 export type ResultsView = {
   /** Carparks after sort + active filters. */
   ranked: Carpark[];
-  /** EV filter is on and nothing nearby has a charger. */
+  /** A vehicle filter is on and nothing nearby reports those lot types. */
+  vehicleFilterEmpty: boolean;
+  /** EV filter is on and nothing nearby (that passed the vehicle filter) has
+   * a charger. */
   evFilterEmpty: boolean;
   /** Available-only is on and every (EV-passing) carpark is full. */
   availFilterEmpty: boolean;
@@ -33,6 +40,10 @@ export function selectResultsView(input: {
   state: ResultsState;
   availableOnly: boolean;
   evOnly: boolean;
+  /** Keep only carparks that report every one of these lot types (e.g. ['M']
+   * for motorcycle lots). Lot types are only known for HDB carparks — every
+   * other carpark counts as car-only. Defaults to no vehicle filter. */
+  vehicles?: VehicleFilter[];
   /** 'cost' ranks by estimated cost for `duration`; 'distance' by walk metres.
    * Defaults to 'distance' to preserve the original nearest-first behaviour. */
   sortBy?: SortBy;
@@ -43,7 +54,9 @@ export function selectResultsView(input: {
    * back to the preset estByHours[duration] (rateUnknown carparks → null). */
   costOf?: (cp: Carpark) => number | null;
 }): ResultsView {
-  const { carparks, state, availableOnly, evOnly, sortBy = 'distance', duration = 1, costOf } = input;
+  const {
+    carparks, state, availableOnly, evOnly, vehicles = [], sortBy = 'distance', duration = 1, costOf,
+  } = input;
 
   // Cost function: explicit costOf when provided, else the preset estimate
   // (rateUnknown → null so it can't masquerade as the cheapest $0).
@@ -63,7 +76,10 @@ export function selectResultsView(input: {
     }
     return a.walkMeters - b.walkMeters;
   });
-  const afterEv = evOnly ? sorted.filter((c) => c.ev?.hasCharging === true) : sorted;
+  const afterVehicle = vehicles.length
+    ? sorted.filter((c) => vehicles.every((t) => c.lotTypes.includes(t)))
+    : sorted;
+  const afterEv = evOnly ? afterVehicle.filter((c) => c.ev?.hasCharging === true) : afterVehicle;
   const ranked = availableOnly
     ? afterEv.filter((c) => (c.lotsAvailable ?? 0) > 0)
     : afterEv;
@@ -72,11 +88,12 @@ export function selectResultsView(input: {
   // have their own dedicated screens.
   const settled = state === 'loaded' || state === 'degraded';
 
-  const evFilterEmpty = settled && evOnly && afterEv.length === 0;
+  const vehicleFilterEmpty = settled && vehicles.length > 0 && afterVehicle.length === 0;
+  const evFilterEmpty = settled && evOnly && !vehicleFilterEmpty && afterEv.length === 0;
   const availFilterEmpty =
     settled && availableOnly && afterEv.length > 0 && ranked.length === 0;
 
-  return { ranked, evFilterEmpty, availFilterEmpty };
+  return { ranked, vehicleFilterEmpty, evFilterEmpty, availFilterEmpty };
 }
 
 /**

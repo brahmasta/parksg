@@ -1,6 +1,11 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Carpark, ResultsState, ViewMode, User } from '../lib/types';
-import { pickCheapestId, selectResultsView, type SortBy } from '../lib/resultsView';
+import {
+  pickCheapestId,
+  selectResultsView,
+  type SortBy,
+  type VehicleFilter,
+} from '../lib/resultsView';
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
@@ -10,11 +15,10 @@ import { DegradedBanner } from '../components/DegradedBanner';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
 import { AddCarparkLink } from '../components/AddCarparkLink';
-import { FilterPill } from '../components/FilterPill';
+import { ResultFilters, VehicleEmptyResults } from '../components/ResultFilters';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { PoweredByGoogle } from '../components/PoweredByGoogle';
 import {
-  IconBolt,
   IconChevronLeft,
   IconList,
   IconMap,
@@ -33,6 +37,8 @@ export function ResultsScreen({
   setAvailableOnly,
   evOnly,
   setEvOnly,
+  vehicles,
+  setVehicles,
   viewMode,
   onToggleView,
   onBack,
@@ -57,6 +63,8 @@ export function ResultsScreen({
   setAvailableOnly: (v: boolean) => void;
   evOnly: boolean;
   setEvOnly: (v: boolean) => void;
+  vehicles: VehicleFilter[];
+  setVehicles: (v: VehicleFilter[]) => void;
   viewMode: ViewMode;
   onToggleView: () => void;
   onBack: () => void;
@@ -85,9 +93,9 @@ export function ResultsScreen({
   const costOf = useCallback((cp: Carpark) => estCostForStay(cp, stay), [stay]);
   const durationText = `EST · ${fmtDuration(stay.hours)}`;
 
-  const { ranked, evFilterEmpty, availFilterEmpty } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly, sortBy, costOf }),
-    [carparks, state, availableOnly, evOnly, sortBy, costOf],
+  const { ranked, vehicleFilterEmpty, evFilterEmpty, availFilterEmpty } = useMemo(
+    () => selectResultsView({ carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf }),
+    [carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf],
   );
 
   // Preserve the list's scroll position across Detail→back. The screen
@@ -228,29 +236,11 @@ export function ResultsScreen({
         </div>
 
         {/* Result summary */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 14,
-            gap: 8,
-          }}
-        >
-          <div style={{ fontSize: 12.5, color: 'var(--text-2)' }}>
-            {state === 'empty' ? '0' : ranked.length} carpark
-            {ranked.length === 1 ? '' : 's'}
-            <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
-            sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }} data-track="filter_ev">
-            <FilterPill
-              active={evOnly}
-              onClick={() => setEvOnly(!evOnly)}
-              icon={<IconBolt size={11} stroke={2.25} />}
-              label="EV"
-            />
-          </div>
+        <div style={{ marginTop: 14, fontSize: 12.5, color: 'var(--text-2)' }}>
+          {state === 'empty' ? '0' : ranked.length} carpark
+          {ranked.length === 1 ? '' : 's'}
+          <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
+          sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
         </div>
 
         {/* Sort (Cheapest/Nearest) + Available-only */}
@@ -260,6 +250,16 @@ export function ResultsScreen({
             onSortBy={setSortBy}
             availableOnly={availableOnly}
             onAvailableOnly={setAvailableOnly}
+          />
+        </div>
+
+        {/* EV + vehicle lot-type filters */}
+        <div style={{ marginTop: 10 }}>
+          <ResultFilters
+            evOnly={evOnly}
+            onEvOnly={setEvOnly}
+            vehicles={vehicles}
+            onVehicles={setVehicles}
           />
         </div>
       </div>
@@ -294,6 +294,10 @@ export function ResultsScreen({
           <EmptyResults destination={destination} onExpandRadius={onExpandRadius} onBack={onBack} user={user} />
         )}
 
+        {vehicleFilterEmpty && (
+          <VehicleEmptyResults vehicles={vehicles} onClearFilter={() => setVehicles([])} />
+        )}
+
         {evFilterEmpty && (
           <EVEmptyResults
             destination={destination}
@@ -309,7 +313,8 @@ export function ResultsScreen({
           />
         )}
 
-        {(state === 'loaded' || state === 'degraded') && !evFilterEmpty && !availFilterEmpty &&
+        {(state === 'loaded' || state === 'degraded') &&
+          !vehicleFilterEmpty && !evFilterEmpty && !availFilterEmpty &&
           (viewMode === 'map' ? (
             <RealResultsMap
               carparks={ranked}
