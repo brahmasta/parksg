@@ -93,9 +93,12 @@ export function ResultsScreen({
   const costOf = useCallback((cp: Carpark) => estCostForStay(cp, stay), [stay]);
   const durationText = `EST · ${fmtDuration(stay.hours)}`;
 
-  const { ranked, vehicleFilterEmpty, evFilterEmpty, availFilterEmpty } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf }),
-    [carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf],
+  const { ranked, vehicleFilterEmpty, evFilterEmpty, availFilterEmpty, pinnedId } = useMemo(
+    () =>
+      selectResultsView({
+        carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf, destinationLabel: destination,
+      }),
+    [carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf, destination],
   );
 
   // Preserve the list's scroll position across Detail→back. The screen
@@ -342,7 +345,8 @@ export function ResultsScreen({
                   duration={1}
                   cost={costOf(cp)}
                   durationText={durationText}
-                  rank={i + 1}
+                  rank={pinnedId ? i : i + 1}
+                  atDestination={cp.id === pinnedId}
                   isCheapest={cp.id === cheapestId}
                   degraded={state === 'degraded'}
                   onClick={() => onSelect(cp)}

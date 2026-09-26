@@ -25,9 +25,11 @@ export function CarparkCard({
   durationText,
   isActive = false,
   onHoverChange,
+  atDestination = false,
 }: {
   cp: Carpark;
   duration: DurationHours;
+  /** Position in the ranked list; ignored when `atDestination` is set. */
   rank: number;
   isCheapest: boolean;
   degraded: boolean;
@@ -43,6 +45,8 @@ export function CarparkCard({
   isActive?: boolean;
   /** Desktop: report hover so the map can emphasise the matching marker. */
   onHoverChange?: (id: string | null) => void;
+  /** The searched destination's own carpark, pinned above the ranking. */
+  atDestination?: boolean;
 }) {
   const lots = degraded ? null : cp.lotsAvailable;
   const status = availabilityStatus(lots);
@@ -95,17 +99,36 @@ export function CarparkCard({
               rowGap: 4,
             }}
           >
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 10,
-                color: isCheapest ? 'var(--accent)' : 'var(--text-3)',
-                fontWeight: 500,
-                letterSpacing: 0.4,
-              }}
-            >
-              #{rank}
-            </span>
+            {atDestination ? (
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 9.5,
+                  fontWeight: 600,
+                  letterSpacing: 0.6,
+                  color: 'var(--accent)',
+                  background: 'var(--accent-tint)',
+                  border: '0.5px solid var(--accent)',
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  textTransform: 'uppercase',
+                }}
+              >
+                At destination
+              </span>
+            ) : (
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: isCheapest ? 'var(--accent)' : 'var(--text-3)',
+                  fontWeight: 500,
+                  letterSpacing: 0.4,
+                }}
+              >
+                #{rank}
+              </span>
+            )}
             {isGoogle ? <GoogleBadge /> : <OperatorBadge operator={cp.operator} />}
             <EVChip ev={cp.ev} />
             {stale && <StaleRatesBadge />}

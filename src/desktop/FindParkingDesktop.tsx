@@ -96,9 +96,12 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   );
   const walkGeometry = detailCp && walk.source === 'onemap' && walk.geometry.length >= 2 ? walk.geometry : null;
 
-  const { ranked, vehicleFilterEmpty, evFilterEmpty } = useMemo(
-    () => selectResultsView({ carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf }),
-    [carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf],
+  const { ranked, vehicleFilterEmpty, evFilterEmpty, pinnedId } = useMemo(
+    () =>
+      selectResultsView({
+        carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf, destinationLabel: headerDestination,
+      }),
+    [carparks, state, availableOnly, evOnly, vehicles, sortBy, costOf, headerDestination],
   );
   const vehicleEmpty = vehicleEmptyCopy(vehicles);
   const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
@@ -267,7 +270,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
                     duration={1}
                     cost={costOf(cp)}
                     durationText={durationText}
-                    rank={i + 1}
+                    rank={pinnedId ? i : i + 1}
+                    atDestination={cp.id === pinnedId}
                     isCheapest={cp.id === cheapestId}
                     isActive={cp.id === hoverId}
                     onHoverChange={setHoverId}

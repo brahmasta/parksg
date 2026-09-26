@@ -48,16 +48,20 @@ export type JustParkSite = {
 };
 
 /**
- * Map a JustPark SiteCode → our DB carpark id. Only the malls we have curated
- * (and that therefore exist in `carparks`) are listed; live counts for any
- * other site have nowhere to attach and are dropped by the merge.
+ * Map a JustPark SiteCode → our DB carpark id. Only carparks curated in
+ * scripts/data/curated-malls.json (and that therefore exist in `carparks` with
+ * coordinates and a real rate card) are listed; live counts for any other site
+ * have nowhere to attach and are dropped by the merge.
  *
- * Clarke Quay (CQ) and Sengkang Grand Mall (SGM) appear in the feed but are not
- * yet curated in the DB — add them here once they have carpark rows.
+ * In the feed but not yet mapped, for want of a verified rate card: Sengkang
+ * Grand Mall (SGM), the CBD towers CapitaGreen (CG), CapitaSpring (CS),
+ * CapitaSky (79RR), Asia Square Tower 2 (AST2) and 21 Collyer Quay (21CQ), and
+ * the business parks. Curate a row first, then add the code here.
  */
 export const SITE_TO_CARPARK_ID: Record<string, string> = {
   BM: 'LTA:65', // Bedok Mall
   'B+': 'LTA:61', // Bugis+
+  CQ: 'LTA:59', // Clarke Quay (DataMall's "CQ @ Clarke Quay")
   FN: 'LTA:66', // Funan
   IMM: 'LTA:53', // IMM Building
   J8: 'LTA:64', // Junction 8
@@ -67,6 +71,9 @@ export const SITE_TO_CARPARK_ID: Record<string, string> = {
   TM: 'LTA:63', // Tampines Mall
   TAO: 'LTA:57', // The Atrium@Orchard
   WGR: 'LTA:43', // Westgate - Retail
+  // CBD commercial towers — the 2018 LTA_DATAGOV rows, curated with coords.
+  SBR: 'LTA:six_battery_road', // Six Battery Road
+  CT: 'LTA:capital_tower', // Capital Tower
 };
 
 type RawSite = {
