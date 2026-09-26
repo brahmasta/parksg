@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { pickCheapestId, selectResultsView } from './resultsView';
-import type { Carpark, RateSource, ResultsState } from './types';
+import type { Carpark, LotType, RateSource, ResultsState } from './types';
 
 /** Minimal Carpark for the fields selectResultsView / pickCheapestId read. */
 function cp(
@@ -12,6 +12,7 @@ function cp(
     ev?: boolean;
     cost?: number;
     source?: RateSource;
+    lotTypes?: LotType[];
   } = {},
 ): Carpark {
   const cost = opts.cost ?? 0;
@@ -20,7 +21,7 @@ function cp(
     name: id,
     block: '',
     operator: 'LTA',
-    lotTypes: ['C'],
+    lotTypes: opts.lotTypes ?? ['C'],
     lotsAvailable: opts.lotsAvailable ?? null,
     lotsTotal: 0,
     walkMin: 1,
@@ -84,6 +85,47 @@ describe('selectResultsView — EV empty state takes priority', () => {
     const v = run([cp('a', { lotsAvailable: 0 }), cp('b', { lotsAvailable: 0 })], true, true);
     assert.equal(v.evFilterEmpty, true);
     assert.equal(v.availFilterEmpty, false);
+  });
+});
+
+describe('selectResultsView — vehicle (lot type) filter', () => {
+  const list = [
+    cp('car-only', { lotsAvailable: 5 }),
+    cp('moto', { lotsAvailable: 5, lotTypes: ['C', 'M'] }),
+    cp('heavy', { lotsAvailable: 5, lotTypes: ['C', 'H'] }),
+    cp('both', { lotsAvailable: 5, lotTypes: ['C', 'M', 'H'], ev: true }),
+  ];
+  const view = (vehicles: ('M' | 'H')[], evOnly = false, carparks = list) =>
+    selectResultsView({ carparks, state: 'loaded', availableOnly: false, evOnly, vehicles });
+
+  it('keeps only carparks with motorcycle lots', () => {
+    assert.deepEqual(view(['M']).ranked.map((c) => c.id).sort(), ['both', 'moto']);
+  });
+
+  it('keeps only carparks with heavy-vehicle lots', () => {
+    assert.deepEqual(view(['H']).ranked.map((c) => c.id).sort(), ['both', 'heavy']);
+  });
+
+  it('both on means the carpark must have both', () => {
+    assert.deepEqual(view(['M', 'H']).ranked.map((c) => c.id), ['both']);
+  });
+
+  it('no vehicle filter keeps everything', () => {
+    assert.equal(view([]).ranked.length, 4);
+    assert.equal(view([]).vehicleFilterEmpty, false);
+  });
+
+  it('flags vehicleFilterEmpty (not evFilterEmpty) when nothing has those lots', () => {
+    const v = view(['M'], true, [cp('a', { lotsAvailable: 5 })]);
+    assert.equal(v.vehicleFilterEmpty, true);
+    assert.equal(v.evFilterEmpty, false);
+    assert.equal(v.availFilterEmpty, false);
+  });
+
+  it('vehicle passes some but none has a charger → evFilterEmpty', () => {
+    const v = view(['M'], true, [cp('moto', { lotsAvailable: 5, lotTypes: ['C', 'M'] })]);
+    assert.equal(v.vehicleFilterEmpty, false);
+    assert.equal(v.evFilterEmpty, true);
   });
 });
 

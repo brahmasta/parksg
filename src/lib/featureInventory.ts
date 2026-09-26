@@ -60,6 +60,8 @@ export const FEATURES: Feature[] = [
   { id: 'result_card_open', label: 'Open a result', area: 'Results' },
   { id: 'filter_ev', label: 'EV filter', area: 'Results' },
   { id: 'filter_available_only', label: 'Available-only filter', area: 'Results' },
+  { id: 'filter_motorcycle', label: 'Motorcycle filter', area: 'Results' },
+  { id: 'filter_heavy_vehicle', label: 'Heavy-vehicle filter', area: 'Results' },
   { id: 'sort_carparks', label: 'Change sort', area: 'Results' },
   { id: 'view_mode_list', label: 'List view', area: 'Results' },
   { id: 'view_mode_map', label: 'Map view', area: 'Results' },

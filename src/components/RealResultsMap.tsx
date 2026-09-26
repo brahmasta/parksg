@@ -70,6 +70,10 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
     return () => {
       map.remove();
       mapRef.current = null;
+      // A fresh map has no viewport yet, so it must be fitted again. Without
+      // this, StrictMode's dev double-mount left the second map unfitted —
+      // no tiles and no pins in `npm run dev`.
+      fittedForDest.current = null;
     };
   }, []);
 

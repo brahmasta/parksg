@@ -358,7 +358,6 @@ export function DetailScreen({
             }}
           >
             {isGoogle ? <GoogleBadge /> : <OperatorBadge operator={cp.operator} size="lg" />}
-            {!isGoogle && <LotTypeChips types={cp.lotTypes} />}
             {cp.grace > 0 && (
               <span
                 style={{
@@ -387,6 +386,33 @@ export function DetailScreen({
             {cp.name}
           </h1>
           <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>{cp.block}</div>
+          {/* Vehicle lot types — own row so the spelled-out chips don't push
+              the operator/grace line into an awkward wrap on a phone. */}
+          {!isGoogle && cp.lotTypes.length > 0 && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginTop: 10,
+                flexWrap: 'wrap',
+                rowGap: 4,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: 'var(--text-3)',
+                  letterSpacing: 0.6,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Lots for
+              </span>
+              <LotTypeChips types={cp.lotTypes} />
+            </div>
+          )}
         </div>
 
         {/* Google supplementary — unverified-data banner */}

@@ -6,6 +6,7 @@ import type {
   Operator,
 } from '../lib/types';
 import { availabilityBgVar, availabilityColorVar } from '../lib/availability';
+import { LOT_TYPE_LABEL } from '../lib/lotTypes';
 import { DURATIONS } from '../lib/mockData';
 import { IconChevronRight, IconClose, IconSearch } from './icons';
 
@@ -181,35 +182,33 @@ export function StaleRatesBadge() {
 }
 
 /* ── Lot-type chips ──────────────────────────────────────────────────────── */
-const LOT_LABELS: Record<LotType, [string, string]> = {
-  C: ['C', 'Car'],
-  M: ['M', 'Motorcycle'],
-  H: ['H', 'Heavy'],
-};
-
 export function LotTypeChips({ types }: { types: LotType[] }) {
   return (
-    <div style={{ display: 'flex', gap: 4 }}>
+    <div
+      role="list"
+      aria-label="Vehicle lots"
+      style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}
+    >
       {types.map((t) => (
         <span
           key={t}
-          title={LOT_LABELS[t][1]}
+          role="listitem"
           style={{
-            width: 18,
-            height: 18,
-            borderRadius: 4,
             display: 'inline-flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-mono)',
-            fontSize: 10,
+            padding: '3px 8px',
+            borderRadius: 999,
+            fontFamily: 'var(--font-body)',
+            fontSize: 11.5,
             fontWeight: 500,
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
             color: 'var(--text-2)',
-            background: 'var(--bg-3)',
+            background: 'transparent',
             border: '0.5px solid var(--line-strong)',
           }}
         >
-          {LOT_LABELS[t][0]}
+          {LOT_TYPE_LABEL[t]}
         </span>
       ))}
     </div>
