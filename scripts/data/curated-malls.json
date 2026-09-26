@@ -996,5 +996,154 @@
       { "dayType": "SUN_PH", "start": "04:00", "end": "24:00", "firstHourCents": 220, "perBlockCents": 110, "blockMinutes": 30 },
       { "dayType": "SUN_PH", "start": "00:00", "end": "04:00", "perEntryCents": 480 }
     ]
+  },
+  {
+    "id": "LTA:six_battery_road",
+    "totalLots": 167,
+    "name": "Six Battery Road",
+    "address": "6 Battery Road, Singapore 049909",
+    "lat": 1.28547,
+    "lng": 103.851764,
+    "operator": "CapitaLand",
+    "provenance": {"url": "https://www.parking-go-where.com/carpark/six-battery-road", "verified": "2026-05", "note": "ParkingGoWhere card verified 2026-05-27. Live lots + capacity via CapitaLand JustPark (site SBR)."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "perBlockCents": 320, "blockMinutes": 30},
+      {"dayType": "WEEKDAY", "start": "18:00", "end": "07:00", "perEntryCents": 380},
+      {"dayType": "SAT", "start": "07:00", "end": "13:00", "perBlockCents": 320, "blockMinutes": 30},
+      {"dayType": "SAT", "start": "13:00", "end": "07:00", "perEntryCents": 380},
+      {"dayType": "SUN_PH", "perEntryCents": 380}
+    ]
+  },
+  {
+    "id": "LTA:oub_centre",
+    "name": "One Raffles Place",
+    "address": "1 Raffles Place, Singapore 048616",
+    "lat": 1.28434,
+    "lng": 103.850982,
+    "operator": "OUE",
+    "provenance": {"url": "https://www.parking-go-where.com/carpark/one-raffles-place", "verified": "2026-09", "note": "ParkingGoWhere $3.27/30min 07:00-17:00, $3.82/entry after; weekends same as weekdays, matching LTA's 2018 structure ($2.62/$3.21 then). An older mall promo listed a flat weekend entry fee instead - verify at the gantry."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "07:00", "end": "17:00", "perBlockCents": 327, "blockMinutes": 30},
+      {"dayType": "WEEKDAY", "start": "17:00", "end": "07:00", "perEntryCents": 382},
+      {"dayType": "SAT", "start": "07:00", "end": "17:00", "perBlockCents": 327, "blockMinutes": 30},
+      {"dayType": "SAT", "start": "17:00", "end": "07:00", "perEntryCents": 382},
+      {"dayType": "SUN_PH", "start": "07:00", "end": "17:00", "perBlockCents": 327, "blockMinutes": 30},
+      {"dayType": "SUN_PH", "start": "17:00", "end": "07:00", "perEntryCents": 382}
+    ]
+  },
+  {
+    "id": "LTA:republic_plaza",
+    "name": "Republic Plaza",
+    "address": "9 Raffles Place (entrance on Malacca Street), Singapore 048619",
+    "lat": 1.283178,
+    "lng": 103.850804,
+    "operator": "CDL",
+    "provenance": {"url": "https://officespaces.com.sg/where-to-park-in-raffles-place/", "verified": "2026-09", "note": "Weekday $3.00/half hour confirmed by the Apr 2026 Raffles Place guide. Evening/weekend $3.50/entry per carnina.app (undated); Saturday-morning per-block band kept from LTA's 2018 card so weekend stays aren't under-estimated."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "07:00", "end": "17:00", "perBlockCents": 300, "blockMinutes": 30},
+      {"dayType": "WEEKDAY", "start": "17:00", "end": "07:00", "perEntryCents": 350},
+      {"dayType": "SAT", "start": "07:00", "end": "12:00", "perBlockCents": 300, "blockMinutes": 30},
+      {"dayType": "SAT", "start": "12:00", "end": "07:00", "perEntryCents": 350},
+      {"dayType": "SUN_PH", "perEntryCents": 350}
+    ]
+  },
+  {
+    "id": "OPERATOR:ocean_financial_centre",
+    "totalLots": 224,
+    "name": "Ocean Financial Centre",
+    "address": "10 Collyer Quay, Singapore 049315",
+    "lat": 1.283081,
+    "lng": 103.851847,
+    "operator": "Keppel REIT",
+    "provenance": {"url": "https://www.motorist.sg/parking/ocean-financial-centre-parking-rates", "verified": "2026-09", "note": "Motorist and officespaces.com.sg agree ($1.20/10min 06:00-18:30, $5.90/entry after); neither page is dated, same figures in a ~2023 review. Not in the 2018 LTA dataset (new id)."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "06:00", "end": "18:30", "perBlockCents": 120, "blockMinutes": 10},
+      {"dayType": "WEEKDAY", "start": "18:30", "end": "06:00", "perEntryCents": 590},
+      {"dayType": "SAT", "start": "06:00", "end": "13:00", "perBlockCents": 120, "blockMinutes": 10},
+      {"dayType": "SAT", "start": "13:00", "end": "06:00", "perEntryCents": 590},
+      {"dayType": "SUN_PH", "perEntryCents": 590}
+    ]
+  },
+  {
+    "id": "LTA:marina_bay_financial_centre_tower_1_2_3_marina_bay_link_mall",
+    "name": "Marina Bay Financial Centre",
+    "address": "8A Marina Boulevard (Towers 1-3 & Marina Bay Link Mall), Singapore 018984",
+    "lat": 1.279651,
+    "lng": 103.853853,
+    "operator": "Keppel REIT / MBFC",
+    "provenance": {"url": "https://www.getgo.sg/blog/guide-to-parking-and-parking-rates-in-cbd", "verified": "2026-09", "note": "GetGo (correct as of 2026-01-14) + ParkingGoWhere agree on $1.18/10min 06:00-18:00; Sun/PH same as weekday per GetGo; Saturday not separately published, assumed same. Evening is $3.27 for the first 4h then $0.30/10min — modelled as per-entry $3.27 (exact for stays up to 4h)."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "06:00", "end": "18:00", "perBlockCents": 118, "blockMinutes": 10},
+      {"dayType": "WEEKDAY", "start": "18:00", "end": "06:00", "perEntryCents": 327},
+      {"dayType": "SAT", "start": "06:00", "end": "18:00", "perBlockCents": 118, "blockMinutes": 10},
+      {"dayType": "SAT", "start": "18:00", "end": "06:00", "perEntryCents": 327},
+      {"dayType": "SUN_PH", "start": "06:00", "end": "18:00", "perBlockCents": 118, "blockMinutes": 10},
+      {"dayType": "SUN_PH", "start": "18:00", "end": "06:00", "perEntryCents": 327}
+    ]
+  },
+  {
+    "id": "LTA:asia_square",
+    "name": "Asia Square Tower 1",
+    "address": "8 Marina View, Singapore 018960",
+    "lat": 1.278692,
+    "lng": 103.851352,
+    "operator": "Asia Square Tower 1",
+    "provenance": {"url": "https://www.parking-go-where.com/carpark/asia-square-tower-1", "verified": "2026-09", "note": "Weekday daytime $1.10/10min per ParkingGoWhere; $5.35/entry evenings + weekends per GetGo (2026-01) / Motorist. Tower 2 (CapitaLand, 12 Marina View) is a separate carpark, not covered here."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "perBlockCents": 110, "blockMinutes": 10},
+      {"dayType": "WEEKDAY", "start": "18:00", "end": "07:00", "perEntryCents": 535},
+      {"dayType": "SAT", "perEntryCents": 535},
+      {"dayType": "SUN_PH", "perEntryCents": 535}
+    ]
+  },
+  {
+    "id": "LTA:capital_tower",
+    "totalLots": 415,
+    "name": "Capital Tower",
+    "address": "168 Robinson Road, Singapore 068912",
+    "lat": 1.277712,
+    "lng": 103.847523,
+    "operator": "CapitaLand",
+    "provenance": {"url": "https://www.motorist.sg/parking/capital-tower-parking-rates", "verified": "2026-09", "note": "Motorist + carnina.app agree (both undated). Live lots via CapitaLand JustPark (site CT)."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "perBlockCents": 280, "blockMinutes": 30},
+      {"dayType": "WEEKDAY", "start": "18:00", "end": "07:00", "perEntryCents": 370},
+      {"dayType": "SAT", "start": "07:00", "end": "13:00", "perBlockCents": 280, "blockMinutes": 30},
+      {"dayType": "SAT", "start": "13:00", "end": "07:00", "perEntryCents": 370},
+      {"dayType": "SUN_PH", "perEntryCents": 370}
+    ]
+  },
+  {
+    "id": "LTA:oue_bayfront_formerly_overseas_union_house",
+    "name": "OUE Bayfront",
+    "address": "50 Collyer Quay, Singapore 049321",
+    "lat": 1.283074,
+    "lng": 103.852986,
+    "operator": "OUE",
+    "provenance": {"url": "https://www.parking-go-where.com/carpark/oue-bayfront", "verified": "2026-09", "note": "ParkingGoWhere card citing oue.com.sg."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "perBlockCents": 107, "blockMinutes": 10},
+      {"dayType": "WEEKDAY", "start": "18:00", "end": "07:00", "perEntryCents": 375},
+      {"dayType": "SAT", "start": "07:00", "end": "15:00", "perBlockCents": 107, "blockMinutes": 10},
+      {"dayType": "SAT", "start": "15:00", "end": "07:00", "perEntryCents": 375},
+      {"dayType": "SUN_PH", "perEntryCents": 375}
+    ]
+  },
+  {
+    "id": "LTA:china_square_central",
+    "name": "China Square Central",
+    "address": "18 Cross Street (also the Great Eastern Centre carpark), Singapore 048423",
+    "lat": 1.283515,
+    "lng": 103.846879,
+    "operator": "Frasers Property",
+    "provenance": {"url": "https://www.parking-go-where.com/carpark/great-eastern-centre", "verified": "2026-09", "note": "LTA's 2018 record places Great Eastern Centre's carpark at China Square Central, so this is one carpark. $1.80/half hour daytime confirmed by the officespaces.com.sg Raffles Place guide (Apr 2026); ParkingGoWhere lists the same card Mon-Sun with $3.30/entry after 17:00. Closed 00:00-06:00."},
+    "rates": [
+      {"dayType": "WEEKDAY", "start": "08:00", "end": "17:00", "perBlockCents": 180, "blockMinutes": 30},
+      {"dayType": "WEEKDAY", "start": "17:00", "end": "08:00", "perEntryCents": 330},
+      {"dayType": "SAT", "start": "08:00", "end": "17:00", "perBlockCents": 180, "blockMinutes": 30},
+      {"dayType": "SAT", "start": "17:00", "end": "08:00", "perEntryCents": 330},
+      {"dayType": "SUN_PH", "start": "08:00", "end": "17:00", "perBlockCents": 180, "blockMinutes": 30},
+      {"dayType": "SUN_PH", "start": "17:00", "end": "08:00", "perEntryCents": 330}
+    ]
   }
 ]

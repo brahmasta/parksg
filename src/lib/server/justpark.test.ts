@@ -67,13 +67,17 @@ test('coerces string lot figures and skips rows without a SiteCode', () => {
 test('maps known sites onto DB carpark ids and drops unmapped ones', () => {
   const sites: JustParkSite[] = [
     { siteCode: 'BM', name: 'Bedok Mall', businessUnit: 'Retail', lotsAvailable: 8, lotsTotal: 265, isFull: false },
-    { siteCode: 'CQ', name: 'Clarke Quay', businessUnit: 'Retail', lotsAvailable: 260, lotsTotal: 383, isFull: false },
+    { siteCode: 'SBR', name: 'Six Battery Road', businessUnit: 'Commercial', lotsAvailable: 143, lotsTotal: 167, isFull: false },
+    { siteCode: 'SGM', name: 'Sengkang Grand Mall', businessUnit: 'Retail', lotsAvailable: 22, lotsTotal: 205, isFull: false },
     { siteCode: '1JKG', name: 'Industrial', businessUnit: 'Business Parks', lotsAvailable: 15, lotsTotal: 37, isFull: false },
   ];
   const lots = toCarparkLots(sites);
-  // CQ (not curated) and the industrial site are dropped; only BM maps.
-  assert.equal(lots.length, 1);
-  assert.deepEqual(lots[0], { id: 'LTA:65', lotsAvailable: 8, lotsTotal: 265 });
+  // SGM (not curated) and the industrial site are dropped; BM and the CBD
+  // tower SBR map onto their DB ids.
+  assert.deepEqual(lots, [
+    { id: 'LTA:65', lotsAvailable: 8, lotsTotal: 265 },
+    { id: 'LTA:six_battery_road', lotsAvailable: 143, lotsTotal: 167 },
+  ]);
 });
 
 test('every mapped site code resolves against the fixture (catches stale codes)', () => {
