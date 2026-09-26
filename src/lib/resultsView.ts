@@ -1,5 +1,6 @@
 import type { Carpark, DurationHours, ResultsState } from './types';
 import { isStaleRates } from './rateSource';
+import { findDestinationCarparkId } from './destinationMatch';
 
 /**
  * Pure ranking + filter-empty classification for the Results screen.
@@ -26,6 +27,8 @@ export type ResultsView = {
   evFilterEmpty: boolean;
   /** Available-only is on and every (EV-passing) carpark is full. */
   availFilterEmpty: boolean;
+  /** The destination's own carpark, pinned first in `ranked`; null if none. */
+  pinnedId: string | null;
 };
 
 export function selectResultsView(input: {
@@ -42,8 +45,11 @@ export function selectResultsView(input: {
    * desktop StayPlanner. Returns null when unknown. When omitted, cost falls
    * back to the preset estByHours[duration] (rateUnknown carparks → null). */
   costOf?: (cp: Carpark) => number | null;
+  /** Searched destination label. When it names a carpark we list (searching
+   * "Tampines Mall"), that carpark is pinned first — see destinationMatch.ts. */
+  destinationLabel?: string | null;
 }): ResultsView {
-  const { carparks, state, availableOnly, evOnly, sortBy = 'distance', duration = 1, costOf } = input;
+  const { carparks, state, availableOnly, evOnly, sortBy = 'distance', duration = 1, costOf, destinationLabel } = input;
 
   // Cost function: explicit costOf when provided, else the preset estimate
   // (rateUnknown → null so it can't masquerade as the cheapest $0).
@@ -64,9 +70,17 @@ export function selectResultsView(input: {
     return a.walkMeters - b.walkMeters;
   });
   const afterEv = evOnly ? sorted.filter((c) => c.ev?.hasCharging === true) : sorted;
-  const ranked = availableOnly
+  const filtered = availableOnly
     ? afterEv.filter((c) => (c.lotsAvailable ?? 0) > 0)
     : afterEv;
+
+  // Pin the destination's own carpark above the sort (even when full — the
+  // user asked about that place). Filters still apply: a pin never brings back
+  // a carpark the active filters removed.
+  const pinnedId = findDestinationCarparkId(filtered, destinationLabel);
+  const ranked = pinnedId
+    ? [...filtered.filter((c) => c.id === pinnedId), ...filtered.filter((c) => c.id !== pinnedId)]
+    : filtered;
 
   // Only meaningful once a search has actually resolved; 'loading'/'empty'
   // have their own dedicated screens.
@@ -76,7 +90,7 @@ export function selectResultsView(input: {
   const availFilterEmpty =
     settled && availableOnly && afterEv.length > 0 && ranked.length === 0;
 
-  return { ranked, evFilterEmpty, availFilterEmpty };
+  return { ranked, evFilterEmpty, availFilterEmpty, pinnedId };
 }
 
 /**

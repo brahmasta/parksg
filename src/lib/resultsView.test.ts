@@ -172,3 +172,51 @@ describe('selectResultsView — only attributes on a settled state', () => {
     assert.equal(v.availFilterEmpty, true);
   });
 });
+
+describe('selectResultsView — destination carpark pinned first', () => {
+  // Searching "Tampines Mall": ~20 cheaper HDB lots used to bury the mall's own
+  // carpark at the bottom of the cost-sorted list.
+  const named = (id: string, name: string, opts: Parameters<typeof cp>[1]) => ({ ...cp(id, opts), name });
+  const tampines = [
+    named('hdb:t54', 'BLK 513 Tampines Central 1', { cost: 1.2, walkMeters: 157, lotsAvailable: 40 }),
+    named('hdb:t12', 'BLK 156/160 Tampines Street 12', { cost: 1.2, walkMeters: 206, lotsAvailable: 12 }),
+    named('lta:century_square', 'Century Square', { cost: 1.35, walkMeters: 110 }),
+    named('lta:63', 'Tampines Mall', { cost: 1.35, walkMeters: 15, lotsAvailable: 191 }),
+  ];
+
+  it('pins the destination carpark above cheaper ones and ranks the rest by cost', () => {
+    const v = selectResultsView({
+      carparks: tampines, state: 'loaded', availableOnly: false, evOnly: false,
+      sortBy: 'cost', duration: 1, destinationLabel: 'Tampines Mall',
+    });
+    assert.equal(v.pinnedId, 'lta:63');
+    assert.deepEqual(v.ranked.map((c) => c.id), ['lta:63', 'hdb:t54', 'hdb:t12', 'lta:century_square']);
+  });
+
+  it('pins even when the destination carpark is full', () => {
+    const full = tampines.map((c) => (c.id === 'lta:63' ? { ...c, lotsAvailable: 0 } : c));
+    const v = selectResultsView({
+      carparks: full, state: 'loaded', availableOnly: false, evOnly: false,
+      sortBy: 'cost', duration: 1, destinationLabel: 'Tampines Mall',
+    });
+    assert.equal(v.ranked[0].id, 'lta:63');
+  });
+
+  it('does not bring back a pinned carpark the Available filter removed', () => {
+    const v = selectResultsView({
+      carparks: tampines, state: 'loaded', availableOnly: true, evOnly: false,
+      sortBy: 'cost', duration: 1, destinationLabel: 'Century Square',
+    });
+    assert.equal(v.pinnedId, null); // Century Square has no live count
+    assert.ok(!v.ranked.some((c) => c.id === 'lta:century_square'));
+  });
+
+  it('leaves the order alone when nothing matches the destination', () => {
+    const v = selectResultsView({
+      carparks: tampines, state: 'loaded', availableOnly: false, evOnly: false,
+      sortBy: 'cost', duration: 1, destinationLabel: 'My location',
+    });
+    assert.equal(v.pinnedId, null);
+    assert.equal(v.ranked[0].id, 'hdb:t54');
+  });
+});
