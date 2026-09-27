@@ -25,22 +25,41 @@ const intOrNull = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : null;
 const timeOrNull = (v: unknown): string | null =>
   typeof v === 'string' && /^\d{1,2}:\d{2}(:\d{2})?$/.test(v.trim()) ? v.trim() : null;
+/** '8:00' / '08:00:00' → '08:00', for comparing band edges. */
+const hhmm = (t: string): string => {
+  const [h, m] = t.split(':');
+  return `${h.padStart(2, '0')}:${m}`;
+};
 
 /** Normalize a raw rate-row array into DB rows (source=MANUAL). Throws on a
- * bad day_type. */
+ * bad day_type.
+ *
+ * per_block_cents / block_minutes are NOT NULL in rate_rows, so a per-entry row
+ * (no per-block pair) stores 0/0 — the same stub the ingest scripts write and
+ * the runtime skips. Sending null there failed the whole batch insert, which
+ * silently dropped every rate on approved submissions like 18 Cross Carpark.
+ *
+ * A band whose start equals its end ("08:00"–"08:00", i.e. 24h from 08:00) is
+ * stored as all-day: the rate engine reads start === end as an empty window. */
 export function parseRates(raw: unknown[], carparkId: string): Record<string, unknown>[] {
   return raw.map((r) => {
     const row = r as Record<string, unknown>;
     if (!DAY_TYPES.includes(String(row.day_type)))
       throw new Error(`bad day_type: ${row.day_type}`);
+    let start = timeOrNull(row.start_time);
+    let end = timeOrNull(row.end_time);
+    if (start != null && end != null && hhmm(start) === hhmm(end)) {
+      start = null;
+      end = null;
+    }
     return {
       carpark_id: carparkId,
       day_type: row.day_type,
-      start_time: timeOrNull(row.start_time),
-      end_time: timeOrNull(row.end_time),
+      start_time: start,
+      end_time: end,
       first_hour_cents: intOrNull(row.first_hour_cents),
-      per_block_cents: intOrNull(row.per_block_cents),
-      block_minutes: intOrNull(row.block_minutes),
+      per_block_cents: intOrNull(row.per_block_cents) ?? 0,
+      block_minutes: intOrNull(row.block_minutes) ?? 0,
       per_entry_cents: intOrNull(row.per_entry_cents),
       cap_cents: intOrNull(row.cap_cents),
       grace_minutes: intOrNull(row.grace_minutes),
