@@ -17,6 +17,7 @@ export type ProposedRate = {
   start_time: string | null;
   end_time: string | null;
   first_hour_cents: number | null;
+  first_block_minutes?: number | null;
   per_block_cents: number | null;
   block_minutes: number | null;
   per_entry_cents: number | null;

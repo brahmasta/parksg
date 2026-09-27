@@ -45,6 +45,8 @@ export type DbRateRowRaw = {
   per_block_cents: number;
   block_minutes: number;
   first_hour_cents: number | null;
+  /** Minutes the first_hour_cents tier covers (e.g. 120 for "1st 2 hrs"); null = 60. */
+  first_block_minutes: number | null;
   per_entry_cents: number | null;
   cap_cents: number | null;
   grace_minutes: number | null;
@@ -93,7 +95,7 @@ function boundingBox(
 // ── Fetcher ────────────────────────────────────────────────────────────
 
 const CARPARK_SELECT =
-  'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
+  'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,first_block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
 
 /**
  * Fetch a single carpark (with rate_rows) by its URL slug — used when the app

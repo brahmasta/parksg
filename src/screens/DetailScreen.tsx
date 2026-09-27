@@ -61,6 +61,7 @@ function toEditableRates(cp: Carpark): EditableRate[] {
         start_time: r.startTime ?? null,
         end_time: r.endTime ?? null,
         first_hour_cents: r.firstHourCents ?? null,
+        first_block_minutes: r.firstBlockMinutes ?? null,
         per_block_cents: r.perBlockCents ?? null,
         block_minutes: r.blockMinutes ?? null,
         per_entry_cents: r.perEntryCents ?? null,

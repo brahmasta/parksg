@@ -16,6 +16,7 @@ type Rate = {
   start?: string | null;
   end?: string | null;
   firstHourCents?: number | null;
+  firstBlockMinutes?: number | null;
   perBlockCents?: number | null;
   blockMinutes?: number | null;
   perEntryCents?: number | null;
@@ -75,6 +76,17 @@ describe('curated-malls.json', () => {
         const perBlock = (r.perBlockCents ?? 0) > 0 && (r.blockMinutes ?? 0) > 0;
         const perEntry = r.perEntryCents != null && r.perEntryCents >= 0;
         assert.ok(perBlock || perEntry, `${label}: needs perBlockCents+blockMinutes or perEntryCents`);
+      }
+    }
+  });
+
+  it('only sets firstBlockMinutes as a positive tier length on a first-hour row', () => {
+    for (const e of entries) {
+      for (const r of e.rates) {
+        if (r.firstBlockMinutes == null) continue;
+        const label = `${e.name} ${r.dayType} ${r.start ?? ''}-${r.end ?? ''}`;
+        assert.ok(r.firstBlockMinutes > 0, `${label}: firstBlockMinutes must be > 0`);
+        assert.ok(r.firstHourCents != null, `${label}: firstBlockMinutes without firstHourCents`);
       }
     }
   });

@@ -211,13 +211,15 @@
     "name": "Plaza Singapura",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/plaza-singapura-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/plaza-singapura-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
       { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 195, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 },
-      { "dayType": "SAT", "start": "00:00", "end": "18:00", "firstHourCents": 325, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "03:00", "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 325, "firstBlockMinutes": 120, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 },
-      { "dayType": "SUN_PH", "start": "00:00", "end": "18:00", "firstHourCents": 325, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "03:00", "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 325, "firstBlockMinutes": 120, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 }
     ]
   },
@@ -242,12 +244,13 @@
     "name": "Raffles City",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/raffles-city-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/raffles-city-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "08:00", "perEntryCents": 325, "graceMinutes": 10 },
       { "dayType": "WEEKDAY", "start": "08:00", "end": "18:00", "firstHourCents": 260, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
-      { "dayType": "WEEKDAY", "start": "18:00", "end": "08:00", "perEntryCents": 325, "graceMinutes": 10 },
-      { "dayType": "SAT", "firstHourCents": 260, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
-      { "dayType": "SUN_PH", "firstHourCents": 260, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 }
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 260, "firstBlockMinutes": 120, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 260, "firstBlockMinutes": 120, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 }
     ]
   },
   {
@@ -271,13 +274,15 @@
     "name": "Tampines Mall",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/tampines-mall-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/tampines-mall-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
       { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 135, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 },
-      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 265, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "03:00", "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 265, "firstBlockMinutes": 120, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 },
-      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 265, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "03:00", "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 265, "firstBlockMinutes": 120, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 }
     ]
   },
@@ -286,14 +291,14 @@
     "name": "Westgate",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/westgate-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/westgate-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
-      { "dayType": "WEEKDAY", "start": "07:00", "end": "18:00", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15 },
-      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 325 },
-      { "dayType": "SAT", "start": "07:00", "end": "18:00", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15 },
-      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 325 },
-      { "dayType": "SUN_PH", "start": "07:00", "end": "18:00", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15 },
-      { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 325 }
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "18:00", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "18:00", "firstHourCents": 160, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 325, "graceMinutes": 10 }
     ]
   },
   {
@@ -317,12 +322,12 @@
     "name": "Bugis+",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/bugis-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/bugis-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
-      { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 220, "perBlockCents": 55, "blockMinutes": 15 },
-      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 330 },
-      { "dayType": "SAT", "firstHourCents": 330, "perBlockCents": 55, "blockMinutes": 15 },
-      { "dayType": "SUN_PH", "firstHourCents": 330, "perBlockCents": 55, "blockMinutes": 15 }
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 220, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 330, "graceMinutes": 10 },
+      { "dayType": "SAT", "firstHourCents": 330, "firstBlockMinutes": 120, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "firstHourCents": 330, "firstBlockMinutes": 120, "perBlockCents": 55, "blockMinutes": 15, "graceMinutes": 10 }
     ]
   },
   {
@@ -343,13 +348,13 @@
     "name": "Junction 8",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/junction-8-basement-car-park-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/junction-8-basement-car-park-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
       { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 135, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 },
-      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 265, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "18:00", "firstHourCents": 265, "firstBlockMinutes": 120, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 },
-      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 265, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "18:00", "firstHourCents": 265, "firstBlockMinutes": 120, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 }
     ]
   },
@@ -359,13 +364,15 @@
     "name": "Lot One",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/lot-one-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/lot-one-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
       { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 135, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 },
-      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 265, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "03:00", "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 265, "firstBlockMinutes": 120, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 },
-      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 265, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "03:00", "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 265, "firstBlockMinutes": 120, "perBlockCents": 45, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 265, "graceMinutes": 10 }
     ]
   },
@@ -406,14 +413,16 @@
     "name": "Funan",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/funan-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/funan-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
-      { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 240, "perBlockCents": 65, "blockMinutes": 15 },
-      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 330 },
-      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 260, "perBlockCents": 65, "blockMinutes": 15 },
-      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 330 },
-      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 260, "perBlockCents": 65, "blockMinutes": 15 },
-      { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 330 }
+      { "dayType": "WEEKDAY", "start": "00:00", "end": "18:00", "firstHourCents": 240, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "start": "18:00", "end": "24:00", "perEntryCents": 330, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "00:00", "end": "03:00", "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "03:00", "end": "18:00", "firstHourCents": 260, "firstBlockMinutes": 120, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SAT", "start": "18:00", "end": "24:00", "perEntryCents": 330, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "00:00", "end": "03:00", "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "03:00", "end": "18:00", "firstHourCents": 260, "firstBlockMinutes": 120, "perBlockCents": 65, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "SUN_PH", "start": "18:00", "end": "24:00", "perEntryCents": 330, "graceMinutes": 10 }
     ]
   },
   {
@@ -422,9 +431,9 @@
     "name": "IMM",
     "ratesOnly": true,
     "operator": "CapitaLand",
-    "provenance": { "url": "https://www.motorist.sg/parking/imm-building-parking-rates", "verified": "2026-05" },
+    "provenance": { "url": "https://www.motorist.sg/parking/imm-building-parking-rates", "verified": "2026-05", "note": "Rates synced from production 2026-09-27: a 2026-06-22 hand-correction in the DB (weekend first-2-hours tier via firstBlockMinutes, 00:00-03:00 overnight band, grace) never made it back to this file." },
     "rates": [
-      { "dayType": "WEEKDAY", "firstHourCents": 120, "perBlockCents": 40, "blockMinutes": 15, "graceMinutes": 10 },
+      { "dayType": "WEEKDAY", "firstHourCents": 0, "firstBlockMinutes": 60, "perBlockCents": 40, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SAT", "firstHourCents": 120, "perBlockCents": 40, "blockMinutes": 15, "graceMinutes": 10 },
       { "dayType": "SUN_PH", "firstHourCents": 120, "perBlockCents": 40, "blockMinutes": 15, "graceMinutes": 10 }
     ]

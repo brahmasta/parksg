@@ -18,7 +18,7 @@ export const config = { runtime: 'edge' };
 const CARPARK_FIELDS =
   'id,slug,agency,source,source_code,name,address,lat,lng,total_lots,central_area,car_park_type,parking_system';
 const RATE_FIELDS =
-  'id,day_type,start_time,end_time,first_hour_cents,per_block_cents,block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from';
+  'id,day_type,start_time,end_time,first_hour_cents,first_block_minutes,per_block_cents,block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from';
 
 export default async function handler(req: Request): Promise<Response> {
   const admin = await verifyAdmin(req);
