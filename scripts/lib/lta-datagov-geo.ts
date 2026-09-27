@@ -499,6 +499,9 @@ export const REVIEWED: Record<string, ReviewDecision> = {
   'LTA:iluma': { skip: 'renamed — Bugis+ since 2012 (LTA:61)' },
   'LTA:the_esplanade': { skip: 'same carpark as LTA:4 "Esplanade — Theatres on the Bay"' },
   'LTA:d_resort': { skip: 'same carpark as Downtown East (LTA:downtown_east) — one complex' },
+  'LTA:china_square_central': {
+    skip: 'same carpark as the user-submitted 18 Cross Carpark (MANUAL:18_cross_carpark)',
+  },
   'LTA:grand_mecure_roxy_hotel': {
     skip: 'misspelt copy of "Grand Mercure Roxy Hotel" — Roxy Square\'s carpark',
   },
