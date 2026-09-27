@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Wordmark } from '../components/Wordmark';
 import { CoverageSections } from '../components/CoverageSections';
-import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
+import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_LINKEDIN_URL, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
 import { IconChevronLeft } from '../components/icons';
 
 type AboutScreenProps = {
@@ -129,6 +129,21 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
               }}
             >
               Say hi on X (@brahmasta) →
+            </a>
+            <a
+              href={FOUNDER_LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="founder_linkedin_link"
+              style={{
+                alignSelf: 'flex-start',
+                fontSize: 13.5,
+                color: 'var(--accent)',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Connect on LinkedIn →
             </a>
           </div>
         </Section>

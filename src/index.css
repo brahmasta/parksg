@@ -62,6 +62,7 @@
   --src-ura: #5050fa; /* blue */
   --src-lta: #fcae30; /* gold */
   --src-ev: #921fff; /* purple */
+  --src-op: #f0506e; /* coral */
 }
 
 /* ── Themes ──────────────────────────────────────────────────────────────────
@@ -149,6 +150,7 @@
   --src-ura: #3636c9;
   --src-lta: #7a4e00;
   --src-ev: #6a10bd;
+  --src-op: #b0213d;
 }
 
 * {
