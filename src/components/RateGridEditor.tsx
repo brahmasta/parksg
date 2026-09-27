@@ -53,7 +53,7 @@ export function RateGridEditor<T extends EditableRate>({
         <table style={{ borderCollapse: 'separate', borderSpacing: '4px 4px', fontSize: 12 }}>
           <thead>
             <tr style={{ color: 'var(--text-3)', textAlign: 'left' }}>
-              {['Day', 'Start', 'End', '1st hr $', 'Block $', 'Block min', 'Entry $', 'Cap $', 'Grace', 'System', ''].map((h) => (
+              {['Day', 'Start', 'End', '1st hr $', '1st min', 'Block $', 'Block min', 'Entry $', 'Cap $', 'Grace', 'System', ''].map((h) => (
                 <th key={h} style={{ padding: '2px 6px', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
@@ -65,6 +65,7 @@ export function RateGridEditor<T extends EditableRate>({
                 <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.start_time ?? ''} onChange={(e) => setRate(i, { start_time: e.target.value || null })} /></td>
                 <td><input style={{ ...cell, width: 62 }} placeholder="HH:MM" value={r.end_time ?? ''} onChange={(e) => setRate(i, { end_time: e.target.value || null })} /></td>
                 <td><input style={{ ...cell, width: 56 }} value={toDollar(r.first_hour_cents)} onChange={(e) => setRate(i, { first_hour_cents: toCents(e.target.value) })} /></td>
+                <td><input style={{ ...cell, width: 48 }} placeholder="60" value={r.first_block_minutes ?? ''} onChange={(e) => setRate(i, { first_block_minutes: toIntOrNull(e.target.value) })} /></td>
                 <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_block_cents)} onChange={(e) => setRate(i, { per_block_cents: toCents(e.target.value) })} /></td>
                 <td><input style={{ ...cell, width: 52 }} value={r.block_minutes ?? ''} onChange={(e) => setRate(i, { block_minutes: toIntOrNull(e.target.value) })} /></td>
                 <td><input style={{ ...cell, width: 56 }} value={toDollar(r.per_entry_cents)} onChange={(e) => setRate(i, { per_entry_cents: toCents(e.target.value) })} /></td>
@@ -75,7 +76,7 @@ export function RateGridEditor<T extends EditableRate>({
               </tr>
             ))}
             {rates.length === 0 && (
-              <tr><td colSpan={11} style={{ color: 'var(--text-3)', padding: 10 }}>No rate rows yet — add one with “+ Add row”.</td></tr>
+              <tr><td colSpan={12} style={{ color: 'var(--text-3)', padding: 10 }}>No rate rows yet — add one with “+ Add row”.</td></tr>
             )}
           </tbody>
         </table>

@@ -23,6 +23,10 @@ export function slugify(s: string): string {
 
 const intOrNull = (v: unknown): number | null =>
   typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : null;
+const positiveIntOrNull = (v: unknown): number | null => {
+  const n = intOrNull(v);
+  return n != null && n > 0 ? n : null;
+};
 const timeOrNull = (v: unknown): string | null =>
   typeof v === 'string' && /^\d{1,2}:\d{2}(:\d{2})?$/.test(v.trim()) ? v.trim() : null;
 /** '8:00' / '08:00:00' → '08:00', for comparing band edges. */
@@ -58,6 +62,8 @@ export function parseRates(raw: unknown[], carparkId: string): Record<string, un
       start_time: start,
       end_time: end,
       first_hour_cents: intOrNull(row.first_hour_cents),
+      // Tier length for first_hour_cents ("1st 2 hrs" = 120); null means 60.
+      first_block_minutes: positiveIntOrNull(row.first_block_minutes),
       per_block_cents: intOrNull(row.per_block_cents) ?? 0,
       block_minutes: intOrNull(row.block_minutes) ?? 0,
       per_entry_cents: intOrNull(row.per_entry_cents),
