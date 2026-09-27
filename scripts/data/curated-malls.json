@@ -1128,22 +1128,5 @@
       {"dayType": "SAT", "start": "15:00", "end": "07:00", "perEntryCents": 375},
       {"dayType": "SUN_PH", "perEntryCents": 375}
     ]
-  },
-  {
-    "id": "LTA:china_square_central",
-    "name": "China Square Central",
-    "address": "18 Cross Street (also the Great Eastern Centre carpark), Singapore 048423",
-    "lat": 1.283515,
-    "lng": 103.846879,
-    "operator": "Frasers Property",
-    "provenance": {"url": "https://www.parking-go-where.com/carpark/great-eastern-centre", "verified": "2026-09", "note": "LTA's 2018 record places Great Eastern Centre's carpark at China Square Central, so this is one carpark. $1.80/half hour daytime confirmed by the officespaces.com.sg Raffles Place guide (Apr 2026); ParkingGoWhere lists the same card Mon-Sun with $3.30/entry after 17:00. Closed 00:00-06:00."},
-    "rates": [
-      {"dayType": "WEEKDAY", "start": "08:00", "end": "17:00", "perBlockCents": 180, "blockMinutes": 30},
-      {"dayType": "WEEKDAY", "start": "17:00", "end": "08:00", "perEntryCents": 330},
-      {"dayType": "SAT", "start": "08:00", "end": "17:00", "perBlockCents": 180, "blockMinutes": 30},
-      {"dayType": "SAT", "start": "17:00", "end": "08:00", "perEntryCents": 330},
-      {"dayType": "SUN_PH", "start": "08:00", "end": "17:00", "perBlockCents": 180, "blockMinutes": 30},
-      {"dayType": "SUN_PH", "start": "17:00", "end": "08:00", "perEntryCents": 330}
-    ]
   }
 ]
