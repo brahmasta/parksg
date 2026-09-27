@@ -102,6 +102,12 @@ function groupRates(rows: DbRateRowRaw[]): SeoCarpark['rates'] {
   const out: SeoCarpark['rates'] = { weekday: [], saturday: [], sundayPH: [] };
   for (const raw of rows) {
     if (raw.veh_cat !== 'CAR') continue;
+    // Skip the parser-stub rows the LTA CSV import writes for unparseable cells
+    // (per_block_cents=0, block_minutes=0) — they'd render as "$0.00 / 0 min".
+    // Same rule as bucketRateRows in src/hooks/useCarparks.ts.
+    if (raw.per_block_cents === 0 && raw.block_minutes === 0 && raw.per_entry_cents == null) {
+      continue;
+    }
     const row = toRateRow(raw);
     if (raw.day_type === 'WEEKDAY') out.weekday.push(row);
     else if (raw.day_type === 'SAT') out.saturday.push(row);

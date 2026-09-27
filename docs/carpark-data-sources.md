@@ -28,14 +28,14 @@ Coverage today, by source:
 ¹ HDB capacity comes from the live feed at runtime, not the DB column.
 
 **Why not just geocode the 254 rows in place:** `migrateLtaCsv` in
-`scripts/migrate-to-supabase.ts` wipes and recreates every `LTA_DATAGOV` row with
-`lat/lng = NULL` on each full sync, so coordinates written onto those rows are
-lost on the next run. Curated entries are `source='MANUAL'` and survive the sync
+`scripts/migrate-to-supabase.ts` wipes and recreates every `LTA_DATAGOV` row on
+each full sync, so coordinates written onto those rows are lost on the next run.
+Curated entries are `source='MANUAL'` and survive the sync
 (see the `loadManualCarparkIds` guards). The long tail also contains closed or
 renamed places (Liang Court, Underwater World, Jurong Bird Park, Golden Mile
 Complex, the old Hilton on Orchard) and duplicates of carparks we already carry
 (Tangs, The Centrepoint, Lot 1, Clarke Quay…), so it needs review, not a blind
-geocode.
+geocode. That review is now done — see [Long tail](#long-tail-added-2026-09-27).
 
 ## Sources — prices
 
@@ -101,6 +101,51 @@ records the sources and any conflicts.
   **IOI Central Boulevard, Fullerton, Income at Raffles, Robinson 77** (no data).
 - **8 Shenton Way** — AXA Tower site, demolished; never surface it.
 
+## Long tail (added 2026-09-27)
+
+`scripts/data/lta-datagov-coords.json` maps 145 of the 246 `LTA_DATAGOV` carparks
+to OneMap building points. `migrateLtaCsv` reads it whenever it recreates a
+standalone, so the coordinates survive every full sync. The rows keep
+`source='LTA_DATAGOV'`, so the app's "2018 rate" badge still warns, and the SSR
+`/carpark/<slug>` page now says the same.
+
+**Regenerate:** `npm run geocode:lta-datagov` (dry run, prints the report; also saved
+to `scripts/out/lta-datagov-geocode.md`), then `-- --write` to update the JSON. It
+reads the DB with the anon key, matches names against the OneMap postal-code dump
+(2017, cached in `scripts/out/`) and then the OneMap search API. The rules and the
+hand-review table (`REVIEWED`: skip / accept / alias) are in
+`scripts/lib/lta-datagov-geo.ts`, tested by `scripts/lib/lta-datagov-geo.test.ts`.
+
+What it does with each row (counts from the 2026-09-27 run):
+
+| Outcome | Rows | Rule |
+|---|---:|---|
+| Placed | 145 | The OneMap building name matches the carpark name (or its address, for rows named "25 Toa Payoh Lorong 8", or a reviewed alias such as Tampines Junction → "Income at Tampines Junction") |
+| No usable price | 30 | Every cell unparseable, or only "Free" / per-entry strings that `rateRowToDb` drops. A pin would show the invented `ratesFor('LTA')` $1.60/30min placeholder (tagged `MANUAL`, so no 2018 badge). Includes IKEA Tampines, Singapore Land Tower, JCube, Mustafa. `migrateLtaCsv` rechecks this on every sync (`standalonePlacement`) |
+| Duplicate / same carpark | 34 | A same-named carpark within 150 m (Clarke Quay, Lot 1, orchardgateway, Millenia Walk, Bukit Panjang Plaza…), a "Car Park at X" note in the CSV (Pan Pacific, Mandarin Oriental and Marina Mandarin → Marina Square; Swissotel → Raffles City), identical rates (Conrad / Ritz-Carlton → Millenia), a reviewed shared carpark (Mandarin Gallery → Hilton Singapore Orchard, Marriott → Tang Plaza, HDB Hub → `HDB:HDBH`), or the CSV listing a building twice |
+| Closed or renamed away | 15 | Liang Court, Novotel Clarke Quay, Clifford Centre, Tanglin Shopping Centre, Comcentre, Golden Shoe, Keypoint (now City Gate), Underwater World, Golden Mile Complex, Pearl's Centre, 8 Shenton Way, the old Hilton, Iluma (now Bugis+), Mandarin Orchard and Meritus Mandarin (now Hilton Singapore Orchard). Jurong Bird Park falls out earlier, under no usable price |
+| `MANUAL`-protected | 3 | Both Changi Airport rows and Marina Bay Sands carry hand-fixed rates (migration 002). The sync never recreates them, so JSON can't reach them — curate them in `curated-malls.json` to map them |
+| Unmatched | 19 | No confident building match: Berjaya Hotel, Central Place, Copthorne Orchid, CPF Building, Gallery Hotel, Hougang Plaza, IKEA Alexandra (OneMap's only "IKEA" is in Tampines), Katong Village, Paramount Hotel, The Verge… Off the map; add a `REVIEWED` alias to place one |
+
+Closures were checked against news and operator sources on 2026-09-27. **Recheck
+before relying on these:** Shenton House (sold 2023, redevelopment due end-2026),
+Singapore Shopping Centre, Anchorpoint and Delfi Orchard (all up for sale). Several
+placed buildings kept their 2018 name after a rebrand (Grand Park Orchard → Pullman,
+Peninsula Excelsior → Wyndham, Robinson Centre → 61 Robinson, PoMo → GR.iD,
+Traders → Hotel Jen Tanglin); the location is right, the name is not current.
+
+Found along the way:
+
+- A full sync used to **overwrite curated carparks** whose id a CSV name reuses
+  under another name (curated "AMK Hub" is `LTA:ang_mo_kio_hub`; the CSV's "Ang Mo
+  Kio Hub" didn't name-match, so it upserted over the curated row, nulling its
+  coordinates and replacing its rates). Five were exposed: AMK Hub, Compass One,
+  Northpoint City, Velocity, One Raffles Place. `migrateLtaCsv` now skips any
+  standalone whose id has `MANUAL` rate_rows.
+- **Bugis Junction is on no map.** `findMatches` pairs the CSV's "Bugis Junction"
+  with "Bugis+" (prefix "bugis"), and as Bugis+ is curated the row is dropped.
+  Needs its own curated entry.
+
 ## Recommended order
 
 1. ✅ Pin the destination's own carpark (Tampines fix).
@@ -109,9 +154,10 @@ records the sources and any conflicts.
 3. Verify the "not added" CBD list above (starting with Singapore Land Tower and
    the four CapitaLand towers, which get live lots the moment they have a rate card),
    plus Sengkang Grand Mall.
-4. Long tail: review the 254 `LTA_DATAGOV` names (drop closed/duplicate), then either
-   curate the busiest ones or teach `migrateLtaCsv` to read a reviewed
-   `scripts/data/lta-datagov-coords.json` so coordinates survive re-syncs.
+4. ✅ Long tail: 145 `LTA_DATAGOV` carparks placed from the reviewed
+   `scripts/data/lta-datagov-coords.json` (see [Long tail](#long-tail-added-2026-09-27)).
+   Needs a full `npx tsx scripts/migrate-to-supabase.ts` to reach production. Next:
+   curate the busiest of them (fresh rates), plus Changi / MBS coordinates and Bugis Junction.
 5. Refresh curated rate cards every ~6 months (each entry carries
    `provenance.verified`; the guard test in `scripts/lib/curated-malls.test.ts`
    requires it).
