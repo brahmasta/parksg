@@ -16,7 +16,7 @@ const ANON_KEY =
   process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
 
 const CARPARK_SELECT =
-  'id,slug,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
+  'id,slug,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,first_block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
 
 type DbRateRowRaw = {
   day_type: DayType;
@@ -25,6 +25,7 @@ type DbRateRowRaw = {
   per_block_cents: number | null;
   block_minutes: number | null;
   first_hour_cents: number | null;
+  first_block_minutes: number | null;
   per_entry_cents: number | null;
   cap_cents: number | null;
   grace_minutes: number | null;
@@ -85,6 +86,7 @@ function toRateRow(r: DbRateRowRaw): RateRow {
     startTime: r.start_time ?? undefined,
     endTime: r.end_time ?? undefined,
     firstHourCents: r.first_hour_cents ?? undefined,
+    firstBlockMinutes: r.first_block_minutes || undefined,
     perBlockCents: r.per_block_cents ?? undefined,
     blockMinutes: r.block_minutes ?? undefined,
     perEntryCents: r.per_entry_cents ?? undefined,

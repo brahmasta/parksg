@@ -47,6 +47,8 @@ type CuratedRate = {
   end?: string | null;
   /** First-hour (or first-block) flat charge, in cents. */
   firstHourCents?: number | null;
+  /** Minutes firstHourCents covers ("1st 2 hrs" = 120). Omit for 60. */
+  firstBlockMinutes?: number | null;
   /** Per-block charge after the first block, in cents. */
   perBlockCents?: number | null;
   blockMinutes?: number | null;
@@ -105,6 +107,7 @@ type DbRateRow = {
   per_block_cents: number;
   block_minutes: number;
   first_hour_cents: number | null;
+  first_block_minutes: number | null;
   per_entry_cents: number | null;
   cap_cents: number | null;
   grace_minutes: number | null;
@@ -178,6 +181,7 @@ function toDbRateRows(entry: CuratedMall, id: string): DbRateRow[] {
     per_block_cents: r.perBlockCents ?? 0,
     block_minutes: r.blockMinutes ?? 0,
     first_hour_cents: r.firstHourCents ?? null,
+    first_block_minutes: r.firstBlockMinutes ?? null,
     per_entry_cents: r.perEntryCents ?? null,
     cap_cents: r.capCents ?? null,
     grace_minutes: r.graceMinutes ?? null,

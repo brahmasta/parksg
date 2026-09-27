@@ -553,6 +553,9 @@ function dbToRateRow(r: DbRateRowRaw): RateRow {
     perBlockCents: r.per_block_cents,
     blockMinutes: r.block_minutes,
     firstHourCents: r.first_hour_cents ?? undefined,
+    // "1st 2 hrs" weekend tiers at the CapitaLand malls; without it a $2.65 /
+    // 2h first tier was priced as $2.65 / 1h. A 0-minute tier is meaningless.
+    firstBlockMinutes: r.first_block_minutes || undefined,
     perEntryCents: r.per_entry_cents ?? undefined,
     capCents: r.cap_cents ?? undefined,
     graceMinutes: r.grace_minutes ?? undefined,

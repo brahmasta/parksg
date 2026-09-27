@@ -69,7 +69,8 @@ geocode. That review is now done — see [Long tail](#long-tail-added-2026-09-27
 
 ## CBD pack (added 2026-09-26)
 
-Nine buildings curated into `scripts/data/curated-malls.json`. Coordinates are
+Eight buildings curated into `scripts/data/curated-malls.json`, plus the
+user-submitted 18 Cross Carpark (below). Coordinates are
 OneMap building points (via the Open-Data-Licensed OneMap postal-code dump,
 <https://github.com/xkjyeah/singapore-postal-codes>, cross-checked against the
 DB's existing Tampines rows to within metres). Each entry's `provenance.note`
@@ -85,7 +86,14 @@ records the sources and any conflicts.
 | Asia Square Tower 1 | `LTA:asia_square` | $1.10/10min | — | Medium-low |
 | Capital Tower | `LTA:capital_tower` | $2.80/30min | ✅ JustPark CT | Medium-low (sources undated) |
 | OUE Bayfront | `LTA:oue_bayfront_…` | $1.07/10min | — | Medium |
-| China Square Central (= Great Eastern Centre carpark) | `LTA:china_square_central` | $1.80/30min | — | Medium (Apr 2026 guide) |
+| 18 Cross Carpark (China Square Central / Cross Street Exchange; also the Great Eastern Centre carpark) | `MANUAL:18_cross_carpark` — user-submitted, admin-managed, **not** in curated-malls.json | $1.90/30min | — | High (user submission 2026-09-26; matches the Apr 2026 guide's "Cross Street Exchange $1.90/half hour") |
+
+**Admin rate-drop bug (fixed 2026-09-27):** approving a community "new carpark"
+or rate edit silently dropped every rate when any row was per-entry —
+`parseRates` sent `per_block_cents/block_minutes = null` into NOT NULL columns,
+failing the whole insert. 18 Cross Carpark and Stamford Place were approved
+on 2026-09-26 with zero rates because of it. Fixed in `api/_admin/carparkWrite.ts`
+(per-entry rows store 0/0; a `08:00`–`08:00` band is stored as all-day).
 
 **Not added — need a check (signage, operator, or ParkingGoWhere) first:**
 
@@ -149,7 +157,7 @@ Found along the way:
 ## Recommended order
 
 1. ✅ Pin the destination's own carpark (Tampines fix).
-2. ✅ CBD pack: nine towers curated, JustPark live lots for Six Battery Road +
+2. ✅ CBD pack: eight towers curated + 18 Cross Carpark's submitted rates restored, JustPark live lots for Six Battery Road +
    Capital Tower + Clarke Quay. Needs `npm run migrate:malls` to reach production.
 3. Verify the "not added" CBD list above (starting with Singapore Land Tower and
    the four CapitaLand towers, which get live lots the moment they have a rate card),

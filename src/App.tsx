@@ -26,6 +26,7 @@ import { useMediaQuery } from './hooks/useMediaQuery';
 import { DesktopShell } from './desktop/DesktopShell';
 import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
 import { estCostForStay, roundedSoon, type Stay } from './lib/stay';
+import type { VehicleFilter } from './lib/resultsView';
 import { findArea } from './lib/seoAreas';
 import { haversineMeters, walkMinutesFromMeters } from './lib/geo';
 import { loadRecents, pushRecent } from './lib/recents';
@@ -48,6 +49,7 @@ import { Spinner } from './components/atoms';
 const VIEW_MODE_KEY = 'psg.viewMode';
 const AVAILABLE_ONLY_KEY = 'psg.availableOnly';
 const EV_ONLY_KEY = 'psg.evOnly';
+const VEHICLES_KEY = 'psg.vehicleFilter';
 
 function readStored<T>(key: string, fallback: T, parse: (raw: string) => T | null): T {
   try {
@@ -191,6 +193,24 @@ function App() {
     setEvOnlyState(v);
     try {
       localStorage.setItem(EV_ONLY_KEY, String(v));
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Motorcycle / heavy-vehicle lot filter. Remembered like EV — a rider
+  // shouldn't have to re-pick it on every search.
+  const [vehicles, setVehiclesState] = useState<VehicleFilter[]>(() =>
+    readStored<VehicleFilter[]>(VEHICLES_KEY, [], (raw) =>
+      raw
+        .split(',')
+        .filter((t): t is VehicleFilter => t === 'M' || t === 'H'),
+    ),
+  );
+  const setVehicles = useCallback((v: VehicleFilter[]) => {
+    setVehiclesState(v);
+    try {
+      localStorage.setItem(VEHICLES_KEY, v.join(','));
     } catch {
       /* ignore */
     }
@@ -679,6 +699,8 @@ function App() {
       setStay,
       availableOnly,
       setAvailableOnly,
+      vehicles,
+      setVehicles,
       detailCp: selectedCarpark,
       detailLoading,
       onOpenDetail: (cp) => {
@@ -778,6 +800,8 @@ function App() {
         setAvailableOnly={setAvailableOnly}
         evOnly={evOnly}
         setEvOnly={setEvOnly}
+        vehicles={vehicles}
+        setVehicles={setVehicles}
         viewMode={viewMode}
         onToggleView={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
         onBack={() => setScreen('home')}
