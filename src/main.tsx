@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css';
 import { initTheme } from './lib/theme.ts';
 import { applyPlatformClasses, isNative } from './lib/platform.ts';
+import { installExternalLinkHandler } from './lib/openExternal.ts';
 import App from './App.tsx';
 import { AdminApp } from './admin/AdminApp.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
@@ -31,6 +32,7 @@ initTheme();
 // Tag <html> with `native` + `ios`/`android` inside the Capacitor shells so CSS
 // can override per platform. No-op on the web.
 applyPlatformClasses();
+installExternalLinkHandler();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

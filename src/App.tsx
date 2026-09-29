@@ -46,7 +46,7 @@ import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
-import { isNative } from './lib/platform';
+import { canGoogleSignIn, isNative } from './lib/platform';
 import { Spinner } from './components/atoms';
 
 const VIEW_MODE_KEY = 'psg.viewMode';
@@ -457,6 +457,7 @@ function App() {
     // Triggers the Google popup; the user state lands asynchronously when
     // the userinfo fetch resolves. The "Welcome back" toast fires from the
     // useEffect below — once we have a real name to greet.
+    if (!canGoogleSignIn) return;
     signIn();
   }, [signIn]);
 

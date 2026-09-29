@@ -42,3 +42,7 @@ export function isApplePlatform(): boolean {
   if (/Macintosh/i.test(ua)) return true;
   return false;
 }
+
+/** Google sign-in uses a web popup that does not work inside the native
+ *  WebView; hidden there until native auth (roadmap step 8) lands. */
+export const canGoogleSignIn: boolean = !isNative;

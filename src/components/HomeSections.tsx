@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { MergedSaveItem, RecentDestination, User } from '../lib/types';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
+import { canGoogleSignIn } from '../lib/platform';
 import { HomeSavedDestChip } from './HomeSavedDestChip';
 import { HomeSavedCarparkChip } from './HomeSavedCarparkChip';
 import {
@@ -167,7 +168,7 @@ export function HomeRecentSection({
                 />
               ))}
             </div>
-            {!user && (
+            {!user && canGoogleSignIn && (
               <button
                 type="button"
                 onClick={onOpenAccount}
@@ -198,7 +199,7 @@ export function HomeRecentSection({
               </button>
             )}
           </div>
-        ) : !user ? (
+        ) : !user && canGoogleSignIn ? (
           <div style={{ marginTop: 22 }}>
             <div
               style={{

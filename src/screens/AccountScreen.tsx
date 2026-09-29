@@ -1,3 +1,4 @@
+import { canGoogleSignIn } from '../lib/platform';
 import { useState, type ReactNode } from 'react';
 import type { User } from '../lib/types';
 import { AddCarparkDialog } from '../components/AddCarparkDialog';
@@ -226,73 +227,77 @@ function SignedOutBody({
         >
           Save carparks and<br />destinations across devices
         </div>
-        <p
-          style={{
-            margin: '10px auto 0',
-            fontSize: 13.5,
-            color: 'var(--text-2)',
-            lineHeight: 1.5,
-            maxWidth: 280,
-            textWrap: 'pretty',
-          }}
-        >
-          Sign in so your favourites and recent searches follow you between
-          iPhone and the web.
-        </p>
+        {canGoogleSignIn && (
+          <>
+            <p
+              style={{
+                margin: '10px auto 0',
+                fontSize: 13.5,
+                color: 'var(--text-2)',
+                lineHeight: 1.5,
+                maxWidth: 280,
+                textWrap: 'pretty',
+              }}
+            >
+              Sign in so your favourites and recent searches follow you between
+              iPhone and the web.
+            </p>
 
-        <button
-          type="button"
-          onClick={onSignIn}
-          data-track="sign_in"
-          style={{
-            appearance: 'none',
-            border: 0,
-            width: '100%',
-            marginTop: 22,
-            padding: '14px 18px',
-            background: 'var(--text-1)',
-            color: 'var(--bg-1)',
-            borderRadius: 12,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-            fontSize: 15,
-            fontWeight: 600,
-            letterSpacing: -0.1,
-            cursor: 'pointer',
-            fontFamily: 'var(--font-body)',
-            boxShadow: '0 6px 14px rgba(14,16,20,0.10)',
-          }}
-        >
-          <span
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: 999,
-              background: '#fff',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <IconGoogleG size={16} />
-          </span>
-          Continue with Google
-        </button>
+            <button
+              type="button"
+              onClick={onSignIn}
+              data-track="sign_in"
+              style={{
+                appearance: 'none',
+                border: 0,
+                width: '100%',
+                marginTop: 22,
+                padding: '14px 18px',
+                background: 'var(--text-1)',
+                color: 'var(--bg-1)',
+                borderRadius: 12,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                fontSize: 15,
+                fontWeight: 600,
+                letterSpacing: -0.1,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-body)',
+                boxShadow: '0 6px 14px rgba(14,16,20,0.10)',
+              }}
+            >
+              <span
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 999,
+                  background: '#fff',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <IconGoogleG size={16} />
+              </span>
+              Continue with Google
+            </button>
 
-        <div
-          style={{
-            marginTop: 14,
-            fontSize: 11,
-            color: 'var(--text-3)',
-            lineHeight: 1.5,
-            fontFamily: 'var(--font-mono)',
-            letterSpacing: 0.1,
-          }}
-        >
-          By continuing you agree to our Terms and Privacy.
-        </div>
+            <div
+              style={{
+                marginTop: 14,
+                fontSize: 11,
+                color: 'var(--text-3)',
+                lineHeight: 1.5,
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: 0.1,
+              }}
+            >
+              By continuing you agree to our Terms and Privacy.
+            </div>
+          </>
+        )}
       </div>
 
       <AppearanceGroup />
