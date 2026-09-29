@@ -1,10 +1,12 @@
-// Vercel serverless function (Node runtime) — fetches CapitaLand JustPark live
-// lot availability and returns it keyed by our DB carpark ids.
+// Vercel edge function — fetches CapitaLand JustPark live lot availability and
+// returns it keyed by our DB carpark ids.
 //
-// Why Node (not edge) runtime: the JustPark antiforgery handshake needs the
-// Set-Cookie values from the page GET replayed on the POST. undici's
-// Headers.getSetCookie() (Node 18+) splits them correctly; the edge runtime
-// merges Set-Cookie into one comma-joined header that is unsafe to re-split.
+// Edge, like every other route here, because edge functions are bundled. On the
+// Node runtime this file was deployed unbundled as ESM, so the extensionless
+// '../src/lib/server/justpark' import failed to resolve and every request died
+// with 500 FUNCTION_INVOCATION_FAILED. The antiforgery handshake's Set-Cookie
+// replay still works: the Edge Runtime implements Headers.getSetCookie(), and
+// collectCookies() falls back to a date-safe split of the merged header.
 //
 // No secret/API key is involved — the data is public — so unlike the LTA proxy
 // this exists mainly to (a) do the two-step antiforgery dance server-side and
@@ -15,7 +17,7 @@
 
 import { fetchJustParkLive, toCarparkLots, type JustParkLots } from '../src/lib/server/justpark';
 
-export const config = { maxDuration: 30 };
+export const config = { runtime: 'edge' };
 
 const CACHE_TTL_MS = 60_000;
 
