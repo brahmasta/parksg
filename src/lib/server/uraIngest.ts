@@ -186,7 +186,7 @@ export async function ingestUraRates(opts: IngestOptions): Promise<IngestResult>
       continue;
     }
     const before = dbRows.length;
-    for (const rr of [...entry.weekday, ...entry.saturday, ...entry.sundayPH]) {
+    for (const rr of [...entry.weekday, ...entry.saturday, ...entry.sundayPH, ...entry.motorcycle]) {
       const db = rateRowToDb(carparkId, rr, effectiveFrom);
       if (db) dbRows.push(db);
     }
