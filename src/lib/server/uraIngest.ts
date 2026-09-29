@@ -21,7 +21,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-import { parseUraRows } from '../ura';
+import { parseUraRows } from '../ura.js';
 import type { UraRawRow } from '../api/uraDetails';
 import type { RateRow } from '../types';
 
