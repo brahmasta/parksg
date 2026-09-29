@@ -24,7 +24,7 @@
 
 import type { IncomingMessage, ServerResponse } from 'http';
 
-import { ingestUraRates } from '../../src/lib/server/uraIngest';
+import { ingestUraRates } from '../../src/lib/server/uraIngest.js';
 
 export const config = { maxDuration: 60 };
 
