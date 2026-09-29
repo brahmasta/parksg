@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { App as CapApp } from '@capacitor/app';
 import { Analytics } from '@vercel/analytics/react';
 import type {
   Carpark,
@@ -432,6 +433,28 @@ function App() {
     }
   }, [authError, pop]);
   const [signOutOpen, setSignOutOpen] = useState(false);
+
+  // Android hardware/gesture back: step up one screen like the on-screen back
+  // buttons do, close the sign-out prompt first, and leave the app from home.
+  // Registered once; the latest state is read through a ref.
+  const backState = useRef({ screen, user, signOutOpen: false });
+  useEffect(() => {
+    backState.current = { screen, user, signOutOpen };
+  });
+  useEffect(() => {
+    if (!isNative) return;
+    const handle = CapApp.addListener('backButton', () => {
+      const { screen: s, user: u, signOutOpen: open } = backState.current;
+      if (open) setSignOutOpen(false);
+      else if (s === 'detail') setScreen('results');
+      else if (s === 'saved') setScreen(u ? 'account' : 'home');
+      else if (s !== 'home') setScreen('home');
+      else void CapApp.exitApp();
+    });
+    return () => {
+      void handle.then((h) => h.remove());
+    };
+  }, []);
   const [addDestOpen, setAddDestOpen] = useState(false);
   const [destPrefill, setDestPrefill] = useState<AddDestPrefill | null>(null);
 
