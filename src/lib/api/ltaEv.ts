@@ -8,6 +8,7 @@
  */
 
 import type { EVConnector } from '../types';
+import { apiUrl } from '../apiBase';
 
 export type EvLocation = {
   name: string;
@@ -25,7 +26,7 @@ export type EvAvailabilityResponse = {
   locations: EvLocation[];
 };
 
-const ENDPOINT = '/api/lta-ev-availability';
+const ENDPOINT = apiUrl('/api/lta-ev-availability');
 
 export async function fetchEvAvailability(
   signal?: AbortSignal,

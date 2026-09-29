@@ -6,6 +6,28 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "has": [{ "type": "header", "key": "origin", "value": "capacitor://localhost" }],
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "capacitor://localhost" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" },
+        { "key": "Vary", "value": "Origin" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "has": [{ "type": "header", "key": "origin", "value": "https://localhost" }],
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "https://localhost" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" },
+        { "key": "Vary", "value": "Origin" }
+      ]
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/ura-rates-ingest",

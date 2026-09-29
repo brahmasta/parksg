@@ -4,6 +4,8 @@
 // request for one typeahead session, then once more on the placeDetails call
 // that finalizes the pick. Google bills the whole flow as one event.
 
+import { apiUrl } from '../apiBase';
+
 export type PlaceSuggestion = {
   placeId: string;
   primary: string;
@@ -48,7 +50,7 @@ export async function autocomplete(
   const q = query.trim();
   if (q.length < 2) return [];
 
-  const url = new URL('/api/google-places-autocomplete', window.location.origin);
+  const url = new URL(apiUrl('/api/google-places-autocomplete'), window.location.origin);
   url.searchParams.set('q', q);
   url.searchParams.set('sessiontoken', sessionToken);
 
@@ -70,7 +72,7 @@ export async function nearbyParking(
   radiusM: number,
   signal?: AbortSignal,
 ): Promise<NearbyGooglePlace[]> {
-  const url = new URL('/api/google-places-nearby', window.location.origin);
+  const url = new URL(apiUrl('/api/google-places-nearby'), window.location.origin);
   url.searchParams.set('lat', String(centre.lat));
   url.searchParams.set('lng', String(centre.lng));
   url.searchParams.set('radius', String(Math.round(radiusM)));
@@ -88,7 +90,7 @@ export async function placeDetails(
   sessionToken: string,
   signal?: AbortSignal,
 ): Promise<ResolvedPlace | null> {
-  const url = new URL('/api/google-places-details', window.location.origin);
+  const url = new URL(apiUrl('/api/google-places-details'), window.location.origin);
   url.searchParams.set('place_id', placeId);
   url.searchParams.set('sessiontoken', sessionToken);
 
