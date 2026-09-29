@@ -98,10 +98,19 @@ describe('curated-malls.json', () => {
     }
   });
 
-  it('only maps JustPark live lots onto curated carparks', () => {
-    const curated = new Set(entries.map((e) => e.id));
-    for (const [code, id] of Object.entries(SITE_TO_CARPARK_ID)) {
-      assert.ok(curated.has(id), `JustPark ${code} → ${id} has no curated-malls.json entry`);
+  it('only maps JustPark live lots onto carparks we create', () => {
+    // Curated rows (explicit or derived OPERATOR:<slug> id) plus the
+    // coordinates-only rows from justpark-sites.json (npm run migrate:justpark).
+    const slug = (n: string) =>
+      n.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60);
+    const sites = JSON.parse(
+      readFileSync(resolve(__dirname, '../data/justpark-sites.json'), 'utf8'),
+    ) as Array<{ id: string }>;
+    const known = new Set([...entries.map((e) => e.id ?? `OPERATOR:${slug(e.name)}`), ...sites.map((s) => s.id)]);
+    for (const [code, mapped] of Object.entries(SITE_TO_CARPARK_ID)) {
+      for (const id of typeof mapped === 'string' ? [mapped] : mapped) {
+        assert.ok(known.has(id), `JustPark ${code} → ${id} has no curated or justpark-sites.json row`);
+      }
     }
   });
 });

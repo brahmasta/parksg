@@ -48,17 +48,24 @@ export type JustParkSite = {
 };
 
 /**
- * Map a JustPark SiteCode → our DB carpark id. Only carparks curated in
- * scripts/data/curated-malls.json (and that therefore exist in `carparks` with
- * coordinates and a real rate card) are listed; live counts for any other site
- * have nowhere to attach and are dropped by the merge.
+ * Map a JustPark SiteCode → our DB carpark id(s). Every site in the feed that
+ * publishes a live count is mapped, so CapitaLand's numbers always win:
  *
- * In the feed but not yet mapped, for want of a verified rate card: Sengkang
- * Grand Mall (SGM), the CBD towers CapitaGreen (CG), CapitaSpring (CS),
- * CapitaSky (79RR), Asia Square Tower 2 (AST2) and 21 Collyer Quay (21CQ), and
- * the business parks. Curate a row first, then add the code here.
+ *   - sites already curated in scripts/data/curated-malls.json (with a rate
+ *     card) map onto that row;
+ *   - the rest map onto a coordinates-only row from
+ *     scripts/data/justpark-sites.json (`npm run migrate:justpark`), which shows
+ *     live lots but no price until someone curates a rate card.
+ *
+ * A code may map to several ids when one carpark serves several buildings
+ * (e.g. 3C → The Chadwick / The Curie / The Cavendish).
+ *
+ * Deliberately unmapped: the 22 sites the feed reports as LotBalance "NA"
+ * (Westgate - Office, Cintech II–IV, the Galaxis sub-sites, KA Place,
+ * The Gemini and all 13 VPC logistics sites) — CapitaLand publishes no count
+ * for them, so there is nothing live to show.
  */
-export const SITE_TO_CARPARK_ID: Record<string, string> = {
+export const SITE_TO_CARPARK_ID: Record<string, string | readonly string[]> = {
   BM: 'LTA:65', // Bedok Mall
   'B+': 'LTA:61', // Bugis+
   CQ: 'LTA:59', // Clarke Quay (DataMall's "CQ @ Clarke Quay")
@@ -74,6 +81,63 @@ export const SITE_TO_CARPARK_ID: Record<string, string> = {
   // CBD commercial towers — the 2018 LTA_DATAGOV rows, curated with coords.
   SBR: 'LTA:six_battery_road', // Six Battery Road
   CT: 'LTA:capital_tower', // Capital Tower
+  // Already curated (curated-malls.json) — rates + live lots.
+  SGM: 'OPERATOR:sengkang_grand_mall', // Sengkang Grand Mall
+  CG: 'OPERATOR:capitagreen', // CapitaGreen
+  CS: 'LTA:golden_shoe_complex', // CapitaSpring (built on the Golden Shoe site)
+  CRE: 'OPERATOR:31_international_business_park', // 31 IBP - Creative Building
+  KEND: 'OPERATOR:the_kendall', // The Kendall
+  APR: 'OPERATOR:aperia', // Aperia
+  ASCT: 'OPERATOR:ascent', // Ascent
+  CT1: 'OPERATOR:cintech_i', // Cintech I
+  GALB: 'OPERATOR:galaxis', // Galaxis
+  RC: 'OPERATOR:rochester_commons', // Rochester Commons
+  TECP: 'OPERATOR:techpoint', // Techpoint
+  TPPL: 'OPERATOR:teletech_park', // TeleTech Park
+  ALP: 'OPERATOR:the_alpha', // The Alpha
+  ARI: 'OPERATOR:the_aries', // The Aries
+  CAP: 'OPERATOR:the_capricorn', // The Capricorn
+  '3C': ['OPERATOR:the_chadwick', 'OPERATOR:the_curie', 'OPERATOR:the_cavendish'],
+  GALN: 'OPERATOR:the_galen_singapore_science_park_ii', // The Galen
+  UBIX: 'OPERATOR:ubix', // UBIX
+  // Coordinates-only rows (justpark-sites.json) — live lots, no rates yet.
+  '21CQ': 'OPERATOR:capitaland_21_collyer_quay', // 21 Collyer Quay
+  AST2: 'OPERATOR:capitaland_asia_square_tower_2', // Asia Square Tower 2
+  '79RR': 'OPERATOR:capitaland_capitasky', // CapitaSky
+  '1CBP': 'OPERATOR:capitaland_1_changi_business_park_avenue_1', // 1 Changi Business Park Avenue 1
+  PLZ8: 'OPERATOR:capitaland_plaza_8_cbp', // Plaza 8 @ CBP
+  '1JKG': 'OPERATOR:capitaland_1_jalan_kilang', // 1 Jalan Kilang
+  '5SPD': 'OPERATOR:capitaland_1_5_7_science_park_drive', // 1, 5, 7 Science Park Drive
+  '138D': 'OPERATOR:capitaland_138_depot_road', // 138 Depot Road
+  '3CBC': 'OPERATOR:capitaland_3_and_5_changi_business_park_crescent', // 3 & 5 Changi Business Park Crescent
+  '3CBV': 'OPERATOR:capitaland_3_changi_business_park_vista', // 3 Changi Business Park Vista
+  '3TSD': 'OPERATOR:capitaland_3_tai_seng_drive', // 3 Tai Seng Drive
+  '5TSD': 'OPERATOR:capitaland_steel_industries_building_5_tai_seng_drive', // Steel Industries Building (5 Tai Seng Drive)
+  '53SN': 'OPERATOR:capitaland_53_serangoon_north_avenue_4', // 53 Serangoon North Avenue 4
+  '622T': 'OPERATOR:capitaland_622_lorong_1_toa_payoh', // 622 Lorong 1 Toa Payoh
+  '80BD': 'OPERATOR:capitaland_80_bendemeer_road', // 80 Bendemeer Road
+  ACER: 'OPERATOR:capitaland_acer_building', // Acer Building
+  CLOG: 'OPERATOR:capitaland_changi_logistics_centre', // Changi Logistics Centre
+  CORP: 'OPERATOR:capitaland_corporation_place', // Corporation Place
+  FDAX: 'OPERATOR:capitaland_foodaxis_senoko', // FoodAxis @ Senoko
+  HANS: 'OPERATOR:capitaland_hansapoint_cbp', // HansaPoint @ CBP
+  '17CB': 'OPERATOR:capitaland_honeywell_building', // Honeywell Building
+  ICON: 'OPERATOR:capitaland_icon_ibp', // Icon @ IBP
+  INF: 'OPERATOR:capitaland_infinite_studios', // Infinite Studios
+  KAC: 'OPERATOR:capitaland_ka_centre', // KA Centre
+  NEUR: 'OPERATOR:capitaland_neuros_and_immunos', // Neuros & Immunos
+  NEXU: 'OPERATOR:capitaland_nexus_one_north', // Nexus @ one-north
+  NORD: 'OPERATOR:capitaland_nordic_european_centre', // Nordic European Centre
+  NUC: 'OPERATOR:capitaland_nucleos', // Nucleos
+  RUTH: 'OPERATOR:capitaland_oasis_and_rutherford', // Oasis & Rutherford
+  PTC: 'OPERATOR:capitaland_pacific_tech_centre', // Pacific Tech Centre
+  BIZH: 'OPERATOR:capitaland_tampines_biz_hub', // Tampines Biz-Hub
+  TECL: 'OPERATOR:capitaland_techlink', // Techlink
+  TPL1: 'OPERATOR:capitaland_techplace_i', // Techplace I
+  TPL2: 'OPERATOR:capitaland_techplace_ii', // Techplace II
+  TECQ: 'OPERATOR:capitaland_techquest', // Techquest
+  TECV: 'OPERATOR:capitaland_techview', // Techview
+  SC: 'OPERATOR:capitaland_the_siemens_centre', // The Siemens Centre
 };
 
 type RawSite = {
@@ -127,9 +191,10 @@ export type JustParkLots = { id: string; lotsAvailable: number | null; lotsTotal
 export function toCarparkLots(sites: JustParkSite[]): JustParkLots[] {
   const out: JustParkLots[] = [];
   for (const s of sites) {
-    const id = SITE_TO_CARPARK_ID[s.siteCode];
-    if (!id) continue;
-    out.push({ id, lotsAvailable: s.lotsAvailable, lotsTotal: s.lotsTotal });
+    const mapped = SITE_TO_CARPARK_ID[s.siteCode];
+    if (!mapped) continue;
+    const ids = typeof mapped === 'string' ? [mapped] : mapped;
+    for (const id of ids) out.push({ id, lotsAvailable: s.lotsAvailable, lotsTotal: s.lotsTotal });
   }
   return out;
 }
