@@ -67,17 +67,43 @@ test('coerces string lot figures and skips rows without a SiteCode', () => {
 test('maps known sites onto DB carpark ids and drops unmapped ones', () => {
   const sites: JustParkSite[] = [
     { siteCode: 'BM', name: 'Bedok Mall', businessUnit: 'Retail', lotsAvailable: 8, lotsTotal: 265, isFull: false },
-    { siteCode: 'SBR', name: 'Six Battery Road', businessUnit: 'Commercial', lotsAvailable: 143, lotsTotal: 167, isFull: false },
-    { siteCode: 'SGM', name: 'Sengkang Grand Mall', businessUnit: 'Retail', lotsAvailable: 22, lotsTotal: 205, isFull: false },
-    { siteCode: '1JKG', name: 'Industrial', businessUnit: 'Business Parks', lotsAvailable: 15, lotsTotal: 37, isFull: false },
+    { siteCode: '1JKG', name: '1 Jalan Kilang', businessUnit: 'Business Parks', lotsAvailable: 15, lotsTotal: 37, isFull: false },
+    { siteCode: '3C', name: 'The Chadwick/ The Curie/ The Cavendish', businessUnit: 'Business Parks', lotsAvailable: 40, lotsTotal: 183, isFull: false },
+    { siteCode: 'XLAB', name: 'VPC - Xilin', businessUnit: 'Business Parks', lotsAvailable: null, lotsTotal: null, isFull: false },
   ];
-  const lots = toCarparkLots(sites);
-  // SGM (not curated) and the industrial site are dropped; BM and the CBD
-  // tower SBR map onto their DB ids.
-  assert.deepEqual(lots, [
+  // XLAB (no count published) is dropped; 3C fans out to its three buildings.
+  assert.deepEqual(toCarparkLots(sites), [
     { id: 'LTA:65', lotsAvailable: 8, lotsTotal: 265 },
-    { id: 'LTA:six_battery_road', lotsAvailable: 143, lotsTotal: 167 },
+    { id: 'OPERATOR:capitaland_1_jalan_kilang', lotsAvailable: 15, lotsTotal: 37 },
+    { id: 'OPERATOR:the_chadwick', lotsAvailable: 40, lotsTotal: 183 },
+    { id: 'OPERATOR:the_curie', lotsAvailable: 40, lotsTotal: 183 },
+    { id: 'OPERATOR:the_cavendish', lotsAvailable: 40, lotsTotal: 183 },
   ]);
+});
+
+test('maps every site that publishes a count, and none that does not', () => {
+  for (const s of parseJustParkResponse(fixtureRaw)) {
+    if (s.lotsAvailable == null) {
+      assert.equal(SITE_TO_CARPARK_ID[s.siteCode], undefined, `${s.siteCode} publishes no count`);
+    } else {
+      assert.ok(SITE_TO_CARPARK_ID[s.siteCode], `${s.siteCode} (${s.name}) has a live count but no carpark`);
+    }
+  }
+});
+
+test('every mapped id is a DataMall carpark or a row one of our ingests creates', () => {
+  const dataDir = resolve(here, '../../../scripts/data');
+  const slug = (n: string) =>
+    n.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60);
+  const curated = JSON.parse(readFileSync(resolve(dataDir, 'curated-malls.json'), 'utf8')) as Array<{ id?: string; name: string }>;
+  const sites = JSON.parse(readFileSync(resolve(dataDir, 'justpark-sites.json'), 'utf8')) as Array<{ code: string; id: string }>;
+  const known = new Set([...curated.map((c) => c.id ?? `OPERATOR:${slug(c.name)}`), ...sites.map((s) => s.id)]);
+  for (const [code, mapped] of Object.entries(SITE_TO_CARPARK_ID)) {
+    for (const id of typeof mapped === 'string' ? [mapped] : mapped) {
+      assert.ok(/^LTA:\d+$/.test(id) || known.has(id), `${code} → ${id} has no carpark row`);
+    }
+  }
+  for (const s of sites) assert.equal(SITE_TO_CARPARK_ID[s.code], s.id, `justpark-sites.json ${s.code} not mapped`);
 });
 
 test('every mapped site code resolves against the fixture (catches stale codes)', () => {

@@ -183,19 +183,19 @@ describe('parseUraRows', () => {
     assert.equal(entry.weekday[0].system, 'COUPON');
   });
 
-  it('filters out non-CAR vehCats in v1', () => {
+  it('keeps motorcycle rows apart from the car buckets', () => {
     const raw: UraRawRow[] = [
-      {
-        ppCode: 'X0001',
-        ppName: 'Test',
-        vehCat: 'Motorcycle',
-        parkingSystem: 'B',
-        weekdayRate: '$0.50',
-        weekdayMin: '30',
-      },
+      { ppCode: 'X0001', ppName: 'Test', vehCat: 'Car', parkingSystem: 'B', weekdayRate: '$1.20', weekdayMin: '30' },
+      { ppCode: 'X0001', ppName: 'Test', vehCat: 'Motorcycle', parkingSystem: 'B', weekdayRate: '$0.65', weekdayMin: '510' },
+      { ppCode: 'X0001', ppName: 'Test', vehCat: 'Heavy Vehicle', parkingSystem: 'B', weekdayRate: '$2.40', weekdayMin: '30' },
     ];
-    const out = parseUraRows(raw);
-    assert.equal(out.size, 0);
+    const entry = parseUraRows(raw).get('X0001');
+    assert.ok(entry);
+    assert.equal(entry.weekday.length, 1);
+    assert.equal(entry.weekday[0].perBlockCents, 120);
+    assert.equal(entry.motorcycle.length, 1);
+    assert.equal(entry.motorcycle[0].perBlockCents, 65);
+    assert.equal(entry.motorcycle[0].vehCat, 'MOTORCYCLE');
   });
 
   it('routes a malformed row to skipped without crashing', () => {

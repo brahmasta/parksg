@@ -1,0 +1,740 @@
+[
+  {
+    "name": "Ang Mo Kio Polyclinic",
+    "address": "21 Ang Mo Kio Central 2",
+    "lat": 1.374376,
+    "lng": 103.845726,
+    "operator": "LHN Parking (per earlier match note; not re-verified)",
+    "provenance": {
+      "url": "https://www.nhghealth.com.sg/find-care/Clinic/nhg-polyclinics-ang-mo-kio",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "20:00",
+        "firstHourCents": 140,
+        "perBlockCents": 70,
+        "blockMinutes": 30,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "16:00",
+        "firstHourCents": 140,
+        "perBlockCents": 70,
+        "blockMinutes": 30,
+        "graceMinutes": 10
+      }
+    ]
+  },
+  {
+    "name": "Kwong Wai Shiu Hospital",
+    "address": "705 Serangoon Road",
+    "lat": 1.317583,
+    "lng": 103.858871,
+    "provenance": {
+      "url": "https://www.kwsh.org.sg/our-locations/kwsh-serangoon/",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "08:30",
+        "end": "17:00",
+        "firstHourCents": 140,
+        "perBlockCents": 70,
+        "blockMinutes": 30,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:30",
+        "end": "13:00",
+        "firstHourCents": 140,
+        "perBlockCents": 70,
+        "blockMinutes": 30,
+        "graceMinutes": 10
+      }
+    ]
+  },
+  {
+    "name": "Techplace I",
+    "address": "4008 Ang Mo Kio Avenue 10",
+    "lat": 1.359881,
+    "lng": 103.856285,
+    "operator": "CapitaLand Ascendas REIT (owner)",
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/techplace-1-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "08:00",
+        "end": "17:00",
+        "firstHourCents": 92,
+        "perBlockCents": 112,
+        "blockMinutes": 60,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "08:00",
+        "perEntryCents": 174,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:00",
+        "end": "17:00",
+        "firstHourCents": 92,
+        "perBlockCents": 112,
+        "blockMinutes": 60,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "start": "17:00",
+        "end": "08:00",
+        "perEntryCents": 174,
+        "graceMinutes": 10
+      }
+    ]
+  },
+  {
+    "name": "JTC Blk 8 Chia Ping Road",
+    "address": "8 Chia Ping Road",
+    "lat": 1.330423,
+    "lng": 103.720512,
+    "operator": "JTC",
+    "provenance": {
+      "url": "https://www.sgcarmart.com/",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:30",
+        "end": "19:30",
+        "perBlockCents": 50,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:30",
+        "end": "19:30",
+        "perBlockCents": 50,
+        "blockMinutes": 30
+      }
+    ]
+  },
+  {
+    "name": "Tong Lee Building",
+    "address": "35 Kallang Pudding Road",
+    "lat": 1.330121,
+    "lng": 103.878387,
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/tong-lee-building-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "17:00",
+        "firstHourCents": 140,
+        "perBlockCents": 70,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "17:00",
+        "firstHourCents": 140,
+        "perBlockCents": 70,
+        "blockMinutes": 30
+      }
+    ]
+  },
+  {
+    "name": "JTC Blk 8 / 12 Lorong Bakar Batu",
+    "address": "8 Lorong Bakar Batu",
+    "lat": 1.327334,
+    "lng": 103.8722,
+    "operator": "JTC",
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/jtc-blk-8-12-lorong-bakar-batu-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "23:00",
+        "perBlockCents": 50,
+        "blockMinutes": 30,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "23:00",
+        "perBlockCents": 50,
+        "blockMinutes": 30,
+        "graceMinutes": 10
+      }
+    ]
+  },
+  {
+    "name": "Joo Seng Warehouse",
+    "address": "1 Upper Aljunied Link",
+    "lat": 1.335206,
+    "lng": 103.881523,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "08:00",
+        "end": "18:00",
+        "perBlockCents": 102,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:00",
+        "end": "16:00",
+        "perBlockCents": 102,
+        "blockMinutes": 60
+      }
+    ]
+  },
+  {
+    "name": "Pantech 21",
+    "address": "200 Pandan Loop",
+    "lat": 1.311381,
+    "lng": 103.751793,
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/pantech-21-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "18:00",
+        "firstHourCents": 100,
+        "perBlockCents": 50,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "18:00",
+        "end": "07:00",
+        "perEntryCents": 150
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "18:00",
+        "firstHourCents": 100,
+        "perBlockCents": 50,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "18:00",
+        "end": "07:00",
+        "perEntryCents": 150
+      }
+    ]
+  },
+  {
+    "name": "Da Jin Factory Building",
+    "address": "362 Upper Paya Lebar Road",
+    "lat": 1.348027,
+    "lng": 103.881157,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "08:00",
+        "end": "17:00",
+        "perBlockCents": 133,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "22:00",
+        "perEntryCents": 163
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:00",
+        "end": "17:00",
+        "perBlockCents": 133,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "SAT",
+        "start": "17:00",
+        "end": "22:00",
+        "perEntryCents": 163
+      }
+    ]
+  },
+  {
+    "name": "JTC Tuas Amenity Centre",
+    "address": "71 Pioneer Road",
+    "lat": 1.317059,
+    "lng": 103.652267,
+    "operator": "JTC",
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/jtc-tuas-amenity-centre-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "22:30",
+        "perBlockCents": 50,
+        "blockMinutes": 30,
+        "graceMinutes": 15
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "22:30",
+        "perBlockCents": 50,
+        "blockMinutes": 30,
+        "graceMinutes": 15
+      }
+    ]
+  },
+  {
+    "name": "Crocodile House",
+    "address": "3 Ubi Avenue 3",
+    "lat": 1.330992,
+    "lng": 103.890465,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "08:00",
+        "end": "17:00",
+        "perBlockCents": 140,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "08:00",
+        "perEntryCents": 200
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:00",
+        "end": "15:00",
+        "perBlockCents": 267,
+        "blockMinutes": 60
+      }
+    ]
+  },
+  {
+    "name": "Balestier Towers",
+    "address": "207 Balestier Road",
+    "lat": 1.32092,
+    "lng": 103.852409,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark/?AID=345",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "08:00",
+        "end": "17:00",
+        "perBlockCents": 150,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "08:00",
+        "perEntryCents": 275
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:00",
+        "end": "17:00",
+        "perBlockCents": 150,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "SAT",
+        "start": "17:00",
+        "end": "08:00",
+        "perEntryCents": 275
+      }
+    ]
+  },
+  {
+    "name": "Claymore Plaza",
+    "address": "6 Claymore Hill",
+    "lat": 1.306806,
+    "lng": 103.831589,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "09:00",
+        "end": "19:00",
+        "perBlockCents": 150,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "09:00",
+        "end": "19:00",
+        "perBlockCents": 150,
+        "blockMinutes": 30
+      }
+    ]
+  },
+  {
+    "id": "LTA:far_eastern_bank_building",
+    "name": "Far Eastern Bank Building",
+    "address": "156 Cecil Street",
+    "lat": 1.279961,
+    "lng": 103.84816,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "18:00",
+        "perBlockCents": 250,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "18:30",
+        "end": "07:00",
+        "perEntryCents": 320
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "13:00",
+        "perBlockCents": 250,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "13:00",
+        "end": "07:00",
+        "perEntryCents": 320
+      }
+    ]
+  },
+  {
+    "id": "LTA:bangkok_bank_building",
+    "name": "Bangkok Bank Building",
+    "address": "180 Cecil Street",
+    "lat": 1.279337,
+    "lng": 103.847618,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "17:00",
+        "perBlockCents": 250,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "23:00",
+        "perBlockCents": 320,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "15:00",
+        "perBlockCents": 250,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "15:00",
+        "end": "23:00",
+        "perBlockCents": 320,
+        "blockMinutes": 30
+      }
+    ]
+  },
+  {
+    "name": "20 Collyer Quay",
+    "address": "20 Collyer Quay",
+    "lat": 1.284644,
+    "lng": 103.852631,
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/20-collyer-quay-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "06:00",
+        "end": "17:00",
+        "perBlockCents": 280,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "23:00",
+        "perEntryCents": 320
+      },
+      {
+        "dayType": "SAT",
+        "start": "06:00",
+        "end": "17:00",
+        "perBlockCents": 280,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "17:00",
+        "end": "23:00",
+        "perEntryCents": 320
+      }
+    ]
+  },
+  {
+    "name": "6 Raffles Quay",
+    "address": "6 Raffles Quay",
+    "lat": 1.28175,
+    "lng": 103.851433,
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/6-raffles-quay-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "20:00",
+        "perBlockCents": 250,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "20:00",
+        "end": "23:00",
+        "perEntryCents": 300
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "15:00",
+        "perBlockCents": 250,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "15:00",
+        "end": "19:00",
+        "perEntryCents": 300
+      }
+    ]
+  },
+  {
+    "name": "Civil Service College",
+    "address": "31 North Buona Vista Road",
+    "lat": 1.309808,
+    "lng": 103.791924,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "end": "18:00",
+        "perBlockCents": 120,
+        "blockMinutes": 60,
+        "capCents": 900
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "18:00",
+        "end": "22:30",
+        "perBlockCents": 120,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "SAT",
+        "start": "08:00",
+        "end": "22:30",
+        "perBlockCents": 120,
+        "blockMinutes": 60
+      }
+    ]
+  },
+  {
+    "name": "Admirax",
+    "address": "8 Admiralty Street",
+    "lat": 1.462475,
+    "lng": 103.815804,
+    "operator": "Owned by a family office (bought from AEW, Oct 2024); car park operator unknown",
+    "provenance": {
+      "url": "https://www.sgcarmart.com/carpark/admirax?TYP=Carpark&location=n&AID=775",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "22:00",
+        "perBlockCents": 100,
+        "blockMinutes": 60
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "15:00",
+        "perBlockCents": 100,
+        "blockMinutes": 60
+      }
+    ]
+  },
+  {
+    "name": "One Commonwealth",
+    "address": "1 Commonwealth Lane, Singapore 149544",
+    "lat": 1.304428,
+    "lng": 103.796794,
+    "provenance": {
+      "url": "https://freecomchurch.org/contact-us/getting-to-church/",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "SUN_PH",
+        "perEntryCents": 321
+      }
+    ]
+  },
+  {
+    "name": "Lam Seng Building",
+    "address": "Playfair Road",
+    "lat": 1.333743,
+    "lng": 103.887344,
+    "provenance": {
+      "url": "https://www.motorist.sg/parking/lam-seng-building-parking-rates",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "17:00",
+        "perBlockCents": 120,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "17:00",
+        "end": "07:00",
+        "perEntryCents": 200
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "17:00",
+        "perBlockCents": 120,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "17:00",
+        "end": "07:00",
+        "perEntryCents": 200
+      }
+    ]
+  },
+  {
+    "id": "LTA:parklane_shopping_mall",
+    "name": "Parklane Shopping Mall",
+    "address": "35 Selegie Road",
+    "lat": 1.300594,
+    "lng": 103.849411,
+    "provenance": {
+      "url": "https://www.sgcarmart.com/news/carpark_index.php",
+      "verified": "2026-09"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "19:00",
+        "firstHourCents": 330,
+        "perBlockCents": 180,
+        "blockMinutes": 30,
+        "capCents": 2500
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "19:00",
+        "end": "07:00",
+        "firstHourCents": 330,
+        "perBlockCents": 180,
+        "blockMinutes": 30,
+        "capCents": 2500
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "19:00",
+        "firstHourCents": 330,
+        "perBlockCents": 180,
+        "blockMinutes": 30,
+        "capCents": 2500
+      },
+      {
+        "dayType": "SAT",
+        "start": "19:00",
+        "end": "07:00",
+        "firstHourCents": 330,
+        "perBlockCents": 180,
+        "blockMinutes": 30,
+        "capCents": 2500
+      }
+    ]
+  }
+]

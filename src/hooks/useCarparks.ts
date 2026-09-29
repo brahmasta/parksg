@@ -22,6 +22,7 @@ import { nearbyParking, type NearbyGooglePlace } from '../lib/api/googlePlaces';
 import { filterNewGooglePlaces, googlePlaceToCarpark } from '../lib/googleCarpark';
 import { GOOGLE_GAP_THRESHOLD } from '../lib/config';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
+import { hdbHasMotorcycleLots } from '../lib/hdbMotorcycle';
 import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
 import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
@@ -449,7 +450,36 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
 // DB row → app Carpark
 // ──────────────────────────────────────────────────────────────────────
 
+/** Add 'M' when the carpark publishes motorcycle rates (URA), or — since the
+ * HDB live feed never reports motorcycle lots — when an HDB carpark is on the
+ * community motorcycle list. */
+function withMotorcycle(row: DbCarparkRaw, types: LotType[], hasMotoRates: boolean): LotType[] {
+  if (types.includes('M')) return types;
+  const hasM =
+    hasMotoRates ||
+    (row.agency === 'HDB' && hdbHasMotorcycleLots(row.lat!, row.lng!, row.address));
+  if (!hasM) return types;
+  return (['C', 'M', 'H'] as LotType[]).filter((t) => t === 'M' || types.includes(t));
+}
+
 const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
+
+const LOT_TYPE_ORDER: LotType[] = ['C', 'M', 'H'];
+
+/** carparks.lot_types in C→M→H order; undefined when unknown or empty. */
+function storedLotTypes(row: DbCarparkRaw): LotType[] | undefined {
+  if (!row.lot_types) return undefined;
+  const types = LOT_TYPE_ORDER.filter((t) => row.lot_types!.includes(t));
+  return types.length > 0 ? types : undefined;
+}
+
+/** Motorcycle / heavy-vehicle lot counts, when stored. */
+function storedLotCounts(row: DbCarparkRaw): Carpark['lotCounts'] {
+  const counts: NonNullable<Carpark['lotCounts']> = {};
+  if (row.motorcycle_lots) counts.M = row.motorcycle_lots;
+  if (row.heavy_lots) counts.H = row.heavy_lots;
+  return Object.keys(counts).length > 0 ? counts : undefined;
+}
 
 function dbRowToCarpark(
   row: DbCarparkRaw,
@@ -462,7 +492,11 @@ function dbRowToCarpark(
 
   // Group rate_rows into the three day-type buckets the runtime expects.
   const rates = bucketRateRows(row.rate_rows);
-  const allRows = row.rate_rows.map(dbToRateRow);
+  const allRows = row.rate_rows.filter(isCarRow).map(dbToRateRow);
+  const motoRows = row.rate_rows.filter((r) => r.veh_cat === 'MOTORCYCLE');
+  const motorcycleRates = motoRows.length
+    ? bucketRateRows(motoRows.map((r) => ({ ...r, veh_cat: 'CAR' as const })))
+    : undefined;
 
   // Compute estByHours from the structured rate rows. If the DB carpark
   // has no usable rate (e.g. an LTA-CSV standalone with all-zero stub rows),
@@ -483,9 +517,15 @@ function dbRowToCarpark(
     name: row.name,
     block: row.address ?? row.source_code,
     operator: op,
-    // Real per-vehicle types when the live feed carries them (HDB); otherwise
-    // car-only, since other agencies don't break availability out by type.
-    lotTypes: live?.lotTypes ?? (['C'] satisfies LotType[]),
+    // Per-vehicle types from the live feed (HDB), else the stored ones (URA
+    // capacity data), else car-only; withMotorcycle then adds 'M' from
+    // motorcycle rates or the HDB community list.
+    lotTypes: withMotorcycle(
+      row,
+      live?.lotTypes ?? storedLotTypes(row) ?? (['C'] satisfies LotType[]),
+      !!motorcycleRates,
+    ),
+    lotCounts: storedLotCounts(row),
     lotsAvailable: live?.lotsAvailable ?? null,
     lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),
@@ -493,6 +533,7 @@ function dbRowToCarpark(
     grace: row.rate_rows[0]?.grace_minutes ?? (row.agency === 'HDB' ? 10 : 0),
     coords: { entrance: [row.lat!, row.lng!] },
     rates: fallbackRates,
+    motorcycleRates,
     estByHours,
   };
 }
@@ -518,10 +559,13 @@ function buildUraRatesIndex(rows: DbCarparkRaw[]): Map<string, UraCarparkRates> 
       weekday: [],
       saturday: [],
       sundayPH: [],
+      motorcycle: [],
     };
     for (const r of uraRows) {
       const rr = dbToRateRow(r);
-      if (r.day_type === 'WEEKDAY') entry.weekday.push(rr);
+      if (r.veh_cat === 'MOTORCYCLE') entry.motorcycle.push(rr);
+      else if (!isCarRow(r)) continue;
+      else if (r.day_type === 'WEEKDAY') entry.weekday.push(rr);
       else if (r.day_type === 'SAT') entry.saturday.push(rr);
       else entry.sundayPH.push(rr);
     }
@@ -533,6 +577,8 @@ function buildUraRatesIndex(rows: DbCarparkRaw[]): Map<string, UraCarparkRates> 
 function bucketRateRows(rows: DbRateRowRaw[]): Carpark['rates'] {
   const out: Carpark['rates'] = { weekday: [], saturday: [], sundayPH: [] };
   for (const r of rows) {
+    // Motorcycle / heavy rows have their own schedule; never mix into car rates.
+    if (!isCarRow(r)) continue;
     // Skip parser-stub rows the migration emits for unparseable CSV cells
     // (per_block_cents=0, block_minutes=0) — they'd add noise to the schedule.
     if (r.per_block_cents === 0 && r.block_minutes === 0 && r.per_entry_cents == null) {
@@ -543,6 +589,10 @@ function bucketRateRows(rows: DbRateRowRaw[]): Carpark['rates'] {
     target.push(dbToRateRow(r));
   }
   return out;
+}
+
+function isCarRow(r: DbRateRowRaw): boolean {
+  return (r.veh_cat ?? 'CAR') === 'CAR';
 }
 
 function dbToRateRow(r: DbRateRowRaw): RateRow {

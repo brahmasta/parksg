@@ -95,9 +95,14 @@ export function selectResultsView(input: {
   // user asked about that place). Filters still apply: a pin never brings back
   // a carpark the active filters removed.
   const pinnedId = findDestinationCarparkId(filtered, destinationLabel);
-  const ranked = pinnedId
+  const pinned = pinnedId
     ? [...filtered.filter((c) => c.id === pinnedId), ...filtered.filter((c) => c.id !== pinnedId)]
     : filtered;
+  // Live counts are car lots only. Under a motorcycle / heavy filter, showing
+  // them would read as "N motorcycle lots free" — blank them to "unknown".
+  const ranked = vehicles.length
+    ? pinned.map((c) => (c.lotsAvailable == null ? c : { ...c, lotsAvailable: null }))
+    : pinned;
 
   // Only meaningful once a search has actually resolved; 'loading'/'empty'
   // have their own dedicated screens.

@@ -118,6 +118,8 @@ export type Carpark = {
   block: string;
   operator: Operator;
   lotTypes: LotType[];
+  /** Lot counts per vehicle type, where a source publishes them. */
+  lotCounts?: Partial<Record<LotType, number>>;
   lotsAvailable: number | null;
   lotsTotal: number;
   walkMin: number;
@@ -130,6 +132,9 @@ export type Carpark = {
     sundayPH: RateRow[];
   };
   estByHours: Record<DurationHours, number>;
+  /** Motorcycle rate schedule, when the source publishes one (URA). Car
+   * costs never use these rows. */
+  motorcycleRates?: Carpark['rates'];
   /** EV charging data from LTA /EVCBatch joined by haversine ≤50m. */
   ev?: CarparkEV;
   // ── Supplementary (Google Maps) provenance ──────────────────────────

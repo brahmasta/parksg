@@ -182,7 +182,14 @@ export function StaleRatesBadge() {
 }
 
 /* ── Lot-type chips ──────────────────────────────────────────────────────── */
-export function LotTypeChips({ types }: { types: LotType[] }) {
+export function LotTypeChips({
+  types,
+  counts,
+}: {
+  types: LotType[];
+  /** Optional lot count per type, shown as "Motorcycle · 4". */
+  counts?: Partial<Record<LotType, number>>;
+}) {
   return (
     <div
       role="list"
@@ -209,6 +216,7 @@ export function LotTypeChips({ types }: { types: LotType[] }) {
           }}
         >
           {LOT_TYPE_LABEL[t]}
+          {counts?.[t] != null && ` · ${counts[t]}`}
         </span>
       ))}
     </div>

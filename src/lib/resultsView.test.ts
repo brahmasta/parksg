@@ -262,3 +262,13 @@ describe('selectResultsView — destination carpark pinned first', () => {
     assert.equal(v.ranked[0].id, 'hdb:t54');
   });
 });
+
+describe('selectResultsView — vehicle filter lot counts', () => {
+  it('blanks car-lot counts while a vehicle filter is on', () => {
+    const list = [cp('a', { lotsAvailable: 12, lotTypes: ['C', 'M'] })];
+    const on = selectResultsView({ carparks: list, state: 'loaded', availableOnly: false, evOnly: false, vehicles: ['M'] });
+    assert.equal(on.ranked[0].lotsAvailable, null);
+    const off = selectResultsView({ carparks: list, state: 'loaded', availableOnly: false, evOnly: false });
+    assert.equal(off.ranked[0].lotsAvailable, 12);
+  });
+});

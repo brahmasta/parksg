@@ -12,9 +12,9 @@
  * defensive — a malformed row is logged and skipped rather than
  * crashing the whole carpark.
  *
- * v1: filter to CAR vehCat. Motorcycle / heavy rows are dropped (the
- * runtime currently only renders one schedule per carpark). Flag tracked
- * as a follow-up.
+ * CAR rows fill the weekday/saturday/sundayPH buckets. MOTORCYCLE rows go
+ * to a separate `motorcycle` list so they never feed car cost estimates.
+ * Heavy-vehicle rows are still dropped.
  */
 
 import type { DayType, RateRow, RateSystem } from './types';
@@ -32,6 +32,8 @@ export type UraCarparkRates = {
   weekday: RateRow[];
   saturday: RateRow[];
   sundayPH: RateRow[];
+  /** Motorcycle rows across all day types (vehCat 'MOTORCYCLE'). */
+  motorcycle: RateRow[];
 };
 
 /** Bucket the per-row triples emit. Internal. */
@@ -51,11 +53,7 @@ export function parseUraRows(rows: UraRawRow[]): Map<string, UraCarparkRates> {
     }
 
     const veh = parseVehCat(raw.vehCat);
-    if (veh !== 'CAR') {
-      // v1: surface only CAR rates. Motorcycle / heavy follow in a future
-      // pass when the UI can pivot by vehCat.
-      continue;
-    }
+    if (veh !== 'CAR' && veh !== 'MOTORCYCLE') continue;
 
     let entry = out.get(ppCode);
     if (!entry) {
@@ -67,6 +65,7 @@ export function parseUraRows(rows: UraRawRow[]): Map<string, UraCarparkRates> {
         weekday: [],
         saturday: [],
         sundayPH: [],
+        motorcycle: [],
       };
       out.set(ppCode, entry);
     }
@@ -88,9 +87,10 @@ export function parseUraRows(rows: UraRawRow[]): Map<string, UraCarparkRates> {
         startTime,
         endTime,
         system,
+        vehCat: veh,
       });
       if (row) {
-        entry[bucket].push(row);
+        (veh === 'CAR' ? entry[bucket] : entry.motorcycle).push(row);
         yieldCount += 1;
       }
     }
@@ -179,6 +179,7 @@ function buildRow({
   startTime,
   endTime,
   system,
+  vehCat,
 }: {
   rateStr: string | undefined;
   minStr: string | undefined;
@@ -186,6 +187,7 @@ function buildRow({
   startTime: string | undefined;
   endTime: string | undefined;
   system: RateSystem | undefined;
+  vehCat: 'CAR' | 'MOTORCYCLE';
 }): RateRow | null {
   const perBlockCents = parseDollarsToCents(rateStr);
   const blockMinutes = parseMinutes(minStr);
@@ -201,7 +203,7 @@ function buildRow({
     perBlockCents,
     blockMinutes,
     system,
-    vehCat: 'CAR',
+    vehCat,
     source: SOURCE,
   };
 }

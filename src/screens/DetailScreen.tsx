@@ -411,7 +411,7 @@ export function DetailScreen({
               >
                 Lots for
               </span>
-              <LotTypeChips types={cp.lotTypes} />
+              <LotTypeChips types={cp.lotTypes} counts={cp.lotCounts} />
             </div>
           )}
         </div>
@@ -690,6 +690,23 @@ export function DetailScreen({
             </div>
           ) : (
             <RateTable rates={cp.rates} />
+          )}
+          {cp.motorcycleRates && (
+            <>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10.5,
+                  color: 'var(--text-3)',
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  margin: '16px 0 10px',
+                }}
+              >
+                Motorcycle rates
+              </div>
+              <RateTable rates={cp.motorcycleRates} />
+            </>
           )}
           {isDatagovRates && (
             <div

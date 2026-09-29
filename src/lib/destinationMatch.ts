@@ -14,7 +14,8 @@ import type { Carpark } from './types';
  *   1. exact   — names equal after light normalisation
  *                ("Tampines Mall" ↔ "TAMPINES MALL", "Six Battery Road" ↔ "6 Battery Road")
  *   2. core    — equal once generic words (mall, shopping centre, building…)
- *                are dropped ("Funan" ↔ "Funan Mall"); tighter distance guard
+ *                and carpark-section labels (P2, B1…) are dropped
+ *                ("Funan" ↔ "Funan Mall", "VivoCity" ↔ "VivoCity P2"); tighter distance guard
  *                because a bare area name ("Tampines") also reduces to a core
  *   3. prefix  — one core name starts the other, both ≥2 words
  *                ("Asia Square Tower 1" ↔ "Asia Square")
@@ -54,8 +55,11 @@ export function tokens(name: string): string[] {
     .filter((t) => !NOISE.has(t));
 }
 
+/** A carpark section within a building: "Vivocity P3", "… B2". */
+const SECTION_LABEL = /^[pb]\d{1,2}$/;
+
 export function coreTokens(all: string[]): string[] {
-  const core = all.filter((t) => !GENERIC.has(t));
+  const core = all.filter((t) => !GENERIC.has(t) && !SECTION_LABEL.test(t));
   return core.length > 0 ? core : all;
 }
 

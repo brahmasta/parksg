@@ -64,6 +64,8 @@ export function applyUraRates(
       return cp;
     }
     matchedCount += 1;
+    // Motorcycle-only URA carpark: no car schedule to swap in.
+    if (!hit.weekday.length && !hit.saturday.length && !hit.sundayPH.length) return cp;
 
     // Combine all bands into the cost-estimate input. The estimator picks
     // the dominant band that covers the user's day/time.

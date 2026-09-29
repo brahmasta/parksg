@@ -12,7 +12,7 @@ import {
 } from './icons';
 
 // Real figures from the Supabase carpark database. Verified against live counts
-// on 2026-06-06 (they matched exactly — no drift). Refresh with:
+// on 2026-09-28, after the commercial-building rate audit. Refresh with:
 //   select count(*) total,
 //          count(*) filter (where lat is not null and lng is not null) on_map
 //   from carparks;
@@ -32,19 +32,21 @@ type CovSource = {
 };
 
 const COVERAGE = {
-  totalCarparks: 3272,
-  onMap: 3016,
-  withRates: 3226,
-  agencies: 4,
+  totalCarparks: 3846,
+  onMap: 3791,
+  withRates: 3778,
+  agencies: 5,
   sources: [
     { key: 'HDB', name: 'HDB Car Parks', provider: 'data.gov.sg', desc: 'Housing & Development Board public housing car parks. Live lot availability + capacity polled every minute.', carparks: 2265, onMap: 2265, colorVar: '--src-hdb', freshness: 'Live · ~1 min', url: 'https://data.gov.sg' },
     { key: 'URA', name: 'URA Car Parks', provider: 'URA Data Service · LTA DataMall', desc: 'Urban Redevelopment Authority off- and on-street car parks. Real tiered rate schedules from URA; availability via DataMall.', carparks: 661, onMap: 660, colorVar: '--src-ura', freshness: 'Live · ~1 min', url: 'https://www.ura.gov.sg/maps/api/' },
-    { key: 'LTA', name: 'LTA Car Parks', provider: 'LTA DataMall', desc: 'LTA-managed + commercial/mall car parks. Many live via DataMall; the rest cold-start from a 2018 rate snapshot until curated.', carparks: 318, onMap: 63, colorVar: '--src-lta', freshness: 'Live + 2018 snapshot', url: 'https://datamall.lta.gov.sg' },
+    { key: 'LTA', name: 'LTA Car Parks', provider: 'LTA DataMall', desc: 'LTA-managed + commercial/mall car parks. Many live via DataMall; most now carry rates verified in 2026, the rest a 2018 rate snapshot.', carparks: 298, onMap: 244, colorVar: '--src-lta', freshness: 'Live + verified 2026', url: 'https://datamall.lta.gov.sg' },
+    { key: 'OPR', name: 'Commercial Car Parks', provider: 'Operator & mall sites', desc: 'Malls, offices, hotels, hospitals and business parks, with rates checked against operator sites and rate listings in 2026.', carparks: 594, onMap: 594, colorVar: '--src-op', freshness: 'Verified 2026', url: 'https://www.motorist.sg/parking' },
     { key: 'JTC', name: 'JTC Car Parks', provider: 'data.gov.sg', desc: 'JTC industrial-estate car parks (Ang Mo Kio, Bukit Merah, Aljunied, Depot Lane). Metadata + coordinates; season-parking sites.', carparks: 28, onMap: 28, colorVar: '--src-ev', freshness: 'Static', url: 'https://data.gov.sg' },
   ] as CovSource[],
   layers: [
     { key: 'EV', name: 'EV Charging', provider: 'LTA EVCBatch', value: 'Live · 5 min', desc: 'Charging connectors joined to carparks within 50 m, with live connector status.', colorVar: '--src-ev' },
     { key: 'WALK', name: 'Walking Routes', provider: 'OneMap', value: 'Islandwide', desc: 'Real pedestrian routes & walk times from the carpark entrance to your destination.', colorVar: '--src-ura' },
+    { key: 'MOTO', name: 'HDB Motorcycle Lots', provider: 'r/singapore community map', value: 'Dec 2022', desc: 'Which HDB carparks have motorcycle lots — HDB\'s live feed doesn\'t say. From the "SG Motorcycle Parking" map shared on r/singapore.', colorVar: '--src-hdb' },
     { key: 'GEO', name: 'Place Search', provider: 'Google Places', value: 'Typeahead', desc: 'Destination autocomplete + nearby supplementary carparks where our feeds have gaps.', colorVar: '--src-lta' },
   ],
 };
@@ -74,7 +76,7 @@ export function CoverageSections() {
         <BigStat value={c.totalCarparks.toLocaleString()} label="Carparks covered" icon={<IconCar size={18} stroke={2} />} accent />
         <BigStat value={c.onMap.toLocaleString()} label="On the map" icon={<IconDatabase size={18} stroke={2} />} />
         <BigStat value={c.withRates.toLocaleString()} label="With rate estimates" icon={<IconList size={18} stroke={2} />} />
-        <BigStat value={String(c.agencies)} label="Official sources" icon={<IconLayers size={18} stroke={2} />} />
+        <BigStat value={String(c.agencies)} label="Sources" icon={<IconLayers size={18} stroke={2} />} />
       </div>
 
       {/* Breakdown by source */}

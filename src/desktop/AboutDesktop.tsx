@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { CoverageSections } from '../components/CoverageSections';
-import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
+import { FOUNDER_NOTE, FOUNDER_NOTE_TITLE, FOUNDER_LINKEDIN_URL, FOUNDER_SIGNOFF, FOUNDER_X_URL } from '../lib/aboutCopy';
 import { IconInfo } from '../components/icons';
 
 /** Desktop About — centered column, nav peer of Find. Folds in data coverage. */
@@ -23,6 +23,7 @@ export function AboutDesktop() {
             {FOUNDER_SIGNOFF}
           </p>
           <a href={FOUNDER_X_URL} target="_blank" rel="noopener noreferrer" data-track="founder_x_link" style={{ alignSelf: 'flex-start', fontSize: 15, color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Say hi on X (@brahmasta) →</a>
+          <a href={FOUNDER_LINKEDIN_URL} target="_blank" rel="noopener noreferrer" data-track="founder_linkedin_link" style={{ alignSelf: 'flex-start', fontSize: 15, color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>Connect on LinkedIn →</a>
         </div>
       </Section>
 
