@@ -499,6 +499,14 @@ export const REVIEWED: Record<string, ReviewDecision> = {
   'LTA:iluma': { skip: 'renamed — Bugis+ since 2012 (LTA:61)' },
   'LTA:the_esplanade': { skip: 'same carpark as LTA:4 "Esplanade — Theatres on the Bay"' },
   'LTA:d_resort': { skip: 'same carpark as Downtown East (LTA:downtown_east) — one complex' },
+  'LTA:bedok_point': { skip: 'removed from the DB in the 2026-09 rate audit — confirm it is open before placing' },
+  'LTA:798_upper_bukit_timah_road': {
+    skip: 'removed from the DB in the 2026-09 rate audit — confirm it is open before placing',
+  },
+  'LTA:grand_mercure_roxy_hotel': { skip: 'same carpark as Roxy Square (LTA:roxy_square) — the hotel is in it' },
+  'LTA:singapore_general_hospital_multi_storey_carpark_h': {
+    skip: 'covered by the curated SGH campus entry (LTA:singapore_general_hospital_carpark_c_e_g_i)',
+  },
   'LTA:china_square_central': {
     skip: 'same carpark as the user-submitted 18 Cross Carpark (MANUAL:18_cross_carpark)',
   },

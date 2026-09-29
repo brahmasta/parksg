@@ -111,11 +111,19 @@ on 2026-09-26 with zero rates because of it. Fixed in `api/_admin/carparkWrite.t
 
 ## Long tail (added 2026-09-27)
 
-`scripts/data/lta-datagov-coords.json` maps 145 of the 246 `LTA_DATAGOV` carparks
-to OneMap building points. `migrateLtaCsv` reads it whenever it recreates a
+`scripts/data/lta-datagov-coords.json` holds reviewed OneMap building points for
+`LTA_DATAGOV` carparks. `migrateLtaCsv` reads it whenever it recreates a
 standalone, so the coordinates survive every full sync. The rows keep
 `source='LTA_DATAGOV'`, so the app's "2018 rate" badge still warns, and the SSR
 `/carpark/<slug>` page now says the same.
+
+**Where it stands (2026-09-29):** the first review (below) placed 145 of 246 rows.
+The 2026-09 rate audit (`curated-malls.json`, 742 commercial carparks) then curated
+135 of those same ids with fresh rates and its own coordinates, which sit a median
+20 m from these (90th percentile 74 m; the outliers over 100 m are campuses such as
+Chinese Garden, Downtown East, NUH, SGH and the Zoo). Production is down to 54
+`LTA_DATAGOV` rows, and the file now places the 3 the audit didn't cover: Jurong
+Theatre, Shenton House, West Coast Plaza. Re-run the geocoder after each audit.
 
 **Regenerate:** `npm run geocode:lta-datagov` (dry run, prints the report; also saved
 to `scripts/out/lta-datagov-geocode.md`), then `-- --write` to update the JSON. It
@@ -124,7 +132,8 @@ reads the DB with the anon key, matches names against the OneMap postal-code dum
 hand-review table (`REVIEWED`: skip / accept / alias) are in
 `scripts/lib/lta-datagov-geo.ts`, tested by `scripts/lib/lta-datagov-geo.test.ts`.
 
-What it does with each row (counts from the 2026-09-27 run):
+What it did with each row in the first review (2026-09-27, all 246 rows). The same
+rules decide the 54 left today — 3 placed, 46 skipped, 5 unmatched:
 
 | Outcome | Rows | Rule |
 |---|---:|---|
@@ -147,9 +156,14 @@ Found along the way:
 - A full sync used to **overwrite curated carparks** whose id a CSV name reuses
   under another name (curated "AMK Hub" is `LTA:ang_mo_kio_hub`; the CSV's "Ang Mo
   Kio Hub" didn't name-match, so it upserted over the curated row, nulling its
-  coordinates and replacing its rates). Five were exposed: AMK Hub, Compass One,
-  Northpoint City, Velocity, One Raffles Place. `migrateLtaCsv` now skips any
-  standalone whose id has `MANUAL` rate_rows.
+  coordinates and replacing its rates). With the rate audit's 241 `LTA:`-id entries
+  in production, a full sync from before this fix overwrites **67 of the 839**
+  curated carparks (Tampines Junction, AMK Hub, NUH, SGH, Orchard hotels…) — measured
+  by running the sync against an in-memory copy of production. `migrateLtaCsv` now
+  skips any standalone whose id has `MANUAL` rate_rows; the same run leaves all 839 alone.
+- The rate audit removed Bedok Point and 798 Upper Bukit Timah Road from the DB. A
+  full sync recreates every CSV row, so they come back without coordinates; the
+  `REVIEWED` table keeps a later geocode run from pinning them.
 - **Bugis Junction is on no map.** `findMatches` pairs the CSV's "Bugis Junction"
   with "Bugis+" (prefix "bugis"), and as Bugis+ is curated the row is dropped.
   Needs its own curated entry.
@@ -162,10 +176,11 @@ Found along the way:
 3. Verify the "not added" CBD list above (starting with Singapore Land Tower and
    the four CapitaLand towers, which get live lots the moment they have a rate card),
    plus Sengkang Grand Mall.
-4. ✅ Long tail: 145 `LTA_DATAGOV` carparks placed from the reviewed
-   `scripts/data/lta-datagov-coords.json` (see [Long tail](#long-tail-added-2026-09-27)).
-   Needs a full `npx tsx scripts/migrate-to-supabase.ts` to reach production. Next:
-   curate the busiest of them (fresh rates), plus Changi / MBS coordinates and Bugis Junction.
+4. ✅ Long tail: reviewed and mostly curated by the rate audit; the 3 it didn't
+   cover are placed from `scripts/data/lta-datagov-coords.json` (see
+   [Long tail](#long-tail-added-2026-09-27)). Needs a full
+   `npx tsx scripts/migrate-to-supabase.ts` to reach production — only with the
+   curated-carpark guard in place. Next: Changi / MBS coordinates and Bugis Junction.
 5. Refresh curated rate cards every ~6 months (each entry carries
    `provenance.verified`; the guard test in `scripts/lib/curated-malls.test.ts`
    requires it).
