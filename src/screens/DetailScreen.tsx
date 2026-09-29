@@ -411,7 +411,7 @@ export function DetailScreen({
               >
                 Lots for
               </span>
-              <LotTypeChips types={cp.lotTypes} />
+              <LotTypeChips types={cp.lotTypes} counts={cp.lotCounts} />
             </div>
           )}
         </div>

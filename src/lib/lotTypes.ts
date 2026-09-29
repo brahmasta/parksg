@@ -22,6 +22,6 @@ export function vehicleEmptyCopy(vehicles: VehicleFilter[]): { title: string; hi
   const phrase = vehiclePhrase(vehicles);
   return {
     title: `No carparks with ${phrase} lots here`,
-    hint: `No HDB carpark nearby reports ${phrase} lots. Other carparks may still have them — we just don't have that data yet.`,
+    hint: `No HDB or URA carpark nearby reports ${phrase} lots. Other carparks may still have them — we just don't have that data yet.`,
   };
 }

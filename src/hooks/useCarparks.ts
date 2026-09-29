@@ -451,6 +451,23 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
 
 const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
 
+const LOT_TYPE_ORDER: LotType[] = ['C', 'M', 'H'];
+
+/** carparks.lot_types in C→M→H order; undefined when unknown or empty. */
+function storedLotTypes(row: DbCarparkRaw): LotType[] | undefined {
+  if (!row.lot_types) return undefined;
+  const types = LOT_TYPE_ORDER.filter((t) => row.lot_types!.includes(t));
+  return types.length > 0 ? types : undefined;
+}
+
+/** Motorcycle / heavy-vehicle lot counts, when stored. */
+function storedLotCounts(row: DbCarparkRaw): Carpark['lotCounts'] {
+  const counts: NonNullable<Carpark['lotCounts']> = {};
+  if (row.motorcycle_lots) counts.M = row.motorcycle_lots;
+  if (row.heavy_lots) counts.H = row.heavy_lots;
+  return Object.keys(counts).length > 0 ? counts : undefined;
+}
+
 function dbRowToCarpark(
   row: DbCarparkRaw,
   dest: { lat: number; lng: number },
@@ -483,9 +500,10 @@ function dbRowToCarpark(
     name: row.name,
     block: row.address ?? row.source_code,
     operator: op,
-    // Real per-vehicle types when the live feed carries them (HDB); otherwise
-    // car-only, since other agencies don't break availability out by type.
-    lotTypes: live?.lotTypes ?? (['C'] satisfies LotType[]),
+    // Real per-vehicle types when the live feed carries them (HDB), else the
+    // stored ones (URA capacity data), else car-only.
+    lotTypes: live?.lotTypes ?? storedLotTypes(row) ?? (['C'] satisfies LotType[]),
+    lotCounts: storedLotCounts(row),
     lotsAvailable: live?.lotsAvailable ?? null,
     lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),

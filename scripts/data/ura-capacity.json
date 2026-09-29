@@ -1,0 +1,6218 @@
+[
+ {
+  "ppCode": "A0004",
+  "name": "Aliwal Street",
+  "car": 69,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0005",
+  "name": "Allenby Road",
+  "car": 16,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0006",
+  "name": "Amoy Street",
+  "car": 81,
+  "motorcycle": 10,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "A0007",
+  "name": "Angullia Park Off Street",
+  "car": 268,
+  "motorcycle": 96,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "A0008",
+  "name": "Ann Siang Road",
+  "car": 26,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0010",
+  "name": "Arab Street",
+  "car": 69,
+  "motorcycle": 13,
+  "heavy": 1,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "A0011",
+  "name": "Armenian Street Off Street",
+  "car": 45,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0017",
+  "name": "Arab Street / Queen Street Off Street",
+  "car": 148,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0021",
+  "name": "Amoy Street Off Street",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0024",
+  "name": "Adam Road Food Centre Off Street",
+  "car": 64,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "A0025",
+  "name": "Adam Road / Dunearn Close Off Street",
+  "car": 12,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0028",
+  "name": "Aljunied Road (minor)",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0034",
+  "name": "Anamalai Avenue",
+  "car": 12,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0035",
+  "name": "Anthony Road Off Street",
+  "car": 50,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0036",
+  "name": "Ang Mo Kio Street 62",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0037",
+  "name": "Ang Mo Kio Street 64",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0043",
+  "name": "Ayer Rajah Crescent",
+  "car": 17,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0045",
+  "name": "Attap Valley Road",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 4,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "A0046",
+  "name": "Aljunied Road Off Street",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0048",
+  "name": "Ang Mo Kio Street 63",
+  "car": 43,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "A0049",
+  "name": "Ang Mo Kio Avenue 1 Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 12,
+  "heavy": 62,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "A0054",
+  "name": "Anchorvale Street",
+  "car": 62,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "A0057",
+  "name": "Aroozoo Avenue",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0001",
+  "name": "Bukit Timah Road",
+  "car": 10,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0002",
+  "name": "Baghdad Street",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "B0004",
+  "name": "Bulim Avenue Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 88,
+  "heavy": 439,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0005",
+  "name": "Banda Street / Sago Lane Off Street",
+  "car": 29,
+  "motorcycle": 18,
+  "heavy": 20,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0008",
+  "name": "Beatty Road",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0011",
+  "name": "Birch Road",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0018",
+  "name": "Bukit Pasoh Road",
+  "car": 36,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "B0020",
+  "name": "Bussorah Street",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0022",
+  "name": "Beatty Lane",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0023",
+  "name": "Beng Wan Road Off Street",
+  "car": 41,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0025",
+  "name": "Bali Lane",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "B0028",
+  "name": "Balestier Road",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "B0029",
+  "name": "Bhamo Road",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0031",
+  "name": "Beatty Road Off Street",
+  "car": 17,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "B0033",
+  "name": "Boon Teck Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "B0035",
+  "name": "Belilios Lane Off Street",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0042",
+  "name": "Benoi Sector",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 35,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "B0043",
+  "name": "Benoi Crescent",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 11,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "B0045",
+  "name": "Blair Road",
+  "car": 43,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0052",
+  "name": "Banda Street",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "B0063",
+  "name": "Bukit Batok Nature Park Off Street",
+  "car": 106,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0067",
+  "name": "Burn Road",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "B0069",
+  "name": "Bedok South Road",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0073",
+  "name": "Boon Tat Street",
+  "car": 17,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "B0082",
+  "name": "Braddell Road Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 29,
+  "heavy": 81,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0084",
+  "name": "Beach Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "B0086",
+  "name": "Bukit Batok East Avenue 2 Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 45,
+  "heavy": 212,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0087",
+  "name": "Baghdad Street Off Street",
+  "car": 25,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0088",
+  "name": "Bedok Road Food Centre Off Street",
+  "car": 100,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "B0090",
+  "name": "Benoi Road",
+  "car": 54,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0092",
+  "name": "Baboo Lane",
+  "car": 0,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0098",
+  "name": "Bayfront Avenue Off Street",
+  "car": 251,
+  "motorcycle": 176,
+  "heavy": 10,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0099",
+  "name": "Bendemeer Road Heavy Vehicle Park",
+  "car": 9,
+  "motorcycle": 39,
+  "heavy": 116,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "B0100",
+  "name": "Brighton Crescent",
+  "car": 11,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "B0101",
+  "name": "Boon Lay Way Hvp",
+  "car": 0,
+  "motorcycle": 89,
+  "heavy": 341,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "BL008",
+  "name": "Backlane Bet North Canal Road / Circular Road",
+  "car": 0,
+  "motorcycle": 24,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL009",
+  "name": "Backlane Bet Hongkong Street / Carpenter Street",
+  "car": 0,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL010",
+  "name": "Backlane Bet Lorong Telok / Circular Road",
+  "car": 0,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "BL011",
+  "name": "Backlane Off Synagogue Street",
+  "car": 0,
+  "motorcycle": 43,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL014",
+  "name": "Backlane Bet Boon Tat Street / Amoy Street",
+  "car": 0,
+  "motorcycle": 16,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "BL015",
+  "name": "Backlane Off Amoy Street",
+  "car": 0,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL016",
+  "name": "Backlane Off Gemill Lane",
+  "car": 0,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL019",
+  "name": "Backlane Bet Upper Cross Street / Mosque Street",
+  "car": 0,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL021",
+  "name": "Backlane Off Cook Street",
+  "car": 0,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL022",
+  "name": "Backlane Bet Tras Street / Cook Street",
+  "car": 0,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL023",
+  "name": "Backlane Bet Peck Seah Street / Tras Street",
+  "car": 0,
+  "motorcycle": 18,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL031",
+  "name": "Backlane Off Bukit Pasoh Road",
+  "car": 0,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL032",
+  "name": "Backlane Off Keong Saik Road",
+  "car": 0,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL033",
+  "name": "Backlane Off Teck Lim Road",
+  "car": 0,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "BL034",
+  "name": "Backlane Bet Keong Siak Road / Neil Road",
+  "car": 0,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "BL041",
+  "name": "Backlane Bet Carpenter / Upper Circular Road",
+  "car": 0,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL046",
+  "name": "Backlane Bet Synagogue Street / Church Street",
+  "car": 0,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL053",
+  "name": "Backlane Bet Boon Tat Street / Mccuallum Street",
+  "car": 0,
+  "motorcycle": 60,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL054",
+  "name": "Backlane Off Boon Tat Street",
+  "car": 0,
+  "motorcycle": 26,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "BL055",
+  "name": "Backlane Off Mccallum Street",
+  "car": 0,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL060",
+  "name": "Backlane Off Smith Street",
+  "car": 0,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL061",
+  "name": "Backlane Bet Temple Street / Pagoda Street",
+  "car": 0,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL062",
+  "name": "Backlane Bet Temple Street / Smith Street",
+  "car": 0,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL067",
+  "name": "Backlane Bet Ann Siang Road / Erskine Road",
+  "car": 0,
+  "motorcycle": 21,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL076",
+  "name": "Backlane Bet Craig Road / Duxton Road",
+  "car": 0,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL077",
+  "name": "Backlane Bet Jiak Chuan Road / Teck Lim Road",
+  "car": 0,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL092",
+  "name": "Backlane Off Seah Street",
+  "car": 0,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL093",
+  "name": "Backlane Off Purvis Street",
+  "car": 0,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL109",
+  "name": "Backlane Bet Perak Road / Madras Street",
+  "car": 0,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL111",
+  "name": "Backlane Bet Mayo Street / Dunlop Street",
+  "car": 0,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL112",
+  "name": "Backlane Bet Dickson Road / Dunlop Street",
+  "car": 0,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL116",
+  "name": "Backlane Bet Kampong Kapor / Upper Dickson Road",
+  "car": 0,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL118",
+  "name": "Backlane Bet Dickson Road / Upper Weld Road",
+  "car": 0,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL120",
+  "name": "Backlane Bet Cuff Road / Veerasamy Road",
+  "car": 0,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL124",
+  "name": "Backlane Bet Hindoo Road / Rowell Road",
+  "car": 0,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL128",
+  "name": "Backlane Off Rowell Road",
+  "car": 0,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL132",
+  "name": "Backlane Off Desker Road",
+  "car": 0,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL137",
+  "name": "Backlane Off Sam Leong Road",
+  "car": 0,
+  "motorcycle": 14,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "BL138",
+  "name": "Backlane Bet Kelantan Lane / Road",
+  "car": 0,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL141",
+  "name": "Backlane Bet Townshend Road / Jalan Besar",
+  "car": 0,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL144",
+  "name": "Backlane Bet Kitchener Road / Plumer Road",
+  "car": 0,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL172",
+  "name": "Backlane Bet Arab Street / Jalan Pinang",
+  "car": 0,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL177",
+  "name": "Backlane Off Baghdad Street",
+  "car": 0,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "BL180",
+  "name": "Backlane Bet Jalan Sultan / Aliwal Street",
+  "car": 0,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "BL192",
+  "name": "Backlane Off Farleigh Avenue",
+  "car": 0,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL193",
+  "name": "Backlane Off Serangoon Garden Way",
+  "car": 0,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL196",
+  "name": "Backlane Off Blair Road / Spottiswoode Park Road",
+  "car": 0,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL201",
+  "name": "Backlane Off Jalan Berseh",
+  "car": 0,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL204",
+  "name": "Backlane Bet Clive Street / Madras St",
+  "car": 0,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL208",
+  "name": "Backlane Bet Baghdad Street / Muscat Street",
+  "car": 0,
+  "motorcycle": 18,
+  "heavy": 0,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "BL209",
+  "name": "Backlane Off Mohd Ali Lane / Ann Siang Hill",
+  "car": 0,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "BL210",
+  "name": "Backlane Off North Bridge Road",
+  "car": 0,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "BL212",
+  "name": "Backlane Bet Onan Road / Joo Chiat Road",
+  "car": 0,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "C0004",
+  "name": "Carpenter Street",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0009",
+  "name": "Chander Road",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0011",
+  "name": "Cheong Chin Nam Road",
+  "car": 62,
+  "motorcycle": 26,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "C0018",
+  "name": "Circular Road",
+  "car": 34,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0022",
+  "name": "Club Street",
+  "car": 27,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220713"
+ },
+ {
+  "ppCode": "C0028",
+  "name": "Cuff Road",
+  "car": 40,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0036",
+  "name": "Claymore Road",
+  "car": 4,
+  "motorcycle": 43,
+  "heavy": 2,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "C0038",
+  "name": "Claymore Hill",
+  "car": 10,
+  "motorcycle": 25,
+  "heavy": 2,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0039",
+  "name": "Coronation Walk",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0041",
+  "name": "Chin Bee Road",
+  "car": 52,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "C0045",
+  "name": "Chin Bee Drive",
+  "car": 29,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0053",
+  "name": "Cairnhill Road Service Road",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0055",
+  "name": "Choa Chu Kang Way",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 39,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "C0057",
+  "name": "Casuarina Road",
+  "car": 10,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0058",
+  "name": "Clemenceau Avenue",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0063",
+  "name": "Cheng Yan Place",
+  "car": 4,
+  "motorcycle": 15,
+  "heavy": 3,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0097",
+  "name": "Campbell Lane",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0098",
+  "name": "Clive Street",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 2,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "C0104",
+  "name": "Cavan Road",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "C0110",
+  "name": "Cook Street",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0113",
+  "name": "Changi Road (bet Jalan Kembangan / Still Road)",
+  "car": 63,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0114",
+  "name": "Changi Road Service Road",
+  "car": 38,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0118",
+  "name": "Ceylon Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "C0119",
+  "name": "Ceylon Road Off Street",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "C0120",
+  "name": "Chia Ping Road",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "C0121",
+  "name": "Clementi Loop",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 13,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "C0122",
+  "name": "Changi Village Road",
+  "car": 23,
+  "motorcycle": 25,
+  "heavy": 2,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "C0126",
+  "name": "Changi South Avenue 2",
+  "car": 10,
+  "motorcycle": 4,
+  "heavy": 10,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0128",
+  "name": "Changi South Avenue 4",
+  "car": 26,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "C0129",
+  "name": "Changi South Street 1",
+  "car": 59,
+  "motorcycle": 4,
+  "heavy": 9,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0130",
+  "name": "Changi South Street 2",
+  "car": 77,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0132",
+  "name": "Changi Road (bet Joo Chiat Road / Still Road)",
+  "car": 61,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0133",
+  "name": "Carpenter Street Off Street",
+  "car": 69,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0134",
+  "name": "Circuit Road",
+  "car": 66,
+  "motorcycle": 24,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "C0135",
+  "name": "Crane Road",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0136",
+  "name": "Ceylon Lane",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0142",
+  "name": "Chang Charn Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "C0147",
+  "name": "Changi Road / Jalan Wakaff Off Street",
+  "car": 15,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0148",
+  "name": "Clemenceau Avenue North (newton Fc)",
+  "car": 239,
+  "motorcycle": 23,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0151",
+  "name": "Changi Beach Car Park 1",
+  "car": 62,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "C0152",
+  "name": "Changi Beach Car Park 2",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "C0153",
+  "name": "Changi Beach Car Park 3",
+  "car": 37,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "C0154",
+  "name": "Changi Beach Car Park 4",
+  "car": 80,
+  "motorcycle": 28,
+  "heavy": 2,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0155",
+  "name": "Changi Beach Car Park 5",
+  "car": 39,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0156",
+  "name": "Changi Beach Car Park 6",
+  "car": 33,
+  "motorcycle": 1,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "C0157",
+  "name": "Changi North Crescent",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 9,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0158",
+  "name": "Changi North Rise",
+  "car": 13,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "C0159",
+  "name": "Changi North Street 1",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0160",
+  "name": "Changi North Street 2",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "C0161",
+  "name": "Changi South Lane",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 3,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "C0162",
+  "name": "Clemenceau Avenue Off Street",
+  "car": 31,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "D0001",
+  "name": "Devonshire Road",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "D0002",
+  "name": "Dublin Road",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "D0004",
+  "name": "Dickson Road",
+  "car": 48,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "D0005",
+  "name": "Dunlop Street",
+  "car": 55,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "D0006",
+  "name": "Duxton Hill Off Street",
+  "car": 58,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "D0009",
+  "name": "Desker Road",
+  "car": 85,
+  "motorcycle": 18,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "D0010",
+  "name": "Duxton Road",
+  "car": 42,
+  "motorcycle": 8,
+  "heavy": 2,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "D0012",
+  "name": "Dalhousie Lane",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "D0017",
+  "name": "Dunearn Close",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "D0026",
+  "name": "Dickson Road Off Street",
+  "car": 43,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "D0027",
+  "name": "Dunman Rd Food Centre Off Street",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "D0028",
+  "name": "Delta Circus Fringe Carpark",
+  "car": 74,
+  "motorcycle": 40,
+  "heavy": 157,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "D0029",
+  "name": "Dairy Farm Road / Petir Road Heavy Vehcle Park",
+  "car": 0,
+  "motorcycle": 29,
+  "heavy": 255,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "E0009",
+  "name": "Emerald Hill Road",
+  "car": 35,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "E0010",
+  "name": "Eunos Road 7 / Eunos Avenue 6 Hvp",
+  "car": 0,
+  "motorcycle": 32,
+  "heavy": 157,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "E0011",
+  "name": "Emerald Link",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "E0017",
+  "name": "East Coast Road (haig Road / Telok Kurau Road)",
+  "car": 63,
+  "motorcycle": 26,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "E0022",
+  "name": "Everton Road",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "E0023",
+  "name": "East Coast Park E3 Off Street",
+  "car": 42,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "E0024",
+  "name": "East Coast Park E2 Off Street",
+  "car": 353,
+  "motorcycle": 38,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "E0025",
+  "name": "East Coast Park Service Road",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "E0027",
+  "name": "East Coast Park E1 Off Street",
+  "car": 549,
+  "motorcycle": 23,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "E0031",
+  "name": "Ean Kiam Place",
+  "car": 26,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "E0033",
+  "name": "East Coast Road (frankel Avenue / Siglap Road)",
+  "car": 6,
+  "motorcycle": 12,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "E0034",
+  "name": "Everitt Road North",
+  "car": 9,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "E0035",
+  "name": "Everitt Road",
+  "car": 19,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "E0037",
+  "name": "East Coast Road (bet Siglap Road / Jalan Jamal)",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0001",
+  "name": "Fort Canning Park A Off Street",
+  "car": 46,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "F0002",
+  "name": "Foch Road",
+  "car": 31,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0006",
+  "name": "Flanders Square",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0011",
+  "name": "Foresthill Hvp",
+  "car": 0,
+  "motorcycle": 20,
+  "heavy": 158,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "F0013",
+  "name": "Fourth Chin Bee Road",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 21,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "F0021",
+  "name": "First Lok Yang Road",
+  "car": 31,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0022",
+  "name": "Fort Canning Park B Off Street",
+  "car": 36,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "F0025",
+  "name": "Forth Lok Yang Road",
+  "car": 23,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0026",
+  "name": "Fifth Lok Yang Road",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0027",
+  "name": "Fort Canning Park C Off Street",
+  "car": 50,
+  "motorcycle": 0,
+  "heavy": 5,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "F0029",
+  "name": "Fort Road / East Coast Park Heavy Vehicle Park",
+  "car": 20,
+  "motorcycle": 28,
+  "heavy": 85,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "F0030",
+  "name": "Farleigh Avenue",
+  "car": 23,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0031",
+  "name": "Farleigh Avenue Off Street",
+  "car": 44,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "F0032",
+  "name": "Fourth Chin Bee Road Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 42,
+  "heavy": 240,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "G0002",
+  "name": "Geylang Road",
+  "car": 169,
+  "motorcycle": 62,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0004",
+  "name": "Gali Batu Close Hvp",
+  "car": 0,
+  "motorcycle": 150,
+  "heavy": 216,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "G0018",
+  "name": "Genting Lane",
+  "car": 43,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0021",
+  "name": "Genting Road",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "G0022",
+  "name": "Genting Link",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0026",
+  "name": "Gul Circle",
+  "car": 39,
+  "motorcycle": 0,
+  "heavy": 98,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "G0027",
+  "name": "Gul Avenue",
+  "car": 45,
+  "motorcycle": 3,
+  "heavy": 20,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "G0028",
+  "name": "Gul Drive",
+  "car": 38,
+  "motorcycle": 0,
+  "heavy": 24,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "G0029",
+  "name": "Gul Lane",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 9,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "G0030",
+  "name": "Gul Crescent",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 15,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "G0032",
+  "name": "Gul Street 1",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0033",
+  "name": "Gul Street 2",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0034",
+  "name": "Gul Street 3",
+  "car": 17,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0035",
+  "name": "Gul Street 4",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0036",
+  "name": "Gul Street 5",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0037",
+  "name": "Genting Lane Off Street",
+  "car": 38,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "G0038",
+  "name": "Gul Road",
+  "car": 80,
+  "motorcycle": 165,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0039",
+  "name": "Guillemard Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0040",
+  "name": "Gemmill Lane",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "G0044",
+  "name": "Ganges Avenue Off Street Carpark",
+  "car": 39,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "H0003",
+  "name": "Hamilton Road Off Street",
+  "car": 22,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "H0006",
+  "name": "Hindoo Road",
+  "car": 33,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0007",
+  "name": "Hullet Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "H0008",
+  "name": "Harbour Drive",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 47,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "H0012",
+  "name": "Hong Kong Street",
+  "car": 30,
+  "motorcycle": 3,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "H0015",
+  "name": "Hindoo Road Off Street",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0021",
+  "name": "Hillview Terrace",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0022",
+  "name": "Hullet Road Off Street",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0024",
+  "name": "Hong Lim Park Off Street",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0028",
+  "name": "Hamilton Road",
+  "car": 53,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "H0037",
+  "name": "Horne Road",
+  "car": 33,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0049",
+  "name": "Harvey Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "H0050",
+  "name": "Howard Road",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "H0052",
+  "name": "Harrison Road",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "H0055",
+  "name": "Havelock Road",
+  "car": 22,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "H0057",
+  "name": "Hindoo Road / Kampong Kapor Road Off Street",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "H0061",
+  "name": "Happy Avenue North",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "H0064",
+  "name": "Holland Road / Peirce Road Coach Park",
+  "car": 0,
+  "motorcycle": 20,
+  "heavy": 76,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "I0005",
+  "name": "Irving Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "I0006",
+  "name": "Irving Place",
+  "car": 11,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0001",
+  "name": "Jalan Berseh",
+  "car": 34,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0003",
+  "name": "Jalan Besar",
+  "car": 35,
+  "motorcycle": 14,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "J0005",
+  "name": "Jalan Mata Ayer",
+  "car": 14,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "J0006",
+  "name": "Jalan Klapa",
+  "car": 16,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0008",
+  "name": "Jalan Kledek",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0009",
+  "name": "Jalan Kubor (north Bridge Road / Victoria Street)",
+  "car": 15,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "J0010",
+  "name": "Jalan Lana",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "J0012",
+  "name": "Jalan Pisang",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "J0015",
+  "name": "Jalan Binchang",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0017",
+  "name": "Joo Chiat Road Off Street",
+  "car": 99,
+  "motorcycle": 36,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0018",
+  "name": "Jiak Chuan Road",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220713"
+ },
+ {
+  "ppCode": "J0020",
+  "name": "Joo Koon Road",
+  "car": 15,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0021",
+  "name": "Joo Koon Way",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 7,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "J0022",
+  "name": "Jalan Pinang",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0027",
+  "name": "Joo Koon Circle",
+  "car": 33,
+  "motorcycle": 0,
+  "heavy": 57,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "J0029",
+  "name": "Jalan Sultan",
+  "car": 23,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0030",
+  "name": "Jalan Semerbak",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "J0033",
+  "name": "Jalan Tukang",
+  "car": 37,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0034",
+  "name": "Jalan Legundi",
+  "car": 20,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0035",
+  "name": "Jalan Tampang",
+  "car": 19,
+  "motorcycle": 17,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0036",
+  "name": "Jalan Derum",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0037",
+  "name": "Joo Yee Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0038",
+  "name": "Jalan Merah Saga",
+  "car": 31,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "J0039",
+  "name": "Jalan Rumia",
+  "car": 28,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "J0040",
+  "name": "Jalan Kelabu Asap",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0041",
+  "name": "Jalan Hitam Manis",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0042",
+  "name": "Jalan Kuning",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0043",
+  "name": "Jalan Puteh Jerneh",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0047",
+  "name": "Jalan Lembah Kallang",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0049",
+  "name": "Jellicoe Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "J0050",
+  "name": "Jalan Mas Kuning",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "J0051",
+  "name": "Jalan Mas Puteh",
+  "car": 20,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220713"
+ },
+ {
+  "ppCode": "J0054",
+  "name": "Jalan Besar / Beatty Road Off Street",
+  "car": 37,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "J0055",
+  "name": "Jalan Seh Chuan Off Street",
+  "car": 179,
+  "motorcycle": 28,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "J0056",
+  "name": "Jalan Seh Chuan / Lorong Kilat Off Street",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 9,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "J0057",
+  "name": "Jalan Dusun",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0058",
+  "name": "Jalan Kemaman",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "J0059",
+  "name": "Jalan Raja Udang",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0060",
+  "name": "Jalan Rama-rama",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0062",
+  "name": "Jalan Ampas",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "J0069",
+  "name": "Joo Avenue",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "J0070",
+  "name": "Jalan Anggerek",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "J0075",
+  "name": "Jago Close",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0080",
+  "name": "Jalan Masjid",
+  "car": 20,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "J0088",
+  "name": "Joo Seng Road",
+  "car": 20,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0092",
+  "name": "Jalan Kuras Off Street",
+  "car": 52,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0093",
+  "name": "Joo Koon Crescent",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "J0094",
+  "name": "Jalan Kuras",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0095",
+  "name": "Jalan Leban Service Road",
+  "car": 25,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "J0097",
+  "name": "Jalan Kubor (victoria Street / Rochor Canal Road)",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 7,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "J0098",
+  "name": "Jalan Mesin",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0099",
+  "name": "Jalan Bahar Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 42,
+  "heavy": 360,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "J0100",
+  "name": "Jalan Pelepah Off Street",
+  "car": 54,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0102",
+  "name": "Joo Chiat Road (changi Road / East Coast Road)",
+  "car": 107,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "J0104",
+  "name": "Joo Chiat Place",
+  "car": 48,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "J0106",
+  "name": "Joo Chiat Lane",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "J0109",
+  "name": "Jalan Ubi",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0111",
+  "name": "Jalan Lapang",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0112",
+  "name": "Jalan Gelenggang",
+  "car": 9,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0117",
+  "name": "Jalan Busut",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "J0122",
+  "name": "Jalan Kayu Off Street",
+  "car": 207,
+  "motorcycle": 30,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "J0128",
+  "name": "Jalan Kledek Off Street",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0130",
+  "name": "Joo Chiat Terrace (joo Chiat Rd / Tembeling Rd)",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "J0132",
+  "name": "Jalan Penjara Off Street",
+  "car": 43,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "JOO97",
+  "name": null,
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "K0004",
+  "name": "Kaki Bukit Road 4",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "K0005",
+  "name": "Kandahar Street",
+  "car": 46,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "K0006",
+  "name": "Kaki Bukit Road 1",
+  "car": 15,
+  "motorcycle": 10,
+  "heavy": 11,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "K0008",
+  "name": "Keong Saik Road",
+  "car": 68,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220713"
+ },
+ {
+  "ppCode": "K0009",
+  "name": "Kerbau Road",
+  "car": 11,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0010",
+  "name": "Killiney Road",
+  "car": 23,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "K0011",
+  "name": "Kinta Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "K0013",
+  "name": "Kitchener Road",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "K0016",
+  "name": "Kaki Bukit Road 6",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 15,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "K0022",
+  "name": "Kaki Bukit Avenue 4",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0027",
+  "name": "Kampong Kapor Road",
+  "car": 34,
+  "motorcycle": 16,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0032",
+  "name": "Kensington Park Road Off Street",
+  "car": 30,
+  "motorcycle": 25,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0034",
+  "name": "Kung Chong Road",
+  "car": 26,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "K0037",
+  "name": "King George's Ave Off Street",
+  "car": 22,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0039",
+  "name": "King George's Avenue / Horne Road Off Street",
+  "car": 61,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "K0046",
+  "name": "Kian Teck Avenue",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "K0049",
+  "name": "Kelantan Road",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "K0051",
+  "name": "Kensington Park Road Service Raod",
+  "car": 30,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0052",
+  "name": "Kallang Sector",
+  "car": 48,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "K0054",
+  "name": "Kallang Way",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0057",
+  "name": "Kallang Avenue",
+  "car": 80,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0061",
+  "name": "Kallang Bahru",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0064",
+  "name": "Kovan Road",
+  "car": 50,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "K0069",
+  "name": "Kelantan Lane",
+  "car": 23,
+  "motorcycle": 34,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0081",
+  "name": "Kim Chuan Road",
+  "car": 25,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "K0082",
+  "name": "Kampong Bugis Off Street",
+  "car": 29,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0087",
+  "name": "Kim Keat Close",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "K0091",
+  "name": "Kaki Bukit Road 2",
+  "car": 38,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0093",
+  "name": "Kampong Java Road",
+  "car": 30,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "K0094",
+  "name": "Kellock Road",
+  "car": 28,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0097",
+  "name": "Kampong Ampat",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0099",
+  "name": "Kampong Eunos",
+  "car": 4,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0108",
+  "name": "Keppel Road Off Street",
+  "car": 99,
+  "motorcycle": 28,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0110",
+  "name": "Kallang Way 2a",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "K0111",
+  "name": "Kinta Road Off Street",
+  "car": 122,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0113",
+  "name": "Kim Yam Road",
+  "car": 28,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0114",
+  "name": "Kampong Bugis",
+  "car": 16,
+  "motorcycle": 5,
+  "heavy": 3,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "K0115",
+  "name": "Kaki Bukit Place",
+  "car": 14,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "K0120",
+  "name": "Kempas Road",
+  "car": 23,
+  "motorcycle": 17,
+  "heavy": 0,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "K0121",
+  "name": "Kampong Kapor Road Off Street",
+  "car": 57,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0002",
+  "name": "Lembu Road",
+  "car": 19,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0003",
+  "name": "Liang Seah Street",
+  "car": 45,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0004",
+  "name": "Lorong 4 Geylang",
+  "car": 12,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "L0005",
+  "name": "Lloyd Road",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0008",
+  "name": "Lorong Kilat",
+  "car": 28,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0009",
+  "name": "Lorong Telok",
+  "car": 21,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "L0011",
+  "name": "Link Road",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "L0013",
+  "name": "Lorong 6 Geylang",
+  "car": 26,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0014",
+  "name": "Lorong 7 Geylang",
+  "car": 12,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0015",
+  "name": "Lorong 8 Geylang",
+  "car": 31,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0016",
+  "name": "Lorong 9 Geylang",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "L0018",
+  "name": "Lorong 11 Geylang",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0019",
+  "name": "Lorong 12 Geylang",
+  "car": 19,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "L0020",
+  "name": "Lorong 13 Geylang",
+  "car": 20,
+  "motorcycle": 1,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0021",
+  "name": "Lorong 14 Geylang",
+  "car": 44,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0022",
+  "name": "Lorong 15 Geylang",
+  "car": 21,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "L0023",
+  "name": "Lorong 16 Geylang",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0024",
+  "name": "Lorong 17 Geylang",
+  "car": 27,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0025",
+  "name": "Lorong 18 Geylang",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0026",
+  "name": "Lorong 19 Geylang",
+  "car": 38,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0027",
+  "name": "Lorong 20 Geylang",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0028",
+  "name": "Lorong 21 Geylang",
+  "car": 24,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220408"
+ },
+ {
+  "ppCode": "L0029",
+  "name": "Lok Yang Way",
+  "car": 122,
+  "motorcycle": 50,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "L0030",
+  "name": "Lorong Bachok",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0031",
+  "name": "Lorong Tahar",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0032",
+  "name": "Lorong 23 Geylang",
+  "car": 53,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "L0033",
+  "name": "Lorong 24 Geylang",
+  "car": 19,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "L0034",
+  "name": "Lorong 24a Geylang",
+  "car": 53,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0035",
+  "name": "Lorong 25 Geylang",
+  "car": 36,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0036",
+  "name": "Lorong 25a Geylang",
+  "car": 29,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "L0037",
+  "name": "Lorong 26 Geylang",
+  "car": 12,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0038",
+  "name": "Lorong 27 Geylang",
+  "car": 26,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0039",
+  "name": "Lorong 27a Geylang",
+  "car": 18,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0040",
+  "name": "Lorong 28 Geylang",
+  "car": 36,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0041",
+  "name": "Lorong 29 Geylang",
+  "car": 22,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "L0042",
+  "name": "Lorong 30 Geylang",
+  "car": 17,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0043",
+  "name": "Lorong 31 Geylang",
+  "car": 15,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0044",
+  "name": "Lorong 32 Geylang",
+  "car": 20,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "L0045",
+  "name": "Lorong 33 Geylang",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0046",
+  "name": "Lorong 34 Geylang",
+  "car": 22,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "L0047",
+  "name": "Lorong 35 Geylang",
+  "car": 13,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "L0048",
+  "name": "Lorong 36 Geylang",
+  "car": 14,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0049",
+  "name": "Lorong 37 Geylang",
+  "car": 14,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0050",
+  "name": "Lorong 38 Geylang",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "L0051",
+  "name": "Lorong 39 Geylang",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0052",
+  "name": "Lorong 40 Geylang",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0053",
+  "name": "Lorong 41 Geylang",
+  "car": 45,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0056",
+  "name": "Lorong 28 Service Road Geylang",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0057",
+  "name": "Lorong 39 Service Road Geylang",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0058",
+  "name": "Lim Tua Tow Road Off Street",
+  "car": 39,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0060",
+  "name": "Lorong Bakar Batu",
+  "car": 50,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0061",
+  "name": "Lim Tua Tow Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0064",
+  "name": "Lorong 21 Geylang Off Street",
+  "car": 35,
+  "motorcycle": 14,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0065",
+  "name": "Lorong Pendek",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "L0074",
+  "name": "Lorong 21a Geylang",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0076",
+  "name": "Lorong Melayu",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "L0077",
+  "name": "Leng Kee Road",
+  "car": 25,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0078",
+  "name": "Lorong Mydin Off Street",
+  "car": 23,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0079",
+  "name": "Lorong Marzuki",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "L0081",
+  "name": "Lorong Ampas",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "L0082",
+  "name": "Lorong Sarina",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0083",
+  "name": "Lorong Marican",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "L0085",
+  "name": "Loyang Way",
+  "car": 37,
+  "motorcycle": 17,
+  "heavy": 9,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "L0086",
+  "name": "Loyang Close Hvp",
+  "car": 0,
+  "motorcycle": 46,
+  "heavy": 61,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "L0087",
+  "name": "Loyang Crescent",
+  "car": 34,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "L0088",
+  "name": "Loyang Drive",
+  "car": 26,
+  "motorcycle": 31,
+  "heavy": 7,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "L0089",
+  "name": "Loyang Lane",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "L0092",
+  "name": "Little Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0096",
+  "name": "Lorong 101 Changi",
+  "car": 17,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0097",
+  "name": "Lorong 102 Changi",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0098",
+  "name": "Lorong 104 Changi",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0099",
+  "name": "Lorong 105 Changi",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0100",
+  "name": "Lorong 106 Changi",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "L0101",
+  "name": "Lorong 107 Changi",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0102",
+  "name": "Lorong 108 Changi",
+  "car": 9,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0103",
+  "name": "Langsat Road",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0104",
+  "name": "Lorong Bekukong Off Street",
+  "car": 167,
+  "motorcycle": 28,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0107",
+  "name": "Lorong Bachok Off Street",
+  "car": 25,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0109",
+  "name": "Loyang Way 1",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0110",
+  "name": "Loyang Street",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0113",
+  "name": "Lorong 3 Geylang",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0115",
+  "name": "Lorong 1 Geylang Road Off Street",
+  "car": 66,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0116",
+  "name": "Lorong 21 Geylang / Geylang Road Off Street",
+  "car": 29,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0117",
+  "name": "Lorong 25 / 25a Geylang Off Street (eps)",
+  "car": 105,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "L0118",
+  "name": "Lorong 36 Geylang Off Street (l0118)",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0120",
+  "name": "Lorong Mydin",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0123",
+  "name": "Lorong 9-11 Geylang (eps)",
+  "car": 56,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0124",
+  "name": "Lorong 37 Geyalng Off Street (eps)",
+  "car": 28,
+  "motorcycle": 17,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "L0125",
+  "name": "Lorng 31 Geylang Off Street (eps)",
+  "car": 51,
+  "motorcycle": 21,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0001",
+  "name": "Mackenzie Road",
+  "car": 6,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0003",
+  "name": "Marne Road",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0005",
+  "name": "Mayo Street",
+  "car": 35,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0006",
+  "name": "Mccallum Street",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0009",
+  "name": "Mistri Road",
+  "car": 0,
+  "motorcycle": 18,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0011",
+  "name": "Mosque Street",
+  "car": 61,
+  "motorcycle": 4,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "M0015",
+  "name": "Mohd Sultan Road",
+  "car": 72,
+  "motorcycle": 29,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "M0017",
+  "name": "Middle Road Off Street",
+  "car": 13,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0020",
+  "name": "Maude Road",
+  "car": 31,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0026",
+  "name": "Manila Street",
+  "car": 6,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0032",
+  "name": "Marsiling Crescent",
+  "car": 0,
+  "motorcycle": 14,
+  "heavy": 29,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "M0038",
+  "name": "Maju Avenue",
+  "car": 43,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0039",
+  "name": "Maju Avenue Service Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0040",
+  "name": "Mackenzie Road A Off Street",
+  "car": 109,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0043",
+  "name": "Mount Emily Road",
+  "car": 2,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0048",
+  "name": "Martaban Road",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0049",
+  "name": "Minbu Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0050",
+  "name": "Mnd Complex (surface)",
+  "car": 104,
+  "motorcycle": 77,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0055",
+  "name": "Moonstone Lane",
+  "car": 29,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0058",
+  "name": "Macpherson Road",
+  "car": 28,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0059",
+  "name": "Mackenzie Road B Off Street",
+  "car": 82,
+  "motorcycle": 33,
+  "heavy": 76,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "M0063",
+  "name": "Mayne Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "M0066",
+  "name": "Mactaggart Road",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0072",
+  "name": "Mandalay Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "M0076",
+  "name": "Minbu Road Off Street",
+  "car": 111,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0077",
+  "name": "Mohamed Sultan / River Valley Road",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0078",
+  "name": "Maritime Square D Off Street",
+  "car": 258,
+  "motorcycle": 396,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "M0079",
+  "name": "Marsiling Crescent Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 84,
+  "heavy": 647,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "M0080",
+  "name": "Marshall Road",
+  "car": 37,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0084",
+  "name": "Marina View Off Street",
+  "car": 44,
+  "motorcycle": 16,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "M0085",
+  "name": "Martin Place / Muthuraman Chetty Road",
+  "car": 19,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "M0088",
+  "name": "Margaret Drive Off Street",
+  "car": 28,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "N0003",
+  "name": "North Bridge Road (arab Street / Jalan Sultan)",
+  "car": 31,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "N0005",
+  "name": "New Industrial Road",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "N0006",
+  "name": "Neil Road Off Street",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "N0010",
+  "name": "Niven Road",
+  "car": 15,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "N0011",
+  "name": "Norris Road",
+  "car": 17,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "N0012",
+  "name": "North Bridge Road Market Off Street",
+  "car": 83,
+  "motorcycle": 50,
+  "heavy": 1,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "N0013",
+  "name": "North Bridge Road Off Street",
+  "car": 92,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "N0014",
+  "name": "North Canal Road",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "N0016",
+  "name": "Neythal Road",
+  "car": 53,
+  "motorcycle": 5,
+  "heavy": 9,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "N0020",
+  "name": "New Market Road",
+  "car": 0,
+  "motorcycle": 15,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "N0023",
+  "name": "Netheravon Road",
+  "car": 16,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "N0047",
+  "name": "Neil Road",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "N0048",
+  "name": "Neo Pee Teck Lane",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "N0053",
+  "name": "North Coast Drive",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "O0004",
+  "name": "Old Upper Thomson Road",
+  "car": 53,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "O0005",
+  "name": "Old Upper Thomson Road Off Street",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "O0007",
+  "name": "Owen Road / Dorest Road/ Cambridge Road",
+  "car": 11,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "O0008",
+  "name": "Old Airport Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "O0010",
+  "name": "Outram Road",
+  "car": 27,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "O0013",
+  "name": "Outram Hill",
+  "car": 11,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "O0026",
+  "name": "Opal Crescent",
+  "car": 48,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "O0027",
+  "name": "Onan Road",
+  "car": 52,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "O0029",
+  "name": "Onan Road Off Street",
+  "car": 13,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "O0031",
+  "name": "Onan Road / Joo Chiat Road Off Street",
+  "car": 20,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0002",
+  "name": "Pahang Street",
+  "car": 24,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0006",
+  "name": "Peck Seah Street",
+  "car": 4,
+  "motorcycle": 11,
+  "heavy": 3,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0009",
+  "name": "Penang Lane",
+  "car": 13,
+  "motorcycle": 28,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0011",
+  "name": "Petain Road (serangoon Road / Jalan Besar)",
+  "car": 62,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0013",
+  "name": "Prince Edward Road / Shenton Way Off Street",
+  "car": 84,
+  "motorcycle": 66,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0015",
+  "name": "Prinsep Street",
+  "car": 50,
+  "motorcycle": 26,
+  "heavy": 3,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "P0018",
+  "name": "Purvis Street",
+  "car": 43,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "P0023",
+  "name": "Plumer Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0024",
+  "name": "Prince Of Wales Road",
+  "car": 23,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0025",
+  "name": "Princess Of Wales Road",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "P0028",
+  "name": "Prome Road",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0031",
+  "name": "Pepys Road Off Street",
+  "car": 30,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0035",
+  "name": "Pheng Geck Avenue",
+  "car": 58,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0036",
+  "name": "Puay Hee Avenue",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "P0038",
+  "name": "Perak Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0048",
+  "name": "Pearl Bank Off Street",
+  "car": 19,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220408"
+ },
+ {
+  "ppCode": "P0049",
+  "name": "Penshurt Place",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0051",
+  "name": "Penhas Road",
+  "car": 23,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0054",
+  "name": "Pasir Panjang Rd Food Centre",
+  "car": 58,
+  "motorcycle": 32,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "P0055",
+  "name": "Petain Road (jalan Besar / Tyrwhitt Road)",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "P0072",
+  "name": "Pennefather Road",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "P0075",
+  "name": "Penhas Road / Lavender Street Off Street",
+  "car": 29,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0076",
+  "name": "Pandan Road",
+  "car": 90,
+  "motorcycle": 10,
+  "heavy": 15,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0077",
+  "name": "Pandan Avenue",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0078",
+  "name": "Pandan Crescent",
+  "car": 2,
+  "motorcycle": 0,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0081",
+  "name": "Pioneer Sector 1",
+  "car": 107,
+  "motorcycle": 65,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0082",
+  "name": "Pioneer Sector 2",
+  "car": 63,
+  "motorcycle": 106,
+  "heavy": 18,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0083",
+  "name": "Pioneer Sector 3",
+  "car": 18,
+  "motorcycle": 15,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0084",
+  "name": "Pioneer Sector Lane",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0086",
+  "name": "Pandan Loop",
+  "car": 57,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0093",
+  "name": "Pasir Panjang Road Off Street",
+  "car": 19,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0094",
+  "name": "Pasir Panjang Road / South Buona Vista Road",
+  "car": 26,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "P0095",
+  "name": "Penjuru Close",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 10,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0096",
+  "name": "Penang Road Off Street",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0099",
+  "name": "Pioneer Sector Walk",
+  "car": 25,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0102",
+  "name": "Pandan Gardens",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 20,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0103",
+  "name": "Pioneer Road Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 573,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "P0106",
+  "name": "Pasir Panjang Road / Clementi Road Off Street",
+  "car": 47,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "P0109",
+  "name": "Pasir Ris Park Car Park E Off Street",
+  "car": 26,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0111",
+  "name": "Pahang Street Off Street (eps)",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0113",
+  "name": "Pasir Panjang Food Centre (temp) Off Street Car Park",
+  "car": 76,
+  "motorcycle": 16,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "P0114",
+  "name": "Pasir Laba Road Trailer Park",
+  "car": 0,
+  "motorcycle": 65,
+  "heavy": 442,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "P0117",
+  "name": "Peck Seah Street Off Street",
+  "car": 150,
+  "motorcycle": 65,
+  "heavy": 0,
+  "updated": "20220408"
+ },
+ {
+  "ppCode": "Q0001",
+  "name": "Queen Street",
+  "car": 6,
+  "motorcycle": 32,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "Q0002",
+  "name": "Queen Street (arab Street / Rochor Road)",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "Q0004",
+  "name": "Quality Road",
+  "car": 30,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "Q0006",
+  "name": "Queen Street Off Street",
+  "car": 91,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "Q0008",
+  "name": "Queensway Off Street (ridout Tea Garden)",
+  "car": 66,
+  "motorcycle": 17,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "R0001",
+  "name": "Race Course Lane",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 4,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "R0002",
+  "name": "Race Course Road",
+  "car": 55,
+  "motorcycle": 16,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "R0003",
+  "name": "Rangoon Road",
+  "car": 80,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "R0006",
+  "name": "Riverside Road",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 70,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "R0010",
+  "name": "River Valley Road (bet. Tank Rd / Zion Rd)",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "R0011",
+  "name": "Roberts Lane",
+  "car": 39,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "R0015",
+  "name": "Rowell Road",
+  "car": 88,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "R0028",
+  "name": "Ruby Lane",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "R0036",
+  "name": "Race Course Road (bet Bukit Timah Road / Rangoon Road)",
+  "car": 33,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "R0037",
+  "name": "Rangoon Lane Off Street",
+  "car": 21,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "R0039",
+  "name": "Rangoon Lane",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "R0040",
+  "name": "Raffles Boulevard Coach Park",
+  "car": 0,
+  "motorcycle": 30,
+  "heavy": 51,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0001",
+  "name": "Sam Leong Road",
+  "car": 48,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "S0002",
+  "name": "Seah Street",
+  "car": 8,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0005",
+  "name": "Serangoon Road (kitchener Road / Lavender Street)",
+  "car": 42,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0007",
+  "name": "Starlight Road / Terrace",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "S0009",
+  "name": "Short Street",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "S0011",
+  "name": "Sophia Road",
+  "car": 3,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "S0015",
+  "name": "Stanley Street",
+  "car": 20,
+  "motorcycle": 5,
+  "heavy": 2,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0018",
+  "name": "Sultan Gate",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "S0020",
+  "name": "Sembawang Hills Food Centre Off Street",
+  "car": 18,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0021",
+  "name": "Syed Alwi Road (jalan Besar / Serangoon Road)",
+  "car": 42,
+  "motorcycle": 17,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "S0022",
+  "name": "Syed Alwi Road (jalan Besar / Rochor Canal Road)",
+  "car": 43,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "S0023",
+  "name": "Sturdee Road",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "S0026",
+  "name": "Service Road Off Bukit Timah Road / Sixth Ave",
+  "car": 10,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0027",
+  "name": "Siak Kew Avenue",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0032",
+  "name": "Saunders Road",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "S0033",
+  "name": "Service Road Off Choa Chu Kang Avenue 1",
+  "car": 42,
+  "motorcycle": 22,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0035",
+  "name": "Service Road Off Queen Street (bet. Queen St / Waterloo St)",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 3,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "S0039",
+  "name": "Sims Avenue Service Road",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "S0040",
+  "name": "Second Chin Bee Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0043",
+  "name": "Sixth Avenue",
+  "car": 21,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0044",
+  "name": "Seletar North Link",
+  "car": 0,
+  "motorcycle": 9,
+  "heavy": 20,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0045",
+  "name": "Sing Avenue",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "S0046",
+  "name": "Sing Joo Walk",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0047",
+  "name": "Shan Road",
+  "car": 11,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0048",
+  "name": "Shaw Road",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0049",
+  "name": "Serangoon Rd / Lavender Street Off Street",
+  "car": 112,
+  "motorcycle": 27,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0050",
+  "name": "Siang Kuang Avenue",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0055",
+  "name": "Serangoon Garden Market Off Street",
+  "car": 105,
+  "motorcycle": 39,
+  "heavy": 0,
+  "updated": "20220408"
+ },
+ {
+  "ppCode": "S0061",
+  "name": "Sembong Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0063",
+  "name": "Serangoon Garden Way",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "S0064",
+  "name": "Serangoon Garden Way Service Road",
+  "car": 84,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0065",
+  "name": "Sandown Place",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0066",
+  "name": "Somme Road",
+  "car": 13,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0070",
+  "name": "Simon Road Service Road",
+  "car": 10,
+  "motorcycle": 18,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0074",
+  "name": "Sin Ming Drive",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0076",
+  "name": "Second Lok Yang Road",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0078",
+  "name": "Soon Wing Road",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "S0079",
+  "name": "Service Road Off King George's Avenue",
+  "car": 12,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "S0082",
+  "name": "Sixth Lok Yang Road",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0083",
+  "name": "Sungei Kadut Avenue",
+  "car": 7,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0084",
+  "name": "Sungei Kadut Drive",
+  "car": 38,
+  "motorcycle": 0,
+  "heavy": 74,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0085",
+  "name": "Sungei Kadut Loop",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0086",
+  "name": "Sungei Kadut Street 1",
+  "car": 59,
+  "motorcycle": 0,
+  "heavy": 9,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0087",
+  "name": "Sungei Kadut Central",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 10,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0088",
+  "name": "Sungei Kadut Street 3",
+  "car": 20,
+  "motorcycle": 0,
+  "heavy": 27,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0090",
+  "name": "Sungei Kadut Street 5",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 23,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0091",
+  "name": "Senoko Road",
+  "car": 24,
+  "motorcycle": 0,
+  "heavy": 14,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0092",
+  "name": "Senoko South Road",
+  "car": 26,
+  "motorcycle": 6,
+  "heavy": 14,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0094",
+  "name": "Senoko Way",
+  "car": 31,
+  "motorcycle": 0,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0096",
+  "name": "Senoko Drive",
+  "car": 39,
+  "motorcycle": 0,
+  "heavy": 7,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "S0097",
+  "name": "Senoko Avenue",
+  "car": 24,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20230105"
+ },
+ {
+  "ppCode": "S0098",
+  "name": "Sims Avenue (bet Lor 3 Geylang/paya Lebar Rd)",
+  "car": 123,
+  "motorcycle": 16,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0102",
+  "name": "Spottiswoode Park Road",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0103",
+  "name": "Stevens Road",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0105",
+  "name": "Sungei Kadut Way",
+  "car": 56,
+  "motorcycle": 0,
+  "heavy": 7,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0106",
+  "name": "Sin Ming Drive Off Street",
+  "car": 34,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "S0108",
+  "name": "Shrewsbury Road Off Street",
+  "car": 29,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "S0109",
+  "name": "Sin Ming Road Heavy Vehicle Park",
+  "car": 69,
+  "motorcycle": 17,
+  "heavy": 82,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0110",
+  "name": "Service Road Off Onan Road",
+  "car": 2,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0111",
+  "name": "Stagmont Ring Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 37,
+  "heavy": 188,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "S0112",
+  "name": "Seah Im Road Off Street",
+  "car": 434,
+  "motorcycle": 366,
+  "heavy": 21,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "S0115",
+  "name": "Service Road Off Hamilton Road / Cavan Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "S0118",
+  "name": "Service Road Off Penhas Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "S0119",
+  "name": "Shrewsbury Road",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "S0120",
+  "name": "Service Road Bet Petain Road / Allenby Road",
+  "car": 3,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "S0127",
+  "name": "Service Road Off Joo Chiat Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "S0128",
+  "name": "Service Road Off Chai Chee Drive",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0130",
+  "name": null,
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "S0132",
+  "name": "Service Road Off Aliwal Street",
+  "car": 5,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "S0133",
+  "name": "Service Road Off Everton Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "S0134",
+  "name": "Sommerville Walk",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "S0135",
+  "name": "Sims Avenue (paya Lebar Road / Eunos Road)",
+  "car": 20,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0136",
+  "name": "Service Road Off Zion Road",
+  "car": 21,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0139",
+  "name": "Service Road Off Upper Bukit Timah Road",
+  "car": 27,
+  "motorcycle": 13,
+  "heavy": 3,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0141",
+  "name": "Service Road Off Upper East Coast Road",
+  "car": 14,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "S0143",
+  "name": "Service Road Off Lorong 44 Geylang",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0146",
+  "name": "Service Road Off Quality Road",
+  "car": 36,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0148",
+  "name": "Sungei Kadut Crescent",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "S0149",
+  "name": "Service Road Off Sin Ming Road",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0150",
+  "name": "Sultan Gate / Aliwal Street Off Street (eps)",
+  "car": 52,
+  "motorcycle": 4,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0151",
+  "name": "Sembawang Drive Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 49,
+  "heavy": 127,
+  "updated": "20250401"
+ },
+ {
+  "ppCode": "S0152",
+  "name": "Sunshine Terrace",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0156",
+  "name": "Sims Place",
+  "car": 35,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "S0157",
+  "name": "Service Road Off Jalan Masjid",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0158",
+  "name": "Service Road Off Macpherson Road",
+  "car": 23,
+  "motorcycle": 22,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0159",
+  "name": "Service Road Off Balestier Road",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0160",
+  "name": "Sin Ming Walk",
+  "car": 17,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "S0162",
+  "name": "Service Road Off Tebing Lane",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0164",
+  "name": "Seletar Aerospace View",
+  "car": 31,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "S0166",
+  "name": "Sembawang Road / Admiralty Road East Off Street",
+  "car": 63,
+  "motorcycle": 14,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0167",
+  "name": "Service Road Off Jalan Selaseh",
+  "car": 29,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0168",
+  "name": "Service Road Off Jalan Kelulut",
+  "car": 27,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0170",
+  "name": "Service Road Off Sembawang Road",
+  "car": 5,
+  "motorcycle": 13,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "S0171",
+  "name": "Spooner Road Off Street",
+  "car": 62,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "S0172",
+  "name": "Springleaf Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0001",
+  "name": "Tuas Crescent Trailer Park",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 120,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0002",
+  "name": "Tanjong Pagar Road",
+  "car": 25,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0003",
+  "name": "Tank Road",
+  "car": 18,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0006",
+  "name": "Teck Lim Road",
+  "car": 14,
+  "motorcycle": 2,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0008",
+  "name": "Telok Ayer Street",
+  "car": 49,
+  "motorcycle": 58,
+  "heavy": 3,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0009",
+  "name": "Temple Street",
+  "car": 61,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0010",
+  "name": "Teo Hong Road",
+  "car": 14,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0014",
+  "name": "Tras Street",
+  "car": 71,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "T0017",
+  "name": "Tiong Bahru Park Off Street",
+  "car": 20,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0019",
+  "name": "Tanjong Penjuru Crescent",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 34,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0020",
+  "name": "Tanjong Penjuru",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 23,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0021",
+  "name": "Tyrwhitt Road",
+  "car": 35,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "T0022",
+  "name": "Townshend Road",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "T0025",
+  "name": "Tai Thong Crescent",
+  "car": 12,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0031",
+  "name": "Talma Road",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0036",
+  "name": "Tampines Place",
+  "car": 17,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0039",
+  "name": "Tannery Lane",
+  "car": 36,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20230410"
+ },
+ {
+  "ppCode": "T0040",
+  "name": "Third Chin Bee Road",
+  "car": 41,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0043",
+  "name": "Taman Mas Merah",
+  "car": 13,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0057",
+  "name": "Tessensohn Road",
+  "car": 43,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20260401"
+ },
+ {
+  "ppCode": "T0060",
+  "name": "Toh Guan Road",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0061",
+  "name": "Third Lok Yang Road",
+  "car": 30,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0062",
+  "name": "Tai Seng Drive",
+  "car": 8,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0065",
+  "name": "Tagore Road",
+  "car": 44,
+  "motorcycle": 16,
+  "heavy": 42,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0066",
+  "name": "Tagore Industrial Avenue",
+  "car": 75,
+  "motorcycle": 9,
+  "heavy": 0,
+  "updated": "20240402"
+ },
+ {
+  "ppCode": "T0067",
+  "name": "Tagore Lane",
+  "car": 126,
+  "motorcycle": 12,
+  "heavy": 4,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0068",
+  "name": "Tagore Drive",
+  "car": 41,
+  "motorcycle": 0,
+  "heavy": 17,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "T0070",
+  "name": "Tanglin Halt Close",
+  "car": 37,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0074",
+  "name": "Tampines Industrial Avenue 3",
+  "car": 16,
+  "motorcycle": 24,
+  "heavy": 8,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "T0076",
+  "name": "Tuas Avenue 1",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 14,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0077",
+  "name": "Tuas Avenue 3",
+  "car": 38,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231010"
+ },
+ {
+  "ppCode": "T0078",
+  "name": "Tuas Avenue 4",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 11,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0079",
+  "name": "Tuas Avenue 5",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0080",
+  "name": "Tuas Avenue 7",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 10,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0081",
+  "name": "Tuas Avenue 9",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 9,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0082",
+  "name": "Tuas Avenue 11",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0083",
+  "name": "Tuas Avenue 12",
+  "car": 19,
+  "motorcycle": 0,
+  "heavy": 2,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "T0084",
+  "name": "Tuas Avenue 13",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0088",
+  "name": "Tuas Avenue 18a",
+  "car": 32,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0090",
+  "name": "Tuas Drive 1",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0091",
+  "name": "Tuas Drive 2",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0092",
+  "name": "Tuas Street",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0094",
+  "name": "Tuas Lane",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0095",
+  "name": "Tuas Link 1",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 6,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0096",
+  "name": "Tuas West Avenue",
+  "car": 43,
+  "motorcycle": 0,
+  "heavy": 30,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "T0100",
+  "name": "Telok Blangah Street 31",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0102",
+  "name": "Tuas Road",
+  "car": 25,
+  "motorcycle": 32,
+  "heavy": 20,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "T0103",
+  "name": "Tembeling Road Off Street",
+  "car": 200,
+  "motorcycle": 23,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "T0104",
+  "name": "Tai Seng Avenue",
+  "car": 75,
+  "motorcycle": 10,
+  "heavy": 14,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0107",
+  "name": "Tampines Road / Hougang Avenue 7 (a) Heavy Vehcile Park",
+  "car": 0,
+  "motorcycle": 49,
+  "heavy": 163,
+  "updated": "20241001"
+ },
+ {
+  "ppCode": "T0109",
+  "name": "Telok Blangah Drive Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 18,
+  "heavy": 55,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0111",
+  "name": "Tuas Link 2",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 4,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0113",
+  "name": "Tuas Link 4",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 10,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0114",
+  "name": "Tembeling Road",
+  "car": 57,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "T0115",
+  "name": "Telok Kurau Road",
+  "car": 22,
+  "motorcycle": 3,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "T0116",
+  "name": "Teban Gardens Crescent",
+  "car": 104,
+  "motorcycle": 0,
+  "heavy": 52,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0117",
+  "name": "Tuas South Avenue 1",
+  "car": 63,
+  "motorcycle": 10,
+  "heavy": 11,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0120",
+  "name": "Tuas South Avenue 6",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 20,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0123",
+  "name": "Tuas South Street 2",
+  "car": 25,
+  "motorcycle": 0,
+  "heavy": 8,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0129",
+  "name": "Tanjong Katong Complex",
+  "car": 355,
+  "motorcycle": 72,
+  "heavy": 7,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "T0130",
+  "name": "Toa Payoh West",
+  "car": 51,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "T0131",
+  "name": "Tampines Avenue 9 / Avenue 10 Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 131,
+  "heavy": 528,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0140",
+  "name": "Tanjong Katong Road Off Street",
+  "car": 123,
+  "motorcycle": 21,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0142",
+  "name": "Tuas Basin Close",
+  "car": 5,
+  "motorcycle": 0,
+  "heavy": 2,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0143",
+  "name": "Tuas Basin Lane",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 2,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "T0144",
+  "name": "Teo Hong Rd / New Bridge Road Off Street",
+  "car": 31,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0145",
+  "name": "Tebing Lane",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0146",
+  "name": "Tai Seng Street",
+  "car": 8,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "T0147",
+  "name": "Tampines Industrial Avenue 2",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 55,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "T0148",
+  "name": "Tuas South Avenue 1 Trailer Park",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 321,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0149",
+  "name": "Tampines Industrial Avenue 1",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 12,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "T0150",
+  "name": "Tuas View Crescent",
+  "car": 0,
+  "motorcycle": 0,
+  "heavy": 24,
+  "updated": "20260107"
+ },
+ {
+  "ppCode": "T0151",
+  "name": "Tampines Road H V Park",
+  "car": 0,
+  "motorcycle": 105,
+  "heavy": 338,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "T0153",
+  "name": "Tampines North Drive 3 Hvp",
+  "car": 0,
+  "motorcycle": 45,
+  "heavy": 367,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "U0002",
+  "name": "Upper Circular Road",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0003",
+  "name": "Ubi Avenue 3",
+  "car": 67,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "U0007",
+  "name": "Upper Dickson Road",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0008",
+  "name": "Upper Weld Road",
+  "car": 59,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "U0012",
+  "name": "Upper Paya Lebar Road Service Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0013",
+  "name": "Ubi Road 1",
+  "car": 26,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0014",
+  "name": "Ubi Road 2",
+  "car": 35,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0016",
+  "name": "Ubi Road 3",
+  "car": 16,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0017",
+  "name": "Upper Hokkien Street",
+  "car": 28,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0021",
+  "name": "Ubi Avenue 4",
+  "car": 11,
+  "motorcycle": 25,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0023",
+  "name": "Unity Street",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 1,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "U0030",
+  "name": "Ubi Avenue 1",
+  "car": 4,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0031",
+  "name": "Upper Serangoon Road",
+  "car": 13,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0035",
+  "name": "Upper Serangoon Road (bartley Road Juntion)",
+  "car": 23,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0036",
+  "name": "Upper East Coast Road Off Street",
+  "car": 128,
+  "motorcycle": 11,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0037",
+  "name": "Ubi Road 4",
+  "car": 12,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0038",
+  "name": "Upper Thomson Road (lakeview Estate)",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "U0039",
+  "name": "Ubi Crescent",
+  "car": 17,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0040",
+  "name": "Upper Aljunied Link Off Street",
+  "car": 15,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0042",
+  "name": "Upper Changi Road / Bedok Road Off Street",
+  "car": 48,
+  "motorcycle": 10,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0043",
+  "name": "Upper Thomson Road Off Street",
+  "car": 38,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0044",
+  "name": "Ubi View",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "U0045",
+  "name": "Ubi Link",
+  "car": 18,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "V0001",
+  "name": "Veerasamy Road",
+  "car": 28,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20251008"
+ },
+ {
+  "ppCode": "V0005",
+  "name": "Verdun Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "V0007",
+  "name": "Verdun Road Off Street",
+  "car": 18,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0001",
+  "name": "Wallich Street",
+  "car": 9,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0002",
+  "name": "Waterloo Street",
+  "car": 14,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20250709"
+ },
+ {
+  "ppCode": "W0004",
+  "name": "Wilkie Road",
+  "car": 15,
+  "motorcycle": 12,
+  "heavy": 0,
+  "updated": "20250107"
+ },
+ {
+  "ppCode": "W0005",
+  "name": "Wilkinson Road",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0010",
+  "name": "Westerhout Road",
+  "car": 6,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0021",
+  "name": "Wishart Road",
+  "car": 37,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20230714"
+ },
+ {
+  "ppCode": "W0029",
+  "name": "West Coast Park 1 Off Street",
+  "car": 58,
+  "motorcycle": 10,
+  "heavy": 11,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "W0034",
+  "name": "Woodlands Sector 1",
+  "car": 27,
+  "motorcycle": 20,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0035",
+  "name": "Woodlands Walk",
+  "car": 22,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0036",
+  "name": "Woodlands Link",
+  "car": 35,
+  "motorcycle": 0,
+  "heavy": 15,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "W0037",
+  "name": "Woodlands Loop",
+  "car": 30,
+  "motorcycle": 0,
+  "heavy": 12,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "W0038",
+  "name": "Woodlands Terrace",
+  "car": 44,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0040",
+  "name": "Woodlands Avenue 9 (woodlands Avenue 8 / Link)",
+  "car": 0,
+  "motorcycle": 19,
+  "heavy": 60,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "W0045",
+  "name": "Warna Road",
+  "car": 14,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0046",
+  "name": "Woodlands Industrial Park E1",
+  "car": 20,
+  "motorcycle": 19,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0047",
+  "name": "Woodlands Industrial Park E3",
+  "car": 71,
+  "motorcycle": 0,
+  "heavy": 5,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "W0048",
+  "name": "Woodlands Industrial Park E8",
+  "car": 45,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20221010"
+ },
+ {
+  "ppCode": "W0049",
+  "name": "Woodlands Industrial Park E9",
+  "car": 33,
+  "motorcycle": 6,
+  "heavy": 0,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "W0051",
+  "name": "Woodlands Industrial Park E6",
+  "car": 10,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0055",
+  "name": "Warna Road Off Street",
+  "car": 42,
+  "motorcycle": 7,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "W0058",
+  "name": "Woodlands Industrial Park E5",
+  "car": 44,
+  "motorcycle": 14,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "Y0002",
+  "name": "Yan Kit Road",
+  "car": 11,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20231229"
+ },
+ {
+  "ppCode": "Y0013",
+  "name": "Yishun Industrial Park A",
+  "car": 70,
+  "motorcycle": 14,
+  "heavy": 58,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "Y0017",
+  "name": "Yishun Avenue 7 Heavy Vehicle Park",
+  "car": 0,
+  "motorcycle": 109,
+  "heavy": 679,
+  "updated": "20260701"
+ },
+ {
+  "ppCode": "Y0019",
+  "name": "Yan Kit Road / Cantonment Road Off Street",
+  "car": 15,
+  "motorcycle": 8,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "Y0020",
+  "name": "Yio Chu Kang Road Hvp",
+  "car": 0,
+  "motorcycle": 138,
+  "heavy": 433,
+  "updated": "20240703"
+ },
+ {
+  "ppCode": "Z0001",
+  "name": "Zion Road Off Street",
+  "car": 12,
+  "motorcycle": 5,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "Z0003",
+  "name": "Zion Road",
+  "car": 26,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ },
+ {
+  "ppCode": "Z0004",
+  "name": "Zion Close",
+  "car": 8,
+  "motorcycle": 0,
+  "heavy": 0,
+  "updated": "20220210"
+ }
+]

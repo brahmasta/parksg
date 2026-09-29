@@ -118,6 +118,8 @@ export type Carpark = {
   block: string;
   operator: Operator;
   lotTypes: LotType[];
+  /** Lot counts per vehicle type, where a source publishes them. */
+  lotCounts?: Partial<Record<LotType, number>>;
   lotsAvailable: number | null;
   lotsTotal: number;
   walkMin: number;
