@@ -33,6 +33,7 @@ import { loadRecents, pushRecent } from './lib/recents';
 import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
+import { getCurrentCoords } from './lib/geolocation';
 import {
   trackAppOpen,
   trackEvent,
@@ -328,15 +329,10 @@ function App() {
 
   const [nearMeBusy, setNearMeBusy] = useState(false);
   const onNearMe = useCallback(() => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not available on this device.');
-      return;
-    }
     setNearMeBusy(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    getCurrentCoords().then(
+      ({ latitude, longitude }) => {
         setNearMeBusy(false);
-        const { latitude, longitude } = pos.coords;
         setDestinationInput('My location');
         resultsScrollRef.current = 0;
         searchStartedByUser.current = true;
@@ -344,11 +340,10 @@ function App() {
         setScreen('results');
         searchAtCoords('My location', latitude, longitude);
       },
-      (err) => {
+      (err: Error) => {
         setNearMeBusy(false);
-        alert(`Could not get your location: ${err.message}`);
+        alert(err.message);
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
     );
   }, [searchAtCoords]);
 
