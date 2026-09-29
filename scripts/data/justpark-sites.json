@@ -1,0 +1,372 @@
+[
+  {
+    "code": "21CQ",
+    "id": "OPERATOR:capitaland_21_collyer_quay",
+    "name": "21 Collyer Quay",
+    "address": "21 Collyer Quay, Singapore 049320",
+    "lat": 1.285079,
+    "lng": 103.852803,
+    "totalLots": 9,
+    "businessUnit": "Commercial"
+  },
+  {
+    "code": "AST2",
+    "id": "OPERATOR:capitaland_asia_square_tower_2",
+    "name": "Asia Square Tower 2",
+    "address": "12 Marina View, Singapore 018961",
+    "lat": 1.278307,
+    "lng": 103.850795,
+    "totalLots": 267,
+    "businessUnit": "Commercial"
+  },
+  {
+    "code": "79RR",
+    "id": "OPERATOR:capitaland_capitasky",
+    "name": "CapitaSky",
+    "address": "79 Robinson Road, Singapore 068897",
+    "lat": 1.277144,
+    "lng": 103.848056,
+    "totalLots": 137,
+    "businessUnit": "Commercial"
+  },
+  {
+    "code": "1CBP",
+    "id": "OPERATOR:capitaland_1_changi_business_park_avenue_1",
+    "name": "1 Changi Business Park Avenue 1",
+    "address": "1 Changi Business Park Avenue 1, Singapore 486058",
+    "lat": 1.336753,
+    "lng": 103.963713,
+    "totalLots": 59,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "PLZ8",
+    "id": "OPERATOR:capitaland_plaza_8_cbp",
+    "name": "Plaza 8 @ CBP",
+    "address": "1 Changi Business Park Crescent, Singapore 486025",
+    "lat": 1.333602,
+    "lng": 103.965412,
+    "totalLots": 174,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "1JKG",
+    "id": "OPERATOR:capitaland_1_jalan_kilang",
+    "name": "1 Jalan Kilang",
+    "address": "1 Jalan Kilang, Singapore 159402",
+    "lat": 1.285168,
+    "lng": 103.810104,
+    "totalLots": 37,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "5SPD",
+    "id": "OPERATOR:capitaland_1_5_7_science_park_drive",
+    "name": "1, 5, 7 Science Park Drive",
+    "address": "5 Science Park Drive, Singapore 118265",
+    "lat": 1.29208,
+    "lng": 103.78671,
+    "totalLots": 387,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "138D",
+    "id": "OPERATOR:capitaland_138_depot_road",
+    "name": "138 Depot Road",
+    "address": "138 Depot Road, Singapore 109683",
+    "lat": 1.282659,
+    "lng": 103.808609,
+    "totalLots": 285,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "3CBC",
+    "id": "OPERATOR:capitaland_3_and_5_changi_business_park_crescent",
+    "name": "3 & 5 Changi Business Park Crescent",
+    "address": "3 Changi Business Park Crescent, Singapore 486026",
+    "lat": 1.334132,
+    "lng": 103.965833,
+    "totalLots": 325,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "3CBV",
+    "id": "OPERATOR:capitaland_3_changi_business_park_vista",
+    "name": "3 Changi Business Park Vista",
+    "address": "3 Changi Business Park Vista, Singapore 486051",
+    "lat": 1.336848,
+    "lng": 103.967329,
+    "totalLots": 192,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "3TSD",
+    "id": "OPERATOR:capitaland_3_tai_seng_drive",
+    "name": "3 Tai Seng Drive",
+    "address": "3 Tai Seng Drive, Singapore 535216",
+    "lat": 1.337825,
+    "lng": 103.892649,
+    "totalLots": 135,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "5TSD",
+    "id": "OPERATOR:capitaland_steel_industries_building_5_tai_seng_drive",
+    "name": "Steel Industries Building (5 Tai Seng Drive)",
+    "address": "5 Tai Seng Drive, Singapore 535217",
+    "lat": 1.338276,
+    "lng": 103.893287,
+    "totalLots": 35,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "53SN",
+    "id": "OPERATOR:capitaland_53_serangoon_north_avenue_4",
+    "name": "53 Serangoon North Avenue 4",
+    "address": "53 Serangoon North Avenue 4, Singapore 555852",
+    "lat": 1.376514,
+    "lng": 103.87492,
+    "totalLots": 27,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "622T",
+    "id": "OPERATOR:capitaland_622_lorong_1_toa_payoh",
+    "name": "622 Lorong 1 Toa Payoh",
+    "address": "622 Lorong 1 Toa Payoh, Singapore 319763",
+    "lat": 1.33452,
+    "lng": 103.842598,
+    "totalLots": 76,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "80BD",
+    "id": "OPERATOR:capitaland_80_bendemeer_road",
+    "name": "80 Bendemeer Road",
+    "address": "80 Bendemeer Road, Singapore 339949",
+    "lat": 1.316916,
+    "lng": 103.863109,
+    "totalLots": 249,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "ACER",
+    "id": "OPERATOR:capitaland_acer_building",
+    "name": "Acer Building",
+    "address": "29 International Business Park, Singapore 609923",
+    "lat": 1.326964,
+    "lng": 103.746251,
+    "totalLots": 258,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "CLOG",
+    "id": "OPERATOR:capitaland_changi_logistics_centre",
+    "name": "Changi Logistics Centre",
+    "address": "19 Loyang Way, Singapore 508724",
+    "lat": 1.376462,
+    "lng": 103.972563,
+    "totalLots": 66,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "CORP",
+    "id": "OPERATOR:capitaland_corporation_place",
+    "name": "Corporation Place",
+    "address": "2 Corporation Road, Singapore 618494",
+    "lat": 1.324541,
+    "lng": 103.720166,
+    "totalLots": 391,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "FDAX",
+    "id": "OPERATOR:capitaland_foodaxis_senoko",
+    "name": "FoodAxis @ Senoko",
+    "address": "1 Senoko Avenue, Singapore 758297",
+    "lat": 1.464104,
+    "lng": 103.811458,
+    "totalLots": 230,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "HANS",
+    "id": "OPERATOR:capitaland_hansapoint_cbp",
+    "name": "HansaPoint @ CBP",
+    "address": "10 Changi Business Park Central 2, Singapore 486030",
+    "lat": 1.335688,
+    "lng": 103.966524,
+    "totalLots": 147,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "17CB",
+    "id": "OPERATOR:capitaland_honeywell_building",
+    "name": "Honeywell Building",
+    "address": "17 Changi Business Park Central 1, Singapore 486073",
+    "lat": 1.337251,
+    "lng": 103.965656,
+    "totalLots": 200,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "ICON",
+    "id": "OPERATOR:capitaland_icon_ibp",
+    "name": "Icon @ IBP",
+    "address": "3a International Business Park, Singapore 609935",
+    "lat": 1.327608,
+    "lng": 103.749219,
+    "totalLots": 424,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "INF",
+    "id": "OPERATOR:capitaland_infinite_studios",
+    "name": "Infinite Studios",
+    "address": "21 Media Circle, Singapore 138562",
+    "lat": 1.292414,
+    "lng": 103.794617,
+    "totalLots": 263,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "KAC",
+    "id": "OPERATOR:capitaland_ka_centre",
+    "name": "KA Centre",
+    "address": "150 Kampong Ampat, Singapore 368324",
+    "lat": 1.334827,
+    "lng": 103.88368,
+    "totalLots": 232,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "NEUR",
+    "id": "OPERATOR:capitaland_neuros_and_immunos",
+    "name": "Neuros & Immunos",
+    "address": "8 Biomedical Grove, Singapore 138665",
+    "lat": 1.302246,
+    "lng": 103.793176,
+    "totalLots": 290,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "NEXU",
+    "id": "OPERATOR:capitaland_nexus_one_north",
+    "name": "Nexus @ one-north",
+    "address": "1 Fusionopolis Link, Singapore 138542",
+    "lat": 1.299197,
+    "lng": 103.789626,
+    "totalLots": 183,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "NORD",
+    "id": "OPERATOR:capitaland_nordic_european_centre",
+    "name": "Nordic European Centre",
+    "address": "3 International Business Park, Singapore 609927",
+    "lat": 1.32726,
+    "lng": 103.748507,
+    "totalLots": 18,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "NUC",
+    "id": "OPERATOR:capitaland_nucleos",
+    "name": "Nucleos",
+    "address": "21 Biopolis Road, Singapore 138567",
+    "lat": 1.301861,
+    "lng": 103.792148,
+    "totalLots": 218,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "RUTH",
+    "id": "OPERATOR:capitaland_oasis_and_rutherford",
+    "name": "Oasis & Rutherford",
+    "address": "87 Science Park Drive, Singapore 118260",
+    "lat": 1.287699,
+    "lng": 103.790428,
+    "totalLots": 189,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "PTC",
+    "id": "OPERATOR:capitaland_pacific_tech_centre",
+    "name": "Pacific Tech Centre",
+    "address": "1 Jalan Kilang Timor, Singapore 159303",
+    "lat": 1.28511,
+    "lng": 103.810832,
+    "totalLots": 212,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "BIZH",
+    "id": "OPERATOR:capitaland_tampines_biz_hub",
+    "name": "Tampines Biz-Hub",
+    "address": "11 Tampines Street 92, Singapore 528872",
+    "lat": 1.342589,
+    "lng": 103.944898,
+    "totalLots": 118,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "TECL",
+    "id": "OPERATOR:capitaland_techlink",
+    "name": "Techlink",
+    "address": "31 Kaki Bukit Road 3, Singapore 417818",
+    "lat": 1.335731,
+    "lng": 103.90556,
+    "totalLots": 289,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "TPL1",
+    "id": "OPERATOR:capitaland_techplace_i",
+    "name": "Techplace I",
+    "address": "4008 Ang Mo Kio Avenue 10, Singapore 569625",
+    "lat": 1.359882,
+    "lng": 103.856388,
+    "totalLots": 920,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "TPL2",
+    "id": "OPERATOR:capitaland_techplace_ii",
+    "name": "Techplace II",
+    "address": "5000 Ang Mo Kio Avenue 5, Singapore 569870",
+    "lat": 1.377173,
+    "lng": 103.864302,
+    "totalLots": 647,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "TECQ",
+    "id": "OPERATOR:capitaland_techquest",
+    "name": "Techquest",
+    "address": "7 International Business Park, Singapore 609919",
+    "lat": 1.32555,
+    "lng": 103.749858,
+    "totalLots": 46,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "TECV",
+    "id": "OPERATOR:capitaland_techview",
+    "name": "Techview",
+    "address": "1 Kaki Bukit View, Singapore 415941",
+    "lat": 1.336407,
+    "lng": 103.909565,
+    "totalLots": 474,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  },
+  {
+    "code": "SC",
+    "id": "OPERATOR:capitaland_the_siemens_centre",
+    "name": "The Siemens Centre",
+    "address": "60 Macpherson Road, Singapore 348615",
+    "lat": 1.327449,
+    "lng": 103.870769,
+    "totalLots": 382,
+    "businessUnit": "Business Parks, Industrial and Logistics"
+  }
+]
