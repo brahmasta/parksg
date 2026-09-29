@@ -22,6 +22,7 @@ import { nearbyParking, type NearbyGooglePlace } from '../lib/api/googlePlaces';
 import { filterNewGooglePlaces, googlePlaceToCarpark } from '../lib/googleCarpark';
 import { GOOGLE_GAP_THRESHOLD } from '../lib/config';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
+import { hdbHasMotorcycleLots } from '../lib/hdbMotorcycle';
 import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
 import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
@@ -449,6 +450,14 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
 // DB row → app Carpark
 // ──────────────────────────────────────────────────────────────────────
 
+/** The HDB live feed never reports motorcycle lots — add 'M' from the
+ * community motorcycle list when this HDB carpark is on it. */
+function withHdbMotorcycle(row: DbCarparkRaw, types: LotType[]): LotType[] {
+  if (row.agency !== 'HDB' || types.includes('M')) return types;
+  if (!hdbHasMotorcycleLots(row.lat!, row.lng!, row.address)) return types;
+  return (['C', 'M', 'H'] as LotType[]).filter((t) => t === 'M' || types.includes(t));
+}
+
 const DURATION_VALUES: DurationHours[] = [0.5, 1, 1.5, 2, 3, 4];
 
 function dbRowToCarpark(
@@ -485,7 +494,7 @@ function dbRowToCarpark(
     operator: op,
     // Real per-vehicle types when the live feed carries them (HDB); otherwise
     // car-only, since other agencies don't break availability out by type.
-    lotTypes: live?.lotTypes ?? (['C'] satisfies LotType[]),
+    lotTypes: withHdbMotorcycle(row, live?.lotTypes ?? (['C'] satisfies LotType[])),
     lotsAvailable: live?.lotsAvailable ?? null,
     lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),
