@@ -58,6 +58,18 @@ describe('findDestinationCarparkId', () => {
     assert.equal(findDestinationCarparkId([cp('lta:66', 'Funan Mall', 60)], 'Funan'), 'lta:66');
   });
 
+  it('matches a mall to its numbered carpark sections ("VivoCity" ↔ "Vivocity P3")', () => {
+    const harbourfront = [
+      cp('lta:16', 'Vivocity P3', 70),
+      cp('lta:50', 'VivoCity P2', 40),
+      cp('ura:hf', 'HarbourFront Centre', 300),
+    ];
+    assert.equal(findDestinationCarparkId(harbourfront, 'VivoCity'), 'lta:50');
+    assert.equal(findDestinationCarparkId(harbourfront, 'VIVOCITY SINGAPORE'), 'lta:50');
+    // Still distance-guarded like any core match.
+    assert.equal(findDestinationCarparkId([cp('lta:16', 'Vivocity P3', 400)], 'VivoCity'), null);
+  });
+
   it('does not pin a same-named mall for an area search far from it', () => {
     // "Tampines" reduces to the same core as "Tampines Mall", but the area
     // centroid is well away from the mall, so nothing is pinned.
