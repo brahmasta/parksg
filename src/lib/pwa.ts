@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { isNative } from './platform';
 
 /** The non-standard event Chromium fires when the app is installable. */
 type BeforeInstallPromptEvent = Event & {
@@ -95,7 +96,9 @@ export function usePwaInstall() {
   //  - either Chromium gave us a prompt, OR we're on iOS Safari (manual flow).
   const canPromptChromium = deferred != null;
   const canPromptIos = ios && !installed;
-  const eligible = !installed && !dismissed && (canPromptChromium || canPromptIos);
+  // Never inside the Capacitor shells: the app is already installed.
+  const eligible =
+    !isNative && !installed && !dismissed && (canPromptChromium || canPromptIos);
 
   return {
     eligible,

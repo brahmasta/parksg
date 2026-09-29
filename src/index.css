@@ -335,3 +335,13 @@ html {
     border-inline: 0;
   }
 }
+
+/* Native (Capacitor) shell: the app owns the whole screen, so there is no
+ * column to centre and no gutter to delimit - always edge-to-edge, even on a
+ * landscape phone. `native` / `ios` / `android` are set on <html> by
+ * applyPlatformClasses() in lib/platform.ts. Per-platform design overrides
+ * hang off `html.native.ios` / `html.native.android`. */
+html.native .psg-frame {
+  max-width: none;
+  border-inline: 0;
+}

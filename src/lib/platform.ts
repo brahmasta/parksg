@@ -1,3 +1,28 @@
+import { Capacitor } from '@capacitor/core';
+
+/**
+ * Runtime platform detection for the Capacitor (Android / iOS) shells.
+ *
+ * On the plain web build Capacitor reports `web` and `isNative` is false, so
+ * every native-only branch stays dormant and the site behaves exactly as
+ * before. Inside the native WebView `isNative` is true and `platform` is
+ * 'ios' or 'android'.
+ */
+export type Platform = 'web' | 'ios' | 'android';
+
+export const isNative: boolean = Capacitor.isNativePlatform();
+export const platform: Platform = Capacitor.getPlatform() as Platform;
+
+/**
+ * Tag <html> with `native` plus `ios` / `android` so CSS can override design
+ * tokens per platform (e.g. `html.native.ios { ... }`). No-op on the web.
+ * Called once at boot from main.tsx, before first render.
+ */
+export function applyPlatformClasses(): void {
+  if (!isNative || typeof document === 'undefined') return;
+  document.documentElement.classList.add('native', platform);
+}
+
 /**
  * Apple-platform detection — used to decide whether to offer Apple Maps as a
  * navigation target. Apple Maps' universal link (maps.apple.com) opens the

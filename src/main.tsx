@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css';
 import { initTheme } from './lib/theme.ts';
+import { applyPlatformClasses, isNative } from './lib/platform.ts';
 import App from './App.tsx';
 import { AdminApp } from './admin/AdminApp.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
@@ -27,6 +28,10 @@ const GOOGLE_CLIENT_ID =
 // teardown it returns is deliberately unused.
 initTheme();
 
+// Tag <html> with `native` + `ios`/`android` inside the Capacitor shells so CSS
+// can override per platform. No-op on the web.
+applyPlatformClasses();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
@@ -40,7 +45,8 @@ createRoot(document.getElementById('root')!).render(
 // Register the service worker so the app is installable as a PWA. Prod-only
 // — in dev the SW would shadow Vite's HMR. Registered after load so it never
 // competes with first paint.
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+// Skipped in the native shells: assets ship inside the app bundle there.
+if (import.meta.env.PROD && !isNative && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {
       /* non-fatal: app still works without offline support */

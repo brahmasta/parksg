@@ -45,6 +45,7 @@ import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
+import { isNative } from './lib/platform';
 import { Spinner } from './components/atoms';
 
 const VIEW_MODE_KEY = 'psg.viewMode';
@@ -938,7 +939,7 @@ function App() {
           <Toast toast={toast} bottomOffset={screen === 'detail' ? 90 : 28} />
           {/* PWA install banner — only on the Home landing surface so it
               never collides with the Detail sticky CTA or results flow. */}
-          {screen === 'home' && <InstallPrompt />}
+          {screen === 'home' && !isNative && <InstallPrompt />}
         </div>
       </div>
     </div>
