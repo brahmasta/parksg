@@ -18,7 +18,7 @@
     "migrate:malls": "tsx scripts/migrate-curated-malls.ts",
     "migrate:justpark": "tsx scripts/migrate-justpark-sites.ts",
     "geocode:malls": "tsx scripts/geocode-malls.ts",
-    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts scripts/lib/ura.test.ts scripts/lib/hdb-rates.test.ts src/lib/uraJoin.test.ts src/lib/destinationMatch.test.ts scripts/lib/curated-malls.test.ts scripts/lib/ura-capacity.test.ts src/lib/server/justpark.test.ts api/_admin/carparkWrite.test.ts"
+    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts scripts/lib/ura.test.ts scripts/lib/hdb-rates.test.ts src/lib/uraJoin.test.ts src/lib/destinationMatch.test.ts src/lib/hdbMotorcycle.test.ts scripts/lib/curated-malls.test.ts scripts/lib/ura-capacity.test.ts src/lib/server/justpark.test.ts api/_admin/carparkWrite.test.ts"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",

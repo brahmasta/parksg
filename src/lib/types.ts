@@ -132,6 +132,9 @@ export type Carpark = {
     sundayPH: RateRow[];
   };
   estByHours: Record<DurationHours, number>;
+  /** Motorcycle rate schedule, when the source publishes one (URA). Car
+   * costs never use these rows. */
+  motorcycleRates?: Carpark['rates'];
   /** EV charging data from LTA /EVCBatch joined by haversine ≤50m. */
   ev?: CarparkEV;
   // ── Supplementary (Google Maps) provenance ──────────────────────────

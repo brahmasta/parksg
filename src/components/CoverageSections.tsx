@@ -46,6 +46,7 @@ const COVERAGE = {
   layers: [
     { key: 'EV', name: 'EV Charging', provider: 'LTA EVCBatch', value: 'Live · 5 min', desc: 'Charging connectors joined to carparks within 50 m, with live connector status.', colorVar: '--src-ev' },
     { key: 'WALK', name: 'Walking Routes', provider: 'OneMap', value: 'Islandwide', desc: 'Real pedestrian routes & walk times from the carpark entrance to your destination.', colorVar: '--src-ura' },
+    { key: 'MOTO', name: 'HDB Motorcycle Lots', provider: 'r/singapore community map', value: 'Dec 2022', desc: 'Which HDB carparks have motorcycle lots — HDB\'s live feed doesn\'t say. From the "SG Motorcycle Parking" map shared on r/singapore.', colorVar: '--src-hdb' },
     { key: 'GEO', name: 'Place Search', provider: 'Google Places', value: 'Typeahead', desc: 'Destination autocomplete + nearby supplementary carparks where our feeds have gaps.', colorVar: '--src-lta' },
   ],
 };

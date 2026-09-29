@@ -691,6 +691,23 @@ export function DetailScreen({
           ) : (
             <RateTable rates={cp.rates} />
           )}
+          {cp.motorcycleRates && (
+            <>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10.5,
+                  color: 'var(--text-3)',
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  margin: '16px 0 10px',
+                }}
+              >
+                Motorcycle rates
+              </div>
+              <RateTable rates={cp.motorcycleRates} />
+            </>
+          )}
           {isDatagovRates && (
             <div
               role="status"
