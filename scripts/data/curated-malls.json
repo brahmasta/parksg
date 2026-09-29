@@ -24097,13 +24097,14 @@
   {
     "id": "LTA:inter_continental_hotel",
     "name": "Bugis Junction",
-    "address": "200 Victoria Street",
-    "lat": 1.29922,
-    "lng": 103.855476,
+    "address": "200 Victoria Street, Singapore 188021",
+    "lat": 1.299113,
+    "lng": 103.855411,
     "operator": "CapitaLand (CICT)",
     "provenance": {
-      "url": "https://www.sgcarmart.com/carpark",
-      "verified": "2026-09"
+      "url": "https://www.motorist.sg/parking/bugis-junction-parking-rates",
+      "verified": "2026-09",
+      "note": "Reuses the id of the 2018 CSV row \"Inter-continental Hotel\", whose rates read \"Car park at Parco Bugis Junction\". Coordinates: OneMap, postal 188021. Friday after 6pm is the weekend rate ($3.30 first 2 hrs, $0.35 per 10 min); WEEKDAY carries the Mon-Thu $3.30 per entry."
     },
     "rates": [
       {
