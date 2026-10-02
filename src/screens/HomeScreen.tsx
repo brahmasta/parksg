@@ -487,7 +487,7 @@ export function HomeScreen({
           </div>
         ) : null}
 
-        <AppFooter />
+        <AppFooter user={user} />
       </div>
     </div>
   );

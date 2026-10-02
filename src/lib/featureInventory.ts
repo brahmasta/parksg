@@ -58,6 +58,7 @@ export const FEATURES: Feature[] = [
 
   // Results
   { id: 'result_card_open', label: 'Open a result', area: 'Results' },
+  { id: 'card_navigate', label: 'Navigate from a result card', area: 'Results' },
   { id: 'filter_ev', label: 'EV filter', area: 'Results' },
   { id: 'filter_available_only', label: 'Available-only filter', area: 'Results' },
   { id: 'filter_motorcycle', label: 'Motorcycle filter', area: 'Results' },
@@ -65,6 +66,8 @@ export const FEATURES: Feature[] = [
   { id: 'sort_carparks', label: 'Change sort', area: 'Results' },
   { id: 'view_mode_list', label: 'List view', area: 'Results' },
   { id: 'view_mode_map', label: 'Map view', area: 'Results' },
+  { id: 'results_share', label: 'Share results page', area: 'Results' },
+  { id: 'search_radius', label: 'Change search radius', area: 'Results' },
 
   // Stay planner
   { id: 'stay_planner_toggle', label: 'Open stay planner', area: 'Stay planner' },
@@ -97,7 +100,9 @@ export const FEATURES: Feature[] = [
   { id: 'add_carpark_submit', label: 'Submit a new carpark', area: 'Contribute' },
   { id: 'report_inaccuracy_submit', label: 'Send an inaccuracy report', area: 'Contribute' },
   { id: 'suggest_edit_submit', label: 'Send a suggested edit', area: 'Contribute' },
-  { id: 'feedback_link', label: 'Send feedback on X', area: 'Contribute' },
+  { id: 'feedback_link', label: 'Open the feedback form', area: 'Contribute' },
+  { id: 'feedback_category', label: 'Feedback type', area: 'Contribute' },
+  { id: 'feedback_submit', label: 'Send feedback', area: 'Contribute' },
 ];
 
 /** Lookup by `data-track` id. */

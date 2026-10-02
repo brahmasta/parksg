@@ -350,6 +350,12 @@ async function migrateHdb(supabase: SupabaseClient): Promise<SourceResult> {
     }
   }
   process.stderr.write(`  inserted ${result.rateRows} HDB rate_rows\n`);
+
+  // Height limits come from raw.gantry_height (migration 015). Fills only
+  // carparks with none yet, so admin-set heights survive the sync.
+  const { data: heights, error: hErr } = await supabase.rpc('refresh_hdb_height_limits');
+  if (hErr) process.stderr.write(`  HDB height limits refresh failed: ${hErr.message}\n`);
+  else process.stderr.write(`  filled ${heights} HDB height limits\n`);
   return result;
 }
 

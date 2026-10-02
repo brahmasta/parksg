@@ -11,12 +11,12 @@
  */
 import { verifyAdmin, json } from '../_admin/auth';
 import { SB_URL, sbHeaders, hasServiceConfig } from '../_admin/db';
-import { parseRates, replaceRateRows, createCarpark } from '../_admin/carparkWrite';
+import { parseRates, replaceRateRows, createCarpark, heightOrNull } from '../_admin/carparkWrite';
 
 export const config = { runtime: 'edge' };
 
 const CARPARK_FIELDS =
-  'id,slug,agency,source,source_code,name,address,lat,lng,total_lots,central_area,car_park_type,parking_system';
+  'id,slug,agency,source,source_code,name,address,lat,lng,total_lots,height_limit_m,central_area,car_park_type,parking_system';
 const RATE_FIELDS =
   'id,day_type,start_time,end_time,first_hour_cents,first_block_minutes,per_block_cents,block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from';
 
@@ -73,6 +73,13 @@ export default async function handler(req: Request): Promise<Response> {
       if (typeof m.lng === 'number' || m.lng === null) patch.lng = m.lng;
       if (typeof m.total_lots === 'number' || m.total_lots === null)
         patch.total_lots = m.total_lots === null ? null : Math.round(m.total_lots as number);
+      // '' or null clears the height; anything outside 1.2–6m is rejected below.
+      if (m.height_limit_m === null || m.height_limit_m === '') patch.height_limit_m = null;
+      else if (m.height_limit_m !== undefined) {
+        const h = heightOrNull(m.height_limit_m);
+        if (h == null) return json({ error: 'Height limit must be between 1.2 and 6 metres.' }, 400);
+        patch.height_limit_m = h;
+      }
       if (typeof m.central_area === 'boolean') patch.central_area = m.central_area;
       if (typeof m.car_park_type === 'string') patch.car_park_type = m.car_park_type.trim().slice(0, 60) || null;
       else if (m.car_park_type === null) patch.car_park_type = null;

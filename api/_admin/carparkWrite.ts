@@ -35,6 +35,14 @@ const hhmm = (t: string): string => {
   return `${h.padStart(2, '0')}:${m}`;
 };
 
+/** A height clearance in metres within 1.2–6m (the DB check), rounded to cm;
+ * anything else is null. Accepts numbers or numeric strings. */
+export function heightOrNull(v: unknown): number | null {
+  const n = typeof v === 'string' ? Number.parseFloat(v) : v;
+  if (typeof n !== 'number' || !Number.isFinite(n) || n < 1.2 || n > 6) return null;
+  return Math.round(n * 100) / 100;
+}
+
 /** Normalize a raw rate-row array into DB rows (source=MANUAL). Throws on a
  * bad day_type.
  *
@@ -102,17 +110,14 @@ export async function replaceRateRows(
   return { ok: true };
 }
 
-/** Patch a carpark's total_lots (null clears it). */
-async function patchTotalLots(carparkId: string, total: number | null): Promise<Result> {
+/** Patch carpark fields from a community edit (total_lots, height_limit_m). */
+async function patchCarpark(carparkId: string, patch: Record<string, unknown>): Promise<Result> {
   const r = await fetch(`${SB_URL}/rest/v1/carparks?id=eq.${encodeURIComponent(carparkId)}`, {
     method: 'PATCH',
     headers: sbHeaders({ Prefer: 'return=minimal' }),
-    body: JSON.stringify({
-      total_lots: total === null ? null : Math.round(total),
-      last_synced: new Date().toISOString(),
-    }),
+    body: JSON.stringify({ ...patch, last_synced: new Date().toISOString() }),
   });
-  return r.ok ? { ok: true } : { ok: false, error: 'total_lots update failed.' };
+  return r.ok ? { ok: true } : { ok: false, error: 'Carpark update failed.' };
 }
 
 type CreateResult =
@@ -166,6 +171,7 @@ export async function createCarpark(
     parking_system: parkingSystem,
     central_area: m.central_area === true,
     total_lots: typeof m.total_lots === 'number' && Number.isFinite(m.total_lots) ? Math.round(m.total_lots) : null,
+    height_limit_m: heightOrNull(m.height_limit_m),
     source: 'MANUAL',
     // `slug` is a GENERATED column in Postgres — never insert it.
     last_synced: new Date().toISOString(),
@@ -198,16 +204,23 @@ export async function createCarpark(
 }
 
 /**
- * Apply a community edit: optionally set total_lots, optionally replace rates.
- * `rates` are raw (unparsed) rows — validated here. Pass `total_lots: undefined`
- * to leave lots untouched (null explicitly clears them).
+ * Apply a community edit: optionally set total_lots, optionally set a height
+ * limit, optionally replace rates. `rates` are raw (unparsed) rows — validated
+ * here. Pass `total_lots: undefined` to leave lots untouched (null explicitly
+ * clears them). A null/absent height leaves the stored one alone — an edit
+ * that doesn't mention height shouldn't erase it.
  */
 export async function applyCarparkEdit(
   carparkId: string,
-  edit: { total_lots?: number | null; rates?: unknown[] },
+  edit: { total_lots?: number | null; height_limit_m?: number | null; rates?: unknown[] },
 ): Promise<Result> {
-  if (edit.total_lots !== undefined) {
-    const res = await patchTotalLots(carparkId, edit.total_lots);
+  const patch: Record<string, unknown> = {};
+  if (edit.total_lots !== undefined)
+    patch.total_lots = edit.total_lots === null ? null : Math.round(edit.total_lots);
+  const height = heightOrNull(edit.height_limit_m);
+  if (height != null) patch.height_limit_m = height;
+  if (Object.keys(patch).length > 0) {
+    const res = await patchCarpark(carparkId, patch);
     if (!res.ok) return res;
   }
   if (Array.isArray(edit.rates)) {

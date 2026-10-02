@@ -10,20 +10,23 @@ import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { StayPlanner } from '../components/StayPlanner';
-import { FilterBar } from '../components/FilterBar';
 import { DegradedBanner } from '../components/DegradedBanner';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
 import { AddCarparkLink } from '../components/AddCarparkLink';
 import { ResultFilters, VehicleEmptyResults } from '../components/ResultFilters';
 import { RealResultsMap } from '../components/RealResultsMap';
+import { RadiusSelect } from '../components/RadiusSelect';
+import { fmtRadius, widerRadius } from '../lib/radius';
+import { useCarparkNavigation } from '../hooks/useCarparkNavigation';
 import { PoweredByGoogle } from '../components/PoweredByGoogle';
 import {
   IconChevronLeft,
   IconList,
   IconMap,
   IconRefresh,
-  IconStar,
+  IconShare,
+  IconBookmark,
 } from '../components/icons';
 
 export function ResultsScreen({
@@ -40,15 +43,16 @@ export function ResultsScreen({
   vehicles,
   setVehicles,
   viewMode,
-  onToggleView,
+  onViewMode,
   onBack,
   onSelect,
   onRetry,
   onExpandRadius,
-  isCarparkSaved,
-  onToggleSaveCarpark,
+  radiusM,
+  onRadius,
   destinationSaved,
   onSaveDestination,
+  onShare,
   initialScrollTop = 0,
   onScrollChange,
   user = null,
@@ -66,15 +70,18 @@ export function ResultsScreen({
   vehicles: VehicleFilter[];
   setVehicles: (v: VehicleFilter[]) => void;
   viewMode: ViewMode;
-  onToggleView: () => void;
+  onViewMode: (v: ViewMode) => void;
   onBack: () => void;
   onSelect: (cp: Carpark) => void;
   onRetry: () => void;
   onExpandRadius: () => void;
-  isCarparkSaved: (id: string) => boolean;
-  onToggleSaveCarpark: (cp: Carpark) => void;
+  /** Current search radius in metres, and a setter that re-runs the search. */
+  radiusM: number;
+  onRadius: (m: number) => void;
   destinationSaved: boolean;
   onSaveDestination: () => void;
+  /** Share this "Carparks near X" page (native sheet, else copy link). */
+  onShare: () => void;
   /** Scroll offset to restore on mount (preserved across Detail→back). */
   initialScrollTop?: number;
   /** Report the live scroll offset so the parent can preserve it. */
@@ -115,6 +122,8 @@ export function ResultsScreen({
   // can't beat a live price unchallenged — see pickCheapestId (TRUST-1).
   const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
   const hasGoogle = useMemo(() => ranked.some((c) => c.source === 'GOOGLE'), [ranked]);
+  // Navigate straight from a card; the app picker shows on first use.
+  const nav = useCarparkNavigation('sheet');
 
   return (
     <div
@@ -187,46 +196,36 @@ export function ResultsScreen({
             style={{
               appearance: 'none',
               cursor: destinationSaved ? 'default' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '7px 11px 7px 9px',
+              width: 36,
+              height: 36,
               borderRadius: 999,
-              background: destinationSaved
-                ? 'var(--accent-tint)'
-                : 'var(--bg-1)',
+              background: destinationSaved ? 'var(--accent-tint)' : 'var(--bg-1)',
               border: destinationSaved
                 ? '1px solid var(--accent)'
                 : '0.5px solid var(--line-strong)',
               color: destinationSaved ? 'var(--accent)' : 'var(--text-2)',
-              fontSize: 11.5,
-              fontWeight: 600,
-              letterSpacing: -0.05,
-              fontFamily: 'var(--font-body)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               flexShrink: 0,
               transition: 'all 140ms ease',
-              minHeight: 32,
             }}
           >
-            <IconStar size={13} stroke={2} />
-            {destinationSaved ? 'Saved' : 'Save'}
+            <IconBookmark filled={destinationSaved} size={16} stroke={2} />
           </button>
           <button
-            onClick={onToggleView}
-            data-track={viewMode === 'map' ? 'view_mode_list' : 'view_mode_map'}
-            aria-label="Toggle map view"
+            type="button"
+            onClick={onShare}
+            data-track="results_share"
+            aria-label={`Share carparks near ${destination}`}
             style={{
               appearance: 'none',
               width: 36,
               height: 36,
               borderRadius: 999,
-              background:
-                viewMode === 'map' ? 'var(--accent-tint-strong)' : 'var(--bg-1)',
-              border:
-                viewMode === 'map'
-                  ? '1px solid var(--accent)'
-                  : '0.5px solid var(--line-strong)',
-              color: viewMode === 'map' ? 'var(--accent)' : 'var(--text-2)',
+              background: 'var(--bg-1)',
+              border: '0.5px solid var(--line-strong)',
+              color: 'var(--text-2)',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
@@ -234,36 +233,36 @@ export function ResultsScreen({
               flexShrink: 0,
             }}
           >
-            {viewMode === 'map' ? <IconList size={16} stroke={2} /> : <IconMap size={16} stroke={2} />}
+            <IconShare size={16} stroke={2} />
           </button>
         </div>
 
-        {/* Result summary */}
-        <div style={{ marginTop: 14, fontSize: 12.5, color: 'var(--text-2)' }}>
-          {state === 'empty' ? '0' : ranked.length} carpark
-          {ranked.length === 1 ? '' : 's'}
-          <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
-          sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
-        </div>
+        {/* List | Map — the top-level choice, above every filter. */}
+        <ViewTabs viewMode={viewMode} onViewMode={onViewMode} />
 
-        {/* Sort (Cheapest/Nearest) + Available-only */}
+        {/* Sort + filters, one row of equal pills */}
         <div style={{ marginTop: 12 }}>
-          <FilterBar
+          <ResultFilters
             sortBy={sortBy}
             onSortBy={setSortBy}
             availableOnly={availableOnly}
             onAvailableOnly={setAvailableOnly}
-          />
-        </div>
-
-        {/* EV + vehicle lot-type filters */}
-        <div style={{ marginTop: 10 }}>
-          <ResultFilters
             evOnly={evOnly}
             onEvOnly={setEvOnly}
             vehicles={vehicles}
             onVehicles={setVehicles}
+            scroll
           />
+        </div>
+
+        {/* Result summary */}
+        <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-2)' }}>
+          {state === 'empty' ? '0' : ranked.length} carpark
+          {ranked.length === 1 ? '' : 's'}
+          <span style={{ color: 'var(--text-3)' }}> · within </span>
+          <RadiusSelect value={radiusM} onChange={onRadius} />
+          <span style={{ color: 'var(--text-3)' }}> · </span>
+          sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
         </div>
       </div>
 
@@ -276,25 +275,24 @@ export function ResultsScreen({
         {state === 'degraded' && <DegradedBanner onRetry={onRetry} />}
 
         {/* Stay planner — same control + arbitrary-duration cost as desktop.
-            Lives at the top of the scrollable body and is collapsible so it
-            doesn't crowd a phone — collapsed by default in map view. The
-            `key` remounts it on view switch so the default applies. */}
+            Lives at the top of the scrollable body, collapsed to a one-line
+            summary until opened so the results come first. */}
         {(state === 'loaded' || state === 'degraded') && (
           <div style={{ padding: '4px 16px 10px' }}>
-            <StayPlanner
-              key={viewMode}
-              stay={stay}
-              onChange={setStay}
-              collapsible
-              defaultOpen={viewMode === 'list'}
-            />
+            <StayPlanner stay={stay} onChange={setStay} collapsible />
           </div>
         )}
 
         {state === 'loading' && <ResultsLoading />}
 
         {state === 'empty' && (
-          <EmptyResults destination={destination} onExpandRadius={onExpandRadius} onBack={onBack} user={user} />
+          <EmptyResults
+            destination={destination}
+            radiusM={radiusM}
+            onExpandRadius={onExpandRadius}
+            onBack={onBack}
+            user={user}
+          />
         )}
 
         {vehicleFilterEmpty && (
@@ -305,6 +303,7 @@ export function ResultsScreen({
           <EVEmptyResults
             destination={destination}
             onClearFilter={() => setEvOnly(false)}
+            radiusLabel={fmtRadius(radiusM)}
           />
         )}
 
@@ -313,6 +312,8 @@ export function ResultsScreen({
             destination={destination}
             onClearFilter={() => setAvailableOnly(false)}
             onExpandRadius={onExpandRadius}
+            radiusLabel={fmtRadius(radiusM)}
+            canExpand={widerRadius(radiusM) != null}
           />
         )}
 
@@ -350,8 +351,7 @@ export function ResultsScreen({
                   isCheapest={cp.id === cheapestId}
                   degraded={state === 'degraded'}
                   onClick={() => onSelect(cp)}
-                  saved={isCarparkSaved(cp.id)}
-                  onToggleSave={() => onToggleSaveCarpark(cp)}
+                  onNavigate={() => nav.navigate(cp)}
                 />
               ))}
               <div
@@ -370,6 +370,7 @@ export function ResultsScreen({
             </div>
           ))}
       </div>
+      {nav.picker}
     </div>
   );
 }
@@ -416,15 +417,18 @@ function ResultsLoading() {
 
 function EmptyResults({
   destination,
+  radiusM,
   onExpandRadius,
   onBack,
   user = null,
 }: {
   destination: string;
+  radiusM: number;
   onExpandRadius: () => void;
   onBack: () => void;
   user?: User | null;
 }) {
+  const wider = widerRadius(radiusM);
   return (
     <div
       style={{
@@ -474,10 +478,11 @@ function EmptyResults({
           maxWidth: 280,
         }}
       >
-        No HDB or URA carparks found within 600m of{' '}
+        No HDB or URA carparks found within {fmtRadius(radiusM)} of{' '}
         <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>{destination}</strong>.
         This area may be served by private carparks.
       </p>
+      {wider != null && (
       <button
         onClick={onExpandRadius}
         style={{
@@ -497,8 +502,9 @@ function EmptyResults({
         }}
       >
         <IconRefresh size={14} stroke={2.5} />
-        Search wider (1 km)
+        Search wider ({fmtRadius(wider)})
       </button>
+      )}
       <button
         onClick={onBack}
         data-track="nav_back"
@@ -524,3 +530,67 @@ function EmptyResults({
   );
 }
 
+/** Full-width List | Map segmented switch for the phone results header. */
+function ViewTabs({
+  viewMode,
+  onViewMode,
+}: {
+  viewMode: ViewMode;
+  onViewMode: (v: ViewMode) => void;
+}) {
+  const tabs: [ViewMode, string, typeof IconList][] = [
+    ['list', 'List', IconList],
+    ['map', 'Map', IconMap],
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Results view"
+      style={{
+        marginTop: 14,
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 4,
+        padding: 4,
+        background: 'var(--bg-2)',
+        border: '0.5px solid var(--line)',
+        borderRadius: 12,
+      }}
+    >
+      {tabs.map(([mode, label, Icon]) => {
+        const active = viewMode === mode;
+        return (
+          <button
+            key={mode}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            data-track={`view_mode_${mode}`}
+            onClick={() => onViewMode(mode)}
+            style={{
+              appearance: 'none',
+              border: 0,
+              borderRadius: 9,
+              padding: '8px 0',
+              minHeight: 36,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 7,
+              background: active ? 'var(--bg-1)' : 'transparent',
+              color: active ? 'var(--text-1)' : 'var(--text-2)',
+              fontSize: 13.5,
+              fontWeight: active ? 600 : 500,
+              cursor: 'pointer',
+              boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              transition: 'all 120ms ease',
+            }}
+          >
+            <Icon size={15} stroke={2} />
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

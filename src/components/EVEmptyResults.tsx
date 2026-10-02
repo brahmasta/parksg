@@ -9,9 +9,12 @@ import { IconBolt } from './icons';
 export function EVEmptyResults({
   destination,
   onClearFilter,
+  radiusLabel = '600m',
 }: {
   destination: string;
   onClearFilter: () => void;
+  /** Current search radius, e.g. "600m". */
+  radiusLabel?: string;
 }) {
   return (
     <div
@@ -60,7 +63,7 @@ export function EVEmptyResults({
           maxWidth: 280,
         }}
       >
-        We didn't find public EV chargers within 600m of{' '}
+        We didn't find public EV chargers within {radiusLabel} of{' '}
         <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>
           {destination}
         </strong>

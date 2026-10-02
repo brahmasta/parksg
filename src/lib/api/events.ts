@@ -48,6 +48,7 @@ export type EventName =
   | 'stay_planner_used'
   | 'checkin_submitted'
   | 'inaccuracy_reported'
+  | 'feedback_submitted'
   | 'carpark_add_started'
   | 'carpark_add_submitted'
   | 'edit_suggested'

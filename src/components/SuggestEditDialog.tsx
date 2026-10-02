@@ -15,6 +15,8 @@ type Props = {
   carpark: { id: string; name: string; source?: string };
   /** Current capacity (null = unknown), pre-filled into the lots field. */
   currentTotalLots: number | null;
+  /** Current height clearance in metres (null = unknown), pre-filled. */
+  currentHeightLimitM?: number | null;
   /** Current rate schedule, flattened to editable rows and pre-filled. */
   initialRates: EditableRate[];
   /** Signed-in user, if any — pre-fills/locks the contact identity. */
@@ -27,6 +29,7 @@ export function SuggestEditDialog({
   variant = 'sheet',
   carpark,
   currentTotalLots,
+  currentHeightLimitM = null,
   initialRates,
   user = null,
 }: Props) {
@@ -34,6 +37,9 @@ export function SuggestEditDialog({
   // clean state (avoids a setState-in-effect reset).
   const [totalLots, setTotalLots] = useState(
     currentTotalLots == null ? '' : String(currentTotalLots),
+  );
+  const [height, setHeight] = useState(
+    currentHeightLimitM == null ? '' : String(currentHeightLimitM),
   );
   const [rates, setRates] = useState<EditableRate[]>(() => initialRates.map((r) => ({ ...r })));
   const [note, setNote] = useState('');
@@ -63,6 +69,10 @@ export function SuggestEditDialog({
       carparkName: carpark.name,
       carparkSource: carpark.source ?? null,
       totalLots: totalLots.trim() === '' ? null : Math.round(Number(totalLots)) || null,
+      // Only send a height that differs from what's shown; the server ignores
+      // anything outside 1.2–6m.
+      heightLimitM:
+        height.trim() === '' || Number(height) === currentHeightLimitM ? null : Number(height) || null,
       rates,
       note: note.trim() || null,
       userId: user?.id ?? null,
@@ -106,7 +116,7 @@ export function SuggestEditDialog({
             <IconInfo size={15} stroke={2} />
           </span>
           <span style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.45 }}>
-            Edit the total lots and/or rate schedule below. Changes are reviewed by an admin before they appear. Live availability (lots free now) is LTA-owned and can&rsquo;t be edited here.
+            Edit the total lots, height limit and/or rate schedule below. Changes are reviewed by an admin before they appear. Live availability (lots free now) is LTA-owned and can&rsquo;t be edited here.
           </span>
         </div>
 
@@ -117,6 +127,16 @@ export function SuggestEditDialog({
           value={totalLots}
           onChange={(e) => setTotalLots(e.target.value.replace(/[^0-9]/g, ''))}
           placeholder="e.g. 480 (leave blank if unknown)"
+          style={fieldStyle}
+        />
+
+        <Label htmlFor="se-height">Height limit (metres)</Label>
+        <input
+          id="se-height"
+          inputMode="decimal"
+          value={height}
+          onChange={(e) => setHeight(e.target.value.replace(/[^0-9.]/g, ''))}
+          placeholder="e.g. 2.15, from the sign at the entrance"
           style={fieldStyle}
         />
 

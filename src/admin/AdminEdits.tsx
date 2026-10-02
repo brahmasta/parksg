@@ -168,6 +168,14 @@ function SubmissionCard({
             <span style={{ color: 'var(--text-2)' }}>{current ? (current.total_lots ?? '—') : '…'}</span>
             <span style={{ color: 'var(--text-3)' }}> → </span>
             <span style={{ fontWeight: 700, color: lotsChanged ? 'var(--accent)' : 'var(--text-1)' }}>{sub.proposed_total_lots ?? '—'}</span>
+            {sub.proposed_height_limit_m != null && (
+              <div style={{ marginTop: 4 }}>
+                <span style={{ color: 'var(--text-3)' }}>Height limit: </span>
+                <span style={{ color: 'var(--text-2)' }}>{current ? (current.height_limit_m != null ? `${current.height_limit_m} m` : '—') : '…'}</span>
+                <span style={{ color: 'var(--text-3)' }}> → </span>
+                <span style={{ fontWeight: 700, color: current?.height_limit_m !== sub.proposed_height_limit_m ? 'var(--accent)' : 'var(--text-1)' }}>{sub.proposed_height_limit_m} m</span>
+              </div>
+            )}
           </div>
         )}
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
