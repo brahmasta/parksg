@@ -18,36 +18,39 @@ export function AppFooter({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <footer
-      style={{
-        marginTop: 18,
-        padding: '0 4px',
-        fontSize: 10,
-        color: 'var(--text-3)',
-        fontFamily: 'var(--font-body)',
-        lineHeight: 1.6,
-        textAlign: 'center',
-      }}
-    >
-      Missing a carpark, or have an idea?{' '}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        data-track="feedback_link"
+    <>
+      <footer
         style={{
-          appearance: 'none',
-          border: 0,
-          background: 'transparent',
-          padding: 0,
-          font: 'inherit',
-          color: 'var(--ok)',
-          fontWeight: 600,
-          whiteSpace: 'nowrap',
-          cursor: 'pointer',
+          marginTop: 18,
+          padding: '0 4px',
+          fontSize: 10,
+          color: 'var(--text-3)',
+          fontFamily: 'var(--font-body)',
+          lineHeight: 1.6,
+          textAlign: 'center',
         }}
       >
-        Send feedback
-      </button>
+        Missing a carpark, or have an idea?{' '}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          data-track="feedback_link"
+          style={{
+            appearance: 'none',
+            border: 0,
+            background: 'transparent',
+            padding: 0,
+            font: 'inherit',
+            color: 'var(--ok)',
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            cursor: 'pointer',
+          }}
+        >
+          Send feedback
+        </button>
+      </footer>
+      {/* Outside <footer> so the sheet doesn't inherit its small centred text. */}
       <FeedbackDialog
         key={open ? 'feedback-open' : 'feedback-closed'}
         open={open}
@@ -55,6 +58,6 @@ export function AppFooter({
         variant={variant}
         user={user}
       />
-    </footer>
+    </>
   );
 }
