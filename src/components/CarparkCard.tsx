@@ -9,8 +9,7 @@ import {
 import { isStaleRates } from '../lib/rateSource';
 import { AvailabilityDot, GoogleBadge, OperatorBadge, StaleRatesBadge } from './atoms';
 import { EVChip } from './EVChip';
-import { BookmarkToggle } from './BookmarkToggle';
-import { IconWalk } from './icons';
+import { IconNavigate, IconWalk } from './icons';
 
 export function CarparkCard({
   cp,
@@ -19,8 +18,7 @@ export function CarparkCard({
   isCheapest,
   degraded,
   onClick,
-  saved,
-  onToggleSave,
+  onNavigate,
   cost: costOverride,
   durationText,
   isActive = false,
@@ -34,8 +32,8 @@ export function CarparkCard({
   isCheapest: boolean;
   degraded: boolean;
   onClick: () => void;
-  saved?: boolean;
-  onToggleSave?: () => void;
+  /** Open directions straight from the card (skips the detail page). */
+  onNavigate?: () => void;
   /** Explicit cost (dollars) for an arbitrary stay; null = unknown. When
    * omitted, falls back to the preset estByHours[duration]. */
   cost?: number | null;
@@ -206,10 +204,33 @@ export function CarparkCard({
           </div>
         </div>
 
-        {onToggleSave && !isGoogle && (
-          <div style={{ marginTop: -4, marginRight: -8 }}>
-            <BookmarkToggle saved={!!saved} onToggle={onToggleSave} />
-          </div>
+        {onNavigate && (
+          <button
+            type="button"
+            data-track="card_navigate"
+            aria-label={`Navigate to ${cp.name}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate();
+            }}
+            style={{
+              appearance: 'none',
+              width: 38,
+              height: 38,
+              marginTop: -2,
+              borderRadius: 999,
+              flexShrink: 0,
+              border: 0,
+              background: 'var(--accent-tint)',
+              color: 'var(--accent)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <IconNavigate size={17} stroke={2} />
+          </button>
         )}
       </div>
 

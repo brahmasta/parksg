@@ -172,6 +172,8 @@ export type EditSubmission = {
   submitter_email: string | null;
   submitter_name: string | null;
   proposed_total_lots: number | null;
+  /** Proposed height clearance in metres (migration 015); null = not given. */
+  proposed_height_limit_m?: number | null;
   proposed_rates: RateRow[];
   note: string | null;
   status: 'pending' | 'approved' | 'rejected';
@@ -205,6 +207,8 @@ export type CarparkLite = {
   address: string | null;
   agency: string;
   total_lots: number | null;
+  /** Height clearance in metres (migration 015); null = unknown. */
+  height_limit_m: number | null;
   lat: number | null;
   lng: number | null;
   central_area: boolean;

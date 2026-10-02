@@ -16,6 +16,9 @@ import { EVEmptyResults } from '../components/EVEmptyResults';
 import { AddCarparkLink } from '../components/AddCarparkLink';
 import { ResultFilters, VehicleEmptyResults } from '../components/ResultFilters';
 import { RealResultsMap } from '../components/RealResultsMap';
+import { RadiusSelect } from '../components/RadiusSelect';
+import { fmtRadius, widerRadius } from '../lib/radius';
+import { useCarparkNavigation } from '../hooks/useCarparkNavigation';
 import { PoweredByGoogle } from '../components/PoweredByGoogle';
 import {
   IconChevronLeft,
@@ -23,7 +26,7 @@ import {
   IconMap,
   IconRefresh,
   IconShare,
-  IconStar,
+  IconBookmark,
 } from '../components/icons';
 
 export function ResultsScreen({
@@ -45,8 +48,8 @@ export function ResultsScreen({
   onSelect,
   onRetry,
   onExpandRadius,
-  isCarparkSaved,
-  onToggleSaveCarpark,
+  radiusM,
+  onRadius,
   destinationSaved,
   onSaveDestination,
   onShare,
@@ -72,8 +75,9 @@ export function ResultsScreen({
   onSelect: (cp: Carpark) => void;
   onRetry: () => void;
   onExpandRadius: () => void;
-  isCarparkSaved: (id: string) => boolean;
-  onToggleSaveCarpark: (cp: Carpark) => void;
+  /** Current search radius in metres, and a setter that re-runs the search. */
+  radiusM: number;
+  onRadius: (m: number) => void;
   destinationSaved: boolean;
   onSaveDestination: () => void;
   /** Share this "Carparks near X" page (native sheet, else copy link). */
@@ -118,6 +122,8 @@ export function ResultsScreen({
   // can't beat a live price unchallenged — see pickCheapestId (TRUST-1).
   const cheapestId = useMemo(() => pickCheapestId(ranked, 1, costOf), [ranked, costOf]);
   const hasGoogle = useMemo(() => ranked.some((c) => c.source === 'GOOGLE'), [ranked]);
+  // Navigate straight from a card; the app picker shows on first use.
+  const nav = useCarparkNavigation('sheet');
 
   return (
     <div
@@ -190,29 +196,22 @@ export function ResultsScreen({
             style={{
               appearance: 'none',
               cursor: destinationSaved ? 'default' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '7px 11px 7px 9px',
+              width: 36,
+              height: 36,
               borderRadius: 999,
-              background: destinationSaved
-                ? 'var(--accent-tint)'
-                : 'var(--bg-1)',
+              background: destinationSaved ? 'var(--accent-tint)' : 'var(--bg-1)',
               border: destinationSaved
                 ? '1px solid var(--accent)'
                 : '0.5px solid var(--line-strong)',
               color: destinationSaved ? 'var(--accent)' : 'var(--text-2)',
-              fontSize: 11.5,
-              fontWeight: 600,
-              letterSpacing: -0.05,
-              fontFamily: 'var(--font-body)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               flexShrink: 0,
               transition: 'all 140ms ease',
-              minHeight: 32,
             }}
           >
-            <IconStar size={13} stroke={2} />
-            {destinationSaved ? 'Saved' : 'Save'}
+            <IconBookmark filled={destinationSaved} size={16} stroke={2} />
           </button>
           <button
             type="button"
@@ -260,7 +259,9 @@ export function ResultsScreen({
         <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-2)' }}>
           {state === 'empty' ? '0' : ranked.length} carpark
           {ranked.length === 1 ? '' : 's'}
-          <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
+          <span style={{ color: 'var(--text-3)' }}> · within </span>
+          <RadiusSelect value={radiusM} onChange={onRadius} />
+          <span style={{ color: 'var(--text-3)' }}> · </span>
           sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
         </div>
       </div>
@@ -285,7 +286,13 @@ export function ResultsScreen({
         {state === 'loading' && <ResultsLoading />}
 
         {state === 'empty' && (
-          <EmptyResults destination={destination} onExpandRadius={onExpandRadius} onBack={onBack} user={user} />
+          <EmptyResults
+            destination={destination}
+            radiusM={radiusM}
+            onExpandRadius={onExpandRadius}
+            onBack={onBack}
+            user={user}
+          />
         )}
 
         {vehicleFilterEmpty && (
@@ -296,6 +303,7 @@ export function ResultsScreen({
           <EVEmptyResults
             destination={destination}
             onClearFilter={() => setEvOnly(false)}
+            radiusLabel={fmtRadius(radiusM)}
           />
         )}
 
@@ -304,6 +312,8 @@ export function ResultsScreen({
             destination={destination}
             onClearFilter={() => setAvailableOnly(false)}
             onExpandRadius={onExpandRadius}
+            radiusLabel={fmtRadius(radiusM)}
+            canExpand={widerRadius(radiusM) != null}
           />
         )}
 
@@ -341,8 +351,7 @@ export function ResultsScreen({
                   isCheapest={cp.id === cheapestId}
                   degraded={state === 'degraded'}
                   onClick={() => onSelect(cp)}
-                  saved={isCarparkSaved(cp.id)}
-                  onToggleSave={() => onToggleSaveCarpark(cp)}
+                  onNavigate={() => nav.navigate(cp)}
                 />
               ))}
               <div
@@ -361,6 +370,7 @@ export function ResultsScreen({
             </div>
           ))}
       </div>
+      {nav.picker}
     </div>
   );
 }
@@ -407,15 +417,18 @@ function ResultsLoading() {
 
 function EmptyResults({
   destination,
+  radiusM,
   onExpandRadius,
   onBack,
   user = null,
 }: {
   destination: string;
+  radiusM: number;
   onExpandRadius: () => void;
   onBack: () => void;
   user?: User | null;
 }) {
+  const wider = widerRadius(radiusM);
   return (
     <div
       style={{
@@ -465,10 +478,11 @@ function EmptyResults({
           maxWidth: 280,
         }}
       >
-        No HDB or URA carparks found within 600m of{' '}
+        No HDB or URA carparks found within {fmtRadius(radiusM)} of{' '}
         <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>{destination}</strong>.
         This area may be served by private carparks.
       </p>
+      {wider != null && (
       <button
         onClick={onExpandRadius}
         style={{
@@ -488,8 +502,9 @@ function EmptyResults({
         }}
       >
         <IconRefresh size={14} stroke={2.5} />
-        Search wider (1 km)
+        Search wider ({fmtRadius(wider)})
       </button>
+      )}
       <button
         onClick={onBack}
         data-track="nav_back"

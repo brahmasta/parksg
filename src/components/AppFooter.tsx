@@ -1,19 +1,22 @@
+import { useState } from 'react';
+import { FeedbackDialog } from './FeedbackDialog';
+import type { User } from '../lib/types';
+
 /**
- * Global app footer — sits at the bottom of every screen's scrollable
- * body. A single line of mono micro-copy: a feedback CTA linking to the
- * project's X handle.
+ * Global app footer — sits at the bottom of the home screen's scrollable
+ * body. A single line of micro-copy whose link opens the feedback form
+ * (FeedbackDialog: a bottom sheet on phone, a centred modal on desktop).
  *
- * Kept small (10.5pt mono) so it never competes with the data-freshness
- * notes that sit just above it on Results / Detail. On Detail it lives
- * inside the scroll region, above the 120px gutter the sticky Navigate
- * CTA pins to, so scrolling reveals it fully and the CTA never covers
- * it.
+ * Kept small (10pt) so it never competes with the content above it.
  */
-
-/** Single source of truth for the feedback destination. */
-export const FEEDBACK_URL = 'https://x.com/brahmasta';
-
-export function AppFooter() {
+export function AppFooter({
+  user = null,
+  variant = 'sheet',
+}: {
+  user?: User | null;
+  variant?: 'sheet' | 'modal';
+}) {
+  const [open, setOpen] = useState(false);
   return (
     <footer
       style={{
@@ -26,22 +29,32 @@ export function AppFooter() {
         textAlign: 'center',
       }}
     >
-      Feedback? share with me on{' '}
-      <a
-        href={FEEDBACK_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Share feedback on X (@brahmasta)"
+      Missing a carpark, or have an idea?{' '}
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
         data-track="feedback_link"
         style={{
+          appearance: 'none',
+          border: 0,
+          background: 'transparent',
+          padding: 0,
+          font: 'inherit',
           color: 'var(--ok)',
-          textDecoration: 'none',
           fontWeight: 600,
           whiteSpace: 'nowrap',
+          cursor: 'pointer',
         }}
       >
-        X (@brahmasta)
-      </a>
+        Send feedback
+      </button>
+      <FeedbackDialog
+        key={open ? 'feedback-open' : 'feedback-closed'}
+        open={open}
+        onClose={() => setOpen(false)}
+        variant={variant}
+        user={user}
+      />
     </footer>
   );
 }

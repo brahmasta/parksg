@@ -14,6 +14,6 @@ export const FOUNDER_NOTE: string[] = [
 
 export const FOUNDER_SIGNOFF = 'Happy Parking!';
 
-/** Bram's personal X account (same destination as the footer's FEEDBACK_URL). */
+/** Bram's personal X account. */
 export const FOUNDER_X_URL = 'https://x.com/brahmasta';
 export const FOUNDER_LINKEDIN_URL = 'https://www.linkedin.com/in/brahmasta/';

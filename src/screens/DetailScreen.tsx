@@ -1,18 +1,16 @@
 import { useCallback, useState } from 'react';
-import { trackEvent } from '../lib/api/events';
 import type { Carpark, DurationHours, User } from '../lib/types';
 import { isStaleRates } from '../lib/rateSource';
 import {
   MAPS_PROVIDER_LABELS,
   availableProviders,
   getLastProvider,
-  mapsDirectionsUrl,
-  setLastProvider,
   type MapsProvider,
 } from '../lib/maps';
 import { isApplePlatform } from '../lib/platform';
 import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
+import { openDirections } from '../hooks/useCarparkNavigation';
 import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
 import { SuggestEditDialog } from '../components/SuggestEditDialog';
 import type { EditableRate } from '../components/rateGrid';
@@ -140,28 +138,8 @@ export function DetailScreen({
 
   const openProvider = useCallback(
     (provider: MapsProvider) => {
-      const [lat, lng] = cp.coords.entrance;
-      const url = mapsDirectionsUrl(provider, lat, lng);
-      // Use a real anchor click rather than window.open — anchors with
-      // target=_blank are never treated as a popup (so they're not blocked) and
-      // open reliably across browsers.
-      const a = document.createElement('a');
-      a.href = url;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setLastProvider(provider);
+      openDirections(cp, provider, 'detail');
       setLastProviderState(provider);
-      // Funnel step 5, and the last thing that happens before the user leaves
-      // for an external maps app — flush immediately rather than waiting out
-      // the buffer debounce, which the page unload would cut short.
-      trackEvent(
-        'navigate_clicked',
-        { provider, carpark: cp.id, source: cp.source },
-        { immediate: true },
-      );
     },
     [cp],
   );
@@ -414,6 +392,31 @@ export function DetailScreen({
               <LotTypeChips types={cp.lotTypes} counts={cp.lotCounts} />
             </div>
           )}
+          {cp.heightLimitM != null && (
+            <div
+              style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 8 }}
+            >
+              <span
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  color: 'var(--text-3)',
+                  letterSpacing: 0.6,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Height limit
+              </span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-1)' }}>
+                {fmtHeight(cp.heightLimitM)}
+              </span>
+              {carParkKind(cp.carParkType) && (
+                <span style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                  · {carParkKind(cp.carParkType)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Google supplementary — unverified-data banner */}
@@ -564,6 +567,32 @@ export function DetailScreen({
           </div>
         </div>
 
+        {/* Adjust duration — right under the cost it drives. StayPlanner when a
+            `stay` is supplied (phone and desktop rail); legacy preset strip
+            otherwise. */}
+        {!hideDurationStrip &&
+          (stay && setStay ? (
+            <div style={{ marginTop: 12 }}>
+              <StayPlanner stay={stay} onChange={setStay} collapsible />
+            </div>
+          ) : setDuration ? (
+            <div style={{ marginTop: 20 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10.5,
+                  color: 'var(--text-3)',
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                Adjust duration
+              </div>
+              <DurationStrip value={duration} onChange={setDuration} compact />
+            </div>
+          ) : null)}
+
         {/* EV charging (between stat cards and walk map per E8 design spec). */}
         <EVSection ev={cp.ev} />
 
@@ -624,32 +653,6 @@ export function DetailScreen({
             <WalkMap walkMin={walk.minutes} walkMeters={walk.meters} />
           )}
         </div>
-
-        {/* Adjust duration — StayPlanner when a `stay` is supplied (mobile +
-            desktop parity); legacy preset strip otherwise. Hidden entirely on
-            the desktop rail, which has its own StayPlanner. */}
-        {!hideDurationStrip &&
-          (stay && setStay ? (
-            <div style={{ marginTop: 20 }}>
-              <StayPlanner stay={stay} onChange={setStay} collapsible />
-            </div>
-          ) : setDuration ? (
-            <div style={{ marginTop: 20 }}>
-              <div
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10.5,
-                  color: 'var(--text-3)',
-                  letterSpacing: 1,
-                  textTransform: 'uppercase',
-                  marginBottom: 10,
-                }}
-              >
-                Adjust duration
-              </div>
-              <DurationStrip value={duration} onChange={setDuration} compact />
-            </div>
-          ) : null)}
 
         {/* Rate schedule */}
         <div style={{ marginTop: 22 }}>
@@ -990,6 +993,7 @@ export function DetailScreen({
           variant={navVariant}
           carpark={{ id: cp.id, name: cp.name, source: cp.operator }}
           currentTotalLots={cp.lotsTotal > 0 ? cp.lotsTotal : null}
+          currentHeightLimitM={cp.heightLimitM ?? null}
           initialRates={toEditableRates(cp)}
           user={user}
         />
@@ -1023,4 +1027,20 @@ export function DetailScreen({
       )}
     </div>
   );
+}
+
+/** 2.15 → "2.15 m", 2 → "2.0 m". */
+function fmtHeight(m: number): string {
+  return `${m % 1 === 0 ? m.toFixed(1) : String(m)} m`;
+}
+
+/** HDB's "MULTI-STOREY CAR PARK" → "Multi-storey"; other types → null. */
+function carParkKind(type: string | undefined): string | null {
+  if (!type) return null;
+  const t = type.toUpperCase();
+  if (t.includes('BASEMENT')) return 'Basement';
+  if (t.includes('MULTI-STOREY')) return 'Multi-storey';
+  if (t.includes('MECHANISED')) return 'Mechanised';
+  if (t.includes('COVERED')) return 'Covered';
+  return null;
 }

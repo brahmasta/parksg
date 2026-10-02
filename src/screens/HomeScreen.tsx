@@ -5,7 +5,6 @@ import type {
   User,
 } from '../lib/types';
 import { AppFooter } from '../components/AppFooter';
-import { HomeFeedbackForm } from '../components/HomeFeedbackForm';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { ThemeToggleButton } from '../components/ThemeToggleButton';
@@ -488,9 +487,7 @@ export function HomeScreen({
           </div>
         ) : null}
 
-        <HomeFeedbackForm user={user} />
-
-        <AppFooter />
+        <AppFooter user={user} />
       </div>
     </div>
   );

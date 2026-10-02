@@ -135,6 +135,10 @@ export type Carpark = {
   /** Motorcycle rate schedule, when the source publishes one (URA). Car
    * costs never use these rows. */
   motorcycleRates?: Carpark['rates'];
+  /** Height clearance in metres (multi-storey / basement), when known. */
+  heightLimitM?: number;
+  /** Source carpark type, e.g. 'MULTI-STOREY CAR PARK' (HDB), 'MALL'. */
+  carParkType?: string;
   /** EV charging data from LTA /EVCBatch joined by haversine ≤50m. */
   ev?: CarparkEV;
   // ── Supplementary (Google Maps) provenance ──────────────────────────

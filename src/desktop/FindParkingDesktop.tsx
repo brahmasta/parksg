@@ -16,8 +16,10 @@ import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import { ResultFilters } from '../components/ResultFilters';
 import { vehicleEmptyCopy } from '../lib/lotTypes';
 import { useWalkRoute } from '../hooks/useWalkRoute';
+import { useCarparkNavigation } from '../hooks/useCarparkNavigation';
+import { RadiusSelect } from '../components/RadiusSelect';
 import { pickHeroCopy } from '../lib/heroCopy';
-import { HomeFeedbackForm } from '../components/HomeFeedbackForm';
+import { AppFooter } from '../components/AppFooter';
 import { IconBookmark, IconChevronRight, IconHistory, IconLocation, IconShare, IconStar } from '../components/icons';
 
 export type DesktopSavedProps = {
@@ -62,6 +64,9 @@ export type FindParkingDesktopProps = {
   onRequireSignIn: () => void;
   /** Share the current "Carparks near X" results. */
   onShareResults: () => void;
+  /** Current search radius in metres, and a setter that re-runs the search. */
+  radiusM: number;
+  onRadius: (m: number) => void;
   /** This browser's recent destinations, newest first (empty until a search). */
   recents: RecentDestination[];
 };
@@ -77,12 +82,14 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly, vehicles, setVehicles,
     detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
-    user, onRequireSignIn, onShareResults, recents,
+    user, onRequireSignIn, onShareResults, recents, radiusM, onRadius,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
   const [evOnly, setEvOnly] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
+  // Navigate straight from a card; the app picker shows on first use.
+  const nav = useCarparkNavigation('modal');
   // The emphasised carpark on the map: the open detail, else the hovered card.
   const activeId = detailCp?.id ?? hoverId;
 
@@ -170,7 +177,6 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             destinationCoords={destinationCoords}
             stay={stay}
             setStay={setStay}
-            hideDurationStrip
             hideWalkMap
             navVariant="modal"
             onBack={onCloseDetail}
@@ -225,10 +231,15 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
             {/* Results header + filter/sort */}
             <div style={{ margin: '22px 0 12px' }}>
               <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                <MonoLabel>
-                  {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
-                  {headerDestination ? ` near ${headerDestination}` : ''}
-                </MonoLabel>
+                <div style={{ minWidth: 0 }}>
+                  <MonoLabel>
+                    {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
+                    {headerDestination ? ` near ${headerDestination}` : ''}
+                  </MonoLabel>
+                  <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginTop: 4 }}>
+                    within <RadiusSelect value={radiusM} onChange={onRadius} />
+                  </div>
+                </div>
                 {destinationCoords && (
                   <button
                     type="button"
@@ -296,8 +307,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
                     onHoverChange={setHoverId}
                     degraded={state === 'degraded'}
                     onClick={() => onOpenDetail(cp)}
-                    saved={isCarparkSaved(cp.id)}
-                    onToggleSave={() => onToggleSaveCarpark(cp)}
+                    onNavigate={() => nav.navigate(cp)}
                   />
                 ))}
               </div>
@@ -346,6 +356,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
           </div>
         )}
       </div>
+      {nav.picker}
     </main>
   );
 }
@@ -477,8 +488,8 @@ function LandingDesktop({
           </div>
         )}
 
-        <div style={{ marginTop: 8 }}>
-          <HomeFeedbackForm user={user} />
+        <div style={{ marginTop: 28 }}>
+          <AppFooter user={user} variant="modal" />
         </div>
       </div>
     </main>

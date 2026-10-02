@@ -13,13 +13,14 @@ export const config = { runtime: 'edge' };
 
 const STATUSES = ['pending', 'approved', 'rejected'];
 const FIELDS =
-  'id,created_at,kind,carpark_id,carpark_name,carpark_source,submitter_user_id,submitter_email,submitter_name,proposed_total_lots,proposed_rates,proposed_carpark,note,status,reviewed_by,reviewed_at,review_note';
+  'id,created_at,kind,carpark_id,carpark_name,carpark_source,submitter_user_id,submitter_email,submitter_name,proposed_total_lots,proposed_height_limit_m,proposed_rates,proposed_carpark,note,status,reviewed_by,reviewed_at,review_note';
 
 type Submission = {
   id: string;
   kind: 'edit' | 'new';
   carpark_id: string | null;
   proposed_total_lots: number | null;
+  proposed_height_limit_m: number | null;
   proposed_rates: unknown[];
   proposed_carpark: { name?: string; lat?: number; lng?: number; address?: string } | null;
   status: string;
@@ -68,6 +69,7 @@ export default async function handler(req: Request): Promise<Response> {
         if (!sub.carpark_id) return json({ error: 'Edit submission has no carpark id.' }, 400);
         const applied = await applyCarparkEdit(sub.carpark_id, {
           total_lots: sub.proposed_total_lots,
+          height_limit_m: sub.proposed_height_limit_m,
           rates,
         });
         if (!applied.ok) return json({ error: applied.error }, 502);

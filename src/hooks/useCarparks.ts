@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { DEFAULT_RADIUS_M, widerRadius } from '../lib/radius';
 import type {
   Carpark,
   DurationHours,
@@ -22,7 +23,7 @@ import { nearbyParking, type NearbyGooglePlace } from '../lib/api/googlePlaces';
 import { filterNewGooglePlaces, googlePlaceToCarpark } from '../lib/googleCarpark';
 import { GOOGLE_GAP_THRESHOLD } from '../lib/config';
 import { haversineMeters, walkMinutesFromMeters } from '../lib/geo';
-import { hdbHasMotorcycleLots } from '../lib/hdbMotorcycle';
+import { HDB_MOTORCYCLE_RATES, hdbHasMotorcycleLots } from '../lib/hdbMotorcycle';
 import { estimateCostCentsAt } from '../lib/rateMath';
 import { estByHoursFor, ratesFor } from '../lib/cost';
 import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
@@ -30,7 +31,6 @@ import { attachEvData } from '../lib/ev';
 import { applyUraRates, currentDayType } from '../lib/uraJoin';
 import type { UraCarparkRates } from '../lib/ura';
 
-const DEFAULT_RADIUS_M = 600;
 const REFRESH_MS = 60_000;
 const AVAIL_TIMEOUT_MS = 5_000;
 
@@ -366,9 +366,20 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
   const retry = useCallback(() => {
     if (trigger) void run(trigger);
   }, [trigger, run]);
+  // "Search wider": the next radius option up (600m → 1km → 1.5km → 2km).
   const expandRadius = useCallback(() => {
-    if (trigger) void run(trigger, { radius: 1000 });
-  }, [trigger, run]);
+    const next = widerRadius(radiusM);
+    if (trigger && next) void run(trigger, { radius: next });
+  }, [trigger, run, radiusM]);
+  // Search radius chosen in the results header. It sticks for later searches
+  // (run() keeps the last radius), and re-runs the current one straight away.
+  const setRadius = useCallback(
+    (m: number) => {
+      if (trigger) void run(trigger, { radius: m });
+      else setRadiusM(m);
+    },
+    [trigger, run],
+  );
 
   // Hydrate a fetched DB row into a Detail-ready Carpark. Static data (rates)
   // comes from the DB row; live lots + EV are merged best-effort so a slow
@@ -440,6 +451,8 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
     searchAtCoords,
     retry,
     expandRadius,
+    radiusM,
+    setRadius,
     loadCarparkById,
     loadCarparkBySlug,
     trigger,
@@ -511,21 +524,24 @@ function dbRowToCarpark(
       : rates;
 
   const live = lotsByDbId.get(row.id);
+  // Per-vehicle types from the live feed (HDB), else the stored ones (URA
+  // capacity data), else car-only; withMotorcycle then adds 'M' from
+  // motorcycle rates or the HDB community list.
+  const lotTypes = withMotorcycle(
+    row,
+    live?.lotTypes ?? storedLotTypes(row) ?? (['C'] satisfies LotType[]),
+    !!motorcycleRates,
+  );
 
   return {
     id: row.id.toLowerCase(),
     name: row.name,
     block: row.address ?? row.source_code,
     operator: op,
-    // Per-vehicle types from the live feed (HDB), else the stored ones (URA
-    // capacity data), else car-only; withMotorcycle then adds 'M' from
-    // motorcycle rates or the HDB community list.
-    lotTypes: withMotorcycle(
-      row,
-      live?.lotTypes ?? storedLotTypes(row) ?? (['C'] satisfies LotType[]),
-      !!motorcycleRates,
-    ),
+    lotTypes,
     lotCounts: storedLotCounts(row),
+    heightLimitM: row.height_limit_m != null ? Number(row.height_limit_m) : undefined,
+    carParkType: row.car_park_type ?? undefined,
     lotsAvailable: live?.lotsAvailable ?? null,
     lotsTotal: live?.lotsTotal ?? row.total_lots ?? 0,
     walkMin: walkMinutesFromMeters(meters),
@@ -533,7 +549,11 @@ function dbRowToCarpark(
     grace: row.rate_rows[0]?.grace_minutes ?? (row.agency === 'HDB' ? 10 : 0),
     coords: { entrance: [row.lat!, row.lng!] },
     rates: fallbackRates,
-    motorcycleRates,
+    // HDB's flat motorcycle charge where the carpark has motorcycle lots but
+    // no schedule of its own.
+    motorcycleRates:
+      motorcycleRates ??
+      (row.agency === 'HDB' && lotTypes.includes('M') ? HDB_MOTORCYCLE_RATES : undefined),
     estByHours,
   };
 }

@@ -31,6 +31,8 @@ export type CarparkEditSubmission = {
   carparkName: string;
   carparkSource?: string | null;
   totalLots: number | null;
+  /** Height clearance in metres; null = not given (migration 015). */
+  heightLimitM?: number | null;
   rates: ProposedRate[];
   note?: string | null;
   // Submitter identity — from the session when signed in, typed otherwise.
@@ -105,6 +107,7 @@ export async function submitCarparkEdit(s: CarparkEditSubmission): Promise<boole
         p_total_lots: s.totalLots,
         p_rates: s.rates,
         p_note: s.note ?? null,
+        p_height_limit_m: s.heightLimitM ?? null,
       }),
     });
     return res.ok;

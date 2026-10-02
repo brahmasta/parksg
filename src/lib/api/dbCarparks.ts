@@ -72,6 +72,8 @@ export type DbCarparkRaw = {
   lot_types: string[] | null;
   motorcycle_lots: number | null;
   heavy_lots: number | null;
+  /** Clearance in metres (multi-storey / basement); null = unknown. Migration 015. */
+  height_limit_m: number | null;
   source: DbSource;
   rate_rows: DbRateRowRaw[];
 };
@@ -99,7 +101,7 @@ function boundingBox(
 // ── Fetcher ────────────────────────────────────────────────────────────
 
 const CARPARK_SELECT =
-  'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,lot_types,motorcycle_lots,heavy_lots,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,first_block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
+  'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,lot_types,motorcycle_lots,heavy_lots,height_limit_m,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,first_block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
 
 /**
  * Fetch a single carpark (with rate_rows) by its URL slug — used when the app

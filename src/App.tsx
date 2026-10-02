@@ -240,6 +240,8 @@ function App() {
     searchAtCoords,
     retry,
     expandRadius,
+    radiusM,
+    setRadius,
     loadCarparkById,
     loadCarparkBySlug,
   } = useCarparks(initialTrigger);
@@ -729,6 +731,8 @@ function App() {
       user,
       onRequireSignIn: handleSignIn,
       onShareResults: () => void shareCurrentResults(),
+      radiusM,
+      onRadius: setRadius,
       recents,
     };
     return (
@@ -826,8 +830,8 @@ function App() {
         onSelect={goDetail}
         onRetry={retry}
         onExpandRadius={expandRadius}
-        isCarparkSaved={(id) => saves.isCarparkSaved(id)}
-        onToggleSaveCarpark={toggleSaveCarpark}
+        radiusM={radiusM}
+        onRadius={setRadius}
         destinationSaved={destAlreadySaved}
         onSaveDestination={openSaveDestSheet}
         onShare={() => void shareCurrentResults()}

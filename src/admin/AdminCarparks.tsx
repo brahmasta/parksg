@@ -45,7 +45,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
     setRates([]);
     setNewCp({
       name: '', id: '', agency: 'OPERATOR', source_code: '', address: '',
-      lat: '', lng: '', total_lots: '', car_park_type: '', parking_system: '',
+      lat: '', lng: '', total_lots: '', height_limit_m: '', car_park_type: '', parking_system: '',
     });
     setCreating(true);
   };
@@ -67,6 +67,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
             lat: newCp.lat === '' ? null : Number(newCp.lat),
             lng: newCp.lng === '' ? null : Number(newCp.lng),
             total_lots: newCp.total_lots === '' ? null : Number(newCp.total_lots),
+            height_limit_m: newCp.height_limit_m === '' ? null : Number(newCp.height_limit_m),
             central_area: centralArea,
             car_park_type: newCp.car_park_type || null,
             parking_system: newCp.parking_system || undefined,
@@ -109,6 +110,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
         lat: c.lat == null ? '' : String(c.lat),
         lng: c.lng == null ? '' : String(c.lng),
         total_lots: c.total_lots == null ? '' : String(c.total_lots),
+        height_limit_m: c.height_limit_m == null ? '' : String(c.height_limit_m),
         car_park_type: c.car_park_type ?? '',
       });
       setCentralArea(!!c.central_area);
@@ -134,6 +136,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
             lat: meta.lat === '' ? null : Number(meta.lat),
             lng: meta.lng === '' ? null : Number(meta.lng),
             total_lots: meta.total_lots === '' ? null : Number(meta.total_lots),
+            height_limit_m: meta.height_limit_m === '' ? null : Number(meta.height_limit_m),
             central_area: centralArea,
             car_park_type: meta.car_park_type || null,
           },
@@ -243,6 +246,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
             <Labeled label="ID (optional)"><input style={field} value={newCp.id} onChange={(e) => setNewCp({ ...newCp, id: e.target.value })} placeholder="auto: MANUAL:<slug of name>" /></Labeled>
             <Labeled label="Source code (optional)"><input style={field} value={newCp.source_code} onChange={(e) => setNewCp({ ...newCp, source_code: e.target.value })} placeholder="auto: slug of name" /></Labeled>
             <Labeled label="Total lots"><input style={field} inputMode="numeric" value={newCp.total_lots} onChange={(e) => setNewCp({ ...newCp, total_lots: e.target.value })} /></Labeled>
+            <Labeled label="Height limit (m)"><input style={field} inputMode="decimal" value={newCp.height_limit_m} onChange={(e) => setNewCp({ ...newCp, height_limit_m: e.target.value })} placeholder="e.g. 2.15 — blank if none" /></Labeled>
             <Labeled label="Address"><input style={field} value={newCp.address} onChange={(e) => setNewCp({ ...newCp, address: e.target.value })} /></Labeled>
             <Labeled label="Latitude"><input style={field} inputMode="decimal" value={newCp.lat} onChange={(e) => setNewCp({ ...newCp, lat: e.target.value })} /></Labeled>
             <Labeled label="Longitude"><input style={field} inputMode="decimal" value={newCp.lng} onChange={(e) => setNewCp({ ...newCp, lng: e.target.value })} /></Labeled>
@@ -294,6 +298,7 @@ export function AdminCarparks({ token, onAuthError }: { token: string; onAuthErr
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
             <Labeled label="Name"><input style={field} value={meta.name} onChange={(e) => setMeta({ ...meta, name: e.target.value })} /></Labeled>
             <Labeled label="Total lots"><input style={field} inputMode="numeric" value={meta.total_lots} onChange={(e) => setMeta({ ...meta, total_lots: e.target.value })} /></Labeled>
+            <Labeled label="Height limit (m)"><input style={field} inputMode="decimal" value={meta.height_limit_m} onChange={(e) => setMeta({ ...meta, height_limit_m: e.target.value })} placeholder="e.g. 2.15 — blank if none" /></Labeled>
             <Labeled label="Address"><input style={field} value={meta.address} onChange={(e) => setMeta({ ...meta, address: e.target.value })} /></Labeled>
             <Labeled label="Latitude"><input style={field} inputMode="decimal" value={meta.lat} onChange={(e) => setMeta({ ...meta, lat: e.target.value })} /></Labeled>
             <Labeled label="Longitude"><input style={field} inputMode="decimal" value={meta.lng} onChange={(e) => setMeta({ ...meta, lng: e.target.value })} /></Labeled>

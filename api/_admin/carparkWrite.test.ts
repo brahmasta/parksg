@@ -1,6 +1,6 @@
-import { describe, it } from 'node:test';
+import { describe, it, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseRates } from './carparkWrite';
+import { heightOrNull, parseRates } from './carparkWrite';
 
 // The rates proposed for 18 Cross Carpark (a real approved submission whose
 // rates never reached rate_rows): a per-block weekday band plus per-entry
@@ -41,4 +41,14 @@ describe('parseRates', () => {
   it('still rejects an unknown day_type', () => {
     assert.throws(() => parseRates([{ day_type: 'MON' }], 'x'), /bad day_type/);
   });
+});
+
+test('heightOrNull keeps 1.2–6m clearances rounded to cm, rejects the rest', () => {
+  assert.equal(heightOrNull(2.15), 2.15);
+  assert.equal(heightOrNull('2.1'), 2.1);
+  assert.equal(heightOrNull(2.156), 2.16);
+  assert.equal(heightOrNull(0), null);
+  assert.equal(heightOrNull(9.99), null);
+  assert.equal(heightOrNull(''), null);
+  assert.equal(heightOrNull(null), null);
 });

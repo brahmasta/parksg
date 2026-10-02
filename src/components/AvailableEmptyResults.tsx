@@ -10,10 +10,16 @@ export function AvailableEmptyResults({
   destination,
   onClearFilter,
   onExpandRadius,
+  radiusLabel = '600m',
+  canExpand = true,
 }: {
   destination: string;
   onClearFilter: () => void;
   onExpandRadius: () => void;
+  /** Current search radius, e.g. "600m". */
+  radiusLabel?: string;
+  /** False at the largest radius — hides "Search wider". */
+  canExpand?: boolean;
 }) {
   return (
     <div
@@ -65,7 +71,7 @@ export function AvailableEmptyResults({
           maxWidth: 280,
         }}
       >
-        All carparks within 600m of{' '}
+        All carparks within {radiusLabel} of{' '}
         <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>
           {destination}
         </strong>{' '}
@@ -91,6 +97,7 @@ export function AvailableEmptyResults({
         >
           Show full carparks
         </button>
+        {canExpand && (
         <button
           type="button"
           onClick={onExpandRadius}
@@ -109,6 +116,7 @@ export function AvailableEmptyResults({
         >
           Search wider
         </button>
+        )}
       </div>
     </div>
   );
