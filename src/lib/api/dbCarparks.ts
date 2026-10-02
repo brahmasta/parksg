@@ -36,7 +36,8 @@ export type DbSource =
   | 'LTA_DATAMALL'
   | 'CAG'
   | 'OPERATOR'
-  | 'MANUAL';
+  | 'MANUAL'
+  | 'COMMUNITY';
 
 export type DbRateRowRaw = {
   day_type: DbDayType;

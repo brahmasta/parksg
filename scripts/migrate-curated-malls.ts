@@ -222,12 +222,15 @@ async function ingestOne(
       return false;
     }
   }
-  // Replace rate_rows by carpark_id (NOT by source) so stale LTA_DATAGOV rows —
-  // including the 2018 duplicates — are cleared regardless of their source.
+  // Replace car rate_rows by carpark_id (NOT by source) so stale LTA_DATAGOV
+  // rows — including the 2018 duplicates — are cleared regardless of their
+  // source. Car only: the curated file has no motorcycle rates, and wiping
+  // every row would delete the community motorcycle prices (migration 017).
   const { error: delErr } = await supabase
     .from('rate_rows')
     .delete()
-    .eq('carpark_id', id);
+    .eq('carpark_id', id)
+    .eq('veh_cat', 'CAR');
   if (delErr) {
     process.stderr.write(`  delete rate_rows ${id} failed: ${delErr.message}\n`);
     return false;
