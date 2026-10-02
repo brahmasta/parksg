@@ -17,6 +17,20 @@ export function vehiclePhrase(vehicles: VehicleFilter[]): string {
     .join(' and ');
 }
 
+/**
+ * The note under the filters while a vehicle filter is on. Lot types come
+ * from HDB (live feed + the community motorcycle list) and URA's capacity
+ * data; motorcycle lots also come from rider-reported mall and office prices.
+ * Card prices and free-lot counts stay car figures.
+ */
+export function vehicleCaveat(vehicles: VehicleFilter[]): string {
+  const sources = vehicles.includes('M') ? 'HDB, URA and rider reports' : 'HDB and URA';
+  return (
+    `Showing carparks known to have ${vehiclePhrase(vehicles)} lots, from ${sources}. ` +
+    'Others may have them too. Prices and free-lot counts on the cards are for cars.'
+  );
+}
+
 /** Title + hint for the "vehicle filter emptied the list" state. */
 export function vehicleEmptyCopy(vehicles: VehicleFilter[]): { title: string; hint: string } {
   const phrase = vehiclePhrase(vehicles);

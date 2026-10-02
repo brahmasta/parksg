@@ -1,5 +1,5 @@
 import type { SortBy, VehicleFilter } from '../lib/resultsView';
-import { LOT_TYPE_LABEL, vehicleEmptyCopy, vehiclePhrase } from '../lib/lotTypes';
+import { LOT_TYPE_LABEL, vehicleCaveat, vehicleEmptyCopy } from '../lib/lotTypes';
 import { FilterPill } from './FilterPill';
 import { IconBolt, IconInfo } from './icons';
 
@@ -22,10 +22,9 @@ const SORTS: [SortBy, string][] = [
  * `scroll` keeps the row on one line and lets it scroll sideways (phone);
  * otherwise it wraps (desktop rail).
  *
- * With a vehicle filter on, a caveat line explains the two things a rider
- * would otherwise get wrong: only HDB carparks report lot types (so malls and
- * URA carparks drop out), and the prices / free-lot counts are still car
- * figures.
+ * With a vehicle filter on, a caveat line (vehicleCaveat) says where the lot
+ * data comes from — so a carpark missing from the list may still have lots —
+ * and that the prices / free-lot counts are still car figures.
  */
 export function ResultFilters({
   sortBy,
@@ -112,10 +111,7 @@ export function ResultFilters({
           <span style={{ display: 'inline-flex', marginTop: 1, flexShrink: 0 }}>
             <IconInfo size={12} stroke={2} />
           </span>
-          <span>
-            Only HDB carparks report {vehiclePhrase(vehicles)} lots, so other carparks are
-            hidden. Prices and free-lot counts are for cars.
-          </span>
+          <span>{vehicleCaveat(vehicles)}</span>
         </div>
       )}
     </div>
