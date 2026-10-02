@@ -10,7 +10,6 @@ import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { StayPlanner } from '../components/StayPlanner';
-import { FilterBar } from '../components/FilterBar';
 import { DegradedBanner } from '../components/DegradedBanner';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
@@ -23,6 +22,7 @@ import {
   IconList,
   IconMap,
   IconRefresh,
+  IconShare,
   IconStar,
 } from '../components/icons';
 
@@ -40,7 +40,7 @@ export function ResultsScreen({
   vehicles,
   setVehicles,
   viewMode,
-  onToggleView,
+  onViewMode,
   onBack,
   onSelect,
   onRetry,
@@ -49,6 +49,7 @@ export function ResultsScreen({
   onToggleSaveCarpark,
   destinationSaved,
   onSaveDestination,
+  onShare,
   initialScrollTop = 0,
   onScrollChange,
   user = null,
@@ -66,7 +67,7 @@ export function ResultsScreen({
   vehicles: VehicleFilter[];
   setVehicles: (v: VehicleFilter[]) => void;
   viewMode: ViewMode;
-  onToggleView: () => void;
+  onViewMode: (v: ViewMode) => void;
   onBack: () => void;
   onSelect: (cp: Carpark) => void;
   onRetry: () => void;
@@ -75,6 +76,8 @@ export function ResultsScreen({
   onToggleSaveCarpark: (cp: Carpark) => void;
   destinationSaved: boolean;
   onSaveDestination: () => void;
+  /** Share this "Carparks near X" page (native sheet, else copy link). */
+  onShare: () => void;
   /** Scroll offset to restore on mount (preserved across Detail→back). */
   initialScrollTop?: number;
   /** Report the live scroll offset so the parent can preserve it. */
@@ -212,21 +215,18 @@ export function ResultsScreen({
             {destinationSaved ? 'Saved' : 'Save'}
           </button>
           <button
-            onClick={onToggleView}
-            data-track={viewMode === 'map' ? 'view_mode_list' : 'view_mode_map'}
-            aria-label="Toggle map view"
+            type="button"
+            onClick={onShare}
+            data-track="results_share"
+            aria-label={`Share carparks near ${destination}`}
             style={{
               appearance: 'none',
               width: 36,
               height: 36,
               borderRadius: 999,
-              background:
-                viewMode === 'map' ? 'var(--accent-tint-strong)' : 'var(--bg-1)',
-              border:
-                viewMode === 'map'
-                  ? '1px solid var(--accent)'
-                  : '0.5px solid var(--line-strong)',
-              color: viewMode === 'map' ? 'var(--accent)' : 'var(--text-2)',
+              background: 'var(--bg-1)',
+              border: '0.5px solid var(--line-strong)',
+              color: 'var(--text-2)',
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
@@ -234,36 +234,34 @@ export function ResultsScreen({
               flexShrink: 0,
             }}
           >
-            {viewMode === 'map' ? <IconList size={16} stroke={2} /> : <IconMap size={16} stroke={2} />}
+            <IconShare size={16} stroke={2} />
           </button>
         </div>
 
-        {/* Result summary */}
-        <div style={{ marginTop: 14, fontSize: 12.5, color: 'var(--text-2)' }}>
-          {state === 'empty' ? '0' : ranked.length} carpark
-          {ranked.length === 1 ? '' : 's'}
-          <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
-          sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
-        </div>
+        {/* List | Map — the top-level choice, above every filter. */}
+        <ViewTabs viewMode={viewMode} onViewMode={onViewMode} />
 
-        {/* Sort (Cheapest/Nearest) + Available-only */}
+        {/* Sort + filters, one row of equal pills */}
         <div style={{ marginTop: 12 }}>
-          <FilterBar
+          <ResultFilters
             sortBy={sortBy}
             onSortBy={setSortBy}
             availableOnly={availableOnly}
             onAvailableOnly={setAvailableOnly}
-          />
-        </div>
-
-        {/* EV + vehicle lot-type filters */}
-        <div style={{ marginTop: 10 }}>
-          <ResultFilters
             evOnly={evOnly}
             onEvOnly={setEvOnly}
             vehicles={vehicles}
             onVehicles={setVehicles}
+            scroll
           />
+        </div>
+
+        {/* Result summary */}
+        <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-2)' }}>
+          {state === 'empty' ? '0' : ranked.length} carpark
+          {ranked.length === 1 ? '' : 's'}
+          <span style={{ color: 'var(--text-3)' }}> · within 600m · </span>
+          sorted by {sortBy === 'cost' ? 'cost' : 'distance'}
         </div>
       </div>
 
@@ -276,18 +274,11 @@ export function ResultsScreen({
         {state === 'degraded' && <DegradedBanner onRetry={onRetry} />}
 
         {/* Stay planner — same control + arbitrary-duration cost as desktop.
-            Lives at the top of the scrollable body and is collapsible so it
-            doesn't crowd a phone — collapsed by default in map view. The
-            `key` remounts it on view switch so the default applies. */}
+            Lives at the top of the scrollable body, collapsed to a one-line
+            summary until opened so the results come first. */}
         {(state === 'loaded' || state === 'degraded') && (
           <div style={{ padding: '4px 16px 10px' }}>
-            <StayPlanner
-              key={viewMode}
-              stay={stay}
-              onChange={setStay}
-              collapsible
-              defaultOpen={viewMode === 'list'}
-            />
+            <StayPlanner stay={stay} onChange={setStay} collapsible />
           </div>
         )}
 
@@ -524,3 +515,67 @@ function EmptyResults({
   );
 }
 
+/** Full-width List | Map segmented switch for the phone results header. */
+function ViewTabs({
+  viewMode,
+  onViewMode,
+}: {
+  viewMode: ViewMode;
+  onViewMode: (v: ViewMode) => void;
+}) {
+  const tabs: [ViewMode, string, typeof IconList][] = [
+    ['list', 'List', IconList],
+    ['map', 'Map', IconMap],
+  ];
+  return (
+    <div
+      role="tablist"
+      aria-label="Results view"
+      style={{
+        marginTop: 14,
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 4,
+        padding: 4,
+        background: 'var(--bg-2)',
+        border: '0.5px solid var(--line)',
+        borderRadius: 12,
+      }}
+    >
+      {tabs.map(([mode, label, Icon]) => {
+        const active = viewMode === mode;
+        return (
+          <button
+            key={mode}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            data-track={`view_mode_${mode}`}
+            onClick={() => onViewMode(mode)}
+            style={{
+              appearance: 'none',
+              border: 0,
+              borderRadius: 9,
+              padding: '8px 0',
+              minHeight: 36,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 7,
+              background: active ? 'var(--bg-1)' : 'transparent',
+              color: active ? 'var(--text-1)' : 'var(--text-2)',
+              fontSize: 13.5,
+              fontWeight: active ? 600 : 500,
+              cursor: 'pointer',
+              boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              transition: 'all 120ms ease',
+            }}
+          >
+            <Icon size={15} stroke={2} />
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

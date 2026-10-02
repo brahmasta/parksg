@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import type { Carpark, MergedSaveItem, User } from '../lib/types';
+import type { Carpark, MergedSaveItem, RecentDestination, User } from '../lib/types';
 import {
   pickCheapestId,
   selectResultsView,
@@ -9,7 +9,6 @@ import {
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { MonoLabel, Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
-import { FilterBar } from '../components/FilterBar';
 import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
 import { DetailScreen } from '../screens/DetailScreen';
@@ -18,7 +17,8 @@ import { ResultFilters } from '../components/ResultFilters';
 import { vehicleEmptyCopy } from '../lib/lotTypes';
 import { useWalkRoute } from '../hooks/useWalkRoute';
 import { pickHeroCopy } from '../lib/heroCopy';
-import { IconBookmark, IconChevronRight, IconLocation, IconStar } from '../components/icons';
+import { HomeFeedbackForm } from '../components/HomeFeedbackForm';
+import { IconBookmark, IconChevronRight, IconHistory, IconLocation, IconShare, IconStar } from '../components/icons';
 
 export type DesktopSavedProps = {
   merged: MergedSaveItem[];
@@ -60,6 +60,10 @@ export type FindParkingDesktopProps = {
   /** Signed-in user + sign-in prompt — powers crowdsourced check-ins in Detail. */
   user: User | null;
   onRequireSignIn: () => void;
+  /** Share the current "Carparks near X" results. */
+  onShareResults: () => void;
+  /** This browser's recent destinations, newest first (empty until a search). */
+  recents: RecentDestination[];
 };
 
 /**
@@ -73,7 +77,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly, vehicles, setVehicles,
     detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
-    user, onRequireSignIn,
+    user, onRequireSignIn, onShareResults, recents,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
@@ -124,6 +128,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
         onNearMe={onNearMe}
         nearMeBusy={nearMeBusy}
         saved={saved}
+        recents={recents}
+        user={user}
       />
     );
   }
@@ -210,33 +216,46 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
               {nearMeBusy ? 'Locating…' : 'Use my location'}
             </button>
 
-            {/* Stay planner — drives every cost estimate */}
+            {/* Stay planner — drives every cost estimate. Starts collapsed to a
+                one-line summary so the results lead. */}
             <div style={{ marginTop: 16 }}>
-              <StayPlanner stay={stay} onChange={setStay} />
+              <StayPlanner stay={stay} onChange={setStay} collapsible />
             </div>
 
             {/* Results header + filter/sort */}
             <div style={{ margin: '22px 0 12px' }}>
-              <div style={{ marginBottom: 12 }}>
+              <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                 <MonoLabel>
                   {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
                   {headerDestination ? ` near ${headerDestination}` : ''}
                 </MonoLabel>
+                {destinationCoords && (
+                  <button
+                    type="button"
+                    data-track="results_share"
+                    onClick={onShareResults}
+                    aria-label={`Share carparks near ${headerDestination}`}
+                    style={{
+                      appearance: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
+                      padding: '6px 11px', borderRadius: 999, border: '0.5px solid var(--line-strong)',
+                      background: 'var(--bg-1)', color: 'var(--text-2)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    <IconShare size={14} stroke={2} />
+                    Share
+                  </button>
+                )}
               </div>
-              <FilterBar
+              <ResultFilters
                 sortBy={sortBy}
                 onSortBy={setSortBy}
                 availableOnly={availableOnly}
                 onAvailableOnly={setAvailableOnly}
+                evOnly={evOnly}
+                onEvOnly={setEvOnly}
+                vehicles={vehicles}
+                onVehicles={setVehicles}
               />
-              <div style={{ marginTop: 10 }}>
-                <ResultFilters
-                  evOnly={evOnly}
-                  onEvOnly={setEvOnly}
-                  vehicles={vehicles}
-                  onVehicles={setVehicles}
-                />
-              </div>
             </div>
 
             {/* Cards */}
@@ -331,7 +350,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   );
 }
 
-/** Pre-search landing — focused single column (no map): search + saved places. */
+/** Pre-search landing — focused single column (no map): search, recents, saved places. */
 function LandingDesktop({
   destinationInput,
   setDestinationInput,
@@ -340,6 +359,8 @@ function LandingDesktop({
   onNearMe,
   nearMeBusy,
   saved,
+  recents,
+  user,
 }: {
   destinationInput: string;
   setDestinationInput: (v: string) => void;
@@ -348,6 +369,8 @@ function LandingDesktop({
   onNearMe: () => void;
   nearMeBusy: boolean;
   saved: DesktopSavedProps;
+  recents: RecentDestination[];
+  user: User | null;
 }) {
   // Same hero copy as the phone home, locked per mount.
   const hero = useMemo(() => pickHeroCopy(), []);
@@ -384,6 +407,36 @@ function LandingDesktop({
           {nearMeBusy ? <Spinner /> : <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconLocation size={16} stroke={2} /></span>}
           {nearMeBusy ? 'Locating…' : 'Use my location'}
         </button>
+
+        {/* Recent — this browser's own searches; hidden until there are any.
+            A recent with coords replays that exact place; older entries
+            without them fall back to a text search. */}
+        {recents.length > 0 && (
+          <>
+            <div style={{ marginTop: 30 }}>
+              <MonoLabel>Recent</MonoLabel>
+            </div>
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {recents.map((r) => (
+                <SavedRow
+                  key={`r:${r.name}`}
+                  track="recent_dest_chip"
+                  icon={<IconHistory size={16} stroke={2} />}
+                  title={r.name}
+                  sub={r.address ?? r.hint}
+                  onClick={() => {
+                    if (typeof r.lat === 'number' && typeof r.lng === 'number') {
+                      onPickPlace({ label: r.name, address: r.address ?? r.name, lat: r.lat, lng: r.lng });
+                    } else {
+                      setDestinationInput(r.name);
+                      onSearch(r.name);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Saved places */}
         <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -423,6 +476,10 @@ function LandingDesktop({
             )}
           </div>
         )}
+
+        <div style={{ marginTop: 8 }}>
+          <HomeFeedbackForm user={user} />
+        </div>
       </div>
     </main>
   );

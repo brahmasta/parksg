@@ -564,14 +564,6 @@ export function DetailScreen({
           </div>
         </div>
 
-        {/* Crowdsourced "is it full now?" — community signal + report buttons. */}
-        <CheckinCard
-          carparkId={cp.id}
-          user={user}
-          onRequireSignIn={onRequireSignIn ?? (() => {})}
-          hasSensor={cp.lotsAvailable != null}
-        />
-
         {/* EV charging (between stat cards and walk map per E8 design spec). */}
         <EVSection ev={cp.ev} />
 
@@ -827,6 +819,17 @@ export function DetailScreen({
             </>
           )}
         </div>
+
+        {/* Crowdsourced "is it full now?" — community signal + report buttons.
+            Below the rates and details: it's a contribution, not something a
+            driver needs before deciding, so it sits with the other feedback
+            actions at the foot of the page. */}
+        <CheckinCard
+          carparkId={cp.id}
+          user={user}
+          onRequireSignIn={onRequireSignIn ?? (() => {})}
+          hasSensor={cp.lotsAvailable != null}
+        />
 
         {/* Suggest an edit — structured rate/lots proposal for admin review.
             Hidden for Google carparks (no DB row to edit). Open to everyone. */}

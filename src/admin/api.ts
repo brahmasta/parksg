@@ -142,6 +142,22 @@ export type Report = {
   status: string;
 };
 
+/** General feedback from the home-page form (migration 014). */
+export type AppFeedbackRow = {
+  id: string;
+  created_at: string;
+  category: string;
+  message: string;
+  email: string | null;
+  user_id: string | null;
+  device: string | null;
+  page: string | null;
+  status: string;
+};
+
+/** Unread ('new') totals for the Feedback tab badge; null = table missing. */
+export type FeedbackCounts = { reports_new: number | null; app_new: number | null };
+
 /** A community-proposed carpark edit ('edit') or brand-new carpark ('new')
  * awaiting moderation. */
 export type EditSubmission = {

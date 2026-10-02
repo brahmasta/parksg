@@ -30,6 +30,7 @@ import type { VehicleFilter } from './lib/resultsView';
 import { findArea } from './lib/seoAreas';
 import { haversineMeters, walkMinutesFromMeters } from './lib/geo';
 import { loadRecents, pushRecent } from './lib/recents';
+import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
 import {
@@ -670,6 +671,18 @@ function App() {
     setAddDestOpen(true);
   }, [result.destination]);
 
+  // Share the current "Carparks near X" results (see lib/shareResults).
+  const shareCurrentResults = useCallback(async () => {
+    const d = result.destination;
+    if (!d) return;
+    const outcome = await shareResults({ label: d.label, lat: d.lat, lng: d.lng });
+    if (outcome === 'copied') {
+      pop({ icon: <IconCheck size={15} stroke={2.25} />, title: 'Link copied', sub: `Carparks near ${d.label}` });
+    } else if (outcome === 'failed') {
+      pop({ icon: <IconWarning size={15} stroke={2} />, title: "Couldn't copy the link" });
+    }
+  }, [result.destination, pop]);
+
   const destAlreadySaved = useMemo(() => {
     if (!result.destination) return false;
     return (
@@ -715,6 +728,8 @@ function App() {
       onToggleSaveCarpark: toggleSaveCarpark,
       user,
       onRequireSignIn: handleSignIn,
+      onShareResults: () => void shareCurrentResults(),
+      recents,
     };
     return (
       <>
@@ -806,7 +821,7 @@ function App() {
         vehicles={vehicles}
         setVehicles={setVehicles}
         viewMode={viewMode}
-        onToggleView={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+        onViewMode={setViewMode}
         onBack={() => setScreen('home')}
         onSelect={goDetail}
         onRetry={retry}
@@ -815,6 +830,7 @@ function App() {
         onToggleSaveCarpark={toggleSaveCarpark}
         destinationSaved={destAlreadySaved}
         onSaveDestination={openSaveDestSheet}
+        onShare={() => void shareCurrentResults()}
         initialScrollTop={resultsScrollRef.current}
         onScrollChange={(y) => {
           resultsScrollRef.current = y;

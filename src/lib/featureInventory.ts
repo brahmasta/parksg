@@ -65,6 +65,7 @@ export const FEATURES: Feature[] = [
   { id: 'sort_carparks', label: 'Change sort', area: 'Results' },
   { id: 'view_mode_list', label: 'List view', area: 'Results' },
   { id: 'view_mode_map', label: 'Map view', area: 'Results' },
+  { id: 'results_share', label: 'Share results page', area: 'Results' },
 
   // Stay planner
   { id: 'stay_planner_toggle', label: 'Open stay planner', area: 'Stay planner' },
@@ -98,6 +99,8 @@ export const FEATURES: Feature[] = [
   { id: 'report_inaccuracy_submit', label: 'Send an inaccuracy report', area: 'Contribute' },
   { id: 'suggest_edit_submit', label: 'Send a suggested edit', area: 'Contribute' },
   { id: 'feedback_link', label: 'Send feedback on X', area: 'Contribute' },
+  { id: 'feedback_category', label: 'Feedback type', area: 'Contribute' },
+  { id: 'feedback_submit', label: 'Send feedback', area: 'Contribute' },
 ];
 
 /** Lookup by `data-track` id. */

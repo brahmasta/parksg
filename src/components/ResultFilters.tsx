@@ -1,4 +1,4 @@
-import type { VehicleFilter } from '../lib/resultsView';
+import type { SortBy, VehicleFilter } from '../lib/resultsView';
 import { LOT_TYPE_LABEL, vehicleEmptyCopy, vehiclePhrase } from '../lib/lotTypes';
 import { FilterPill } from './FilterPill';
 import { IconBolt, IconInfo } from './icons';
@@ -8,9 +8,19 @@ const VEHICLE_FILTERS: { type: VehicleFilter; track: string }[] = [
   { type: 'H', track: 'filter_heavy_vehicle' },
 ];
 
+const SORTS: [SortBy, string][] = [
+  ['cost', 'Cheapest'],
+  ['distance', 'Nearest'],
+];
+
 /**
- * Results filter pills — EV plus the vehicle lot-type filters (motorcycle,
- * heavy vehicle). Shared by the phone Results header and the desktop rail.
+ * Results sort + filter pills on one row, all the same weight: Cheapest /
+ * Nearest (a pair, one always on), Available only, EV, and the vehicle
+ * lot-type filters (motorcycle, heavy vehicle). Shared by the phone Results
+ * header and the desktop rail.
+ *
+ * `scroll` keeps the row on one line and lets it scroll sideways (phone);
+ * otherwise it wraps (desktop rail).
  *
  * With a vehicle filter on, a caveat line explains the two things a rider
  * would otherwise get wrong: only HDB carparks report lot types (so malls and
@@ -18,15 +28,25 @@ const VEHICLE_FILTERS: { type: VehicleFilter; track: string }[] = [
  * figures.
  */
 export function ResultFilters({
+  sortBy,
+  onSortBy,
+  availableOnly,
+  onAvailableOnly,
   evOnly,
   onEvOnly,
   vehicles,
   onVehicles,
+  scroll = false,
 }: {
+  sortBy: SortBy;
+  onSortBy: (v: SortBy) => void;
+  availableOnly: boolean;
+  onAvailableOnly: (v: boolean) => void;
   evOnly: boolean;
   onEvOnly: (v: boolean) => void;
   vehicles: VehicleFilter[];
   onVehicles: (v: VehicleFilter[]) => void;
+  scroll?: boolean;
 }) {
   const toggle = (t: VehicleFilter) =>
     onVehicles(vehicles.includes(t) ? vehicles.filter((v) => v !== t) : [...vehicles, t]);
@@ -35,9 +55,30 @@ export function ResultFilters({
     <div>
       <div
         role="group"
-        aria-label="Filter carparks"
-        style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}
+        aria-label="Sort and filter carparks"
+        className={scroll ? 'psg-no-scrollbar' : undefined}
+        style={{
+          display: 'flex',
+          gap: 6,
+          alignItems: 'center',
+          ...(scroll
+            ? { overflowX: 'auto', marginLeft: -16, marginRight: -16, padding: '0 16px' }
+            : { flexWrap: 'wrap' }),
+        }}
       >
+        {SORTS.map(([key, label]) => (
+          <span key={key} data-track="sort_carparks" style={{ display: 'inline-flex' }}>
+            <FilterPill active={sortBy === key} onClick={() => onSortBy(key)} label={label} />
+          </span>
+        ))}
+        <span data-track="filter_available_only" style={{ display: 'inline-flex' }}>
+          <FilterPill
+            active={availableOnly}
+            onClick={() => onAvailableOnly(!availableOnly)}
+            dot
+            label="Available only"
+          />
+        </span>
         <span data-track="filter_ev" style={{ display: 'inline-flex' }}>
           <FilterPill
             active={evOnly}
