@@ -31,6 +31,7 @@ import type { UraRawRow } from '../src/lib/api/uraDetails';
 import { parseDayRate } from './lib/parse-lta-rate';
 import { makeCsvNameMatcher, normaliseName } from './lib/lta-csv-match';
 import { inferHdbRateRows as ruleEngineHdbRows, type PeakBand } from './lib/hdb-rates';
+import { standalonePlacement, type LtaDataGovCoordsFile } from './lib/lta-datagov-geo';
 import type { RateRow } from '../src/lib/types';
 
 // ──────────────────────────────────────────────────────────────────────
@@ -52,6 +53,13 @@ const HDB_PEAK_RESTRUCTURED_CODES = new Set<string>(
 const HDB_PEAK_BANDS_BY_CODE = new Map<string, PeakBand[]>(
   (peakJson.carparks ?? []).map((c) => [c.code, c.bands]),
 );
+
+// Reviewed OneMap coordinates for the LTA 2018 CSV standalones, produced by
+// scripts/geocode-lta-datagov.ts. The CSV has no coordinates and migrateLtaCsv
+// recreates those rows on every run, so this file is what keeps them on the map.
+const LTA_DATAGOV_COORDS = JSON.parse(
+  readFileSync(resolve(__dirname, 'data/lta-datagov-coords.json'), 'utf8'),
+) as LtaDataGovCoordsFile;
 
 // Load .env.local explicitly (in addition to the root .env that dotenv/config picks up).
 dotenv.config({ path: resolve(process.cwd(), '.env.local') });
@@ -898,6 +906,10 @@ async function migrateLtaCsv(
 
   const today = new Date().toISOString();
   let skippedDefunct = 0;
+  const skippedCurated = new Set<string>();
+  const placed = new Set<string>();
+  const withheld = new Set<string>();
+  const standaloneIds = new Set<string>();
   for (const r of records) {
     const name = (r.carpark ?? '').trim();
     if (!name) {
@@ -985,14 +997,37 @@ async function migrateLtaCsv(
       continue;
     }
 
+    // A curated entry can reuse this row's id under another name (curated "AMK
+    // Hub" is LTA:ang_mo_kio_hub, the CSV's "Ang Mo Kio Hub"). The name match
+    // above misses it, so guard the id too — otherwise the upsert below would
+    // overwrite the curated row, null its coordinates and replace its rates.
+    if (manualIds.has(carparkId)) {
+      skippedCurated.add(carparkId);
+      continue;
+    }
+
+    // The CSV has no coordinates; the reviewed coords file supplies them (and
+    // withholds them from a row whose rates no longer parse to a real price).
+    // The CSV repeats some names (a hotel under "Hotels" and its area), so the
+    // same id can come through twice — the later row wins, as for its rates.
+    const placement = standalonePlacement(carparkId, dbRows, LTA_DATAGOV_COORDS);
+    if (placement) {
+      placed.add(carparkId);
+      withheld.delete(carparkId);
+    } else if (LTA_DATAGOV_COORDS[carparkId]) {
+      placed.delete(carparkId);
+      withheld.add(carparkId);
+    }
+    standaloneIds.add(carparkId);
+
     const carpark: DbCarpark = {
       id: carparkId,
       agency: 'LTA',
       source_code: name,
       name,
-      address: null,
-      lat: null,
-      lng: null,
+      address: placement?.address ?? null,
+      lat: placement?.lat ?? null,
+      lng: placement?.lng ?? null,
       car_park_type: r.category ?? null,
       parking_system: 'FLAT',
       central_area: false,
@@ -1011,6 +1046,23 @@ async function migrateLtaCsv(
   }
   if (skippedDefunct > 0) {
     process.stderr.write(`  skipped ${skippedDefunct} defunct/duplicate CSV name(s)\n`);
+  }
+  if (skippedCurated.size > 0) {
+    process.stderr.write(
+      `  left ${skippedCurated.size} curated carpark(s) alone (id reused by a CSV name): ${[...skippedCurated].join(', ')}\n`,
+    );
+  }
+  process.stderr.write(`  placed ${placed.size} standalones on the map from lta-datagov-coords.json\n`);
+  if (withheld.size > 0) {
+    process.stderr.write(
+      `  withheld coords from ${withheld.size} (no usable price): ${[...withheld].join(', ')}\n`,
+    );
+  }
+  // Entries that no longer land on a standalone (the CSV renamed the row, or it
+  // now matches a better carpark) — re-run `npm run geocode:lta-datagov`.
+  const unused = Object.keys(LTA_DATAGOV_COORDS).filter((id) => !standaloneIds.has(id));
+  if (unused.length > 0) {
+    process.stderr.write(`  ${unused.length} coords entries matched no standalone: ${unused.join(', ')}\n`);
   }
   return result;
 }

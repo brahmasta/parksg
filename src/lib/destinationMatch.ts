@@ -40,7 +40,8 @@ const GENERIC = new Set([
   'car', 'park', 'basement', 'multi', 'storey',
 ]);
 
-function tokens(name: string): string[] {
+/** Normalised name words (also used by scripts/lib/lta-datagov-geo.ts). */
+export function tokens(name: string): string[] {
   return name
     .toLowerCase()
     .replace(/&/g, ' and ')
@@ -57,7 +58,7 @@ function tokens(name: string): string[] {
 /** A carpark section within a building: "Vivocity P3", "… B2". */
 const SECTION_LABEL = /^[pb]\d{1,2}$/;
 
-function coreTokens(all: string[]): string[] {
+export function coreTokens(all: string[]): string[] {
   const core = all.filter((t) => !GENERIC.has(t) && !SECTION_LABEL.test(t));
   return core.length > 0 ? core : all;
 }
@@ -67,7 +68,7 @@ function startsWithWords(longer: string[], shorter: string[]): boolean {
   return shorter.every((t, i) => longer[i] === t);
 }
 
-function matchTier(destination: string, carparkName: string): Tier | null {
+export function matchTier(destination: string, carparkName: string): Tier | null {
   const d = tokens(destination);
   const c = tokens(carparkName);
   if (d.length === 0 || c.length === 0) return null;

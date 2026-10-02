@@ -1,0 +1,26 @@
+{
+  "LTA:jurong_theatre": {
+    "name": "Jurong Theatre",
+    "lat": 1.334319,
+    "lng": 103.721774,
+    "address": "101 Yung Sheng Road, Singapore 618497",
+    "matchedBuilding": "JURONG THEATRE",
+    "source": "onemap-2017"
+  },
+  "LTA:shenton_house": {
+    "name": "Shenton House",
+    "lat": 1.278519,
+    "lng": 103.850072,
+    "address": "3 Shenton Way, Singapore 068805",
+    "matchedBuilding": "SHENTON HOUSE",
+    "source": "onemap-2017"
+  },
+  "LTA:west_coast_plaza_ginza_plaza": {
+    "name": "West Coast Plaza (Ginza Plaza)",
+    "lat": 1.303743,
+    "lng": 103.766093,
+    "address": "154 West Coast Road, Singapore 127371",
+    "matchedBuilding": "WEST COAST PLAZA",
+    "source": "onemap-2017"
+  }
+}

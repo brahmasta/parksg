@@ -266,6 +266,13 @@ export function renderCarparkPage(
   meta.push(`Operator: ${escapeHtml(cp.operator)}`);
   if (cp.totalLots != null) meta.push(`${cp.totalLots} lots`);
 
+  // Same rule as the app's "2018 rate" badge (isStaleRates in src/lib/rateSource.ts).
+  const firstRow = cp.rates.weekday[0] ?? cp.rates.saturday[0] ?? cp.rates.sundayPH[0];
+  const staleNote =
+    firstRow?.source === 'LTA_DATAGOV'
+      ? '<p class="muted">Rates are from LTA’s November 2018 snapshot and may have changed — check at the gantry.</p>'
+      : '';
+
   const nearbyHtml =
     nearby.length > 0
       ? `<h2>Nearby carparks</h2><ul class="cards">${nearby
@@ -281,6 +288,7 @@ export function renderCarparkPage(
   const inner = `
 <h1>${escapeHtml(cp.name)}</h1>
 <p class="muted">${meta.join(' · ')}</p>
+${staleNote}
 ${estimateTable(cp.rates.weekday)}
 ${rateTable('Weekday rates', cp.rates.weekday)}
 ${rateTable('Saturday rates', cp.rates.saturday)}
