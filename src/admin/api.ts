@@ -15,7 +15,15 @@ export type Analytics = {
   searches_by_day: { day: string; count: number }[];
   device: { device: string; count: number }[];
   referrers: { referrer: string; count: number }[];
-  top_searches: { query: string; count: number }[];
+  /** Typed searches only, spelling variants merged (migration 012). */
+  top_searches: { query: string; count: number; clients?: number }[];
+  /** Optional: absent until 012 is applied (SQL ships separately from the SPA). */
+  top_searches_meta?: {
+    searches: number;
+    auto_excluded: number;
+    distinct: number;
+    shown: number;
+  };
 };
 
 /**

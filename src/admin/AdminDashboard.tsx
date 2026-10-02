@@ -80,6 +80,7 @@ export function AdminDashboard({
   if (!data) return null;
 
   const t = data.totals;
+  const meta = data.top_searches_meta;
   const hasReports = t.reports_open > 0;
 
   const people = traffic?.people;
@@ -220,7 +221,30 @@ export function AdminDashboard({
             {data.top_searches.length === 0 ? (
               <Empty>No searches in this window.</Empty>
             ) : (
-              <Bars rows={data.top_searches.map((d) => ({ label: d.query, value: d.count }))} color="var(--accent)" />
+              <>
+                <Bars
+                  rows={data.top_searches.map((d) => ({
+                    label: d.query,
+                    value: d.count,
+                    note: d.clients == null ? undefined : `${d.clients} ppl`,
+                  }))}
+                  color="var(--accent)"
+                />
+                {meta && (
+                  <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 12, lineHeight: 1.55 }}>
+                    These {data.top_searches.length} places cover {meta.shown.toLocaleString()} of{' '}
+                    {meta.searches.toLocaleString()} typed searches across{' '}
+                    {meta.distinct.toLocaleString()} places. Count = searches, ppl = unique visitors.
+                    {meta.auto_excluded > 0 && (
+                      <>
+                        {' '}
+                        {meta.auto_excluded.toLocaleString()} auto-fired by <code>/parking-near/</code>{' '}
+                        page loads are excluded.
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

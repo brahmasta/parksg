@@ -401,15 +401,16 @@ function App() {
   // object identity changes on each search); attaches the user id when known.
   useEffect(() => {
     if (result.destination) {
+      const byUser = searchStartedByUser.current;
+      searchStartedByUser.current = false;
       recordSearch({
         query: result.destination.label,
         lat: result.destination.lat,
         lng: result.destination.lng,
         userId: user?.id ?? null,
+        auto: !byUser,
       });
       // Funnel step 3: a resolved destination means results are on screen.
-      const byUser = searchStartedByUser.current;
-      searchStartedByUser.current = false;
       trackEvent('results_viewed', {
         count: result.carparks.length,
         ...(byUser ? {} : { auto: true }),
@@ -527,6 +528,8 @@ function App() {
 
   const handleSearchSavedDestination = useCallback(
     (d: SavedDestination) => {
+      searchStartedByUser.current = true;
+      trackEvent('search_submitted', { via: 'saved_destination' });
       if (typeof d.lat === 'number' && typeof d.lng === 'number') {
         setScreen('results');
         searchAtCoords(d.name, d.lat, d.lng, d.address);
