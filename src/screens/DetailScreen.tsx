@@ -701,6 +701,12 @@ export function DetailScreen({
                 Motorcycle rates
               </div>
               <RateTable rates={cp.motorcycleRates} />
+              {isCommunityRates(cp.motorcycleRates) && (
+                <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-3)', lineHeight: 1.45 }}>
+                  Reported by riders on the r/singapore motorcycle parking map, Dec 2022.
+                  Prices may have changed.
+                </div>
+              )}
             </>
           )}
           {isDatagovRates && (
@@ -1043,4 +1049,9 @@ function carParkKind(type: string | undefined): string | null {
   if (t.includes('MECHANISED')) return 'Mechanised';
   if (t.includes('COVERED')) return 'Covered';
   return null;
+}
+
+/** True when a rate schedule comes from the community motorcycle map. */
+function isCommunityRates(rates: Carpark['rates']): boolean {
+  return [...rates.weekday, ...rates.saturday, ...rates.sundayPH].some((r) => r.source === 'COMMUNITY');
 }

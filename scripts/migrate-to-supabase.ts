@@ -1099,10 +1099,13 @@ async function replaceRateRows(
   carparkId: string,
   rateRows: DbRateRow[],
 ): Promise<boolean> {
+  // Keep community-reported motorcycle prices (migration 017): no source this
+  // sync reads carries them, so wiping them would just lose them.
   const { error: delErr } = await supabase
     .from('rate_rows')
     .delete()
-    .eq('carpark_id', carparkId);
+    .eq('carpark_id', carparkId)
+    .neq('source', 'COMMUNITY');
   if (delErr) {
     process.stderr.write(
       `  delete rate_rows for ${carparkId} failed: ${delErr.message}\n`,

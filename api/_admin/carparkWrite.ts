@@ -92,9 +92,12 @@ type Result = { ok: true } | { ok: false; error: string };
 export async function replaceRateRows(
   carparkId: string,
   rows: Record<string, unknown>[],
+  /** Only replace these vehicle categories (default: all). */
+  vehCats?: string[],
 ): Promise<Result> {
+  const scope = vehCats ? `&veh_cat=in.(${vehCats.join(',')})` : '';
   const del = await fetch(
-    `${SB_URL}/rest/v1/rate_rows?carpark_id=eq.${encodeURIComponent(carparkId)}`,
+    `${SB_URL}/rest/v1/rate_rows?carpark_id=eq.${encodeURIComponent(carparkId)}${scope}`,
     { method: 'DELETE', headers: sbHeaders({ Prefer: 'return=minimal' }) },
   );
   if (!del.ok) return { ok: false, error: 'Could not clear existing rates.' };
@@ -230,7 +233,10 @@ export async function applyCarparkEdit(
     } catch (e) {
       return { ok: false, error: (e as Error).message || 'Invalid rate row.' };
     }
-    const res = await replaceRateRows(carparkId, rows);
+    // Proposals come from Suggest an edit, which only shows car rates —
+    // replacing every row would delete URA or community motorcycle rates.
+    const carRows = rows.filter((r) => r.veh_cat === 'CAR');
+    const res = await replaceRateRows(carparkId, carRows, ['CAR']);
     if (!res.ok) return res;
   }
   return { ok: true };

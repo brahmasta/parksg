@@ -41,11 +41,18 @@ export function synthesizeRate(row: RateRow): string {
       firstMin === 60 ? '1st hr' : `1st ${firstMin} min`;
     parts.push(`${fmtCents(row.firstHourCents)} / ${tierLabel}`);
   }
-  if (row.perBlockCents != null && row.blockMinutes != null) {
-    parts.push(`${fmtCents(row.perBlockCents)} / ${row.blockMinutes} min`);
+  // Per-entry rows are stored with per_block_cents = block_minutes = 0 (both
+  // NOT NULL in rate_rows), so a 0/0 pair means "no per-block charge" — not
+  // "$0.00 / 0 min", which hid every per-entry price behind it.
+  const hasBlock =
+    row.perBlockCents != null &&
+    row.blockMinutes != null &&
+    !(row.perBlockCents === 0 && row.blockMinutes === 0);
+  if (hasBlock) {
+    parts.push(`${fmtCents(row.perBlockCents!)} / ${row.blockMinutes} min`);
   }
-  if (row.perEntryCents != null && row.perBlockCents == null && row.firstHourCents == null) {
-    parts.push(`${fmtCents(row.perEntryCents)} / entry`);
+  if (row.perEntryCents != null && !hasBlock && row.firstHourCents == null) {
+    parts.push(row.perEntryCents === 0 ? 'Free' : `${fmtCents(row.perEntryCents)} / entry`);
   }
   if (parts.length === 0) {
     // Truly nothing structured — caller is showing a free / placeholder row.

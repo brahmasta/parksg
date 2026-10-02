@@ -40,7 +40,9 @@ export type RateSource =
   | 'LTA_DATAMALL'
   | 'CAG'
   | 'OPERATOR'
-  | 'MANUAL';
+  | 'MANUAL'
+  /** Rider-reported (r/singapore motorcycle map, Dec 2022). Migration 016. */
+  | 'COMMUNITY';
 
 /** Day bucket a band applies to. Carpark.rates groups by these for display,
  * but each row also carries the value explicitly so flatter shapes (e.g.
