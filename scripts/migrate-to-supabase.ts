@@ -29,6 +29,7 @@ import { svy21ToWgs84 } from '../src/lib/geo';
 import { parseUraRows } from '../src/lib/ura';
 import type { UraRawRow } from '../src/lib/api/uraDetails';
 import { parseDayRate } from './lib/parse-lta-rate';
+import { makeCsvNameMatcher, normaliseName } from './lib/lta-csv-match';
 import { inferHdbRateRows as ruleEngineHdbRows, type PeakBand } from './lib/hdb-rates';
 import { standalonePlacement, type LtaDataGovCoordsFile } from './lib/lta-datagov-geo';
 import type { RateRow } from '../src/lib/types';
@@ -843,15 +844,6 @@ async function fetchLtaCsvRecords(): Promise<LtaCsvRecord[]> {
   return out;
 }
 
-function normaliseName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9@ ]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 function slugifyId(name: string): string {
   return name
     .toLowerCase()
@@ -865,6 +857,16 @@ function slugifyId(name: string): string {
 // normaliseName() output. Keep in sync with any future de-duplication.
 const LTA_CSV_SKIP_NORM = new Set<string>([
   'funan digitalife mall', // closed 2016; reopened 2019 as "Funan Mall" (LTA:66, live lots)
+  // Bugis Junction's carpark ("Car park at Parco Bugis Junction"); curated
+  // "Bugis Junction" reuses its id, LTA:inter_continental_hotel.
+  'inter continental hotel',
+  // "Central ©" is The Central, curated under its id LTA:central. It used to
+  // prefix-match "Central-Link", which only kept it off that id by accident.
+  'central',
+  // 2018 island-entry pricing; curated per carpark now (LTA:17 Beach Station,
+  // OPERATOR:sentosa_imbiah_car_park / _tanjong_beach_ / _palawan_beach_car_park).
+  'sentosa beach and imbiah car park',
+  'sentosa tanjong and palawan car park',
 ]);
 
 async function migrateLtaCsv(
@@ -897,27 +899,10 @@ async function migrateLtaCsv(
   const records = await fetchLtaCsvRecords();
   process.stderr.write(`  fetched ${records.length} CSV rows\n`);
 
-  // Build name → existing carpark id lookup for matching. Same algorithm
-  // the runtime corpus lookup used: try exact normalised match first, then
-  // word-boundary substring (corpus key starts with existing + " " or vice
-  // versa). Handles "Vivocity P3 Carpark" ↔ "Vivocity P3" cleanly.
-  const existingByName = new Map<string, string>();
-  for (const [id, n] of existingAfterWipe.entries()) {
-    existingByName.set(normaliseName(n), id);
-  }
-  const findMatches = (rawName: string): string[] => {
-    const norm = normaliseName(rawName);
-    if (!norm) return [];
-    const exact = existingByName.get(norm);
-    if (exact) return [exact];
-    // Word-boundary substring match in either direction. "Vivocity" CSV
-    // legitimately covers both "Vivocity P2" and "Vivocity P3" — fan out.
-    const out: string[] = [];
-    for (const [k, id] of existingByName.entries()) {
-      if (k.startsWith(norm + ' ') || norm.startsWith(k + ' ')) out.push(id);
-    }
-    return out;
-  };
+  // Existing carpark ids by name: exact normalised match first, then a
+  // word-boundary prefix either way ("Vivocity P3 Carpark" ↔ "Vivocity P3";
+  // "Vivocity" fans out to P2 and P3). See scripts/lib/lta-csv-match.ts.
+  const findMatches = makeCsvNameMatcher(existingAfterWipe);
 
   const today = new Date().toISOString();
   let skippedDefunct = 0;
