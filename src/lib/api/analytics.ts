@@ -91,12 +91,14 @@ export function recordSignIn(user: {
   });
 }
 
-/** Log a resolved destination search (label + coords + optional user). */
+/** Log a resolved destination search (label + coords + optional user).
+ *  `auto` marks one resolved without a gesture (deep-link cold load). */
 export function recordSearch(params: {
   query: string;
   lat?: number | null;
   lng?: number | null;
   userId?: string | null;
+  auto?: boolean;
 }): void {
   void callRpc('record_search', {
     p_query: params.query,
@@ -105,6 +107,7 @@ export function recordSearch(params: {
     p_user_id: params.userId ?? null,
     p_client_id: getClientId(),
     p_device: getDevice(),
+    p_auto: params.auto ?? false,
   });
 }
 

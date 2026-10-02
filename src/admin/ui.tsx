@@ -128,12 +128,14 @@ export function Bars({
   color = 'var(--accent)',
   suffix,
 }: {
-  rows: { label: string; value: number }[];
+  /** `note` is a muted secondary figure shown after the value. */
+  rows: { label: string; value: number; note?: string }[];
   color?: string;
   /** Appended to each value, e.g. '%' for a rate rather than a count. */
   suffix?: string;
 }) {
   const max = Math.max(1, ...rows.map((r) => r.value));
+  const hasNotes = rows.some((r) => r.note);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
       {rows.map((r, i) => (
@@ -171,6 +173,20 @@ export function Bars({
             {r.value.toLocaleString()}
             {suffix ?? ''}
           </div>
+          {hasNotes && (
+            <div
+              style={{
+                width: 48,
+                flexShrink: 0,
+                textAlign: 'right',
+                fontSize: 11.5,
+                fontVariantNumeric: 'tabular-nums',
+                color: 'var(--text-3)',
+              }}
+            >
+              {r.note}
+            </div>
+          )}
         </div>
       ))}
     </div>

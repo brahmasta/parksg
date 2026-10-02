@@ -34,7 +34,7 @@ export const toIntOrNull = (s: string): number | null => {
 export function blankEditableRate(): EditableRate {
   return {
     day_type: 'WEEKDAY', start_time: null, end_time: null,
-    first_hour_cents: null, per_block_cents: null, block_minutes: 30,
+    first_hour_cents: null, first_block_minutes: null, per_block_cents: null, block_minutes: 30,
     per_entry_cents: null, cap_cents: null, grace_minutes: null, system: 'EPS',
   };
 }
