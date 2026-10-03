@@ -10,6 +10,17 @@ const config: CapacitorConfig = {
       launchAutoHide: false,
       backgroundColor: '#fafafa',
     },
+    SocialLogin: {
+      // Only bundle what lib/nativeAuth.ts uses. Facebook's SDK would also add
+      // the advertising-ID permission, which Play then asks about.
+      providers: {
+        google: true,
+        apple: true,
+        facebook: false,
+        twitter: false,
+      },
+      logLevel: 1,
+    },
   },
 }
 

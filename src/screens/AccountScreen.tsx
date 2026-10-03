@@ -1,4 +1,4 @@
-import { canGoogleSignIn } from '../lib/platform';
+import { signInProviders, type SignInProvider } from '../lib/nativeAuth';
 import { useState, type ReactNode } from 'react';
 import type { User } from '../lib/types';
 import { AddCarparkDialog } from '../components/AddCarparkDialog';
@@ -8,6 +8,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCloud,
+  IconAppleLogo,
   IconGoogleG,
   IconInfo,
   IconPlus,
@@ -31,7 +32,7 @@ export function AccountScreen({
   /** Combined count: saved destinations + saved carparks. */
   savedItemCount: number;
   onBack: () => void;
-  onSignIn: () => void;
+  onSignIn: (provider?: SignInProvider) => void;
   onOpenSaved: () => void;
   onRequestSignOut: () => void;
   onOpenAbout: () => void;
@@ -184,7 +185,7 @@ function SignedOutBody({
   onOpenSaved,
   onOpenAbout,
 }: {
-  onSignIn: () => void;
+  onSignIn: (provider?: SignInProvider) => void;
   onOpenSaved: () => void;
   onOpenAbout: () => void;
 }) {
@@ -227,8 +228,7 @@ function SignedOutBody({
         >
           Save carparks and<br />destinations across devices
         </div>
-        {canGoogleSignIn && (
-          <>
+        <>
             <p
               style={{
                 margin: '10px auto 0',
@@ -243,46 +243,53 @@ function SignedOutBody({
               iPhone and the web.
             </p>
 
-            <button
-              type="button"
-              onClick={onSignIn}
-              data-track="sign_in"
-              style={{
-                appearance: 'none',
-                border: 0,
-                width: '100%',
-                marginTop: 22,
-                padding: '14px 18px',
-                background: 'var(--text-1)',
-                color: 'var(--bg-1)',
-                borderRadius: 12,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-                fontSize: 15,
-                fontWeight: 600,
-                letterSpacing: -0.1,
-                cursor: 'pointer',
-                fontFamily: 'var(--font-body)',
-                boxShadow: '0 6px 14px rgba(14,16,20,0.10)',
-              }}
-            >
-              <span
+            {signInProviders.map((provider, i) => (
+              <button
+                type="button"
+                key={provider}
+                onClick={() => onSignIn(provider)}
+                data-track={`sign_in_${provider}`}
                 style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: 999,
-                  background: '#fff',
+                  appearance: 'none',
+                  border: 0,
+                  width: '100%',
+                  marginTop: i === 0 ? 22 : 10,
+                  padding: '14px 18px',
+                  background: 'var(--text-1)',
+                  color: 'var(--bg-1)',
+                  borderRadius: 12,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: 10,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  letterSpacing: -0.1,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-body)',
+                  boxShadow: '0 6px 14px rgba(14,16,20,0.10)',
                 }}
               >
-                <IconGoogleG size={16} />
-              </span>
-              Continue with Google
-            </button>
+                {provider === 'apple' ? (
+                  <IconAppleLogo size={20} />
+                ) : (
+                  <span
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: 999,
+                      background: '#fff',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <IconGoogleG size={16} />
+                  </span>
+                )}
+                Continue with {provider === 'apple' ? 'Apple' : 'Google'}
+              </button>
+            ))}
 
             <div
               style={{
@@ -296,8 +303,7 @@ function SignedOutBody({
             >
               By continuing you agree to our Terms and Privacy.
             </div>
-          </>
-        )}
+        </>
       </div>
 
       <AppearanceGroup />

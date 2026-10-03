@@ -34,6 +34,7 @@
     "@capacitor/share": "^8.0.2",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
+    "@capgo/capacitor-social-login": "^8.5.12",
     "@react-oauth/google": "^0.13.5",
     "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/vite": "^4.3.0",

@@ -20,6 +20,7 @@ const DURABLE_KEYS = [
   'psg.savedDestinations',
   'psg.recents',
   'psg.session',
+  'psg.appleName',
   'psg.navProvider',
   'psg:theme',
   'psg.viewMode',

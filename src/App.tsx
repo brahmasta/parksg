@@ -48,7 +48,8 @@ import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
-import { canGoogleSignIn, isNative } from './lib/platform';
+import { isNative } from './lib/platform';
+import { signInProviders, type SignInProvider } from './lib/nativeAuth';
 import { Spinner } from './components/atoms';
 import { persist } from './lib/storage';
 
@@ -479,12 +480,17 @@ function App() {
     [saves, stay, pop],
   );
 
-  const handleSignIn = useCallback(() => {
-    // Triggers the Google popup; the user state lands asynchronously when
-    // the userinfo fetch resolves. The "Welcome back" toast fires from the
-    // useEffect below — once we have a real name to greet.
-    if (!canGoogleSignIn) return;
-    signIn();
+  const handleSignIn = useCallback((provider?: SignInProvider) => {
+    // Opens Google's popup (web) or the OS sign-in sheet (apps); the user
+    // state lands asynchronously. The "Welcome back" toast fires from the
+    // useEffect below — once we have a real name to greet. Where there is a
+    // choice of provider (iOS), a request without one, like a check-in tap,
+    // opens Account to pick.
+    if (!provider && signInProviders.length > 1) {
+      setScreen('account');
+      return;
+    }
+    signIn(provider ?? signInProviders[0]);
   }, [signIn]);
 
   // After sign-in resolves, route the user to the Account screen and pop

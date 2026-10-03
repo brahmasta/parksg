@@ -65,7 +65,7 @@ export function AdminApp() {
           </p>
           <button
             type="button"
-            onClick={signIn}
+            onClick={() => signIn()}
             style={{ appearance: 'none', border: 0, width: '100%', padding: '13px 18px', borderRadius: 12, background: 'var(--accent)', color: 'var(--accent-on)', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
           >
             Continue with Google

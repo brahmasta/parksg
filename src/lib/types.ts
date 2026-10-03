@@ -195,6 +195,8 @@ export type User = {
   email: string;
   initials: string;
   avatarUrl?: string;
+  /** How they signed in; absent on web sessions (always Google). */
+  provider?: 'google' | 'apple';
 };
 
 export type Session = {
