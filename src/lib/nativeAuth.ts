@@ -77,7 +77,9 @@ export async function nativeSignIn(provider: SignInProvider): Promise<Profile & 
   try {
     const res = await SocialLogin.login(
       provider === 'google'
-        ? { provider: 'google', options: { scopes: ['openid', 'email', 'profile'] } }
+        ? // No `scopes`: openid/email/profile are the plugin's defaults, and on
+          // Android passing any scopes needs a modified MainActivity.
+          { provider: 'google', options: {} }
         : { provider: 'apple', options: { scopes: ['name', 'email'] } },
     );
     // login()'s result union doesn't narrow on `provider`, so cast per provider.
