@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- App icon source: the in-app wordmark tile (components/Wordmark.tsx), a "P"
+     in Space Grotesk Bold on the brand gradient. ?layer= picks what to draw:
+     full (square icon), fg (P only, transparent), bg (gradient only),
+     tile (rounded tile with glow, for the splash). Rendered by
+     resources/render-icons.sh. -->
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1024px; height: 1024px; overflow: hidden; background: transparent; }
+  .box { position: absolute; inset: 0; display: grid; place-items: center; }
+  .grad { background: linear-gradient(145deg, #2ee3c2 0%, #14c9b6 100%); }
+  .p { font: 700 660px/1 'Space Grotesk', sans-serif; color: #0b2e2a;
+       /* nudge so the cap height, not the line box, is centred */
+       transform: translate(-0.02em, 0.005em); }
+  .tile { position: absolute; left: 192px; top: 192px; width: 640px; height: 640px; border-radius: 160px;
+          display: grid; place-items: center; box-shadow: 0 40px 120px rgba(46,227,194,.45); }
+  .tile .p { font-size: 380px; }
+</style></head>
+<body>
+<script>
+  const layer = new URLSearchParams(location.search).get('layer') || 'full';
+  const P = '<span class="p">P</span>';
+  document.body.innerHTML =
+    layer === 'bg' ? '<div class="box grad"></div>' :
+    layer === 'fg' ? '<div class="box">' + P + '</div>' :
+    layer === 'tile' ? '<div class="tile grad">' + P + '</div>' :
+    '<div class="box grad">' + P + '</div>';
+</script>
+</body></html>
