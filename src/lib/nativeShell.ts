@@ -1,4 +1,5 @@
 import { SystemBars, SystemBarsStyle } from '@capacitor/core';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { subscribeTheme } from './theme';
 import { isNative } from './platform';
@@ -21,4 +22,11 @@ export function initNativeShell(): void {
   requestAnimationFrame(() => {
     SplashScreen.hide({ fadeOutDuration: 200 }).catch(() => {});
   });
+}
+
+/** Native only: a light tap to confirm an action (save, hand-off to a maps
+ *  app). No-op on the web. */
+export function hapticTap(): void {
+  if (!isNative) return;
+  Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
 }

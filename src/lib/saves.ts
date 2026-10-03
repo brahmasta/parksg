@@ -17,6 +17,7 @@ import {
   pushDestinationUpsert,
 } from './api/saves-sync';
 import { areaFromPostal } from './postalArea';
+import { persist } from './storage';
 
 const CARPARKS_KEY = 'psg.savedCarparks';
 const SNAPSHOTS_KEY = 'psg.savedCarparkSnapshots';
@@ -51,7 +52,7 @@ function readCarparks(): SavedCarpark[] {
 
 function writeCarparks(list: SavedCarpark[]) {
   try {
-    localStorage.setItem(CARPARKS_KEY, JSON.stringify(list));
+    persist(CARPARKS_KEY, JSON.stringify(list));
   } catch {
     /* ignore */
   }
@@ -70,7 +71,7 @@ function readSnapshots(): SavedCarparkSnapshot[] {
 
 function writeSnapshots(s: SavedCarparkSnapshot[]) {
   try {
-    localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(s));
+    persist(SNAPSHOTS_KEY, JSON.stringify(s));
   } catch {
     /* ignore */
   }
@@ -96,7 +97,7 @@ function readDestinations(): SavedDestination[] {
 
 function writeDestinations(ds: SavedDestination[]) {
   try {
-    localStorage.setItem(DESTINATIONS_KEY, JSON.stringify(ds));
+    persist(DESTINATIONS_KEY, JSON.stringify(ds));
   } catch {
     /* ignore */
   }

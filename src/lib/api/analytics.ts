@@ -10,6 +10,8 @@
  * search, or page load. The anon key is the same one used for carpark reads.
  */
 
+import { persist } from '../storage';
+
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
@@ -46,7 +48,7 @@ export function getClientId(): string | null {
         typeof crypto !== 'undefined' && 'randomUUID' in crypto
           ? crypto.randomUUID()
           : `c_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
-      localStorage.setItem(CID_KEY, id);
+      persist(CID_KEY, id);
     }
     return id;
   } catch {

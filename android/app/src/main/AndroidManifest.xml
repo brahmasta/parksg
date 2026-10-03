@@ -22,6 +22,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Android App Links: wheretopark.sg links open in the app
+                 (lib/deepLinks.ts). Verified against
+                 https://wheretopark.sg/.well-known/assetlinks.json.
+                 "/" covers shared links (/?cp=…&to=…). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="wheretopark.sg" />
+                <data android:path="/" />
+                <data android:pathPrefix="/carpark/" />
+                <data android:pathPrefix="/parking-near/" />
+            </intent-filter>
+
         </activity>
 
         <provider

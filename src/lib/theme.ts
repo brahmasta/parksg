@@ -1,4 +1,5 @@
 // Theme system — a preference the visitor picks, resolved to one of three
+import { persist } from './storage';
 // palettes and applied as `data-theme` on <html>, which selects the matching
 // token block in index.css:
 //
@@ -164,7 +165,7 @@ function announce(): void {
 /** Record a preference, apply it, and notify subscribers. */
 export function setPref(pref: ThemePref): void {
   try {
-    localStorage.setItem(STORAGE_KEY, pref);
+    persist(STORAGE_KEY, pref);
   } catch {
     // Non-fatal: the choice just won't survive a reload.
   }

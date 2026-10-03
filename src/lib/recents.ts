@@ -1,4 +1,5 @@
 import type { RecentDestination } from './types';
+import { persist } from './storage';
 
 const KEY = 'psg.recents';
 const MAX = 5;
@@ -44,7 +45,7 @@ export function pushRecent(entry: RecentDestination): RecentDestination[] {
   );
   const next = [entry, ...deduped].slice(0, MAX);
   try {
-    localStorage.setItem(KEY, JSON.stringify(next));
+    persist(KEY, JSON.stringify(next));
   } catch {
     /* ignore */
   }

@@ -35,6 +35,7 @@ import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
 import { getCurrentCoords } from './lib/geolocation';
+import { hapticTap } from './lib/nativeShell';
 import {
   trackAppOpen,
   trackEvent,
@@ -49,6 +50,7 @@ import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
 import { canGoogleSignIn, isNative } from './lib/platform';
 import { Spinner } from './components/atoms';
+import { persist } from './lib/storage';
 
 const VIEW_MODE_KEY = 'psg.viewMode';
 const AVAILABLE_ONLY_KEY = 'psg.availableOnly';
@@ -168,7 +170,7 @@ function App() {
   const setViewMode = useCallback((v: ViewMode) => {
     setViewModeState(v);
     try {
-      localStorage.setItem(VIEW_MODE_KEY, v);
+      persist(VIEW_MODE_KEY, v);
     } catch {
       /* ignore */
     }
@@ -182,7 +184,7 @@ function App() {
   const setAvailableOnly = useCallback((v: boolean) => {
     setAvailableOnlyState(v);
     try {
-      localStorage.setItem(AVAILABLE_ONLY_KEY, String(v));
+      persist(AVAILABLE_ONLY_KEY, String(v));
     } catch {
       /* ignore */
     }
@@ -196,7 +198,7 @@ function App() {
   const setEvOnly = useCallback((v: boolean) => {
     setEvOnlyState(v);
     try {
-      localStorage.setItem(EV_ONLY_KEY, String(v));
+      persist(EV_ONLY_KEY, String(v));
     } catch {
       /* ignore */
     }
@@ -214,7 +216,7 @@ function App() {
   const setVehicles = useCallback((v: VehicleFilter[]) => {
     setVehiclesState(v);
     try {
-      localStorage.setItem(VEHICLES_KEY, v.join(','));
+      persist(VEHICLES_KEY, v.join(','));
     } catch {
       /* ignore */
     }
@@ -467,6 +469,7 @@ function App() {
       trackEvent('carpark_saved', { carpark: cp.id, removed: isSaved });
       const snapshot = snapshotFromCarpark(cp, estCostForStay(cp, stay) ?? 0);
       saves.toggleCarpark(cp.id, snapshot);
+      hapticTap();
       pop({
         icon: <IconBookmark filled={!isSaved} size={15} stroke={2} />,
         title: isSaved ? 'Removed from saved' : 'Saved to your account',

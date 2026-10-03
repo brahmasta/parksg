@@ -6,6 +6,8 @@ import { initTheme } from './lib/theme.ts';
 import { applyPlatformClasses, isNative } from './lib/platform.ts';
 import { installExternalLinkHandler } from './lib/openExternal.ts';
 import { initNativeShell } from './lib/nativeShell.ts';
+import { restoreNativeStorage } from './lib/storage.ts';
+import { followLaunchUrl, listenForAppLinks } from './lib/deepLinks.ts';
 import App from './App.tsx';
 import { AdminApp } from './admin/AdminApp.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
@@ -22,29 +24,44 @@ const isAdmin = /^\/admin(\/|$)/.test(window.location.pathname);
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID || 'unset.apps.googleusercontent.com';
 
-// Re-assert the theme the inline script in index.html already applied, and
-// start the listener that keeps the 'auto' preference tracking the device's
-// light/dark setting. The re-assert is a no-op when the inline script ran, but
-// it covers any document served without it (an SSR-injected shell) and keeps
-// <meta name="theme-color"> in step. Lives for the page's lifetime, so the
-// teardown it returns is deliberately unused.
-initTheme();
+function boot() {
+  // Re-assert the theme the inline script in index.html already applied, and
+  // start the listener that keeps the 'auto' preference tracking the device's
+  // light/dark setting. The re-assert is a no-op when the inline script ran, but
+  // it covers any document served without it (an SSR-injected shell) and keeps
+  // <meta name="theme-color"> in step. Lives for the page's lifetime, so the
+  // teardown it returns is deliberately unused.
+  initTheme();
 
-// Tag <html> with `native` + `ios`/`android` inside the Capacitor shells so CSS
-// can override per platform. No-op on the web.
-applyPlatformClasses();
-installExternalLinkHandler();
-initNativeShell();
+  // Tag <html> with `native` + `ios`/`android` inside the Capacitor shells so CSS
+  // can override per platform. No-op on the web.
+  applyPlatformClasses();
+  installExternalLinkHandler();
+  initNativeShell();
+  listenForAppLinks();
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        {isAdmin ? <AdminApp /> : <App />}
-      </GoogleOAuthProvider>
-    </ErrorBoundary>
-  </StrictMode>,
-);
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          {isAdmin ? <AdminApp /> : <App />}
+        </GoogleOAuthProvider>
+      </ErrorBoundary>
+    </StrictMode>,
+  );
+}
+
+// Native: if the app was opened from a wheretopark.sg link, load that path
+// instead. Otherwise put saves and settings back from Preferences (see
+// lib/storage.ts) before anything reads localStorage. The splash screen stays
+// up meanwhile. The web boots synchronously as before.
+if (isNative) {
+  void followLaunchUrl().then(async (leaving) => {
+    if (leaving) return;
+    await restoreNativeStorage();
+    boot();
+  });
+} else boot();
 
 // Register the service worker so the app is installable as a PWA. Prod-only
 // — in dev the SW would shadow Vite's HMR. Registered after load so it never

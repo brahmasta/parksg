@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "sg.wheretopark.app",
+      "sha256_cert_fingerprints": [
+        "8D:64:5D:D9:58:D7:61:E9:A7:3B:D0:4E:7F:0F:BB:D9:08:DE:14:C8:EB:22:8A:56:82:78:EB:95:95:41:D1:32"
+      ]
+    }
+  }
+]

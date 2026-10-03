@@ -12,6 +12,7 @@ import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
 import { openDirections } from '../hooks/useCarparkNavigation';
 import { siteOrigin } from '../lib/apiBase';
+import { shareLink } from '../lib/shareResults';
 import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
 import { SuggestEditDialog } from '../components/SuggestEditDialog';
 import type { EditableRate } from '../components/rateGrid';
@@ -188,22 +189,9 @@ export function DetailScreen({
       !costUnknown && cost != null ? ` · ~${formatCost(cost)} for ${effectiveDurationText}` : '';
     const text = `Park at ${cp.name}${walkBit}${costBit}`;
 
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title: `Parking: ${cp.name}`, text, url });
-        return;
-      }
-    } catch (e) {
-      // User dismissed the native sheet — not an error.
-      if ((e as Error)?.name === 'AbortError') return;
-    }
-    try {
-      // Copy the link only — the description must not embed the URL.
-      await navigator.clipboard?.writeText(url);
-      setShareNote('Link copied');
-    } catch {
-      setShareNote('Could not copy link');
-    }
+    const outcome = await shareLink({ title: `Parking: ${cp.name}`, text, url });
+    if (outcome === 'shared' || outcome === 'cancelled') return;
+    setShareNote(outcome === 'copied' ? 'Link copied' : 'Could not copy link');
     window.setTimeout(() => setShareNote(null), 1800);
   }, [cp, destination, destinationCoords, cost, costUnknown, effectiveDurationText, isGoogle]);
 
