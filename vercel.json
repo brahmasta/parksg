@@ -4,6 +4,8 @@
     { "source": "/carpark/:slug", "destination": "/api/carpark?slug=:slug" },
     { "source": "/parking-near/:area", "destination": "/api/parking-near?area=:area" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/delete-account", "destination": "/delete-account.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
@@ -12,7 +14,7 @@
       "has": [{ "type": "header", "key": "origin", "value": "capacitor://localhost" }],
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "capacitor://localhost" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" },
         { "key": "Vary", "value": "Origin" }
       ]
@@ -22,7 +24,7 @@
       "has": [{ "type": "header", "key": "origin", "value": "https://localhost" }],
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "https://localhost" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, OPTIONS" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" },
         { "key": "Vary", "value": "Origin" }
       ]

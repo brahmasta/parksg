@@ -80,16 +80,19 @@ function getReferrer(): string {
   }
 }
 
-/** Upsert the user's profile row and bump their sign-in count. */
+/** Upsert the user's profile row and bump their sign-in count.
+ *  `privacyVersion` records the privacy policy they accepted to sign in. */
 export function recordSignIn(user: {
   id: string;
   name?: string;
   email?: string;
+  privacyVersion?: string | null;
 }): void {
   void callRpc('record_sign_in', {
     p_user_id: user.id,
     p_name: user.name ?? null,
     p_email: user.email ?? null,
+    p_privacy_version: user.privacyVersion ?? null,
   });
 }
 

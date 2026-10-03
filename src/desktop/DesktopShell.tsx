@@ -8,6 +8,7 @@ import { AboutDesktop } from './AboutDesktop';
 import { AccountDesktop } from './AccountDesktop';
 import { AddCarparkDialog } from '../components/AddCarparkDialog';
 import { ThemeToggleButton } from '../components/ThemeToggleButton';
+import type { SignInProvider } from '../lib/nativeAuth';
 
 type DesktopRoute = 'find' | 'saved' | 'about' | 'account';
 
@@ -16,8 +17,9 @@ export type DesktopShellProps = {
   saved: DesktopSavedProps;
   user: User | null;
   savedItemCount: number;
-  onSignIn: () => void;
+  onSignIn: (provider?: SignInProvider) => void;
   onRequestSignOut: () => void;
+  onDeleteAccount: () => Promise<void>;
 };
 
 /**
@@ -25,7 +27,7 @@ export type DesktopShellProps = {
  * Find parking is a two-pane view; About/Account are peer routes.
  * All data + handlers are shared with the phone flow (passed down from App).
  */
-export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRequestSignOut }: DesktopShellProps) {
+export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRequestSignOut, onDeleteAccount }: DesktopShellProps) {
   const [route, setRoute] = useState<DesktopRoute>('find');
   const [addOpen, setAddOpen] = useState(false);
 
@@ -44,6 +46,8 @@ export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRe
       {route === 'find' && (
         <FindParkingDesktop
           {...find}
+          // Sign-in needs the privacy policy ticked, which lives on Account.
+          onRequireSignIn={() => setRoute('account')}
           saved={saved}
           onOpenSaved={() => setRoute('saved')}
           onOpenAccount={() => setRoute('account')}
@@ -89,6 +93,7 @@ export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRe
             onSignIn={onSignIn}
             onOpenSaved={() => setRoute('saved')}
             onRequestSignOut={onRequestSignOut}
+            onDeleteAccount={onDeleteAccount}
           />
         </div>
       )}

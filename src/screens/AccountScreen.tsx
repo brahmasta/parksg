@@ -1,4 +1,7 @@
 import { signInProviders, type SignInProvider } from '../lib/nativeAuth';
+import { PrivacyConsent } from '../components/PrivacyConsent';
+import { consentDisabledStyle } from '../lib/privacy';
+import { DeleteAccountSection } from '../components/DeleteAccountSection';
 import { useState, type ReactNode } from 'react';
 import type { User } from '../lib/types';
 import { AddCarparkDialog } from '../components/AddCarparkDialog';
@@ -26,6 +29,7 @@ export function AccountScreen({
   onSignIn,
   onOpenSaved,
   onRequestSignOut,
+  onDeleteAccount,
   onOpenAbout,
 }: {
   user: User | null;
@@ -35,6 +39,7 @@ export function AccountScreen({
   onSignIn: (provider?: SignInProvider) => void;
   onOpenSaved: () => void;
   onRequestSignOut: () => void;
+  onDeleteAccount: () => Promise<void>;
   onOpenAbout: () => void;
 }) {
   return (
@@ -55,6 +60,7 @@ export function AccountScreen({
             savedItemCount={savedItemCount}
             onOpenSaved={onOpenSaved}
             onRequestSignOut={onRequestSignOut}
+            onDeleteAccount={onDeleteAccount}
             onOpenAbout={onOpenAbout}
           />
         ) : (
@@ -189,6 +195,7 @@ function SignedOutBody({
   onOpenSaved: () => void;
   onOpenAbout: () => void;
 }) {
+  const [agreed, setAgreed] = useState(false);
   return (
     <>
       <div
@@ -243,17 +250,20 @@ function SignedOutBody({
               iPhone and the web.
             </p>
 
+            <PrivacyConsent checked={agreed} onChange={setAgreed} />
+
             {signInProviders.map((provider, i) => (
               <button
                 type="button"
                 key={provider}
                 onClick={() => onSignIn(provider)}
+                disabled={!agreed}
                 data-track={`sign_in_${provider}`}
                 style={{
                   appearance: 'none',
                   border: 0,
                   width: '100%',
-                  marginTop: i === 0 ? 22 : 10,
+                  marginTop: i === 0 ? 16 : 10,
                   padding: '14px 18px',
                   background: 'var(--text-1)',
                   color: 'var(--bg-1)',
@@ -268,6 +278,7 @@ function SignedOutBody({
                   cursor: 'pointer',
                   fontFamily: 'var(--font-body)',
                   boxShadow: '0 6px 14px rgba(14,16,20,0.10)',
+                  ...(agreed ? {} : consentDisabledStyle),
                 }}
               >
                 {provider === 'apple' ? (
@@ -291,18 +302,6 @@ function SignedOutBody({
               </button>
             ))}
 
-            <div
-              style={{
-                marginTop: 14,
-                fontSize: 11,
-                color: 'var(--text-3)',
-                lineHeight: 1.5,
-                fontFamily: 'var(--font-mono)',
-                letterSpacing: 0.1,
-              }}
-            >
-              By continuing you agree to our Terms and Privacy.
-            </div>
         </>
       </div>
 
@@ -372,12 +371,14 @@ function SignedInBody({
   savedItemCount,
   onOpenSaved,
   onRequestSignOut,
+  onDeleteAccount,
   onOpenAbout,
 }: {
   user: User;
   savedItemCount: number;
   onOpenSaved: () => void;
   onRequestSignOut: () => void;
+  onDeleteAccount: () => Promise<void>;
   onOpenAbout: () => void;
 }) {
   return (
@@ -528,6 +529,11 @@ function SignedInBody({
         <IconSignOut size={16} stroke={2} />
         Sign out
       </button>
+
+      <DeleteAccountSection
+        providerName={user.provider === 'apple' ? 'Apple' : 'Google'}
+        onDelete={onDeleteAccount}
+      />
 
       <div
         style={{

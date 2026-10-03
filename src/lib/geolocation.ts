@@ -3,6 +3,10 @@ import { isNative } from './platform';
 
 const failure = (msg: string) => `Could not get your location: ${msg}`;
 
+/** Destination label for a "Near me" search. The search is logged under this
+ *  label without coordinates: the device's position is never stored. */
+export const NEAR_ME_LABEL = 'My location';
+
 export type Coords = { latitude: number; longitude: number };
 
 const OPTIONS = { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 };
