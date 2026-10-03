@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { App as CapApp } from '@capacitor/app';
 import { Analytics } from '@vercel/analytics/react';
 import type {
   Carpark,
@@ -33,6 +34,7 @@ import { loadRecents, pushRecent } from './lib/recents';
 import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
+import { getCurrentCoords } from './lib/geolocation';
 import {
   trackAppOpen,
   trackEvent,
@@ -45,6 +47,7 @@ import { SignOutSheet } from './components/SignOutSheet';
 import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
+import { canGoogleSignIn, isNative } from './lib/platform';
 import { Spinner } from './components/atoms';
 
 const VIEW_MODE_KEY = 'psg.viewMode';
@@ -327,15 +330,10 @@ function App() {
 
   const [nearMeBusy, setNearMeBusy] = useState(false);
   const onNearMe = useCallback(() => {
-    if (!navigator.geolocation) {
-      alert('Geolocation is not available on this device.');
-      return;
-    }
     setNearMeBusy(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+    getCurrentCoords().then(
+      ({ latitude, longitude }) => {
         setNearMeBusy(false);
-        const { latitude, longitude } = pos.coords;
         setDestinationInput('My location');
         resultsScrollRef.current = 0;
         searchStartedByUser.current = true;
@@ -343,11 +341,10 @@ function App() {
         setScreen('results');
         searchAtCoords('My location', latitude, longitude);
       },
-      (err) => {
+      (err: Error) => {
         setNearMeBusy(false);
-        alert(`Could not get your location: ${err.message}`);
+        alert(err.message);
       },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
     );
   }, [searchAtCoords]);
 
@@ -436,6 +433,28 @@ function App() {
     }
   }, [authError, pop]);
   const [signOutOpen, setSignOutOpen] = useState(false);
+
+  // Android hardware/gesture back: step up one screen like the on-screen back
+  // buttons do, close the sign-out prompt first, and leave the app from home.
+  // Registered once; the latest state is read through a ref.
+  const backState = useRef({ screen, user, signOutOpen: false });
+  useEffect(() => {
+    backState.current = { screen, user, signOutOpen };
+  });
+  useEffect(() => {
+    if (!isNative) return;
+    const handle = CapApp.addListener('backButton', () => {
+      const { screen: s, user: u, signOutOpen: open } = backState.current;
+      if (open) setSignOutOpen(false);
+      else if (s === 'detail') setScreen('results');
+      else if (s === 'saved') setScreen(u ? 'account' : 'home');
+      else if (s !== 'home') setScreen('home');
+      else void CapApp.exitApp();
+    });
+    return () => {
+      void handle.then((h) => h.remove());
+    };
+  }, []);
   const [addDestOpen, setAddDestOpen] = useState(false);
   const [destPrefill, setDestPrefill] = useState<AddDestPrefill | null>(null);
 
@@ -461,6 +480,7 @@ function App() {
     // Triggers the Google popup; the user state lands asynchronously when
     // the userinfo fetch resolves. The "Welcome back" toast fires from the
     // useEffect below — once we have a real name to greet.
+    if (!canGoogleSignIn) return;
     signIn();
   }, [signIn]);
 
@@ -938,7 +958,7 @@ function App() {
           <Toast toast={toast} bottomOffset={screen === 'detail' ? 90 : 28} />
           {/* PWA install banner — only on the Home landing surface so it
               never collides with the Detail sticky CTA or results flow. */}
-          {screen === 'home' && <InstallPrompt />}
+          {screen === 'home' && !isNative && <InstallPrompt />}
         </div>
       </div>
     </div>

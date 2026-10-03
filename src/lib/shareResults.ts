@@ -1,3 +1,5 @@
+import { siteOrigin } from './apiBase';
+
 /**
  * Share a "Carparks near X" results page.
  *
@@ -8,7 +10,7 @@
  */
 export function resultsShareUrl(
   dest: { label: string; lat: number; lng: number },
-  loc: Pick<Location, 'origin' | 'pathname'> = window.location,
+  loc: Pick<Location, 'origin' | 'pathname'> = { origin: siteOrigin(), pathname: window.location.pathname },
 ): string {
   if (/^\/parking-near\/[^/]+\/?$/.test(loc.pathname)) {
     return `${loc.origin}${loc.pathname.replace(/\/$/, '')}`;

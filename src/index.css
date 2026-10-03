@@ -335,3 +335,23 @@ html {
     border-inline: 0;
   }
 }
+
+/* Native (Capacitor) shell: the app owns the whole screen, so there is no
+ * column to centre and no gutter to delimit - always edge-to-edge, even on a
+ * landscape phone. `native` / `ios` / `android` are set on <html> by
+ * applyPlatformClasses() in lib/platform.ts. Per-platform design overrides
+ * hang off `html.native.ios` / `html.native.android`. */
+html.native .psg-frame {
+  max-width: none;
+  border-inline: 0;
+  /* The WebView draws edge-to-edge (viewport-fit=cover): keep content clear of
+   * the status bar, notch/cutout, gesture bar and rounded corners. The
+   * --safe-area-inset-* vars come from Capacitor's SystemBars on Android and
+   * back up env() on WebViews that report 0. */
+  box-sizing: border-box;
+  padding:
+    max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px))
+    max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px))
+    max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px))
+    max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+}

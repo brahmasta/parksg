@@ -8,25 +8,20 @@ import {
   type MapsProvider,
 } from '../lib/maps';
 import { isApplePlatform } from '../lib/platform';
+import { openExternal } from '../lib/openExternal';
 import { trackEvent } from '../lib/api/events';
 import { NavigateModal } from '../components/NavigateModal';
 import { NavigateSheet } from '../components/NavigateSheet';
 
 /**
  * Open driving directions to a carpark's entrance in a maps app, and remember
- * the app for next time. A real anchor click rather than window.open: anchors
- * with target=_blank are never treated as a popup, so they aren't blocked.
+ * the app for next time. openExternal hands the link to the OS on native and
+ * uses an anchor click on the web, which is never blocked as a popup.
  * `from` tells the funnel where the tap came from (detail page or result card).
  */
 export function openDirections(cp: Carpark, provider: MapsProvider, from: 'detail' | 'card'): void {
   const [lat, lng] = cp.coords.entrance;
-  const a = document.createElement('a');
-  a.href = mapsDirectionsUrl(provider, lat, lng);
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  openExternal(mapsDirectionsUrl(provider, lat, lng));
   setLastProvider(provider);
   // Funnel step 5, and the last thing before the user leaves for an external
   // maps app — flush immediately; the page unload would cut a debounce short.

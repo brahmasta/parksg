@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { decodePolyline } from '../lib/polyline';
+import { apiUrl } from '../lib/apiBase';
 
 export type WalkRoute = {
   meters: number;
@@ -41,7 +42,7 @@ export function useWalkRoute(
       geometry: [],
     });
     const ctrl = new AbortController();
-    const url = `/api/onemap-route?start=${from[0]},${from[1]}&end=${to[0]},${to[1]}`;
+    const url = apiUrl(`/api/onemap-route?start=${from[0]},${from[1]}&end=${to[0]},${to[1]}`);
     fetch(url, { signal: ctrl.signal })
       .then((r) => r.json())
       .then((body: { ok: boolean; distance?: number; time?: number; geometry?: string }) => {

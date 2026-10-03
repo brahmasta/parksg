@@ -6,6 +6,8 @@
  * pure parser is independently testable.
  */
 
+import { apiUrl } from '../apiBase';
+
 export type UraRawRow = {
   ppCode?: string;
   ppName?: string;
@@ -30,7 +32,7 @@ export type UraDetailsResponse = {
   items: UraRawRow[];
 };
 
-const ENDPOINT = '/api/ura-carpark-details';
+const ENDPOINT = apiUrl('/api/ura-carpark-details');
 
 export async function fetchUraDetails(
   signal?: AbortSignal,
