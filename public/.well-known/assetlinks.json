@@ -5,6 +5,8 @@
       "namespace": "android_app",
       "package_name": "sg.wheretopark.app",
       "sha256_cert_fingerprints": [
+        "82:86:1F:E8:F7:7F:DA:D4:CE:31:61:38:8F:72:5A:FD:DB:79:31:29:50:77:33:3F:1B:89:38:FE:D1:98:E0:B9",
+        "ED:02:B4:32:BA:95:DE:47:67:9A:E6:A3:9D:C7:98:3D:B8:3E:E5:75:6A:5E:7F:E5:C5:16:81:1B:42:A4:0C:C8",
         "8D:64:5D:D9:58:D7:61:E9:A7:3B:D0:4E:7F:0F:BB:D9:08:DE:14:C8:EB:22:8A:56:82:78:EB:95:95:41:D1:32"
       ]
     }
