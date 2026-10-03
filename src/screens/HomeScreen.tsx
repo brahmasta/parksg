@@ -85,7 +85,7 @@ export function HomeScreen({
       {/* Top bar */}
       <div
         style={{
-          padding: '52px 16px 12px',
+          padding: 'var(--screen-top) 16px 12px',
           flexShrink: 0,
           position: 'relative',
           display: 'flex',

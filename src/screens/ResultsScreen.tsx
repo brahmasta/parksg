@@ -131,7 +131,7 @@ export function ResultsScreen({
       style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
     >
       {/* Top bar */}
-      <div style={{ padding: '52px 16px 12px', flexShrink: 0 }}>
+      <div style={{ padding: 'var(--screen-top) 16px 12px', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <button
             onClick={onBack}

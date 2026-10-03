@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import type { Session, User } from './types';
 import { recordSignIn } from './api/analytics';
+import { persist } from './storage';
 
 const KEY = 'psg.session';
 
@@ -19,7 +20,7 @@ function readSession(): Session {
 
 function writeSession(s: Session) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    persist(KEY, JSON.stringify(s));
   } catch {
     /* ignore */
   }

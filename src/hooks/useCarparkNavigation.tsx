@@ -9,6 +9,7 @@ import {
 } from '../lib/maps';
 import { isApplePlatform } from '../lib/platform';
 import { openExternal } from '../lib/openExternal';
+import { hapticTap } from '../lib/nativeShell';
 import { trackEvent } from '../lib/api/events';
 import { NavigateModal } from '../components/NavigateModal';
 import { NavigateSheet } from '../components/NavigateSheet';
@@ -21,6 +22,7 @@ import { NavigateSheet } from '../components/NavigateSheet';
  */
 export function openDirections(cp: Carpark, provider: MapsProvider, from: 'detail' | 'card'): void {
   const [lat, lng] = cp.coords.entrance;
+  hapticTap();
   openExternal(mapsDirectionsUrl(provider, lat, lng));
   setLastProvider(provider);
   // Funnel step 5, and the last thing before the user leaves for an external

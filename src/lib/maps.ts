@@ -6,6 +6,8 @@
  * carpark entrance [lat, lng].
  */
 
+import { persist } from './storage';
+
 export type MapsProvider = 'google' | 'waze' | 'apple';
 
 export const MAPS_PROVIDERS: readonly MapsProvider[] = ['google', 'waze', 'apple'];
@@ -56,7 +58,7 @@ export function getLastProvider(): MapsProvider | null {
 /** Remember the user's navigation app for next time (best-effort). */
 export function setLastProvider(provider: MapsProvider): void {
   try {
-    localStorage.setItem(LAST_PROVIDER_KEY, provider);
+    persist(LAST_PROVIDER_KEY, provider);
   } catch {
     /* ignore quota / disabled storage */
   }
