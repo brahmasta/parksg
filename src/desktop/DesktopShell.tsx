@@ -41,7 +41,14 @@ export function DesktopShell({ find, saved, user, savedItemCount, onSignIn, onRe
         user={user}
       />
 
-      {route === 'find' && <FindParkingDesktop {...find} saved={saved} />}
+      {route === 'find' && (
+        <FindParkingDesktop
+          {...find}
+          saved={saved}
+          onOpenSaved={() => setRoute('saved')}
+          onOpenAccount={() => setRoute('account')}
+        />
+      )}
 
       {route === 'saved' && (
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>

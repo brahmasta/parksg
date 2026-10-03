@@ -20,7 +20,8 @@ import { useCarparkNavigation } from '../hooks/useCarparkNavigation';
 import { RadiusSelect } from '../components/RadiusSelect';
 import { pickHeroCopy } from '../lib/heroCopy';
 import { AppFooter } from '../components/AppFooter';
-import { IconBookmark, IconChevronRight, IconHistory, IconLocation, IconShare, IconStar } from '../components/icons';
+import { HomeRecentSection, HomeSavedSection } from '../components/HomeSections';
+import { IconLocation, IconShare } from '../components/icons';
 
 export type DesktopSavedProps = {
   merged: MergedSaveItem[];
@@ -76,13 +77,15 @@ export type FindParkingDesktopProps = {
  * (search · stay · filter · cards, or a carpark detail panel) and the live map
  * on the right. Reuses the same data + components as the phone flow.
  */
-export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: DesktopSavedProps }) {
+export function FindParkingDesktop(
+  props: FindParkingDesktopProps & { saved: DesktopSavedProps; onOpenSaved: () => void; onOpenAccount: () => void },
+) {
   const {
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
     onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly, vehicles, setVehicles,
     detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
-    user, onRequireSignIn, onShareResults, recents, radiusM, onRadius,
+    user, onRequireSignIn, onShareResults, recents, radiusM, onRadius, onOpenSaved, onOpenAccount,
   } = props;
 
   const [sortBy, setSortBy] = useState<SortBy>('cost');
@@ -137,6 +140,8 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
         saved={saved}
         recents={recents}
         user={user}
+        onOpenSaved={onOpenSaved}
+        onOpenAccount={onOpenAccount}
       />
     );
   }
@@ -361,7 +366,7 @@ export function FindParkingDesktop(props: FindParkingDesktopProps & { saved: Des
   );
 }
 
-/** Pre-search landing — focused single column (no map): search, recents, saved places. */
+/** Pre-search landing — focused single column (no map): search, saved, recents — same sections as the phone home. */
 function LandingDesktop({
   destinationInput,
   setDestinationInput,
@@ -372,6 +377,8 @@ function LandingDesktop({
   saved,
   recents,
   user,
+  onOpenSaved,
+  onOpenAccount,
 }: {
   destinationInput: string;
   setDestinationInput: (v: string) => void;
@@ -382,6 +389,8 @@ function LandingDesktop({
   saved: DesktopSavedProps;
   recents: RecentDestination[];
   user: User | null;
+  onOpenSaved: () => void;
+  onOpenAccount: () => void;
 }) {
   // Same hero copy as the phone home, locked per mount.
   const hero = useMemo(() => pickHeroCopy(), []);
@@ -419,100 +428,26 @@ function LandingDesktop({
           {nearMeBusy ? 'Locating…' : 'Use my location'}
         </button>
 
-        {/* Recent — this browser's own searches; hidden until there are any.
-            A recent with coords replays that exact place; older entries
-            without them fall back to a text search. */}
-        {recents.length > 0 && (
-          <>
-            <div style={{ marginTop: 30 }}>
-              <MonoLabel>Recent</MonoLabel>
-            </div>
-            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {recents.map((r) => (
-                <SavedRow
-                  key={`r:${r.name}`}
-                  track="recent_dest_chip"
-                  icon={<IconHistory size={16} stroke={2} />}
-                  title={r.name}
-                  sub={r.address ?? r.hint}
-                  onClick={() => {
-                    if (typeof r.lat === 'number' && typeof r.lng === 'number') {
-                      onPickPlace({ label: r.name, address: r.address ?? r.name, lat: r.lat, lng: r.lng });
-                    } else {
-                      setDestinationInput(r.name);
-                      onSearch(r.name);
-                    }
-                  }}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        <HomeSavedSection
+          merged={saved.merged}
+          onOpenSaved={onOpenSaved}
+          onSearchSavedDestination={saved.onSearchDestination}
+          onOpenSavedCarpark={saved.onOpenCarpark}
+        />
 
-        {/* Saved places */}
-        <div style={{ marginTop: 30, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <MonoLabel>Saved places</MonoLabel>
-          <button type="button" data-track="add_destination" onClick={saved.onAddDestination} style={{ appearance: 'none', border: 0, background: 'transparent', color: 'var(--accent)', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-            + Add destination
-          </button>
-        </div>
-
-        {saved.merged.length === 0 ? (
-          <div style={{ marginTop: 12, padding: '22px 18px', textAlign: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-1)' }}>Nothing saved yet</div>
-            <div style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 4 }}>Bookmark a carpark from results, or name a destination like Office for one-tap search.</div>
-          </div>
-        ) : (
-          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {saved.merged.map((item) =>
-              item.kind === 'destination' ? (
-                <SavedRow
-                  key={`d:${item.id}`}
-                  track="saved_dest_chip"
-                  icon={<IconStar size={16} stroke={2} />}
-                  title={item.destination.name}
-                  sub={item.destination.address}
-                  onClick={() => saved.onSearchDestination(item)}
-                />
-              ) : (
-                <SavedRow
-                  key={`c:${item.id}`}
-                  track="saved_carpark_chip"
-                  icon={<IconBookmark filled size={16} />}
-                  title={item.carpark.name}
-                  sub={item.carpark.area || item.carpark.block}
-                  onClick={() => saved.onOpenCarpark(item)}
-                />
-              ),
-            )}
-          </div>
-        )}
+        <HomeRecentSection
+          recents={recents}
+          user={user}
+          setDestination={setDestinationInput}
+          onSearch={onSearch}
+          onPickPlace={onPickPlace}
+          onOpenAccount={onOpenAccount}
+        />
 
         <div style={{ marginTop: 28 }}>
           <AppFooter user={user} variant="modal" />
         </div>
       </div>
     </main>
-  );
-}
-
-function SavedRow({ icon, title, sub, onClick, track }: { icon: React.ReactNode; title: string; sub?: string; onClick: () => void; track?: string }) {
-  return (
-    <button
-      type="button"
-      data-track={track}
-      onClick={onClick}
-      style={{
-        appearance: 'none', border: '0.5px solid var(--line-strong)', background: 'var(--bg-1)', borderRadius: 12,
-        padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', cursor: 'pointer', minHeight: 56,
-      }}
-    >
-      <span style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--bg-3)', color: 'var(--text-2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, pointerEvents: 'none' }}>{icon}</span>
-      <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</span>
-        {sub && <span style={{ display: 'block', fontSize: 12.5, color: 'var(--text-3)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</span>}
-      </span>
-      <span style={{ color: 'var(--text-3)', flexShrink: 0 }}><IconChevronRight size={16} stroke={2} /></span>
-    </button>
   );
 }
