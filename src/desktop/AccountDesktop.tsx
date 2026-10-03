@@ -1,6 +1,10 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { User } from '../lib/types';
 import { ThemePicker } from '../components/ThemePicker';
+import { PrivacyConsent } from '../components/PrivacyConsent';
+import { consentDisabledStyle } from '../lib/privacy';
+import { DeleteAccountSection } from '../components/DeleteAccountSection';
+import type { SignInProvider } from '../lib/nativeAuth';
 import {
   IconBookmark,
   IconChevronRight,
@@ -19,27 +23,29 @@ export function AccountDesktop({
   savedItemCount,
   onSignIn,
   onRequestSignOut,
+  onDeleteAccount,
   onOpenSaved,
 }: {
   user: User | null;
   savedItemCount: number;
-  onSignIn: () => void;
+  onSignIn: (provider?: SignInProvider) => void;
   onRequestSignOut: () => void;
+  onDeleteAccount: () => Promise<void>;
   onOpenSaved: () => void;
 }) {
   return (
     <div className="psg-screen" style={{ maxWidth: 640, margin: '0 auto', padding: '44px 28px 80px' }}>
       <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.1 }}>Account</h1>
       {user ? (
-        <SignedIn user={user} savedCount={savedItemCount} onSignOut={onRequestSignOut} onOpenSaved={onOpenSaved} />
+        <SignedIn user={user} savedCount={savedItemCount} onSignOut={onRequestSignOut} onDeleteAccount={onDeleteAccount} onOpenSaved={onOpenSaved} />
       ) : (
-        <SignedOut onSignIn={onSignIn} />
+        <SignedOut onSignIn={() => onSignIn('google')} />
       )}
     </div>
   );
 }
 
-function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; savedCount: number; onSignOut: () => void; onOpenSaved: () => void }) {
+function SignedIn({ user, savedCount, onSignOut, onDeleteAccount, onOpenSaved }: { user: User; savedCount: number; onSignOut: () => void; onDeleteAccount: () => Promise<void>; onOpenSaved: () => void }) {
   return (
     <>
       <div style={{ marginTop: 22, background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 16, padding: 18, display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -67,6 +73,8 @@ function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; sa
         <IconSignOut size={16} stroke={2} /> Sign out
       </button>
 
+      <DeleteAccountSection providerName={user.provider === 'apple' ? 'Apple' : 'Google'} onDelete={onDeleteAccount} />
+
       <div style={{ marginTop: 22, textAlign: 'center', fontSize: 11, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: 0.3 }}>
         wheretopark.sg · {APP_VERSION}
       </div>
@@ -75,6 +83,7 @@ function SignedIn({ user, savedCount, onSignOut, onOpenSaved }: { user: User; sa
 }
 
 function SignedOut({ onSignIn }: { onSignIn: () => void }) {
+  const [agreed, setAgreed] = useState(false);
   return (
     <>
       <div style={{ marginTop: 22, background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 20, padding: '32px 28px', textAlign: 'center' }}>
@@ -83,11 +92,13 @@ function SignedOut({ onSignIn }: { onSignIn: () => void }) {
         </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 600, color: 'var(--text-1)', letterSpacing: -0.5, lineHeight: 1.2 }}>Save carparks and destinations across devices</div>
         <p style={{ margin: '12px auto 0', fontSize: 14, color: 'var(--text-2)', lineHeight: 1.5, maxWidth: 360 }}>Sign in so your favourites and recent searches follow you between desktop, tablet and phone.</p>
-        <button onClick={onSignIn} data-track="sign_in" style={{ appearance: 'none', border: 0, width: '100%', maxWidth: 320, marginTop: 24, padding: '14px 18px', background: 'var(--text-1)', color: 'var(--bg-1)', borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 6px 14px rgba(14,16,20,0.10)' }}>
+        <div style={{ maxWidth: 320, margin: '0 auto' }}>
+          <PrivacyConsent checked={agreed} onChange={setAgreed} />
+        </div>
+        <button onClick={onSignIn} disabled={!agreed} data-track="sign_in" style={{ appearance: 'none', border: 0, width: '100%', maxWidth: 320, marginTop: 16, padding: '14px 18px', background: 'var(--text-1)', color: 'var(--bg-1)', borderRadius: 12, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 6px 14px rgba(14,16,20,0.10)', ...(agreed ? {} : consentDisabledStyle) }}>
           <span style={{ width: 22, height: 22, borderRadius: 999, background: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IconGoogleG size={16} /></span>
           Continue with Google
         </button>
-        <div style={{ marginTop: 14, fontSize: 11, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: 0.1 }}>By continuing you agree to our Terms and Privacy.</div>
       </div>
 
       <Group label="Appearance">

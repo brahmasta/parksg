@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import type { Session, User } from './types';
 import { recordSignIn } from './api/analytics';
 import { persist } from './storage';
 import { isNative } from './platform';
 import { nativeSignIn, nativeSignOut, type SignInProvider } from './nativeAuth';
+import { apiUrl } from './apiBase';
+import { PRIVACY_VERSION } from './privacy';
 
 const KEY = 'psg.session';
 
@@ -68,6 +70,13 @@ export function useSession() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  // The privacy policy version accepted for the sign-in in progress (null
+  // for the admin panel, which signs in without it).
+  const privacyVersion = useRef<string | null>(null);
+  // Set while the web popup is confirming the account for deletion: the
+  // token goes to deleteAccount() instead of signing in again.
+  const reauth = useRef<{ resolve: (token: string) => void; reject: (err: Error) => void } | null>(null);
+
   const finishSignIn = useCallback((user: User) => {
     const next: Session = { user, syncedAt: Date.now() };
     writeSession(next);
@@ -75,11 +84,16 @@ export function useSession() {
     setError(null);
     // Best-effort: record the sign-in to Supabase (upsert profile +
     // bump count). Never blocks or throws into the auth flow.
-    recordSignIn({ id: user.id, name: user.name, email: user.email });
+    recordSignIn({ id: user.id, name: user.name, email: user.email, privacyVersion: privacyVersion.current });
   }, []);
 
   const login = useGoogleLogin({
     onSuccess: async (resp) => {
+      if (reauth.current) {
+        reauth.current.resolve(resp.access_token);
+        reauth.current = null;
+        return;
+      }
       setAccessToken(resp.access_token ?? null);
       try {
         const r = await fetch(
@@ -102,7 +116,17 @@ export function useSession() {
         );
       }
     },
+    onNonOAuthError: () => {
+      // Popup closed or blocked.
+      reauth.current?.reject(new Error('cancelled'));
+      reauth.current = null;
+    },
     onError: (err) => {
+      if (reauth.current) {
+        reauth.current.reject(new Error('Google could not confirm your account.'));
+        reauth.current = null;
+        return;
+      }
       setError(
         typeof err === 'object' && err && 'error' in err
           ? String((err as { error: string }).error)
@@ -111,14 +135,18 @@ export function useSession() {
     },
   });
 
-  /** Web: Google's popup. Native apps: the OS sheet for `provider`. */
-  const signIn = useCallback((provider: SignInProvider = 'google') => {
+  /** Web: Google's popup. Native apps: the OS sheet for `provider`.
+   *  `privacyAccepted` is set by the Account screens, where signing in needs
+   *  the privacy policy ticked; the version is stored on the profile. */
+  const signIn = useCallback((provider: SignInProvider = 'google', opts?: { privacyAccepted?: boolean }) => {
     setError(null);
+    privacyVersion.current = opts?.privacyAccepted ? PRIVACY_VERSION : null;
     if (isNative) {
       nativeSignIn(provider).then(
-        ({ accessToken: token, ...p }) => {
+        // Tokens stay in memory: only the profile fields go into the session.
+        ({ id, name, email, avatarUrl, accessToken: token }) => {
           setAccessToken(token);
-          finishSignIn({ ...p, initials: deriveInitials(p.name, p.email), provider });
+          finishSignIn({ id, name, email, avatarUrl, initials: deriveInitials(name, email), provider });
         },
         (err: Error) => {
           if (err.message !== 'cancelled') setError(err.message);
@@ -145,6 +173,39 @@ export function useSession() {
     setError(null);
   }, []);
 
+  /**
+   * Delete the account and everything linked to it on the server, then sign
+   * out. The server only acts on a fresh sign-in token, so this first asks
+   * the person to confirm their account (Google popup on the web, the OS
+   * sheet in the apps). Call it straight from a click: the web popup must
+   * open before any await. Rejects with a message to show, or `cancelled`.
+   */
+  const deleteAccount = useCallback(async () => {
+    const user = readSession().user;
+    if (!user) throw new Error('You are not signed in.');
+    const provider: SignInProvider = user.provider ?? 'google';
+    let proof: { provider: SignInProvider; accessToken?: string | null; idToken?: string | null };
+    if (isNative) {
+      const p = await nativeSignIn(provider);
+      if (p.id !== user.id) throw new Error('That is a different account from the one signed in here.');
+      proof = { provider, accessToken: p.accessToken, idToken: p.idToken };
+    } else {
+      const token = await new Promise<string>((resolve, reject) => {
+        reauth.current = { resolve, reject };
+        login();
+      });
+      proof = { provider: 'google', accessToken: token };
+    }
+    const r = await fetch(apiUrl('/api/account/delete'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...proof, userId: user.id }),
+    });
+    const body = (await r.json().catch(() => null)) as { error?: string } | null;
+    if (!r.ok) throw new Error(body?.error ?? `Could not delete the account (${r.status}).`);
+    signOut();
+  }, [login, signOut]);
+
   // Stamp the session once the cloud-saves merge actually completes, so
   // `syncedAt` reflects real sync state rather than just sign-in time.
   const markSynced = useCallback((ts: number = Date.now()) => {
@@ -156,5 +217,5 @@ export function useSession() {
     });
   }, []);
 
-  return { session, user: session.user, accessToken, signIn, signOut, markSynced, error };
+  return { session, user: session.user, accessToken, signIn, signOut, deleteAccount, markSynced, error };
 }

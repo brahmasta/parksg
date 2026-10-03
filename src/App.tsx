@@ -34,7 +34,7 @@ import { loadRecents, pushRecent } from './lib/recents';
 import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
-import { getCurrentCoords } from './lib/geolocation';
+import { getCurrentCoords, NEAR_ME_LABEL } from './lib/geolocation';
 import { hapticTap } from './lib/nativeShell';
 import {
   trackAppOpen,
@@ -49,7 +49,7 @@ import { AddDestSheet, type AddDestPrefill } from './components/AddDestSheet';
 import { Toast, useToast } from './components/Toast';
 import { InstallPrompt } from './components/InstallPrompt';
 import { isNative } from './lib/platform';
-import { signInProviders, type SignInProvider } from './lib/nativeAuth';
+import type { SignInProvider } from './lib/nativeAuth';
 import { Spinner } from './components/atoms';
 import { persist } from './lib/storage';
 
@@ -337,12 +337,12 @@ function App() {
     getCurrentCoords().then(
       ({ latitude, longitude }) => {
         setNearMeBusy(false);
-        setDestinationInput('My location');
+        setDestinationInput(NEAR_ME_LABEL);
         resultsScrollRef.current = 0;
         searchStartedByUser.current = true;
         trackEvent('search_submitted', { via: 'near_me' });
         setScreen('results');
-        searchAtCoords('My location', latitude, longitude);
+        searchAtCoords(NEAR_ME_LABEL, latitude, longitude);
       },
       (err: Error) => {
         setNearMeBusy(false);
@@ -352,7 +352,7 @@ function App() {
   }, [searchAtCoords]);
 
   // ── Accounts & Save ──────────────────────────────────────────────
-  const { user, signIn, signOut, markSynced, error: authError } = useSession();
+  const { user, signIn, signOut, deleteAccount, markSynced, error: authError } = useSession();
   const saves = useSaves(user?.id ?? null, {
     onSynced: (ts) => markSynced(ts),
   });
@@ -406,10 +406,12 @@ function App() {
     if (result.destination) {
       const byUser = searchStartedByUser.current;
       searchStartedByUser.current = false;
+      // A near-me search is the device's own position: log it without coords.
+      const nearMe = result.destination.label === NEAR_ME_LABEL;
       recordSearch({
         query: result.destination.label,
-        lat: result.destination.lat,
-        lng: result.destination.lng,
+        lat: nearMe ? null : result.destination.lat,
+        lng: nearMe ? null : result.destination.lng,
         userId: user?.id ?? null,
         auto: !byUser,
       });
@@ -481,17 +483,31 @@ function App() {
   );
 
   const handleSignIn = useCallback((provider?: SignInProvider) => {
-    // Opens Google's popup (web) or the OS sign-in sheet (apps); the user
-    // state lands asynchronously. The "Welcome back" toast fires from the
-    // useEffect below — once we have a real name to greet. Where there is a
-    // choice of provider (iOS), a request without one, like a check-in tap,
-    // opens Account to pick.
-    if (!provider && signInProviders.length > 1) {
+    // The Account screens call this with a provider once the privacy policy
+    // is ticked: it opens Google's popup (web) or the OS sign-in sheet (apps)
+    // and the user state lands asynchronously. The "Welcome back" toast fires
+    // from the useEffect below, once we have a real name to greet. A request
+    // from anywhere else (a check-in tap) opens Account, where the policy is.
+    if (!provider) {
       setScreen('account');
       return;
     }
-    signIn(provider ?? signInProviders[0]);
+    signIn(provider, { privacyAccepted: true });
   }, [signIn]);
+
+  // Called straight from the confirm click (the web popup needs the gesture).
+  const handleDeleteAccount = useCallback(
+    () =>
+      deleteAccount().then(() => {
+        setScreen('home');
+        pop({
+          icon: <IconCheck size={15} stroke={2} />,
+          title: 'Account deleted',
+          sub: 'Your account and its data have been removed.',
+        });
+      }),
+    [deleteAccount, pop],
+  );
 
   // After sign-in resolves, route the user to the Account screen and pop
   // a greeting with their real first name. Seed the ref with the already
@@ -786,6 +802,7 @@ function App() {
           savedItemCount={saves.merged.length}
           onSignIn={handleSignIn}
           onRequestSignOut={() => setSignOutOpen(true)}
+          onDeleteAccount={handleDeleteAccount}
         />
         <SignOutSheet
           open={signOutOpen}
@@ -918,6 +935,7 @@ function App() {
         onSignIn={handleSignIn}
         onOpenSaved={() => setScreen('saved')}
         onRequestSignOut={() => setSignOutOpen(true)}
+        onDeleteAccount={handleDeleteAccount}
         onOpenAbout={() => setScreen('about')}
       />
     );

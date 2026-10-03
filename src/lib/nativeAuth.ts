@@ -72,7 +72,9 @@ function readAppleName(id: string): string | null {
 
 /** Opens the OS sign-in sheet. Rejects with a user-facing message, or with
  *  `cancelled` when the person closes the sheet. */
-export async function nativeSignIn(provider: SignInProvider): Promise<Profile & { accessToken: string | null }> {
+export async function nativeSignIn(
+  provider: SignInProvider,
+): Promise<Profile & { accessToken: string | null; idToken: string | null }> {
   await init();
   try {
     const res = await SocialLogin.login(
@@ -97,6 +99,7 @@ export async function nativeSignIn(provider: SignInProvider): Promise<Profile & 
         email,
         avatarUrl: p.imageUrl ?? undefined,
         accessToken: r.accessToken?.token ?? null,
+        idToken: r.idToken,
       };
     }
     const r = res.result as AppleProviderResponse;
@@ -108,7 +111,7 @@ export async function nativeSignIn(provider: SignInProvider): Promise<Profile & 
     const email = p.email ?? (claims.email as string | undefined) ?? '';
     const given = [p.givenName, p.familyName].filter(Boolean).join(' ');
     if (given) persist(APPLE_NAME_KEY, JSON.stringify({ id, name: given }));
-    return { id, name: given || readAppleName(id) || email || 'Apple user', email, accessToken: null };
+    return { id, name: given || readAppleName(id) || email || 'Apple user', email, accessToken: null, idToken: r.idToken };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     // Closing the sheet: Android reports USER_CANCELLED / "canceled", iOS
