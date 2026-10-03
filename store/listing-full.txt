@@ -1,0 +1,29 @@
+Know the price before the ramp.
+
+wheretopark.sg shows what parking will actually cost near where you're going in Singapore, and whether there are lots free right now. Search a destination, mall or postcode, and see nearby carparks sorted by the estimated price for your stay.
+
+WHAT YOU GET
+• Real rates for thousands of carparks: HDB, URA, malls, offices and more
+• An estimated cost for your stay, using the time you arrive and how long you're staying, including weekend and evening rates
+• Live available lots, where the carpark publishes them
+• Walking time and route from the carpark to your destination
+• List or map view, sorted by cheapest or nearest
+• Filters for available lots, EV charging, motorcycles and heavy vehicles
+• Height limits and full rate schedules for each carpark
+• One tap to navigate with Google Maps or Waze
+• "Use my location" to find parking around you
+
+SAVE AND SHARE
+• Save carparks and favourite destinations like Office or Home
+• Share a carpark or a list of results with friends
+• Optional sign-in with Google to sync your saves across your phone and the web
+
+HELP KEEP IT ACCURATE
+Spotted a wrong rate or a missing carpark? Report it in the app, or check in to tell other drivers whether a carpark is full.
+
+PRIVACY
+No ads. You can use the app without an account. Your location is only used to find carparks near you and is not stored. You can delete your account at any time from the app.
+
+Carpark data comes from public sources including LTA DataMall, URA, HDB (data.gov.sg) and OneMap, plus operator rates and community reports. Rates can change, so check the signs at the carpark. wheretopark.sg is independent and not affiliated with any government agency or carpark operator.
+
+Feedback: contact@wheretopark.sg

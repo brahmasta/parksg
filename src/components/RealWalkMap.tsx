@@ -133,6 +133,9 @@ export function RealWalkMap({
     <div
       style={{
         position: 'relative',
+        // Keeps the map and its overlays (z-index 500) under the page's
+        // sticky Navigate bar.
+        isolation: 'isolate',
         height,
         borderRadius: 14,
         overflow: 'hidden',
