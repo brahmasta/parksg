@@ -3,6 +3,8 @@ import { useGoogleLogin } from '@react-oauth/google';
 import type { Session, User } from './types';
 import { recordSignIn } from './api/analytics';
 import { persist } from './storage';
+import { isNative } from './platform';
+import { nativeSignIn, nativeSignOut, type SignInProvider } from './nativeAuth';
 
 const KEY = 'psg.session';
 
@@ -66,6 +68,16 @@ export function useSession() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  const finishSignIn = useCallback((user: User) => {
+    const next: Session = { user, syncedAt: Date.now() };
+    writeSession(next);
+    setSession(next);
+    setError(null);
+    // Best-effort: record the sign-in to Supabase (upsert profile +
+    // bump count). Never blocks or throws into the auth flow.
+    recordSignIn({ id: user.id, name: user.name, email: user.email });
+  }, []);
+
   const login = useGoogleLogin({
     onSuccess: async (resp) => {
       setAccessToken(resp.access_token ?? null);
@@ -77,20 +89,13 @@ export function useSession() {
         if (!r.ok) throw new Error(`userinfo ${r.status}`);
         const info = (await r.json()) as GoogleUserInfo;
         const name = info.name ?? info.given_name ?? info.email;
-        const user: User = {
+        finishSignIn({
           id: info.sub,
           name,
           email: info.email,
           initials: deriveInitials(name, info.email),
           avatarUrl: info.picture,
-        };
-        const next: Session = { user, syncedAt: Date.now() };
-        writeSession(next);
-        setSession(next);
-        setError(null);
-        // Best-effort: record the sign-in to Supabase (upsert profile +
-        // bump count). Never blocks or throws into the auth flow.
-        recordSignIn({ id: user.id, name: user.name, email: user.email });
+        });
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Google sign-in failed',
@@ -106,8 +111,21 @@ export function useSession() {
     },
   });
 
-  const signIn = useCallback(() => {
+  /** Web: Google's popup. Native apps: the OS sheet for `provider`. */
+  const signIn = useCallback((provider: SignInProvider = 'google') => {
     setError(null);
+    if (isNative) {
+      nativeSignIn(provider).then(
+        ({ accessToken: token, ...p }) => {
+          setAccessToken(token);
+          finishSignIn({ ...p, initials: deriveInitials(p.name, p.email), provider });
+        },
+        (err: Error) => {
+          if (err.message !== 'cancelled') setError(err.message);
+        },
+      );
+      return;
+    }
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
       setError(
@@ -116,9 +134,10 @@ export function useSession() {
       return;
     }
     login();
-  }, [login]);
+  }, [login, finishSignIn]);
 
   const signOut = useCallback(() => {
+    if (isNative) nativeSignOut(readSession().user?.provider ?? 'google');
     const next: Session = { user: null, syncedAt: null };
     writeSession(next);
     setSession(next);
