@@ -11,6 +11,7 @@ import { isApplePlatform } from '../lib/platform';
 import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
 import { openDirections } from '../hooks/useCarparkNavigation';
+import { siteOrigin } from '../lib/apiBase';
 import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
 import { SuggestEditDialog } from '../components/SuggestEditDialog';
 import type { EditableRate } from '../components/rateGrid';
@@ -167,7 +168,7 @@ export function DetailScreen({
   // the carpark in the same destination context for the recipient (App parses
   // `?cp=&to=&dest=`). Uses the native share sheet where available, else copies.
   const onShare = useCallback(async () => {
-    const origin = window.location.origin;
+    const origin = siteOrigin();
     const params = new URLSearchParams();
     // Ephemeral Google carparks can't be re-fetched by id, so share the
     // destination only — the recipient lands on its live results.

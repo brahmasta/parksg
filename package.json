@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:native": "tsc -b && vite build --mode native",
+    "cap:android": "npm run build:native && cap sync android && cap open android",
     "lint": "eslint .",
     "preview": "vite preview",
     "audit:datamall": "ts-node --project scripts/tsconfig.json scripts/audit-datamall.ts",
