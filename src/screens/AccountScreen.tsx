@@ -134,7 +134,7 @@ function TopBar({ onBack, title }: { onBack: () => void; title: string }) {
   return (
     <div
       style={{
-        padding: '52px 16px 12px',
+        padding: 'var(--screen-top) 16px 12px',
         display: 'flex',
         alignItems: 'center',
         gap: 10,

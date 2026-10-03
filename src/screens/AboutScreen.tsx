@@ -22,7 +22,7 @@ export function AboutScreen({ onBack }: AboutScreenProps) {
       {/* Top bar */}
       <div
         style={{
-          padding: '52px 16px 10px',
+          padding: 'var(--screen-top) 16px 10px',
           display: 'flex',
           alignItems: 'center',
           gap: 8,

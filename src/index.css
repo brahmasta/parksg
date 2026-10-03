@@ -341,6 +341,16 @@ html {
  * landscape phone. `native` / `ios` / `android` are set on <html> by
  * applyPlatformClasses() in lib/platform.ts. Per-platform design overrides
  * hang off `html.native.ios` / `html.native.android`. */
+/* Gap above each phone screen's header (the screens' top padding). The web
+ * keeps its 52px of breathing room; in the native shell the status-bar inset
+ * below already supplies that space, so only a small gap is added. */
+:root {
+  --screen-top: 52px;
+}
+html.native {
+  --screen-top: 12px;
+}
+
 html.native .psg-frame {
   max-width: none;
   border-inline: 0;
