@@ -13,7 +13,7 @@
  *
  * Bump CACHE_VERSION to invalidate everything on the next activation.
  */
-const CACHE_VERSION = 'wtp-v2';
+const CACHE_VERSION = 'wtp-v3';
 const SHELL_URL = '/';
 
 // Server-rendered SEO pages live at these paths. They must never be cached to
@@ -28,7 +28,7 @@ function isSeoRoute(pathname) {
     pathname === '/robots.txt'
   );
 }
-const PRECACHE = [SHELL_URL, '/icon.svg', '/icon-maskable.svg', '/manifest.webmanifest'];
+const PRECACHE = [SHELL_URL, '/icon.svg', '/icon-maskable.svg', '/apple-touch-icon.png', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
