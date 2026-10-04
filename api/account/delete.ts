@@ -1,10 +1,12 @@
 /**
  * POST /api/account/delete: delete a person's account and the data linked to
  * it (db/migrations/018_privacy_and_account_deletion.sql, delete_user_data).
- * Body: { provider, accessToken?, idToken?, userId }. The token is verified
- * in _account/verify.ts before anything is deleted.
+ * Body: { provider, accessToken?, idToken?, authorizationCode?, userId }. The
+ * token is verified in _account/verify.ts before anything is deleted; for
+ * Apple accounts the sign-in grant is then revoked (_account/appleRevoke.ts).
  */
 import { verifyDeleteRequest, HttpError, type DeleteRequest } from '../_account/verify';
+import { revokeAppleGrant } from '../_account/appleRevoke';
 import { SB_URL, sbHeaders, hasServiceConfig } from '../_admin/db';
 import { json } from '../_admin/auth';
 
@@ -31,7 +33,12 @@ export default async function handler(req: Request): Promise<Response> {
       body: JSON.stringify({ p_user_id: who.userId, p_email: who.email }),
     });
     if (!r.ok) return json({ error: 'Could not delete the account. Please try again later.' }, 502);
-    return json({ ok: true, deleted: await r.json() });
+    const deleted = await r.json();
+    if (body.provider !== 'apple') return json({ ok: true, deleted });
+    const code = typeof body.authorizationCode === 'string' ? body.authorizationCode : null;
+    const appleRevoke = await revokeAppleGrant(code);
+    if (appleRevoke !== 'revoked') console.warn(`apple revoke: ${appleRevoke}`);
+    return json({ ok: true, deleted, appleRevoke });
   } catch (err) {
     if (err instanceof HttpError) return json({ error: err.message }, err.status);
     return json({ error: 'Could not confirm your sign-in. Please try again.' }, 502);

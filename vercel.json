@@ -10,6 +10,10 @@
   ],
   "headers": [
     {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [{ "key": "Content-Type", "value": "application/json" }]
+    },
+    {
       "source": "/api/(.*)",
       "has": [{ "type": "header", "key": "origin", "value": "capacitor://localhost" }],
       "headers": [

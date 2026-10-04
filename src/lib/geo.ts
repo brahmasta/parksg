@@ -122,3 +122,10 @@ export function svy21ToWgs84(
 
   return { lat: lat / RAD, lng: lng / RAD };
 }
+
+/** Rough Singapore bounding box, with a little slack for the coast and
+ *  Sentosa. The same rectangle restricts Google place suggestions
+ *  (api/google-places-autocomplete.ts). */
+export function inSingapore(lat: number, lng: number): boolean {
+  return lat >= 1.155 && lat <= 1.475 && lng >= 103.594 && lng <= 104.045;
+}

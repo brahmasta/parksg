@@ -29,7 +29,7 @@ import type { FindParkingDesktopProps } from './desktop/FindParkingDesktop';
 import { estCostForStay, roundedSoon, type Stay } from './lib/stay';
 import type { VehicleFilter } from './lib/resultsView';
 import { findArea } from './lib/seoAreas';
-import { haversineMeters, walkMinutesFromMeters } from './lib/geo';
+import { haversineMeters, inSingapore, walkMinutesFromMeters } from './lib/geo';
 import { loadRecents, pushRecent } from './lib/recents';
 import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
@@ -81,12 +81,20 @@ type InitialRoute =
   // to the destination at (lat,lng) labelled `dest`. See the Share button in
   // DetailScreen.
   | { kind: 'share'; cpId: string | null; dest: string; lat: number; lng: number }
+  // Home-screen shortcuts in the iOS app (`?open=near-me`, `?open=saved`; see
+  // ios/App/App/SceneDelegate.swift).
+  | { kind: 'near-me' }
+  | { kind: 'saved' }
   | null;
 
 function parseInitialRoute(): InitialRoute {
   if (typeof window === 'undefined') return null;
   const { pathname, search } = window.location;
   const params = new URLSearchParams(search);
+
+  const open = params.get('open');
+  if (open === 'near-me') return { kind: 'near-me' };
+  if (open === 'saved') return { kind: 'saved' };
 
   const areaMatch = /^\/parking-near\/([^/]+)\/?$/.exec(pathname);
   if (areaMatch) {
@@ -139,7 +147,9 @@ function App() {
           ? initialRoute.cpId
             ? 'detail'
             : 'results'
-          : 'home',
+          : initialRoute?.kind === 'saved'
+            ? 'saved'
+            : 'home',
   );
   const [destinationInput, setDestinationInput] = useState<string>(() =>
     initialRoute?.kind === 'query'
@@ -337,6 +347,10 @@ function App() {
     getCurrentCoords().then(
       ({ latitude, longitude }) => {
         setNearMeBusy(false);
+        if (!inSingapore(latitude, longitude)) {
+          alert('wheretopark.sg covers carparks in Singapore only. Search for a place in Singapore instead, for example Orchard Road.');
+          return;
+        }
         setDestinationInput(NEAR_ME_LABEL);
         resultsScrollRef.current = 0;
         searchStartedByUser.current = true;
@@ -644,6 +658,13 @@ function App() {
       );
     };
 
+    if (route.kind === 'near-me' || route.kind === 'saved') {
+      stripParam('open');
+      // Next tick: onNearMe sets state, which an effect body shouldn't do directly.
+      if (route.kind === 'near-me') setTimeout(onNearMe, 0);
+      return;
+    }
+
     void (async () => {
       // Detail deep links (`/carpark/:slug` or `?cp=<id>`) — load async then
       // swap the spinner for the carpark. The screen was already set to
@@ -701,7 +722,7 @@ function App() {
       // `/parking-near/:slug` URL is already correct and shareable — nothing
       // more to do here.
     })();
-  }, [initialRoute, loadCarparkById, loadCarparkBySlug]);
+  }, [initialRoute, loadCarparkById, loadCarparkBySlug, onNearMe]);
 
   const openSaveDestSheet = useCallback(() => {
     if (!result.destination) return;
