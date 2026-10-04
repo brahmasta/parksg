@@ -372,3 +372,28 @@ html.native .psg-frame {
 .leaflet-container {
   isolation: isolate;
 }
+
+/* Range inputs drawn with a custom track and thumb (StayPlanner): the native
+ * input stays on top for dragging and keyboard use, but its own thumb and
+ * track are invisible. appearance:none on the input alone still leaves
+ * Chrome's default blue thumb showing beside the custom one. */
+.psg-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+}
+.psg-range::-webkit-slider-runnable-track {
+  background: transparent;
+}
+.psg-range::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  background: transparent;
+}
+.psg-range::-moz-range-track {
+  background: transparent;
+}
