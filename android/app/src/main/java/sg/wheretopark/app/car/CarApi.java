@@ -120,14 +120,17 @@ final class CarApi {
         });
     }
 
-    /** Carparks around a point, ranked and priced for `hours` like the phone app. */
-    static void nearby(double lat, double lng, double hours, int limit, Callback<List<Carpark>> cb) {
-        Uri uri = Uri.parse(BASE + "/api/car/nearby").buildUpon()
+    /** Carparks around a point, ranked and priced for `hours` like the phone app.
+     *  `label` (a searched place, null for "near me") pins that place's own
+     *  carpark first, as the phone does when you search a mall. */
+    static void nearby(double lat, double lng, @Nullable String label, double hours, int limit, Callback<List<Carpark>> cb) {
+        Uri.Builder ub = Uri.parse(BASE + "/api/car/nearby").buildUpon()
                 .appendQueryParameter("lat", String.valueOf(lat))
                 .appendQueryParameter("lng", String.valueOf(lng))
                 .appendQueryParameter("hours", String.valueOf(hours))
-                .appendQueryParameter("limit", String.valueOf(limit))
-                .build();
+                .appendQueryParameter("limit", String.valueOf(limit));
+        if (label != null) ub.appendQueryParameter("label", label);
+        Uri uri = ub.build();
         getJson(uri, cb, body -> {
             List<Carpark> out = new ArrayList<>();
             JSONArray arr = body.optJSONArray("carparks");

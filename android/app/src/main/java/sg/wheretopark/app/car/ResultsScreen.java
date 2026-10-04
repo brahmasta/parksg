@@ -138,7 +138,7 @@ final class ResultsScreen extends Screen {
 
     private void load() {
         if (destination == null) return;
-        CarApi.nearby(destination.lat, destination.lng, STAY_HOURS, 12, (list, err) -> {
+        CarApi.nearby(destination.lat, destination.lng, nearMe ? null : destination.label, STAY_HOURS, 12, (list, err) -> {
             carparks = list;
             error = err;
             invalidate();
