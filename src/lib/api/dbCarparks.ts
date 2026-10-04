@@ -12,6 +12,7 @@
  */
 
 import { haversineMeters } from '../geo';
+import { CARPARK_SELECT } from '../carparkSelect';
 
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -101,8 +102,7 @@ function boundingBox(
 
 // ── Fetcher ────────────────────────────────────────────────────────────
 
-const CARPARK_SELECT =
-  'id,agency,source_code,name,address,lat,lng,car_park_type,parking_system,central_area,total_lots,lot_types,motorcycle_lots,heavy_lots,height_limit_m,source,rate_rows(day_type,start_time,end_time,per_block_cents,block_minutes,first_hour_cents,first_block_minutes,per_entry_cents,cap_cents,grace_minutes,system,veh_cat,source,effective_from)';
+
 
 /**
  * Fetch a single carpark (with rate_rows) by its URL slug — used when the app

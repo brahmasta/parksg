@@ -39,6 +39,23 @@
 
         </activity>
 
+        <!-- Android Auto (sg.wheretopark.app.car). A point-of-interest app:
+             parking near a destination or the car, on the host's map. -->
+        <service
+            android:name=".car.WtpCarAppService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.POI" />
+            </intent-filter>
+        </service>
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="1" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -55,4 +72,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Android Auto: the place-list map template for points of interest. -->
+    <uses-permission android:name="androidx.car.app.MAP_TEMPLATES" />
 </manifest>
