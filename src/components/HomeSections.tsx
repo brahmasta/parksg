@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import type { MergedSaveItem, RecentDestination, User } from '../lib/types';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
+import { signInProviders } from '../lib/nativeAuth';
 import { HomeSavedDestChip } from './HomeSavedDestChip';
 import { HomeSavedCarparkChip } from './HomeSavedCarparkChip';
 import {
@@ -305,8 +306,17 @@ export function HomeRecentSection({
                   boxShadow: 'var(--shadow-card)',
                 }}
               >
-                <IconGoogleG size={16} />
-                Continue with Google
+                {/* Opens Account, which lists the sign-in options. With Apple
+                    among them (iOS), naming only Google here would undersell
+                    it (App Store rule 4.8). */}
+                {signInProviders.length === 1 ? (
+                  <>
+                    <IconGoogleG size={16} />
+                    Continue with Google
+                  </>
+                ) : (
+                  'Sign in'
+                )}
               </button>
             </div>
           </div>
