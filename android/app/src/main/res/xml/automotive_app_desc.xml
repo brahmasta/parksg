@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Declares the app's Android Auto support: Car App Library templates. -->
+<automotiveApp>
+    <uses name="template" />
+</automotiveApp>
