@@ -128,6 +128,9 @@ App Store Connect scales them down for smaller iPhones.
 5. `5-plan-stay.jpg`: Plan your stay
 6. `6-home.jpg`: home (optional)
 
+`screenshots-6.5/`: the same set at 1284 × 2778 for App Store Connect's
+6.5" slot (resized from the 6.9" set, 6 px trimmed top and bottom).
+
 To retake: `xcrun simctl status_bar <device> override --time 9:41 ...`,
 `xcrun simctl location <device> set 1.3040,103.8318`, then
 `xcrun simctl io <device> screenshot` and convert with
