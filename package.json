@@ -22,7 +22,7 @@
     "migrate:justpark": "tsx scripts/migrate-justpark-sites.ts",
     "geocode:malls": "tsx scripts/geocode-malls.ts",
     "geocode:lta-datagov": "tsx scripts/geocode-lta-datagov.ts",
-    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts scripts/lib/ura.test.ts scripts/lib/hdb-rates.test.ts src/lib/uraJoin.test.ts src/lib/destinationMatch.test.ts src/lib/hdbMotorcycle.test.ts scripts/lib/curated-malls.test.ts scripts/lib/ura-capacity.test.ts src/lib/server/justpark.test.ts api/_admin/carparkWrite.test.ts scripts/lib/lta-datagov-geo.test.ts scripts/lib/lta-csv-match.test.ts src/lib/recents.test.ts src/lib/shareResults.test.ts src/lib/radius.test.ts src/lib/rateDisplay.test.ts src/lib/lotTypes.test.ts src/lib/deepLinks.test.ts src/lib/geo.test.ts api/_account/verify.test.ts api/_account/appleRevoke.test.ts"
+    "test:scripts": "tsx --test scripts/lib/parse-lta-rate.test.ts scripts/lib/ura.test.ts scripts/lib/hdb-rates.test.ts src/lib/uraJoin.test.ts src/lib/destinationMatch.test.ts src/lib/hdbMotorcycle.test.ts scripts/lib/curated-malls.test.ts scripts/lib/ura-capacity.test.ts src/lib/server/justpark.test.ts api/_admin/carparkWrite.test.ts scripts/lib/lta-datagov-geo.test.ts scripts/lib/lta-csv-match.test.ts src/lib/recents.test.ts src/lib/shareResults.test.ts src/lib/radius.test.ts src/lib/rateDisplay.test.ts src/lib/lotTypes.test.ts src/lib/deepLinks.test.ts src/lib/geo.test.ts api/_account/verify.test.ts api/_account/appleRevoke.test.ts api/_car/results.test.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",

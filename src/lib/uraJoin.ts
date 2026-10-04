@@ -39,6 +39,8 @@ function localDateKey(d: Date): string {
 export function applyUraRates(
   carparks: Carpark[],
   uraByPpCode: Map<string, UraCarparkRates>,
+  /** When to price at. Server callers pass Singapore wall-clock time. */
+  now: Date = new Date(),
 ): {
   carparks: Carpark[];
   matchedCount: number;
@@ -51,7 +53,6 @@ export function applyUraRates(
   const unmatched: string[] = [];
   let matchedCount = 0;
 
-  const now = new Date();
   const dayType = currentDayType(now);
   const hourOfDay = now.getHours();
 
