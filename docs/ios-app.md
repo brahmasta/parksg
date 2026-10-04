@@ -28,10 +28,11 @@ npm run cap:ios   # build:native → cap sync ios → open Xcode
 2. Xcode → Settings → Accounts: sign in with the team's Apple ID. Automatic
    signing then registers the App ID with Sign in with Apple and Associated
    Domains from the entitlements file.
-3. Google Cloud (same project as web/Android) → OAuth client → iOS, bundle id
-   `sg.wheretopark.app`. Put the client id in `VITE_GOOGLE_IOS_CLIENT_ID`
-   (`.env.native` / Vercel env, the server checks it too) and its reversed form
-   in the `GOOGLE_REVERSED_CLIENT_ID` build setting (both configurations).
+3. Google Cloud project 26992432747 → OAuth client `wheretopark iOS`
+   (`26992432747-828f7ld9…`): in `.env.native` as `VITE_GOOGLE_IOS_CLIENT_ID`
+   and reversed as the `GOOGLE_REVERSED_CLIENT_ID` build setting. Also set
+   `VITE_GOOGLE_IOS_CLIENT_ID` in Vercel so account deletion accepts iPhone
+   Google tokens. The Supabase values come from `.env.local` (git-ignored).
 4. After deploying, check the AASA file: `curl -i https://wheretopark.sg/.well-known/apple-app-site-association`.
 5. developer.apple.com → Keys → new key with Sign in with Apple. Set
    `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` in Vercel.

@@ -308,7 +308,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WPSXGHD68F;
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.REPLACE-WITH-IOS-CLIENT";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.26992432747-828f7ld9tg3fve6vfrmqtsp5fm77jslu";
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -333,7 +333,7 @@
 				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WPSXGHD68F;
-				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.REPLACE-WITH-IOS-CLIENT";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.26992432747-828f7ld9tg3fve6vfrmqtsp5fm77jslu";
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
