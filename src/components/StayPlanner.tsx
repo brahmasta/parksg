@@ -163,6 +163,7 @@ export function StayPlanner({
             value={hours}
             onChange={(e) => onChange({ ...stay, hours: clampHours(parseFloat(e.target.value)) })}
             aria-label="Parking duration in hours"
+            className="psg-range"
             style={{ position: 'absolute', left: 0, right: 0, width: '100%', margin: 0, appearance: 'none', background: 'transparent', cursor: 'pointer', height: 28 }}
           />
           <span style={{ position: 'absolute', left: `${pct}%`, transform: 'translateX(-50%)', width: 20, height: 20, borderRadius: 999, background: 'var(--bg-1)', border: '2px solid var(--accent)', boxShadow: '0 2px 6px rgba(0,0,0,0.18)', pointerEvents: 'none' }} />
