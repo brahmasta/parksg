@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["WPSXGHD68F.sg.wheretopark.app"],
+        "components": [
+          { "/": "/", "?": { "cp": "*" }, "comment": "Shared carpark links (/?cp=…&to=…)" },
+          { "/": "/", "?": { "to": "*" } },
+          { "/": "/carpark/*" },
+          { "/": "/parking-near/*" }
+        ]
+      }
+    ]
+  }
+}

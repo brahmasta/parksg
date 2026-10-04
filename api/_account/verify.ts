@@ -18,6 +18,8 @@ export type DeleteRequest = {
   provider?: unknown;
   accessToken?: unknown;
   idToken?: unknown;
+  /** Apple only: lets the server revoke the grant (appleRevoke.ts). */
+  authorizationCode?: unknown;
   userId?: unknown;
 };
 

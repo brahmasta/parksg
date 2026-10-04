@@ -74,7 +74,7 @@ function readAppleName(id: string): string | null {
  *  `cancelled` when the person closes the sheet. */
 export async function nativeSignIn(
   provider: SignInProvider,
-): Promise<Profile & { accessToken: string | null; idToken: string | null }> {
+): Promise<Profile & { accessToken: string | null; idToken: string | null; authorizationCode?: string | null }> {
   await init();
   try {
     const res = await SocialLogin.login(
@@ -111,7 +111,17 @@ export async function nativeSignIn(
     const email = p.email ?? (claims.email as string | undefined) ?? '';
     const given = [p.givenName, p.familyName].filter(Boolean).join(' ');
     if (given) persist(APPLE_NAME_KEY, JSON.stringify({ id, name: given }));
-    return { id, name: given || readAppleName(id) || email || 'Apple user', email, accessToken: null, idToken: r.idToken };
+    return {
+      id,
+      name: given || readAppleName(id) || email || 'Apple user',
+      email,
+      accessToken: null,
+      idToken: r.idToken,
+      // Without useProperTokenExchange the plugin hands back Apple's one-time
+      // authorization code as `accessToken`. Account deletion sends it to the
+      // server, which exchanges it so the grant can be revoked.
+      authorizationCode: r.authorizationCode ?? r.accessToken?.token ?? null,
+    };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     // Closing the sheet: Android reports USER_CANCELLED / "canceled", iOS

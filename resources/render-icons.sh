@@ -1,15 +1,28 @@
 #!/usr/bin/env bash
-# Render the icon layers from resources/icon.html with headless Edge, then run
-# `npx capacitor-assets generate` to rebuild
-# the Android launcher icons and splash screens.
+# Render the icon layers from resources/icon.html with a headless Chromium
+# (Edge on Windows/Git Bash, Chrome or Edge on macOS), then run
+# `npx capacitor-assets generate` to rebuild the Android and iOS launcher
+# icons and splash screens.
 set -e
 cd "$(dirname "$0")"
-EDGE="/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+if command -v cygpath >/dev/null; then
+  BROWSER="/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+  winpath() { cygpath -w "$1"; }
+  fileurl() { echo "file:///$(cygpath -m "$1")"; }
+else
+  for b in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+           "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"; do
+    [ -x "$b" ] && BROWSER="$b" && break
+  done
+  [ -n "$BROWSER" ] || { echo "Install Google Chrome or Microsoft Edge" >&2; exit 1; }
+  winpath() { echo "$1"; }
+  fileurl() { echo "file://$1"; }
+fi
 for layer in full fg bg tile; do
-  "$EDGE" --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 \
+  "$BROWSER" --headless=new --disable-gpu --hide-scrollbars --default-background-color=00000000 \
     --virtual-time-budget=8000 --window-size=1024,1024 \
-    --screenshot="$(cygpath -w "$PWD/layer-$layer.png")" \
-    "file:///$(cygpath -m "$PWD/icon.html")?layer=$layer" 2>/dev/null
+    --screenshot="$(winpath "$PWD/layer-$layer.png")" \
+    "$(fileurl "$PWD/icon.html")?layer=$layer" 2>/dev/null
 done
 
 # Compose the @capacitor/assets sources and the Play Store icon.
@@ -29,6 +42,6 @@ const r = (f) => 'resources/' + f;
   }
 })();"
 rm -f resources/layer-*.png
-npx capacitor-assets generate --android \
+npx capacitor-assets generate --android --ios \
   --iconBackgroundColor '#2ee3c2' --iconBackgroundColorDark '#2ee3c2' \
   --splashBackgroundColor '#fafafa' --splashBackgroundColorDark '#12151a'

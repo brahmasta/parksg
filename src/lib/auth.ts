@@ -184,11 +184,16 @@ export function useSession() {
     const user = readSession().user;
     if (!user) throw new Error('You are not signed in.');
     const provider: SignInProvider = user.provider ?? 'google';
-    let proof: { provider: SignInProvider; accessToken?: string | null; idToken?: string | null };
+    let proof: {
+      provider: SignInProvider;
+      accessToken?: string | null;
+      idToken?: string | null;
+      authorizationCode?: string | null;
+    };
     if (isNative) {
       const p = await nativeSignIn(provider);
       if (p.id !== user.id) throw new Error('That is a different account from the one signed in here.');
-      proof = { provider, accessToken: p.accessToken, idToken: p.idToken };
+      proof = { provider, accessToken: p.accessToken, idToken: p.idToken, authorizationCode: p.authorizationCode };
     } else {
       const token = await new Promise<string>((resolve, reject) => {
         reauth.current = { resolve, reject };
