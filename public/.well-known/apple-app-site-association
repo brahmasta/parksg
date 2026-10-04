@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appIDs": ["TEAMID.sg.wheretopark.app"],
+        "appIDs": ["WPSXGHD68F.sg.wheretopark.app"],
         "components": [
           { "/": "/", "?": { "cp": "*" }, "comment": "Shared carpark links (/?cp=…&to=…)" },
           { "/": "/", "?": { "to": "*" } },

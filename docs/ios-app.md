@@ -23,16 +23,16 @@ npm run cap:ios   # build:native → cap sync ios → open Xcode
 
 ## One-time setup
 
-1. Join the Apple Developer Program (US$99/yr). Note the Team ID.
-2. Xcode → App target → Signing & Capabilities: pick the team. Xcode registers
-   the App ID with Sign in with Apple and Associated Domains from the
-   entitlements file.
+1. Apple Developer Program: team `WPSXGHD68F` (set in the Xcode project and
+   the AASA file).
+2. Xcode → Settings → Accounts: sign in with the team's Apple ID. Automatic
+   signing then registers the App ID with Sign in with Apple and Associated
+   Domains from the entitlements file.
 3. Google Cloud (same project as web/Android) → OAuth client → iOS, bundle id
    `sg.wheretopark.app`. Put the client id in `VITE_GOOGLE_IOS_CLIENT_ID`
    (`.env.native` / Vercel env, the server checks it too) and its reversed form
    in the `GOOGLE_REVERSED_CLIENT_ID` build setting (both configurations).
-4. Replace `TEAMID` in `public/.well-known/apple-app-site-association` and
-   deploy. Check: `curl -i https://wheretopark.sg/.well-known/apple-app-site-association`.
+4. After deploying, check the AASA file: `curl -i https://wheretopark.sg/.well-known/apple-app-site-association`.
 5. developer.apple.com → Keys → new key with Sign in with Apple. Set
    `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` in Vercel.
 
