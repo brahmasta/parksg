@@ -252,12 +252,18 @@ export function renderCarparkPage(
   nearby: SeoCarpark[] = [],
 ): RenderedPage {
   const oneHour = cheapestWeekdayEstimate(cp.rates.weekday, 1);
+  // No rate rows (e.g. JTC metadata-only sites): say so rather than promising
+  // a schedule, and never fall back to an operator-default figure.
+  const hasRates =
+    cp.rates.weekday.length + cp.rates.saturday.length + cp.rates.sundayPH.length > 0;
   const priceBit =
     oneHour != null ? ` from about ${fmtDollars(oneHour)}/hr (weekday est.)` : '';
   const addrBit = cp.address ? ` at ${cp.address}` : '';
-  const description =
-    `Parking rates for ${cp.name}${addrBit}${priceBit}. ` +
-    `Operated by ${cp.operator}. Weekday, Saturday and Sunday/PH rates with estimated costs.`;
+  const description = hasRates
+    ? `Parking rates for ${cp.name}${addrBit}${priceBit}. ` +
+      `Operated by ${cp.operator}. Weekday, Saturday and Sunday/PH rates with estimated costs.`
+    : `Parking at ${cp.name}${addrBit}. Operated by ${cp.operator}. ` +
+      `Rate unknown — check the signage at the gantry.`;
   const title = `${cp.name} parking rates & availability | ${SITE_NAME}`;
   const canonical = `${ORIGIN}/carpark/${cp.slug}`;
 
@@ -289,7 +295,11 @@ export function renderCarparkPage(
 <h1>${escapeHtml(cp.name)}</h1>
 <p class="muted">${meta.join(' · ')}</p>
 ${staleNote}
-${estimateTable(cp.rates.weekday)}
+${
+  hasRates
+    ? estimateTable(cp.rates.weekday)
+    : '<h2>Rates</h2><p class="muted">Rate unknown — we don’t have this carpark’s rates yet. Check the signage at the gantry.</p>'
+}
 ${rateTable('Weekday rates', cp.rates.weekday)}
 ${rateTable('Saturday rates', cp.rates.saturday)}
 ${rateTable('Sunday & public holiday rates', cp.rates.sundayPH)}

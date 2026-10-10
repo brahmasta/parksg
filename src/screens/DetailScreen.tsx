@@ -160,7 +160,11 @@ export function DetailScreen({
     : costOverride !== undefined
       ? costOverride
       : cp.estByHours[duration];
-  const costUnknown = isGoogle || cost == null;
+  // Google carparks and our own carparks with no usable rate rows: "—", never
+  // a placeholder estimate.
+  const costUnknown = isGoogle || !!cp.rateUnknown || cost == null;
+  const hasSchedule =
+    cp.rates.weekday.length + cp.rates.saturday.length + cp.rates.sundayPH.length > 0;
   const effectiveDurationText = stay
     ? `${fmtDuration(stay.hours)} stay`
     : (durationText ?? `${durationLabel(duration)} stay`);
@@ -480,7 +484,11 @@ export function DetailScreen({
               {costUnknown ? '—' : formatCost(cost as number)}
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--text-3)', marginTop: 6 }}>
-              {isGoogle ? googleRateHint(cp.googleParking) : effectiveDurationText}
+              {isGoogle
+                ? googleRateHint(cp.googleParking)
+                : cp.rateUnknown
+                ? 'Rate unknown'
+                : effectiveDurationText}
             </div>
           </div>
           <div
@@ -672,6 +680,21 @@ export function DetailScreen({
               Rate information isn't available from Google. Check the signage or
               the operator's app at the gantry.
             </div>
+          ) : !hasSchedule ? (
+            <div
+              style={{
+                padding: '12px 14px',
+                background: 'var(--bg-2)',
+                border: '0.5px solid var(--line)',
+                borderRadius: 12,
+                fontSize: 12.5,
+                color: 'var(--text-2)',
+                lineHeight: 1.45,
+              }}
+            >
+              We don't have this carpark's rates yet. Check the signage at the
+              gantry.
+            </div>
           ) : (
             <RateTable rates={cp.rates} />
           )}
@@ -796,7 +819,7 @@ export function DetailScreen({
             ? 'Lot count refresh pending'
             : `Lot count last refreshed ${refreshedSecondsAgo}s ago`}
           <br />
-          Rates from {rateSource}
+          {isGoogle || hasSchedule ? `Rates from ${rateSource}` : 'No rate data for this carpark'}
           {isGoogle && cp.placeId && (
             <>
               <br />

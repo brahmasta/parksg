@@ -51,7 +51,7 @@ export function CarparkCard({
   const lotsLabel = lots == null ? '—' : lots === 0 ? 'Full' : `${lots} lots`;
   const isGoogle = cp.source === 'GOOGLE';
   const cost = costOverride !== undefined ? costOverride : cp.estByHours[duration];
-  const costUnknown = isGoogle || cost == null;
+  const costUnknown = isGoogle || !!cp.rateUnknown || cost == null;
   const stale = !isGoogle && isStaleRates(cp);
 
   return (
@@ -200,6 +200,8 @@ export function CarparkCard({
           >
             {isGoogle
               ? googleRateHint(cp.googleParking)
+              : cp.rateUnknown
+              ? 'Rate unknown'
               : (durationText ?? `Est · ${stale ? '2018' : durationLabel(duration)}`)}
           </div>
         </div>

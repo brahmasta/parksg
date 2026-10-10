@@ -148,14 +148,15 @@ export type Carpark = {
    * unverified carpark pulled from Google Places to fill a coverage gap.
    * Google data is held in memory only — never persisted to our DB. */
   source?: 'GOOGLE';
-  /** True when no usable rate is known (Google carparks): the UI renders
-   * "—" / "Rate unknown" instead of a fabricated fallback estimate. When set,
-   * `estByHours` holds sentinel zeros that are NEVER displayed. */
+  /** True when no usable rate is known (Google carparks, and DB carparks with
+   * no priceable rate rows): the UI renders "—" / "Rate unknown" instead of a
+   * fabricated estimate and the carpark is left out of the cheapest ranking.
+   * When set, `estByHours` holds sentinel zeros that are NEVER displayed. */
   rateUnknown?: boolean;
-  /** True when a DB carpark has no usable rate rows of its own, so its cost is
-   * the operator-default placeholder from cost.ts rather than a real tariff.
-   * Logged with results_viewed so search quality can count rate gaps. */
-  rateEstimated?: boolean;
+  /** True when a DB carpark (not Google) is `rateUnknown` because it has no
+   * usable rate rows of its own — a gap in our data rather than a supplementary
+   * result. Logged with results_viewed so search quality can count rate gaps. */
+  rateMissing?: boolean;
   /** Coarse free/paid hint from Google `parkingOptions` (null when unknown). */
   googleParking?: { free: boolean | null; paid: boolean | null };
   /** Bare Google place id (no `google:` prefix) for the "Open in Google Maps" link. */
