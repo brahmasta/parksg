@@ -152,6 +152,10 @@ export type Carpark = {
    * "—" / "Rate unknown" instead of a fabricated fallback estimate. When set,
    * `estByHours` holds sentinel zeros that are NEVER displayed. */
   rateUnknown?: boolean;
+  /** True when a DB carpark has no usable rate rows of its own, so its cost is
+   * the operator-default placeholder from cost.ts rather than a real tariff.
+   * Logged with results_viewed so search quality can count rate gaps. */
+  rateEstimated?: boolean;
   /** Coarse free/paid hint from Google `parkingOptions` (null when unknown). */
   googleParking?: { free: boolean | null; paid: boolean | null };
   /** Bare Google place id (no `google:` prefix) for the "Open in Google Maps" link. */

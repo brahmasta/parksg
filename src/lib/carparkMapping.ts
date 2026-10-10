@@ -72,7 +72,8 @@ export function dbRowToCarpark(
   const op = (row.agency === 'HDB' || row.agency === 'URA' || row.agency === 'LTA'
     ? row.agency
     : 'LTA') as Operator;
-  const estByHours = computeEstByHours(allRows, dayType, hourOfDay) ?? estByHoursFor(op);
+  const realEst = computeEstByHours(allRows, dayType, hourOfDay);
+  const estByHours = realEst ?? estByHoursFor(op);
   const fallbackRates =
     rates.weekday.length === 0 && rates.saturday.length === 0 && rates.sundayPH.length === 0
       ? ratesFor(op)
@@ -110,6 +111,7 @@ export function dbRowToCarpark(
       motorcycleRates ??
       (row.agency === 'HDB' && lotTypes.includes('M') ? HDB_MOTORCYCLE_RATES : undefined),
     estByHours,
+    ...(realEst ? {} : { rateEstimated: true }),
   };
 }
 
