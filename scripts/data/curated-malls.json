@@ -13200,8 +13200,8 @@
   },
   {
     "id": "LTA:changi_airport_t1_t2_t3",
-    "name": "Crowne Plaza Changi Airport",
-    "address": "75 Airport Boulevard",
+    "name": "Changi Airport T2 & T3 Car Parks",
+    "address": "Airport Boulevard (Terminal 2 / Terminal 3)",
     "lat": 1.358784,
     "lng": 103.987877,
     "operator": "Changi Airport Group",
@@ -38721,6 +38721,37 @@
         "dayType": "SUN_PH",
         "perBlockCents": 60,
         "blockMinutes": 30
+      }
+    ]
+  },
+  {
+    "name": "Jewel Changi Airport",
+    "address": "78 Airport Boulevard, Singapore 819666",
+    "lat": 1.360341,
+    "lng": 103.989078,
+    "operator": "Changi Airport Group (T1/Jewel car park; general floors B3-B5, no cap. Short-term B2M/B2 is $0.65/15 min for 90 min, then $5/30 min)",
+    "provenance": {
+      "url": "https://www.changiairport.com/en/at-changi/facilities-and-services-directory/airport-parking.html",
+      "verified": "2026-10"
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "perBlockCents": 65,
+        "blockMinutes": 15,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "perBlockCents": 65,
+        "blockMinutes": 15,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SUN_PH",
+        "perBlockCents": 65,
+        "blockMinutes": 15,
+        "graceMinutes": 10
       }
     ]
   }
