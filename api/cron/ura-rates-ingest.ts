@@ -17,6 +17,10 @@
 //   SUPABASE_URL               Supabase project URL
 //   SUPABASE_SERVICE_ROLE_KEY  service-role key (bypasses RLS for writes)
 //
+// Every attempt (success or failure) is logged to `ingest_runs`
+// (db/migrations/019) so /api/cron/data-health and the admin dashboard can
+// tell a healthy feed from a silently failing one.
+//
 // Response:
 //   200 { ok: true, upserted }
 //   401 { ok: false, error }   missing / bad CRON_SECRET
@@ -25,6 +29,9 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
 import { ingestUraRates } from '../../src/lib/server/uraIngest.js';
+import { logIngestRun } from '../../src/lib/server/ingestRuns.js';
+
+const JOB = 'ura-rates-ingest';
 
 export const config = { maxDuration: 60 };
 
@@ -49,18 +56,31 @@ export default async function handler(
     });
   }
 
+  const startedAt = new Date();
   try {
     const result = await ingestUraRates({
       supabaseUrl,
       serviceRoleKey,
       accessKey,
     });
+    await logIngestRun(supabaseUrl, serviceRoleKey, {
+      job: JOB,
+      source: 'URA',
+      startedAt,
+      ok: true,
+      rows: result.upserted,
+    });
     return send(res, 200, { ok: true, upserted: result.upserted });
   } catch (err) {
-    return send(res, 500, {
+    const error = err instanceof Error ? err.message : String(err);
+    await logIngestRun(supabaseUrl, serviceRoleKey, {
+      job: JOB,
+      source: 'URA',
+      startedAt,
       ok: false,
-      error: err instanceof Error ? err.message : String(err),
+      error,
     });
+    return send(res, 500, { ok: false, error });
   }
 }
 

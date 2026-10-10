@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { adminFetch, AdminError, type Analytics, type Traffic } from './api';
 
 import { TrafficSection } from './TrafficSection';
+import { DataHealthSection } from './DataHealthSection';
 import { GroupHeading, Stat, MiniStat, Empty, Bars } from './ui';
 import { TYPE, card, cardSoft, eyebrow, selectStyle } from './uiTokens';
 
@@ -248,6 +249,7 @@ export function AdminDashboard({
             )}
           </div>
         </div>
+        <DataHealthSection token={token} />
       </section>
     </div>
   );

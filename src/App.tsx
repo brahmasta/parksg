@@ -34,6 +34,7 @@ import { loadRecents, pushRecent } from './lib/recents';
 import { shareResults } from './lib/shareResults';
 import { useSession } from './lib/auth';
 import { recordSearch, recordVisit } from './lib/api/analytics';
+import { resultsQuality, QUERY_MAX } from './lib/resultsQuality';
 import { getCurrentCoords, NEAR_ME_LABEL } from './lib/geolocation';
 import { hapticTap } from './lib/nativeShell';
 import {
@@ -430,8 +431,11 @@ function App() {
         auto: !byUser,
       });
       // Funnel step 3: a resolved destination means results are on screen.
+      // Carries the destination and how many results were actually priced,
+      // so zero/low/unpriced outcomes can be ranked by place.
       trackEvent('results_viewed', {
-        count: result.carparks.length,
+        ...resultsQuality(result.carparks),
+        query: result.destination.label.slice(0, QUERY_MAX),
         ...(byUser ? {} : { auto: true }),
       });
     }
