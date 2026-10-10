@@ -12,7 +12,7 @@ import type { UraCarparkRates } from './ura';
 import { haversineMeters, walkMinutesFromMeters } from './geo';
 import { HDB_MOTORCYCLE_RATES, hdbHasMotorcycleLots } from './hdbMotorcycle';
 import { estimateCostCentsAt } from './rateMath';
-import { estByHoursFor, ratesFor } from './cost';
+import { UNKNOWN_EST_BY_HOURS } from './cost';
 
 // ──────────────────────────────────────────────────────────────────────
 // DB row → app Carpark
@@ -66,18 +66,14 @@ export function dbRowToCarpark(
     ? bucketRateRows(motoRows.map((r) => ({ ...r, veh_cat: 'CAR' as const })))
     : undefined;
 
-  // Compute estByHours from the structured rate rows. If the DB carpark
-  // has no usable rate (e.g. an LTA-CSV standalone with all-zero stub rows),
-  // fall back to the operator default so the cost cell never reads $0.
+  // Compute estByHours from the structured rate rows. A DB carpark with no
+  // usable rate (e.g. an LTA-CSV standalone with all-zero stub rows, or a JTC
+  // metadata-only site) is "Rate unknown": no invented operator-default
+  // schedule or cost, and it never competes for cheapest.
   const op = (row.agency === 'HDB' || row.agency === 'URA' || row.agency === 'LTA'
     ? row.agency
     : 'LTA') as Operator;
   const realEst = computeEstByHours(allRows, dayType, hourOfDay);
-  const estByHours = realEst ?? estByHoursFor(op);
-  const fallbackRates =
-    rates.weekday.length === 0 && rates.saturday.length === 0 && rates.sundayPH.length === 0
-      ? ratesFor(op)
-      : rates;
 
   const live = lotsByDbId.get(row.id);
   // Per-vehicle types from the live feed (HDB), else the stored ones (URA
@@ -104,14 +100,16 @@ export function dbRowToCarpark(
     walkMeters: Math.round(meters),
     grace: row.rate_rows[0]?.grace_minutes ?? (row.agency === 'HDB' ? 10 : 0),
     coords: { entrance: [row.lat!, row.lng!] },
-    rates: fallbackRates,
+    // Real rows only (possibly none); a schedule we can't price is still shown.
+    rates,
     // HDB's flat motorcycle charge where the carpark has motorcycle lots but
     // no schedule of its own.
     motorcycleRates:
       motorcycleRates ??
       (row.agency === 'HDB' && lotTypes.includes('M') ? HDB_MOTORCYCLE_RATES : undefined),
-    estByHours,
-    ...(realEst ? {} : { rateEstimated: true }),
+    ...(realEst
+      ? { estByHours: realEst }
+      : { estByHours: { ...UNKNOWN_EST_BY_HOURS }, rateUnknown: true, rateMissing: true }),
   };
 }
 

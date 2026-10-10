@@ -14,9 +14,11 @@ export type ResultsQuality = {
   count: number;
   /** Carparks priced from their own rate rows. */
   priced: number;
-  /** Carparks on the operator-default placeholder estimate (no rate rows). */
+  /** Our own carparks with no usable rate rows (shown as "Rate unknown").
+   * Key kept as `estimated` so the logged results_viewed property stays
+   * comparable with events from before these stopped getting a placeholder. */
   estimated: number;
-  /** Carparks with no rate at all (supplementary Google results). */
+  /** Supplementary Google carparks (no rate at all). */
   unknown: number;
 };
 
@@ -24,8 +26,8 @@ export function resultsQuality(carparks: Carpark[]): ResultsQuality {
   let unknown = 0;
   let estimated = 0;
   for (const cp of carparks) {
-    if (cp.rateUnknown) unknown++;
-    else if (cp.rateEstimated) estimated++;
+    if (cp.rateMissing) estimated++;
+    else if (cp.rateUnknown) unknown++;
   }
   return { count: carparks.length, priced: carparks.length - unknown - estimated, estimated, unknown };
 }
