@@ -93,6 +93,9 @@ export const FEATURES: Feature[] = [
   { id: 'sign_out', label: 'Sign out', area: 'Account' },
   { id: 'install_accept', label: 'Install the PWA', area: 'Account' },
   { id: 'install_dismiss', label: 'Dismiss install prompt', area: 'Account' },
+  { id: 'app_store_badge', label: 'App Store badge', area: 'Account' },
+  { id: 'app_store_banner', label: 'App Store banner: Get', area: 'Account' },
+  { id: 'app_store_banner_dismiss', label: 'Dismiss App Store banner', area: 'Account' },
 
   // Contribute
   { id: 'report_inaccuracy', label: 'Report an inaccuracy', area: 'Contribute' },

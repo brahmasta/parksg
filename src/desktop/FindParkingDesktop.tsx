@@ -20,6 +20,7 @@ import { useCarparkNavigation } from '../hooks/useCarparkNavigation';
 import { RadiusSelect } from '../components/RadiusSelect';
 import { pickHeroCopy } from '../lib/heroCopy';
 import { AppFooter } from '../components/AppFooter';
+import { AppStoreBanner } from '../components/AppStoreBanner';
 import { HomeRecentSection, HomeSavedSection } from '../components/HomeSections';
 import { IconLocation, IconShare } from '../components/icons';
 
@@ -397,6 +398,7 @@ function LandingDesktop({
   return (
     <main className="psg-screen" style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: 560, padding: '64px 24px 80px' }}>
+        <AppStoreBanner style={{ marginBottom: 28 }} />
         <h1 style={{ margin: '0 0 6px', fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.1, textWrap: 'balance' }}>
           {hero.header}
         </h1>

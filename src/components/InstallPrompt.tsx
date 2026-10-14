@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { usePwaInstall } from '../lib/pwa';
-import { IconClose, IconShare } from './icons';
+import { IconClose } from './icons';
 
 /**
  * In-app "Add to home screen" banner. Slides up after a short delay once the
  * app is eligible (installable + not already installed + not recently
- * dismissed). On Chromium it triggers the native install sheet; on iOS Safari
- * it shows the manual Share → Add to Home Screen instructions.
+ * dismissed), and triggers Chromium's native install sheet. iPhone visitors
+ * get the App Store instead (AppStoreBanner).
  */
 export function InstallPrompt() {
-  const { eligible, ios, hasNativePrompt, promptInstall, dismiss } =
-    usePwaInstall();
+  const { eligible, promptInstall, dismiss } = usePwaInstall();
   const [visible, setVisible] = useState(false);
 
   // Hold off a beat so the banner doesn't fight first paint / the sign-in
@@ -85,9 +84,7 @@ export function InstallPrompt() {
               lineHeight: 1.45,
             }}
           >
-            {ios && !hasNativePrompt
-              ? 'Launch it like an app — full screen, one tap away.'
-              : 'Open it like an app — full screen and one tap from your home screen.'}
+            Open it like an app — full screen and one tap from your home screen.
           </div>
         </div>
         <button
@@ -111,58 +108,28 @@ export function InstallPrompt() {
         </button>
       </div>
 
-      {hasNativePrompt ? (
-        <button
-          type="button"
-          onClick={onInstall}
-          data-track="install_accept"
-          style={{
-            appearance: 'none',
-            border: 0,
-            width: '100%',
-            marginTop: 12,
-            padding: '11px 14px',
-            background: 'var(--accent)',
-            color: 'var(--accent-on)',
-            borderRadius: 10,
-            fontSize: 13.5,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'var(--font-body)',
-            boxShadow: 'var(--shadow-card)',
-          }}
-        >
-          Install
-        </button>
-      ) : (
-        // iOS Safari manual flow.
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginTop: 12,
-            padding: '10px 12px',
-            background: 'var(--bg-2)',
-            border: '0.5px solid var(--line)',
-            borderRadius: 10,
-            fontSize: 12.5,
-            color: 'var(--text-2)',
-            lineHeight: 1.4,
-          }}
-        >
-          <span style={{ color: 'var(--accent)', display: 'inline-flex', flexShrink: 0 }}>
-            <IconShare size={16} stroke={2} />
-          </span>
-          <span>
-            Tap <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>Share</strong>, then{' '}
-            <strong style={{ color: 'var(--text-1)', fontWeight: 600 }}>
-              Add to Home Screen
-            </strong>
-            .
-          </span>
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={onInstall}
+        data-track="install_accept"
+        style={{
+          appearance: 'none',
+          border: 0,
+          width: '100%',
+          marginTop: 12,
+          padding: '11px 14px',
+          background: 'var(--accent)',
+          color: 'var(--accent-on)',
+          borderRadius: 10,
+          fontSize: 13.5,
+          fontWeight: 600,
+          cursor: 'pointer',
+          fontFamily: 'var(--font-body)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+      >
+        Install
+      </button>
     </div>
   );
 }
