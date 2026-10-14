@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { AppStoreBadge } from './AppStoreBadge';
 import { FeedbackDialog } from './FeedbackDialog';
 import type { User } from '../lib/types';
 
 /**
  * Global app footer — sits at the bottom of the home screen's scrollable
  * body. A single line of micro-copy whose link opens the feedback form
- * (FeedbackDialog: a bottom sheet on phone, a centred modal on desktop).
+ * (FeedbackDialog: a bottom sheet on phone, a centred modal on desktop),
+ * then the App Store badge on the website (AppStoreBadge hides itself in the
+ * apps and on Android).
  *
  * Kept small (10pt) so it never competes with the content above it.
  */
@@ -49,6 +52,9 @@ export function AppFooter({
         >
           Send feedback
         </button>
+        <div style={{ marginTop: 14 }}>
+          <AppStoreBadge />
+        </div>
       </footer>
       {/* Outside <footer> so the sheet doesn't inherit its small centred text. */}
       <FeedbackDialog

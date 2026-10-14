@@ -11,16 +11,6 @@ const DISMISS_KEY = 'psg.pwaPromptDismissedAt';
 // Once dismissed, stay quiet for a week before offering again.
 const DISMISS_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
-function isIos(): boolean {
-  if (typeof navigator === 'undefined') return false;
-  const ua = navigator.userAgent;
-  const iDevice = /iphone|ipad|ipod/i.test(ua);
-  // iPadOS 13+ reports as Mac; detect touch + Safari to catch it.
-  const iPadOs =
-    navigator.platform === 'MacIntel' && (navigator.maxTouchPoints ?? 0) > 1;
-  return iDevice || iPadOs;
-}
-
 function isStandalone(): boolean {
   if (typeof window === 'undefined') return false;
   return (
@@ -44,15 +34,13 @@ function dismissedRecently(): boolean {
 
 /**
  * PWA install state. On Chromium we capture `beforeinstallprompt` and expose
- * `promptInstall()` to trigger the native sheet. On iOS Safari (which never
- * fires that event) we surface `iosInstructions` so the UI can show the
- * manual Share → Add to Home Screen flow.
+ * `promptInstall()` to trigger the native sheet. iOS has the App Store app
+ * instead (lib/appStore.ts).
  */
 export function usePwaInstall() {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(() => isStandalone());
   const [dismissed, setDismissed] = useState(() => dismissedRecently());
-  const ios = isIos();
 
   useEffect(() => {
     const onBeforeInstall = (e: Event) => {
@@ -90,22 +78,17 @@ export function usePwaInstall() {
     setDismissed(true);
   }, []);
 
-  // Show the banner when:
-  //  - not already installed, and
-  //  - not dismissed within the cooldown, and
-  //  - either Chromium gave us a prompt, OR we're on iOS Safari (manual flow).
+  // Show the banner when Chromium gave us a prompt, the site isn't installed
+  // and it wasn't dismissed within the cooldown. iPhone visitors are pointed
+  // at the App Store instead (AppStoreBanner, Apple's Smart App Banner), so
+  // the manual Share → Add to Home Screen flow is no longer offered.
   const canPromptChromium = deferred != null;
-  const canPromptIos = ios && !installed;
   // Never inside the Capacitor shells: the app is already installed.
-  const eligible =
-    !isNative && !installed && !dismissed && (canPromptChromium || canPromptIos);
+  const eligible = !isNative && !installed && !dismissed && canPromptChromium;
 
   return {
     eligible,
     installed,
-    ios,
-    /** True only when the native Chromium prompt is available. */
-    hasNativePrompt: canPromptChromium,
     promptInstall,
     dismiss,
   };
