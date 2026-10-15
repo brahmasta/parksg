@@ -1,0 +1,135 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: 'SG'; font-weight: 500; src: url(space-grotesk-latin-500-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'SG'; font-weight: 600; src: url(space-grotesk-latin-600-normal.woff2) format('woff2'); }
+  @font-face { font-family: 'SG'; font-weight: 700; src: url(space-grotesk-latin-700-normal.woff2) format('woff2'); }
+  html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #12151a; }
+  body { font-family: 'SG', -apple-system, sans-serif; color: #f5f7fa; position: relative; }
+  .glow { position: absolute; width: 1400px; height: 1400px; left: -160px; border-radius: 50%;
+          background: radial-gradient(circle, rgba(46,227,194,.28) 0%, rgba(46,227,194,0) 62%); }
+  .layer { position: absolute; inset: 0; will-change: opacity, transform; }
+  .center { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .tile { width: 300px; height: 300px; border-radius: 76px; display: grid; place-items: center;
+          background: linear-gradient(145deg, #2ee3c2 0%, #14c9b6 100%);
+          box-shadow: 0 40px 140px rgba(46,227,194,.45); }
+  .tile span { font: 700 190px/1 'SG'; color: #0b2e2a; transform: translate(-0.02em, 0.005em); }
+  .kicker { font: 600 34px/1 'SG'; letter-spacing: 6px; text-transform: uppercase; color: #2dd4bf; }
+  .h1 { font: 700 104px/1.02 'SG'; letter-spacing: -3px; }
+  .h2 { font: 700 84px/1.04 'SG'; letter-spacing: -2.4px; }
+  .sub { font: 500 40px/1.3 'SG'; color: rgba(245,247,250,.68); }
+  .wordmark { font: 700 64px/1 'SG'; letter-spacing: -1.6px; }
+  .wordmark i { font-style: normal; color: rgba(245,247,250,.45); }
+  .caption { position: absolute; left: 80px; right: 80px; top: 150px; }
+  .phone { position: absolute; left: 50%; top: 420px; width: 640px; margin-left: -342px;
+           padding: 22px; border-radius: 110px; background: #05070a;
+           box-shadow: 0 0 0 3px #2a2f38, 0 60px 160px rgba(0,0,0,.6), 0 0 120px rgba(46,227,194,.18); }
+  .phone img { display: block; width: 640px; border-radius: 90px; }
+</style></head>
+<body>
+<div class="glow" id="glow"></div>
+
+<!-- Intro -->
+<div class="layer center" id="intro">
+  <div class="tile" id="tile"><span>P</span></div>
+  <div style="height:90px"></div>
+  <div class="kicker" id="introKicker">Now on the App Store</div>
+  <div style="height:36px"></div>
+  <div class="wordmark" id="introWord">wheretopark<i>.sg</i></div>
+  <div style="height:30px"></div>
+  <div class="sub" id="introSub">Know the price before the ramp.</div>
+</div>
+
+<!-- Feature scenes, filled from SCENES below -->
+<div id="scenes"></div>
+
+<!-- Outro -->
+<div class="layer center" id="outro">
+  <div class="tile" style="width:220px;height:220px;border-radius:56px"><span style="font-size:140px">P</span></div>
+  <div style="height:70px"></div>
+  <div class="h1" style="font-size:96px">Free for iPhone.</div>
+  <div style="height:28px"></div>
+  <div class="sub">Every carpark in Singapore,<br>cheapest first.</div>
+  <div style="height:80px"></div>
+  <img src="app-store-badge-white.svg" width="420" height="140" alt="">
+  <div style="height:56px"></div>
+  <div class="wordmark" style="font-size:52px">wheretopark<i>.sg</i></div>
+</div>
+
+<script>
+const SCENES = [
+  { img: '1-results-list.jpg', kicker: 'Search anywhere', title: 'Cheapest spot first.', sub: 'Real prices for your stay.' },
+  { img: '2-results-map.jpg',  kicker: 'See it all',      title: 'Every carpark, one map.', sub: 'Tap a price to open the carpark.' },
+  { img: '3-detail.jpg',       kicker: 'Before you drive', title: 'Cost, lots and the walk.', sub: 'Total cost, live lots, walking route.' },
+  { img: '5-plan-stay.jpg',    kicker: 'Your timing',     title: 'Plan your stay.', sub: 'Start now or later, any duration.' },
+];
+const host = document.getElementById('scenes');
+SCENES.forEach((s, i) => {
+  host.insertAdjacentHTML('beforeend', `
+    <div class="layer" id="s${i}">
+      <div class="caption" id="c${i}">
+        <div class="kicker">${s.kicker}</div>
+        <div style="height:26px"></div>
+        <div class="h2">${s.title}</div>
+        <div style="height:20px"></div>
+        <div class="sub">${s.sub}</div>
+      </div>
+      <div class="phone" id="p${i}"><img src="${s.img}" alt=""></div>
+    </div>`);
+});
+
+// Timeline (seconds). Scenes overlap by FADE for crossfades.
+const INTRO = 2.6, SCENE = 2.7, FADE = 0.35, OUTRO = 3.2;
+const sceneStart = (i) => INTRO - FADE + i * (SCENE - FADE);
+const outroStart = sceneStart(SCENES.length) ;
+window.DURATION = outroStart + OUTRO;
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+const easeInOut = (x) => { x = clamp(x); return x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3) / 2; };
+// Opacity for a layer living in [start, start+len], fading in/out over FADE.
+const window_ = (t, start, len, fin = FADE, fout = FADE) =>
+  clamp((t - start) / fin) * clamp((start + len - t) / fout);
+const $ = (id) => document.getElementById(id);
+
+window.render = (t) => {
+  // Background glow drifts slowly the whole time.
+  $('glow').style.top = (260 + Math.sin(t * 0.6) * 60) + 'px';
+  $('glow').style.left = (-160 + Math.cos(t * 0.45) * 50) + 'px';
+
+  // Intro
+  const io = window_(t, 0, INTRO, 0.01);
+  $('intro').style.opacity = io;
+  const pop = easeOut(t / 0.7);
+  $('tile').style.transform = `scale(${0.6 + 0.4 * pop}) rotate(${(1 - pop) * -8}deg)`;
+  $('tile').style.opacity = clamp(t / 0.35);
+  [['introKicker', 0.45], ['introWord', 0.65], ['introSub', 0.85]].forEach(([id, d]) => {
+    const k = easeOut((t - d) / 0.5);
+    $(id).style.opacity = k;
+    $(id).style.transform = `translateY(${(1 - k) * 30}px)`;
+  });
+
+  // Feature scenes
+  SCENES.forEach((_, i) => {
+    const st = sceneStart(i), lt = t - st;
+    $(`s${i}`).style.opacity = window_(t, st, SCENE);
+    // Captions don't crossfade: the outgoing one is gone before the next
+    // arrives, so two lines of text never overlap.
+    const cin = easeOut(lt / 0.45);
+    const cout = clamp((st + SCENE - FADE - t) / 0.25);
+    $(`c${i}`).style.opacity = cin * cout;
+    $(`c${i}`).style.transform = `translateY(${(1 - cin) * 36}px)`;
+    const pin = easeOut((lt - 0.1) / 0.75);
+    const drift = easeInOut(lt / SCENE) * -36;
+    $(`p${i}`).style.transform = `translateY(${(1 - pin) * 260 + drift}px) scale(${0.96 + 0.04 * pin})`;
+  });
+
+  // Outro
+  const oo = window_(t, outroStart, OUTRO + 1, FADE, 0.01);
+  $('outro').style.opacity = oo;
+  const ok = easeOut((t - outroStart) / 0.7);
+  $('outro').style.transform = `scale(${0.97 + 0.03 * ok})`;
+};
+window.render(0);
+</script>
+</body></html>
