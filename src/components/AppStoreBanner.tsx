@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import { APP_STORE_URL, dismissAppStoreBanner, showAppStoreBanner } from '../lib/appStore';
+import { APP_LINK, dismissAppStoreBanner, showAppStoreBanner } from '../lib/appStore';
 import { IconClose } from './icons';
 
 /**
@@ -52,7 +52,7 @@ export function AppStoreBanner({ style }: { style?: CSSProperties }) {
         </div>
       </div>
       <a
-        href={APP_STORE_URL}
+        href={APP_LINK}
         target="_blank"
         rel="noopener"
         aria-label="Get wheretopark.sg on the App Store"

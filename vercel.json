@@ -1,4 +1,10 @@
 {
+  "redirects": [
+    { "source": "/app", "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*android.*" }], "destination": "/", "permanent": false },
+    { "source": "/app", "destination": "https://apps.apple.com/sg/app/wheretopark-sg-sg-parking/id6818932533", "permanent": false },
+    { "source": "/ios", "has": [{ "type": "header", "key": "user-agent", "value": "(?i).*android.*" }], "destination": "/", "permanent": false },
+    { "source": "/ios", "destination": "https://apps.apple.com/sg/app/wheretopark-sg-sg-parking/id6818932533", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/api/home" },
     { "source": "/carpark/:slug", "destination": "/api/carpark?slug=:slug" },

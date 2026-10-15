@@ -1,4 +1,4 @@
-import { APP_STORE_URL, offerAppStore } from '../lib/appStore';
+import { APP_LINK, offerAppStore } from '../lib/appStore';
 
 /**
  * Apple's official "Download on the App Store" badge (artwork from Apple's
@@ -11,7 +11,7 @@ export function AppStoreBadge({ height = 40 }: { height?: number }) {
   const width = Math.round((height * 119.66407) / 40);
   return (
     <a
-      href={APP_STORE_URL}
+      href={APP_LINK}
       target="_blank"
       rel="noopener"
       data-track="app_store_badge"
