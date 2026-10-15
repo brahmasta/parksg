@@ -87,6 +87,19 @@ test('limit caps the list', () => {
   assert.equal(buildCarResults(input({ rows, limit: 4 })).length, 4);
 });
 
+test('a carpark with no rate rows has no cost and ranks after priced ones', () => {
+  const noRates = { ...row('LTA:N', 50, 0), agency: 'LTA', rate_rows: [] } as DbCarparkRaw;
+  const out = buildCarResults(input({ rows: [noRates, row('HDB:A', 300, 60)] }));
+  assert.deepEqual(
+    out.map((c) => [c.id, c.cost]),
+    [
+      ['hdb:a', 2.4],
+      ['lta:n', null],
+    ],
+  );
+  assert.deepEqual(out[1].rateLines, []);
+});
+
 test('sgWallClock reads Singapore time whatever the server zone', () => {
   // 06:30 UTC is 14:30 in Singapore.
   const d = sgWallClock(Date.UTC(2026, 9, 7, 6, 30));

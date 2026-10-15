@@ -83,6 +83,12 @@ export function applyUraRates(
       estByHours[d] = +(cents / 100).toFixed(2);
     }
 
+    // Only swap the estimate when every duration computed cleanly —
+    // otherwise keep what the mapper had (a real estimate or "Rate unknown")
+    // rather than a mixed-source table.
+    const priced: Partial<Carpark> = allEstimatesOk
+      ? { estByHours: estByHours as Carpark['estByHours'], rateUnknown: undefined, rateMissing: undefined }
+      : {};
     return {
       ...cp,
       rates: {
@@ -90,9 +96,7 @@ export function applyUraRates(
         saturday: hit.saturday,
         sundayPH: hit.sundayPH,
       },
-      // Only swap the estimate when every duration computed cleanly —
-      // otherwise the original fallback is safer than a mixed-source table.
-      estByHours: allEstimatesOk ? (estByHours as Carpark['estByHours']) : cp.estByHours,
+      ...priced,
       // URA reports total lots accurately; update if the spine had 0.
       lotsTotal: cp.lotsTotal > 0 ? cp.lotsTotal : hit.parkCapacity,
     };

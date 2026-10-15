@@ -68,9 +68,8 @@ export type DbRateRowLike = {
 /**
  * True when at least one row is both shown by the app and priceable by it.
  *
- * Without such a row the app replaces the schedule with the `ratesFor('LTA')`
- * placeholder and prices it at the invented $1.60/30min (tagged MANUAL, so the
- * "2018 rate" badge doesn't even show). That happens when every CSV cell failed
+ * Without such a row the app shows the carpark as "Rate unknown" (no schedule,
+ * no cost, left out of the cheapest ranking). That happens when every CSV cell failed
  * to parse (migrateLtaCsv's 0/0 stub rows, which `bucketRateRows` hides) or when
  * the only rates were "Free" / per-entry strings that `rateRowToDb` drops.
  */

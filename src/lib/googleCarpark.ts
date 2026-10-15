@@ -5,20 +5,10 @@
 // carpark is flagged `rateUnknown` (cost renders "—") with null lots. These
 // objects live in memory only and are never persisted (Google ToS).
 
-import type { Carpark, DurationHours } from './types';
+import type { Carpark } from './types';
 import { haversineMeters, walkMinutesFromMeters } from './geo';
 import type { NearbyGooglePlace } from './api/googlePlaces';
-
-/** Sentinel estimate — never displayed (every cost render site guards on
- * `rateUnknown`), but keeps `estByHours` non-optional for the rest of the app. */
-const SENTINEL_EST: Record<DurationHours, number> = {
-  0.5: 0,
-  1: 0,
-  1.5: 0,
-  2: 0,
-  3: 0,
-  4: 0,
-};
+import { UNKNOWN_EST_BY_HOURS } from './cost';
 
 /** Distance under which a Google place is treated as the same carpark as one
  * already in our DB (so we don't double-list it). Mirrors the OSM coverage
@@ -52,7 +42,7 @@ export function googlePlaceToCarpark(
     grace: 0,
     coords: { entrance: [p.lat, p.lng] },
     rates: { weekday: [], saturday: [], sundayPH: [] },
-    estByHours: { ...SENTINEL_EST },
+    estByHours: { ...UNKNOWN_EST_BY_HOURS },
   };
 }
 

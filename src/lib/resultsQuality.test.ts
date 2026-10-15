@@ -9,7 +9,7 @@ test('splits priced, estimated and unknown', () => {
   const q = resultsQuality([
     cp({}),
     cp({}),
-    cp({ rateEstimated: true }),
+    cp({ rateUnknown: true, rateMissing: true }),
     cp({ rateUnknown: true }),
   ]);
   assert.deepEqual(q, { count: 4, priced: 2, estimated: 1, unknown: 1 });
