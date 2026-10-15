@@ -38754,5 +38754,86 @@
         "graceMinutes": 10
       }
     ]
+  },
+  {
+    "id": "OPERATOR:capitaland_21_collyer_quay",
+    "name": "21 Collyer Quay",
+    "ratesOnly": true,
+    "operator": "CapitaLand",
+    "provenance": {
+      "url": "https://justpark.capitaland.com/Lot-Availability",
+      "verified": "2026-10",
+      "note": "Operator rate card (JustPark > Commercial > 21 Collyer Quay > Hourly Parking Rate), read 2026-10-10, GST inclusive. ParkingGoWhere's May 2026 card ($2.60/30 min, $3.30/entry) is out of date. Motorcycle $5.45/entry all days, not ingested (car-only file)."
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "18:00",
+        "perBlockCents": 320,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "18:00",
+        "end": "07:00",
+        "perEntryCents": 420
+      },
+      {
+        "dayType": "SAT",
+        "start": "07:00",
+        "end": "13:00",
+        "perBlockCents": 320,
+        "blockMinutes": 30
+      },
+      {
+        "dayType": "SAT",
+        "start": "13:00",
+        "end": "07:00",
+        "perEntryCents": 420
+      },
+      {
+        "dayType": "SUN_PH",
+        "perEntryCents": 420
+      }
+    ]
+  },
+  {
+    "id": "OPERATOR:capitaland_asia_square_tower_2",
+    "name": "Asia Square Tower 2",
+    "ratesOnly": true,
+    "operator": "Asia Square Management Office",
+    "provenance": {
+      "url": "https://www.parking-go-where.com/carpark/asia-square-tower-2",
+      "verified": "2026-05",
+      "note": "No official online rate card; the operator only answers by email or phone (concierge@asia-square.com). ParkingGoWhere was verified 2026-05-27 and is the newest dated source. GetGo (2026-01) and Motorist list $1.07/10 min and $5.35/entry, so re-check with management."
+    },
+    "rates": [
+      {
+        "dayType": "WEEKDAY",
+        "start": "07:00",
+        "end": "18:00",
+        "perBlockCents": 110,
+        "blockMinutes": 10,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "WEEKDAY",
+        "start": "18:00",
+        "end": "07:00",
+        "perEntryCents": 550,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SAT",
+        "perEntryCents": 550,
+        "graceMinutes": 10
+      },
+      {
+        "dayType": "SUN_PH",
+        "perEntryCents": 550,
+        "graceMinutes": 10
+      }
+    ]
   }
 ]
