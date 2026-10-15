@@ -4,6 +4,11 @@ import { isNative } from './platform';
 export const APP_STORE_ID = '6818932533';
 export const APP_STORE_URL = 'https://apps.apple.com/sg/app/wheretopark-sg-sg-parking/id6818932533';
 
+/** The short link we share and link to. vercel.json redirects /app (and
+ *  /ios) to APP_STORE_URL; Android phones go to the website until the Play
+ *  listing is public, then that redirect points at Google Play. */
+export const APP_LINK = 'https://wheretopark.sg/app';
+
 const BANNER_DISMISS_KEY = 'psg.appStoreBannerDismissed';
 
 function ua(): string {
