@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { isAndroid } from './appStore';
 import { isNative } from './platform';
 
 /** The non-standard event Chromium fires when the app is installable. */
@@ -79,12 +80,13 @@ export function usePwaInstall() {
   }, []);
 
   // Show the banner when Chromium gave us a prompt, the site isn't installed
-  // and it wasn't dismissed within the cooldown. iPhone visitors are pointed
-  // at the App Store instead (AppStoreBanner, Apple's Smart App Banner), so
-  // the manual Share → Add to Home Screen flow is no longer offered.
+  // and it wasn't dismissed within the cooldown. Phones are pointed at their
+  // store app instead (AppStoreBanner, Apple's Smart App Banner): iPhone no
+  // longer gets Share → Add to Home Screen, and Android no longer gets the
+  // PWA install, so this is desktop Chromium only.
   const canPromptChromium = deferred != null;
   // Never inside the Capacitor shells: the app is already installed.
-  const eligible = !isNative && !installed && !dismissed && canPromptChromium;
+  const eligible = !isNative && !isAndroid() && !installed && !dismissed && canPromptChromium;
 
   return {
     eligible,

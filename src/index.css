@@ -398,7 +398,7 @@ html.native .psg-frame {
   background: transparent;
 }
 
-/* App Store badge (components/AppStoreBadge.tsx): Apple's black artwork on
+/* App Store badge (components/StoreBadges.tsx): Apple's black artwork on
    the light themes, the white one on dark. */
 .psg-badge-dark {
   display: none;

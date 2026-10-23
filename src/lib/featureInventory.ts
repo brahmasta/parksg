@@ -96,6 +96,9 @@ export const FEATURES: Feature[] = [
   { id: 'app_store_badge', label: 'App Store badge', area: 'Account' },
   { id: 'app_store_banner', label: 'App Store banner: Get', area: 'Account' },
   { id: 'app_store_banner_dismiss', label: 'Dismiss App Store banner', area: 'Account' },
+  { id: 'play_store_badge', label: 'Google Play badge', area: 'Account' },
+  { id: 'play_store_banner', label: 'Google Play banner: Get', area: 'Account' },
+  { id: 'play_store_banner_dismiss', label: 'Dismiss Google Play banner', area: 'Account' },
 
   // Contribute
   { id: 'report_inaccuracy', label: 'Report an inaccuracy', area: 'Contribute' },
