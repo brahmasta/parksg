@@ -6,7 +6,8 @@ import { IconClose } from './icons';
  * In-app "Add to home screen" banner. Slides up after a short delay once the
  * app is eligible (installable + not already installed + not recently
  * dismissed), and triggers Chromium's native install sheet. iPhone visitors
- * get the App Store instead (AppStoreBanner).
+ * and Android visitors get their store's app instead (StoreBadges), so this
+ * is desktop Chromium only.
  */
 export function InstallPrompt() {
   const { eligible, promptInstall, dismiss } = usePwaInstall();

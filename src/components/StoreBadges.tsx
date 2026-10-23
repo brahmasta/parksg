@@ -2,10 +2,10 @@ import { ANDROID_LINK, APP_LINK, offeredStores } from '../lib/appStore';
 
 /**
  * The official store badges, unmodified, in public/: Apple's "Download on
- * the App Store" (black on the light themes, white on dark; index.css swaps
- * them on `data-theme`) and Google's "Get it on Google Play" (one artwork for
- * both themes). Each phone sees its own store, desktop sees both, the apps
- * see none (lib/appStore.ts).
+ * the App Store" and Google's "Get it on Google Play". Both are the black
+ * artwork in every theme, so they match; Google only makes a black one, and
+ * its grey outline (like Apple's) keeps both visible on dark. Each phone sees
+ * its own store, desktop sees both, the apps see none (lib/appStore.ts).
  */
 export function StoreBadges({ height = 40 }: { height?: number }) {
   const stores = offeredStores();
@@ -29,8 +29,7 @@ function AppStoreBadge({ height }: { height: number }) {
       aria-label="Download wheretopark.sg on the App Store"
       style={{ display: 'inline-block', lineHeight: 0 }}
     >
-      <img className="psg-badge-light" src="/app-store-badge-black.svg" alt="" width={width} height={height} />
-      <img className="psg-badge-dark" src="/app-store-badge-white.svg" alt="" width={width} height={height} />
+      <img src="/app-store-badge-black.svg" alt="" width={width} height={height} />
     </a>
   );
 }

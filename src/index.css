@@ -397,15 +397,3 @@ html.native .psg-frame {
 .psg-range::-moz-range-track {
   background: transparent;
 }
-
-/* App Store badge (components/StoreBadges.tsx): Apple's black artwork on
-   the light themes, the white one on dark. */
-.psg-badge-dark {
-  display: none;
-}
-[data-theme='dark'] .psg-badge-light {
-  display: none;
-}
-[data-theme='dark'] .psg-badge-dark {
-  display: inline;
-}

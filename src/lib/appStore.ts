@@ -16,13 +16,6 @@ export const ANDROID_LINK = 'https://wheretopark.sg/android';
 
 export type Store = 'app_store' | 'play';
 
-// Separate keys so people who dismissed "Now on the App Store" still hear
-// about Android once, and the reverse.
-const BANNER_DISMISS_KEYS: Record<Store, string> = {
-  app_store: 'psg.appStoreBannerDismissed',
-  play: 'psg.playStoreBannerDismissed',
-};
-
 function ua(): string {
   return typeof navigator === 'undefined' ? '' : navigator.userAgent;
 }
@@ -38,38 +31,12 @@ function isIos(): boolean {
   );
 }
 
-/** Safari on iPhone / iPad, which shows Apple's Smart App Banner from the
- *  `apple-itunes-app` meta tag in index.html. Other iOS browsers don't. */
-function isIosSafari(): boolean {
-  return isIos() && /safari/i.test(ua()) && !/crios|fxios|edgios|opios/i.test(ua());
-}
-
 /** The stores to offer on the website: the phone's own store, or both on
- *  desktop. None inside the apps. */
+ *  desktop. None inside the apps. (Safari on iPhone also shows Apple's Smart
+ *  App Banner, from the `apple-itunes-app` meta tag in index.html.) */
 export function offeredStores(): Store[] {
   if (isNative) return [];
   if (isAndroid()) return ['play'];
   if (isIos()) return ['app_store'];
   return ['app_store', 'play'];
-}
-
-/** Stores for our own "Now on …" banner. Not in iOS Safari, where Apple's
- *  Smart App Banner already offers Get / Open. Empty once every offered
- *  store's banner was dismissed. */
-export function bannerStores(): Store[] {
-  if (isIosSafari()) return [];
-  const stores = offeredStores();
-  try {
-    return stores.some((s) => localStorage.getItem(BANNER_DISMISS_KEYS[s]) == null) ? stores : [];
-  } catch {
-    return stores;
-  }
-}
-
-export function dismissAppBanner(stores: Store[]): void {
-  try {
-    for (const s of stores) localStorage.setItem(BANNER_DISMISS_KEYS[s], String(Date.now()));
-  } catch {
-    /* private mode: it just shows again next visit */
-  }
 }

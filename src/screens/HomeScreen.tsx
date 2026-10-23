@@ -5,7 +5,6 @@ import type {
   User,
 } from '../lib/types';
 import { AppFooter } from '../components/AppFooter';
-import { AppStoreBanner } from '../components/AppStoreBanner';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { ThemeToggleButton } from '../components/ThemeToggleButton';
@@ -151,8 +150,6 @@ export function HomeScreen({
 
       {/* Body */}
       <div style={{ flex: 1, overflow: 'auto', padding: '0 16px 24px', position: 'relative' }}>
-        <AppStoreBanner style={{ marginTop: 12 }} />
-
         {/* Hero copy */}
         <div style={{ paddingTop: 28, paddingBottom: 18 }}>
           <h1

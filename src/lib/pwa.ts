@@ -81,7 +81,7 @@ export function usePwaInstall() {
 
   // Show the banner when Chromium gave us a prompt, the site isn't installed
   // and it wasn't dismissed within the cooldown. Phones are pointed at their
-  // store app instead (AppStoreBanner, Apple's Smart App Banner): iPhone no
+  // store app instead (StoreBadges, Apple's Smart App Banner): iPhone no
   // longer gets Share → Add to Home Screen, and Android no longer gets the
   // PWA install, so this is desktop Chromium only.
   const canPromptChromium = deferred != null;
