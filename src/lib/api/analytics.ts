@@ -11,6 +11,7 @@
  */
 
 import { persist } from '../storage';
+import { platform } from '../platform';
 
 const URL_BASE = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -130,5 +131,6 @@ export function recordVisit(userId?: string | null): void {
     p_referrer: getReferrer(),
     p_user_id: userId ?? null,
     p_path: typeof window !== 'undefined' ? window.location.pathname : null,
+    p_platform: platform,
   });
 }
