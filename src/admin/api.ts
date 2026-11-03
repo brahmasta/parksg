@@ -105,6 +105,14 @@ export type Traffic = {
   return_7d: { eligible: number; returned: number; pct: number };
   device: { device: string; person?: number; automated?: number; uncertain?: number }[];
 
+  /** People by shell. Null until the platform migration is applied. */
+  platforms?: {
+    platform: 'web' | 'ios' | 'android';
+    people: number;
+    avg_dau: number;
+    visits: number;
+  }[] | null;
+
   events: {
     totals: { events: number; clients: number; sessions: number };
     funnel: { step: number; name: string; label: string; clients: number; pct_of_top: number }[];

@@ -6,6 +6,8 @@ import { DataHealthSection } from './DataHealthSection';
 import { GroupHeading, Stat, MiniStat, Empty, Bars } from './ui';
 import { TYPE, card, cardSoft, eyebrow, selectStyle } from './uiTokens';
 
+const PLATFORM_LABEL: Record<string, string> = { web: 'Web', ios: 'iOS app', android: 'Android app' };
+
 /**
  * The Overview.
  *
@@ -146,6 +148,19 @@ export function AdminDashboard({
               />
               <MiniStat label="Registered" value={t.registered_users} sub="signed-in accounts" />
             </div>
+
+            {traffic?.platforms && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
+                {traffic.platforms.map((p) => (
+                  <MiniStat
+                    key={p.platform}
+                    label={PLATFORM_LABEL[p.platform] ?? p.platform}
+                    value={p.people}
+                    sub={`${p.avg_dau.toLocaleString()} active/day · ${traffic.window_days ?? days}d unique`}
+                  />
+                ))}
+              </div>
+            )}
 
             {series && (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 14 }}>

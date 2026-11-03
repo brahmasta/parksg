@@ -1,0 +1,322 @@
+<title>wheretopark.sg Showcase Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: a hand-off kit. Sticky section index on wide screens, one reading column of
+   copy, facts, brand and assets; every pasteable value has its own Copy button. */
+:root {
+  --bg: #f4f6f8;          /* the app's grey ground */
+  --surface: #ffffff;
+  --ink: #1f252d;
+  --muted: #5b6676;
+  --line: #dde2e9;
+  --teal: #2ee3c2;        /* brand tile */
+  --teal-ink: #0b7d6c;    /* teal that reads as text on light */
+  --tile-on: #0b2e2a;
+  --chip: #e8f8f4;
+  --warn: #9a5b00;
+  --warn-bg: #fff4e0;
+  --display: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --body: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151a; --surface: #1a1f26; --ink: #f2f5f8; --muted: #a3afbf; --line: #2a313b;
+    --teal-ink: #2ee3c2; --chip: #15302c; --warn: #ffc56b; --warn-bg: #2e2412; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151a; --surface: #1a1f26; --ink: #f2f5f8; --muted: #a3afbf; --line: #2a313b;
+  --teal-ink: #2ee3c2; --chip: #15302c; --warn: #ffc56b; --warn-bg: #2e2412; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 96px;
+        display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 56px; }
+nav { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; }
+nav ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+nav a { display: block; padding: 6px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+nav a:hover, nav a:focus-visible { background: var(--surface); color: var(--ink); outline: none; }
+nav .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font: 700 15px var(--display); }
+nav .brand img { width: 28px; height: 28px; border-radius: 8px; }
+main { min-width: 0; display: grid; gap: 72px; }
+header h1 { font: 700 clamp(34px, 5vw, 52px)/1.05 var(--display); letter-spacing: -1.4px; margin: 14px 0 0; text-wrap: balance; }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--teal-ink); }
+header p { color: var(--muted); max-width: 62ch; margin: 16px 0 0; font-size: 17px; }
+.hero-img { margin-top: 28px; border-radius: 16px; display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+section h2 { font: 700 26px/1.2 var(--display); letter-spacing: -.5px; margin: 0; }
+section > .lede { color: var(--muted); margin: 8px 0 0; max-width: 62ch; }
+.stack { display: grid; gap: 14px; margin-top: 24px; }
+.block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; min-width: 0; }
+.block-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.label { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.copy-text { margin: 10px 0 0; white-space: pre-wrap; max-width: 68ch; }
+.copy-text strong { font-weight: 600; }
+button.copy { font: 600 13px var(--body); color: var(--teal-ink); background: var(--chip); border: 0; border-radius: 999px;
+              padding: 6px 14px; cursor: pointer; flex-shrink: 0; }
+button.copy:focus-visible { outline: 2px solid var(--teal-ink); outline-offset: 2px; }
+button.copy[data-done] { color: var(--ink); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 24px; }
+.facts { width: 100%; border-collapse: collapse; margin-top: 20px; font-variant-numeric: tabular-nums; }
+.facts td { padding: 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.facts td:last-child { text-align: right; font: 700 20px var(--display); white-space: nowrap; padding-left: 16px; }
+.facts td small { display: block; color: var(--muted); font: 400 13px var(--body); }
+.note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.feature h3 { margin: 0; font: 600 17px var(--body); }
+.feature p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.press { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; align-items: start; margin-top: 24px; }
+.press img { width: 100%; border-radius: 12px; border: 1px solid var(--line); }
+.press blockquote { margin: 0; font: 600 22px/1.35 var(--display); letter-spacing: -.3px; }
+.press p { color: var(--muted); }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 24px; }
+.swatch { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.swatch .chip-color { height: 72px; }
+.swatch div.meta { padding: 10px 12px; display: grid; gap: 2px; }
+.swatch b { font: 600 14px var(--body); }
+.swatch code { font: 400 13px var(--mono); color: var(--muted); }
+.swatch button.copy { justify-self: start; margin-top: 6px; padding: 4px 10px; font-size: 12px; }
+.type { display: grid; gap: 14px; margin-top: 24px; }
+.type .block p { margin: 6px 0 0; }
+.sample-display { font: 700 34px/1.1 'Space Grotesk', sans-serif; letter-spacing: -1px; }
+.sample-body { font: 600 28px/1.15 'Plus Jakarta Sans', sans-serif; letter-spacing: -.6px; }
+.logos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 24px; }
+.logo-tile { border-radius: 14px; padding: 28px 22px; display: grid; place-items: center; min-height: 150px; border: 1px solid var(--line); }
+.logo-tile.light { background: #ffffff; }
+.logo-tile.dark { background: #12151a; }
+.logo-tile img { max-width: 100%; height: auto; }
+.logo-tile.icon img { width: 96px; }
+.rules { margin: 16px 0 0; padding-left: 20px; display: grid; gap: 6px; max-width: 68ch; }
+.assets { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 24px; }
+.asset { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+.asset .thumb { aspect-ratio: 4 / 3; max-width: 100%; display: grid; place-items: center; background: var(--bg); overflow: hidden; }
+.asset .thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.asset .thumb.tall img { height: 100%; }
+.asset .meta { padding: 12px 14px; display: grid; gap: 4px; font-size: 13px; }
+.asset code { font: 500 12.5px var(--mono); overflow-wrap: anywhere; }
+.asset span { color: var(--muted); }
+.asset a { color: var(--teal-ink); font-weight: 600; text-decoration: none; }
+.asset a:hover { text-decoration: underline; }
+.dont { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.dont li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; display: grid; gap: 2px; }
+.dont .no { color: var(--warn); font-weight: 600; }
+.dont .yes { color: var(--teal-ink); font-weight: 600; }
+.todo { background: var(--warn-bg); border-radius: 14px; padding: 18px 20px; margin-top: 20px; }
+.todo ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.internal { border-style: dashed; }
+code.inline { font: 400 14px var(--mono); }
+a { color: var(--teal-ink); }
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  nav { position: static; }
+  nav ol { display: flex; flex-wrap: wrap; gap: 4px; }
+  .press { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) { button.copy { transition: background .15s; } }
+</style>
+
+<div class="wrap">
+  <nav aria-label="Sections">
+    <div class="brand"><img src="assets/app-icon-512.png" alt=""> wheretopark.sg</div>
+    <ol>
+      <li><a href="#card">Project card</a></li>
+      <li><a href="#copy">Copy</a></li>
+      <li><a href="#facts">Key facts</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#press">Press &amp; origin</a></li>
+      <li><a href="#brand">Brand</a></li>
+      <li><a href="#assets">Assets</a></li>
+      <li><a href="#claims">Claims</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header>
+      <div class="eyebrow">Manfaat Labs · project showcase kit</div>
+      <h1>wheretopark.sg</h1>
+      <p>Everything needed to feature wheretopark.sg on the Manfaat Labs front page: ready-to-paste copy, figures you can publish, brand rules and image assets. Figures are as of 8 October 2026.</p>
+      <img class="hero-img" src="assets/showcase-card-1600x1000.png" alt="wheretopark.sg showcase card: the tagline 'Know the price before the ramp', key figures, the phone app on a carpark page and the Android Auto results screen" width="1600" height="1000">
+    </header>
+
+    <section id="card" aria-labelledby="card-h">
+      <h2 id="card-h">Project card</h2>
+      <p class="lede">For a tile in the projects grid. Pair it with <code class="inline">showcase-card-1600x1000.png</code> or the app icon.</p>
+      <div class="grid2">
+        <div class="block"><div class="block-head"><span class="label">Name</span><button class="copy" type="button">Copy</button></div><p class="copy-text">wheretopark.sg</p></div>
+        <div class="block"><div class="block-head"><span class="label">Tagline</span><button class="copy" type="button">Copy</button></div><p class="copy-text">Know the price before the ramp.</p></div>
+        <div class="block"><div class="block-head"><span class="label">One-liner</span><button class="copy" type="button">Copy</button></div><p class="copy-text">Real carpark prices and live free lots across Singapore, cheapest first.</p></div>
+        <div class="block"><div class="block-head"><span class="label">Tags</span><button class="copy" type="button">Copy</button></div><p class="copy-text">Mobility · Open data · Singapore · Web · Android · Android Auto</p></div>
+        <div class="block"><div class="block-head"><span class="label">Status</span><button class="copy" type="button">Copy</button></div><p class="copy-text">Live on the web · Android in closed testing on Google Play · Android Auto in testing · iOS in development</p></div>
+        <div class="block"><div class="block-head"><span class="label">Link</span><button class="copy" type="button">Copy</button></div><p class="copy-text">https://wheretopark.sg</p></div>
+      </div>
+    </section>
+
+    <section id="copy" aria-labelledby="copy-h">
+      <h2 id="copy-h">Copy</h2>
+      <p class="lede">Three lengths. Use the short one on cards, the paragraph on a project section, the case study on a detail page.</p>
+      <div class="stack">
+        <div class="block"><div class="block-head"><span class="label">Short · about 30 words</span><button class="copy" type="button">Copy</button></div>
+          <p class="copy-text">wheretopark.sg tells Singapore drivers what parking will actually cost before they arrive. Search a destination and see nearby carparks ranked by price for your stay, with live free lots.</p></div>
+        <div class="block"><div class="block-head"><span class="label">Paragraph · about 70 words</span><button class="copy" type="button">Copy</button></div>
+          <p class="copy-text">Parking prices in Singapore are scattered across HDB, URA, LTA, malls and private operators, and they change by day and time. wheretopark.sg brings them together. Search where you're going and it ranks nearby carparks by the estimated cost of your stay, shows live free lots, the walk to your destination and height limits, then hands off to Google Maps or Waze. It runs on the web, on Android and on Android Auto.</p></div>
+        <div class="block"><div class="block-head"><span class="label">Case study · about 200 words</span><button class="copy" type="button">Copy</button></div>
+          <div class="copy-text"><strong>The problem.</strong> It started at a football field. For Brahmasta, a father of two, finding parking while his child played football was a recurring struggle. Singapore publishes a lot of parking data, but it is spread across agencies and operators, in different formats, and rates change by day type and hour.
+
+<strong>What was built.</strong> wheretopark.sg combines ten data sources, from HDB and URA rate schedules and LTA's live availability feed to mall rates and EV chargers, into one answer: the cheapest carpark near your destination for the time you plan to stay. More than 3,800 carparks are mapped, with over 22,000 rate rows priced by day type, hour and public holiday.
+
+<strong>How it was built.</strong> The product treats the credibility of the number as the product. When data is missing it says so: an unknown count shows a dash instead of a false "Full", stale rates are labelled and can't win "Cheapest", and carparks without rates say "Rate unknown" instead of guessing. Drivers can report wrong rates and suggest corrections.
+
+<strong>Where it is now.</strong> Live on the web, in closed testing on Google Play, with an Android Auto version for the car's screen.</div></div>
+      </div>
+    </section>
+
+    <section id="facts" aria-labelledby="facts-h">
+      <h2 id="facts-h">Key facts</h2>
+      <p class="lede">Safe to publish. Counted from the live database on 8 October 2026.</p>
+      <table class="facts">
+        <tbody>
+          <tr><td>Carparks mapped<small>HDB 2,265 · URA 660 · malls and operators 631 · LTA 244 · JTC 28</small></td><td>3,828</td></tr>
+          <tr><td>Carparks with rates</td><td>3,813</td></tr>
+          <tr><td>Rate rows<small>Priced by weekday, Saturday, Sunday and public holiday, and by hour</small></td><td>22,054</td></tr>
+          <tr><td>Data sources<small>HDB, URA, LTA DataMall, LTA EV, LTA rates, JTC, OneMap, Google Places, CapitaLand JustPark, community reports</small></td><td>10</td></tr>
+          <tr><td>Carparks with height limits</td><td>1,194</td></tr>
+          <tr><td>Carparks with motorcycle lots</td><td>298</td></tr>
+          <tr><td>First version</td><td>May 2026</td></tr>
+        </tbody>
+      </table>
+      <div class="block internal" style="margin-top:20px">
+        <span class="label">Internal only, not for the page yet</span>
+        <p class="copy-text">Last 30 days: 2,095 searches from 1,135 devices. Devices are not people, so publish usage only after the owner approves a figure.</p>
+      </div>
+    </section>
+
+    <section id="features" aria-labelledby="features-h">
+      <h2 id="features-h">Features</h2>
+      <p class="lede">Six highlights, in the order a driver meets them.</p>
+      <div class="grid2">
+        <div class="block feature"><h3>Cheapest first</h3><p>Nearby carparks ranked by the estimated cost of your stay, not just distance.</p></div>
+        <div class="block feature"><h3>Live free lots</h3><p>Real-time availability where the carpark publishes it, and an honest dash where it doesn't.</p></div>
+        <div class="block feature"><h3>Plan your stay</h3><p>Set when you arrive and how long you'll stay; weekday, weekend, evening and public-holiday rates are applied.</p></div>
+        <div class="block feature"><h3>Walk to your destination</h3><p>Walking time and route from the carpark to where you're going.</p></div>
+        <div class="block feature"><h3>For every vehicle</h3><p>Filters for EV charging, motorcycle lots and heavy vehicles, plus height limits.</p></div>
+        <div class="block feature"><h3>In the car</h3><p>Android Auto: search by voice or keyboard, see prices and free lots on the car's screen, and start navigation.</p></div>
+      </div>
+    </section>
+
+    <section id="press" aria-labelledby="press-h">
+      <h2 id="press-h">Press &amp; origin</h2>
+      <div class="press">
+        <div>
+          <span class="label">Berita Harian · 28 September 2026</span>
+          <blockquote>"Susah cari tempat letak kenderaan ketika anak main bola cetus idea bina laman sendiri"</blockquote>
+          <p>Translation: "Difficulty finding parking while his child played football sparked the idea to build his own site."</p>
+          <p>Use as an "As featured in Berita Harian" line with a link to the article. The article link is still to be added; the screenshot on the right leaves out the family photo.</p>
+        </div>
+        <img src="assets/press-berita-harian.png" alt="Berita Harian article headline about wheretopark.sg, 28 September 2026" width="1170" height="1128">
+      </div>
+    </section>
+
+    <section id="brand" aria-labelledby="brand-h">
+      <h2 id="brand-h">Brand</h2>
+      <p class="lede">The same identity as the app and the Play Store listing.</p>
+
+      <div class="swatches">
+        <div class="swatch"><div class="chip-color" style="background:#2ee3c2"></div><div class="meta"><b>Teal</b><code>#2ee3c2</code><span class="label">Tile, highlights</span><button class="copy" type="button" data-copy="#2ee3c2">Copy</button></div></div>
+        <div class="swatch"><div class="chip-color" style="background:#14c9b6"></div><div class="meta"><b>Teal deep</b><code>#14c9b6</code><span class="label">Tile gradient end</span><button class="copy" type="button" data-copy="#14c9b6">Copy</button></div></div>
+        <div class="swatch"><div class="chip-color" style="background:#0b2e2a"></div><div class="meta"><b>On teal</b><code>#0b2e2a</code><span class="label">The P, text on teal</span><button class="copy" type="button" data-copy="#0b2e2a">Copy</button></div></div>
+        <div class="swatch"><div class="chip-color" style="background:#12151a"></div><div class="meta"><b>Night</b><code>#12151a</code><span class="label">Dark ground</span><button class="copy" type="button" data-copy="#12151a">Copy</button></div></div>
+        <div class="swatch"><div class="chip-color" style="background:#fafafa"></div><div class="meta"><b>Paper</b><code>#fafafa</code><span class="label">Light ground</span><button class="copy" type="button" data-copy="#fafafa">Copy</button></div></div>
+        <div class="swatch"><div class="chip-color" style="background:#8a97aa"></div><div class="meta"><b>Slate</b><code>#8a97aa</code><span class="label">".sg", secondary text</span><button class="copy" type="button" data-copy="#8a97aa">Copy</button></div></div>
+      </div>
+
+      <div class="type">
+        <div class="block"><span class="label">Brand face · Space Grotesk Bold</span><p class="sample-display">wheretopark.sg</p><p class="note">The wordmark and the P only. Free on Google Fonts.</p></div>
+        <div class="block"><span class="label">Interface and headlines · Plus Jakarta Sans</span><p class="sample-body">Know the price before the ramp.</p><p class="note">Headlines at 600, body at 400–500. Free on Google Fonts.</p></div>
+      </div>
+
+      <div class="logos">
+        <div class="logo-tile light"><img src="assets/wordmark-on-light.svg" alt="wheretopark.sg wordmark for light backgrounds" width="600" height="100"></div>
+        <div class="logo-tile dark"><img src="assets/wordmark-on-dark.svg" alt="wheretopark.sg wordmark for dark backgrounds" width="600" height="100"></div>
+        <div class="logo-tile dark icon"><img src="assets/app-icon.svg" alt="wheretopark.sg app icon" width="512" height="512"></div>
+      </div>
+      <ul class="rules">
+        <li>Write the name in lowercase, with the ".sg": <strong>wheretopark.sg</strong>.</li>
+        <li>Keep clear space around the wordmark of at least the tile's height. Don't place it smaller than 120px wide on screen.</li>
+        <li>Use the version made for the background: "on light" or "on dark". Don't recolour the tile or the P.</li>
+        <li>The wordmark files are outlined vectors, so they need no fonts installed.</li>
+      </ul>
+    </section>
+
+    <section id="assets" aria-labelledby="assets-h">
+      <h2 id="assets-h">Assets</h2>
+      <p class="lede">All files are in the zip that came with this kit. Open an image to save it at full size. Screenshots show only public carpark data; none show personal accounts, saved places or locations.</p>
+      <div class="assets">
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/showcase-card-1600x1000.png" alt="Showcase card" loading="lazy"></div><figcaption class="meta"><code>showcase-card-1600x1000.png</code><span>1600 × 1000 · hero or project tile</span><a href="assets/showcase-card-1600x1000.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/feature-graphic-1024x500.png" alt="Feature graphic" loading="lazy"></div><figcaption class="meta"><code>feature-graphic-1024x500.png</code><span>1024 × 500 · banner, social</span><a href="assets/feature-graphic-1024x500.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/desktop-tampines-mall.png" alt="Desktop app: carparks near Tampines Mall on a map" loading="lazy"></div><figcaption class="meta"><code>desktop-tampines-mall.png</code><span>1760 × 2200 · web app, light theme</span><a href="assets/desktop-tampines-mall.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb tall"><img src="assets/phone-1-results-list.png" alt="Phone: Orchard Road results list" loading="lazy"></div><figcaption class="meta"><code>phone-1-results-list.png</code><span>1344 × 2688 · results, cheapest first</span><a href="assets/phone-1-results-list.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb tall"><img src="assets/phone-2-results-map.png" alt="Phone: results on a map" loading="lazy"></div><figcaption class="meta"><code>phone-2-results-map.png</code><span>1344 × 2688 · map with price pins</span><a href="assets/phone-2-results-map.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb tall"><img src="assets/phone-3-detail.png" alt="Phone: Far East Plaza carpark page" loading="lazy"></div><figcaption class="meta"><code>phone-3-detail.png</code><span>1344 × 2688 · price, live lots, EV</span><a href="assets/phone-3-detail.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb tall"><img src="assets/phone-4-rates.png" alt="Phone: rate schedule" loading="lazy"></div><figcaption class="meta"><code>phone-4-rates.png</code><span>1344 × 2688 · rates and check-ins</span><a href="assets/phone-4-rates.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb tall"><img src="assets/phone-5-plan-stay.png" alt="Phone: plan your stay" loading="lazy"></div><figcaption class="meta"><code>phone-5-plan-stay.png</code><span>1344 × 2688 · plan your stay</span><a href="assets/phone-5-plan-stay.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/android-auto-results.png" alt="Android Auto: parking near VivoCity" loading="lazy"></div><figcaption class="meta"><code>android-auto-results.png</code><span>770 × 700 · car screen, results map</span><a href="assets/android-auto-results.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/android-auto-carpark.png" alt="Android Auto: carpark detail with Navigate" loading="lazy"></div><figcaption class="meta"><code>android-auto-carpark.png</code><span>770 × 700 · car screen, carpark</span><a href="assets/android-auto-carpark.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/app-icon-512.png" alt="App icon" loading="lazy" style="width:45%"></div><figcaption class="meta"><code>app-icon-512.png · app-icon.svg</code><span>512 × 512 · square icon, any size as SVG</span><a href="assets/app-icon-512.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+        <figure class="asset" style="margin:0"><div class="thumb"><img src="assets/press-berita-harian.png" alt="Berita Harian headline" loading="lazy"></div><figcaption class="meta"><code>press-berita-harian.png</code><span>1170 × 1128 · press mention</span><a href="assets/press-berita-harian.png" target="_blank" rel="noopener">Open full size</a></figcaption></figure>
+      </div>
+    </section>
+
+    <section id="claims" aria-labelledby="claims-h">
+      <h2 id="claims-h">Claims</h2>
+      <p class="lede">Keep the page as accurate as the app.</p>
+      <ul class="dont">
+        <li><span class="no">Avoid "every carpark in Singapore"</span><span class="yes">Say "more than 3,800 carparks"</span></li>
+        <li><span class="no">Avoid "live availability everywhere"</span><span class="yes">Say "live free lots where the carpark publishes them"</span></li>
+        <li><span class="no">Avoid "official" or anything that sounds government-run</span><span class="yes">Say it uses public government data and is independent</span></li>
+        <li><span class="no">Avoid "on the App Store"</span><span class="yes">Say iOS is in development</span></li>
+        <li><span class="no">Avoid usage numbers</span><span class="yes">Use coverage figures until the owner approves a usage figure</span></li>
+      </ul>
+      <div class="todo">
+        <span class="label">Still to come from the owner</span>
+        <ul>
+          <li>Link to the Berita Harian article.</li>
+          <li>Google Play link, once the app is public (it's in closed testing now).</li>
+          <li>Whether to use the family photo from the article (it shows his children).</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('button.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var text = btn.dataset.copy;
+    if (!text) {
+      var block = btn.closest('.block');
+      var src = block && block.querySelector('.copy-text');
+      text = src ? src.innerText.trim() : '';
+    }
+    var done = function (label) {
+      btn.textContent = label;
+      btn.setAttribute('data-done', '');
+      setTimeout(function () { btn.textContent = 'Copy'; btn.removeAttribute('data-done'); }, 1600);
+    };
+    var fallback = function () {
+      var holder = btn.closest('.block, .swatch');
+      var target = holder && (holder.querySelector('.copy-text') || holder.querySelector('code'));
+      if (target) {
+        var range = document.createRange();
+        range.selectNodeContents(target);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      done('Selected');
+    };
+    try {
+      navigator.clipboard.writeText(text).then(function () { done('Copied'); }, fallback);
+    } catch (e) { fallback(); }
+  });
+});
+</script>

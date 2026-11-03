@@ -30,7 +30,7 @@ export default async function handler(req: Request): Promise<Response> {
   // Two independent RPCs: the traffic audit (visits/search_events, live now)
   // and the event funnel (app_events, fills in as instrumented traffic lands).
   // Fetched together so the dashboard renders in one pass.
-  const [traffic, events] = await Promise.all([
+  const [traffic, events, platforms] = await Promise.all([
     fetch(`${SB_URL}/rest/v1/rpc/admin_traffic_analytics`, {
       method: 'POST',
       headers: sbHeaders(),
@@ -41,12 +41,20 @@ export default async function handler(req: Request): Promise<Response> {
       headers: sbHeaders(),
       body: JSON.stringify(rpcBody),
     }),
+    fetch(`${SB_URL}/rest/v1/rpc/admin_platform_breakdown`, {
+      method: 'POST',
+      headers: sbHeaders(),
+      body: JSON.stringify(rpcBody),
+    }),
   ]);
 
   if (!traffic.ok) return json({ error: 'Traffic query failed.' }, 502);
 
   return json({
     ...(await traffic.json()),
+    // Web / iOS / Android split. Non-fatal for the same reason as `events`:
+    // null until migration 020 is applied.
+    platforms: platforms.ok ? (await platforms.json())?.platforms ?? null : null,
     // A failed event query is non-fatal — the traffic audit is the headline,
     // and app_events is empty until the instrumentation ships.
     events: events.ok ? await events.json() : null,
