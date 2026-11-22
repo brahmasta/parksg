@@ -8,6 +8,8 @@ import {
 } from '../lib/resultsView';
 import { estCostForStay, fmtDuration, type Stay } from '../lib/stay';
 import { MonoLabel, Spinner } from '../components/atoms';
+import { SearchFailed } from '../components/SearchFailed';
+import type { SearchFailure } from '../lib/searchFailure';
 import { CarparkCard } from '../components/CarparkCard';
 import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
@@ -43,7 +45,10 @@ export type FindParkingDesktopProps = {
   onNearMe: () => void;
   nearMeBusy: boolean;
   carparks: Carpark[];
-  state: 'loading' | 'loaded' | 'degraded' | 'empty';
+  state: 'loading' | 'loaded' | 'degraded' | 'empty' | 'error';
+  /** Why the search failed; set when state is 'error'. */
+  failure?: SearchFailure;
+  onRetry: () => void;
   destinationCoords: [number, number] | null;
   refreshedSecondsAgo: number | null;
   stay: Stay;
@@ -82,7 +87,7 @@ export function FindParkingDesktop(
 ) {
   const {
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
-    onNearMe, nearMeBusy, carparks, state, destinationCoords, refreshedSecondsAgo,
+    onNearMe, nearMeBusy, carparks, state, failure, onRetry, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly, vehicles, setVehicles,
     detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
     user, onRequireSignIn, onShareResults, recents, radiusM, onRadius, onOpenSaved, onOpenAccount,
@@ -127,7 +132,9 @@ export function FindParkingDesktop(
   // destinationCoords is null — but we must still show that carpark's Detail
   // (or its loading spinner), not the landing.
   const showLanding =
-    !detailCp && !detailLoading && !destinationCoords && state !== 'loading';
+    !detailCp && !detailLoading && !destinationCoords && state !== 'loading' &&
+    // A failed search stays on the results rail so its message can be seen.
+    state !== 'error';
   if (showLanding) {
     return (
       <LandingDesktop
@@ -238,8 +245,9 @@ export function FindParkingDesktop(
               <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                 <div style={{ minWidth: 0 }}>
                   <MonoLabel>
-                    {state === 'empty' ? 0 : ranked.length} carpark{ranked.length === 1 ? '' : 's'}
-                    {headerDestination ? ` near ${headerDestination}` : ''}
+                    {state === 'error'
+                      ? 'Search failed'
+                      : `${state === 'empty' ? 0 : ranked.length} carpark${ranked.length === 1 ? '' : 's'}${headerDestination ? ` near ${headerDestination}` : ''}`}
                   </MonoLabel>
                   <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginTop: 4 }}>
                     within <RadiusSelect value={radiusM} onChange={onRadius} />
@@ -279,6 +287,8 @@ export function FindParkingDesktop(
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 20, color: 'var(--text-3)', fontSize: 13 }}>
                 <Spinner /> Fetching live availability…
               </div>
+            ) : state === 'error' ? (
+              <SearchFailed failure={failure ?? 'unknown'} query={headerDestination} onRetry={onRetry} compact />
             ) : ranked.length === 0 ? (
               <div style={{ marginTop: 8, padding: '28px 20px', textAlign: 'center', background: 'var(--bg-1)', border: '0.5px solid var(--line)', borderRadius: 14 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>

@@ -56,6 +56,9 @@ export type EventName =
   | 'sign_in_completed'
   | 'install_prompt_shown'
   | 'install_accepted'
+  // A search that could not be completed; props: reason, query
+  // (lib/searchFailure.ts). Fired by the app, not a gesture.
+  | 'search_failed'
   // Generic UI click, captured by the delegated tracker below. The
   // control is identified by the `target` prop, not the event name.
   | 'ui_click';

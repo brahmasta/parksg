@@ -418,7 +418,9 @@ function App() {
   // owner can query top searches. Fires once per resolved destination (the
   // object identity changes on each search); attaches the user id when known.
   useEffect(() => {
-    if (result.destination) {
+    // A search that failed after the place resolved is logged as
+    // `search_failed` below, not as a result with zero carparks.
+    if (result.destination && result.state !== 'error') {
       const byUser = searchStartedByUser.current;
       searchStartedByUser.current = false;
       // A near-me search is the device's own position: log it without coords.
@@ -443,6 +445,19 @@ function App() {
     // (e.g. a later sign-in) don't double-count the same search.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.destination]);
+
+  // A search that could not be completed (lib/searchFailure.ts). Logged with
+  // its reason and what was searched, so the weekly review can tell a failed
+  // lookup from an area that has no carparks. A retry that fails again passes
+  // through 'loading' first, so it is counted again.
+  useEffect(() => {
+    if (result.state !== 'error') return;
+    searchStartedByUser.current = false;
+    trackEvent('search_failed', {
+      reason: result.failure ?? 'unknown',
+      query: (result.failedQuery ?? '').slice(0, QUERY_MAX),
+    });
+  }, [result.state, result.failure, result.failedQuery]);
 
   // Surface OAuth errors (missing client ID, popup blocked, user cancelled)
   // as a toast so the user gets actionable feedback.
@@ -783,6 +798,8 @@ function App() {
         ? [result.destination.lat, result.destination.lng]
         : null,
       refreshedSecondsAgo: result.refreshedSecondsAgo,
+      failure: result.failure,
+      onRetry: retry,
       stay,
       setStay,
       availableOnly,
@@ -889,6 +906,7 @@ function App() {
         setStay={setStay}
         carparks={result.carparks}
         state={result.state}
+        failure={result.failure}
         availableOnly={availableOnly}
         setAvailableOnly={setAvailableOnly}
         evOnly={evOnly}
