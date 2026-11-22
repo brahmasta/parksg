@@ -13,6 +13,17 @@
  *
  * Run: npx tsx scripts/migrate-to-supabase.ts
  *
+ * Flags:
+ *   --hdb-only            sync just the HDB carparks and their rates
+ *                         (npm run sync:hdb)
+ *   --hdb-only --dry-run  print what that sync would change and write nothing
+ *                         (npm run sync:hdb:dry)
+ *   --hdb-rates-only      re-derive HDB rates for carparks already in the DB
+ *   --jtc-only            sync just the JTC carparks
+ *
+ * Every run that writes leaves a row per source in `ingest_runs`
+ * (db/migrations/019), so the data-health check can see hand-run syncs too.
+ *
  * Env (read from .env.local in the project root):
  *   SUPABASE_URL              required
  *   SUPABASE_SERVICE_ROLE_KEY required
@@ -33,6 +44,8 @@ import { makeCsvNameMatcher, normaliseName } from './lib/lta-csv-match';
 import { inferHdbRateRows as ruleEngineHdbRows, type PeakBand } from './lib/hdb-rates';
 import { standalonePlacement, type LtaDataGovCoordsFile } from './lib/lta-datagov-geo';
 import type { RateRow } from '../src/lib/types';
+import { logIngestRun } from '../src/lib/server/ingestRuns';
+import { diffHdb, formatHdbDiff, type HdbDbRow } from './lib/hdb-sync-diff';
 
 // ──────────────────────────────────────────────────────────────────────
 // Curated HDB reference data (loaded once at startup).
@@ -1139,7 +1152,41 @@ function titleCase(s: string): string {
 // Main
 // ──────────────────────────────────────────────────────────────────────
 
+/** `--hdb-only --dry-run`: what an HDB sync would change. Reads only. */
+async function dryRunHdb(): Promise<void> {
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    console.error('ERROR: SUPABASE_URL and a Supabase key must be set in .env.local');
+    process.exit(1);
+  }
+  const upstream = await fetchHdbRecords();
+  const rows: HdbDbRow[] = [];
+  // PostgREST caps a response at 1,000 rows.
+  for (let offset = 0; ; offset += 1000) {
+    const res = await fetch(
+      `${url}/rest/v1/carparks?agency=eq.HDB&select=source_code,address,car_park_type,parking_system,raw&order=source_code&limit=1000&offset=${offset}`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } },
+    );
+    if (!res.ok) throw new Error(`carparks read failed: ${res.status} ${(await res.text()).slice(0, 200)}`);
+    const page = (await res.json()) as HdbDbRow[];
+    rows.push(...page);
+    if (page.length < 1000) break;
+  }
+  console.log(`Source: ${upstream.length} records. Database: ${rows.length} HDB carparks.`);
+  console.log(formatHdbDiff(diffHdb(upstream, rows)));
+}
+
 async function main(): Promise<void> {
+  if (process.argv.includes('--dry-run')) {
+    if (!process.argv.includes('--hdb-only')) {
+      console.error('ERROR: --dry-run is only available with --hdb-only');
+      process.exit(1);
+    }
+    await dryRunHdb();
+    return;
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceRoleKey) {
@@ -1152,11 +1199,54 @@ async function main(): Promise<void> {
     auth: { persistSession: false },
   });
 
+  // Runs one source's sync and records it in ingest_runs, success or not.
+  // A sync that threw is logged and rethrown for the caller's own handling.
+  const logged = async (
+    job: string,
+    source: string,
+    fn: () => Promise<SourceResult>,
+  ): Promise<SourceResult> => {
+    const startedAt = new Date();
+    try {
+      const r = await fn();
+      await logIngestRun(supabaseUrl, serviceRoleKey, {
+        job,
+        source,
+        startedAt,
+        ok: r.errors === 0,
+        rows: r.carparks + r.rateRows,
+        error: r.errors > 0 ? `${r.errors} rows failed` : undefined,
+      });
+      return r;
+    } catch (err) {
+      await logIngestRun(supabaseUrl, serviceRoleKey, {
+        job,
+        source,
+        startedAt,
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
+  };
+
+  // CLI flag: `--hdb-only` syncs the HDB carparks and their rates, leaving
+  // every other source untouched. `--hdb-only --dry-run` is handled above.
+  if (process.argv.includes('--hdb-only')) {
+    const r = await logged('hdb-sync', 'HDB', () => migrateHdb(supabase));
+    console.log('');
+    console.log('=== HDB sync (only) ===');
+    console.log(`Carparks upserted: ${r.carparks}`);
+    console.log(`Rate rows written: ${r.rateRows}`);
+    console.log(`Errors:            ${r.errors}`);
+    return;
+  }
+
   // CLI flag: `--hdb-rates-only` skips the data.gov.sg fetch and the
   // URA/LTA passes. Reruns the HDB rate hydration against existing DB
   // carparks (also resyncs central_area from the curated list).
   if (process.argv.includes('--hdb-rates-only')) {
-    const r = await migrateHdbRatesOnly(supabase);
+    const r = await logged('hdb-rates', 'HDB', () => migrateHdbRatesOnly(supabase));
     const fmt = (n: number) => String(n).padStart(7);
     console.log('');
     console.log('=== HDB rate hydration (only) ===');
@@ -1169,7 +1259,7 @@ async function main(): Promise<void> {
   // CLI flag: `--jtc-only` ingests just the JTC industrial-estate carparks
   // (metadata + coords), leaving HDB/URA/LTA untouched.
   if (process.argv.includes('--jtc-only')) {
-    const r = await migrateJtc(supabase);
+    const r = await logged('jtc-sync', 'JTC', () => migrateJtc(supabase));
     console.log('');
     console.log('=== JTC ingest (only) ===');
     console.log(`Carparks upserted: ${r.carparks}`);
@@ -1183,7 +1273,7 @@ async function main(): Promise<void> {
 
   // HDB first — fills the spine.
   try {
-    Object.assign(hdb, await migrateHdb(supabase));
+    Object.assign(hdb, await logged('hdb-sync', 'HDB', () => migrateHdb(supabase)));
   } catch (err) {
     hdb.errors += 1;
     process.stderr.write(`HDB failed: ${err instanceof Error ? err.message : String(err)}\n`);
@@ -1194,7 +1284,7 @@ async function main(): Promise<void> {
   // never touch these rows.
   const jtc = makeResult();
   try {
-    Object.assign(jtc, await migrateJtc(supabase));
+    Object.assign(jtc, await logged('jtc-sync', 'JTC', () => migrateJtc(supabase)));
   } catch (err) {
     jtc.errors += 1;
     process.stderr.write(`JTC failed: ${err instanceof Error ? err.message : String(err)}\n`);
@@ -1206,7 +1296,7 @@ async function main(): Promise<void> {
     process.stderr.write('\n== URA == (skipped — URA_ACCESS_KEY not set)\n');
   } else {
     try {
-      Object.assign(ura, await migrateUra(supabase, uraKey));
+      Object.assign(ura, await logged('ura-sync', 'URA', () => migrateUra(supabase, uraKey)));
     } catch (err) {
       ura.errors += 1;
       process.stderr.write(`URA failed: ${err instanceof Error ? err.message : String(err)}\n`);
@@ -1222,7 +1312,7 @@ async function main(): Promise<void> {
     process.stderr.write('\n== LTA DataMall == (skipped — LTA_ACCOUNT_KEY not set)\n');
   } else {
     try {
-      Object.assign(dataMall, await migrateLtaDataMall(supabase, dataMallKey));
+      Object.assign(dataMall, await logged('lta-datamall-sync', 'LTA_DATAMALL', () => migrateLtaDataMall(supabase, dataMallKey)));
     } catch (err) {
       dataMall.errors += 1;
       process.stderr.write(`LTA DataMall failed: ${err instanceof Error ? err.message : String(err)}\n`);
@@ -1232,7 +1322,7 @@ async function main(): Promise<void> {
   // LTA CSV — needs the existing names already in the DB for matching.
   try {
     const existing = await loadExistingCarparkNames(supabase);
-    Object.assign(lta, await migrateLtaCsv(supabase, existing));
+    Object.assign(lta, await logged('lta-datagov-sync', 'LTA_DATAGOV', () => migrateLtaCsv(supabase, existing)));
     // Self-heal: an earlier failed run may have inserted LTA-prefixed
     // carparks for names that now belong to an HDB/URA carpark. Sweep
     // them up so the second source's rates aren't shadowed by a stale

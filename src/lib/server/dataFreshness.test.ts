@@ -73,3 +73,39 @@ test('the 2018 LTA CSV and manual curation are never flagged', () => {
   assert.equal(level(r, 'LTA_DATAGOV'), 'ok');
   assert.equal(level(r, 'MANUAL'), 'ok');
 });
+
+// ── Upstream: the publisher changed the dataset after our last sync ─────────
+
+function withUpstream(source: string, updatedAt: string, lastSynced = '2026-05-26T00:00:00Z') {
+  const r = report([{ ...src(source, '2026-05-31T00:00:00Z'), last_synced: lastSynced }]);
+  r.upstream = { [source]: updatedAt };
+  return evaluateFreshness(r, NOW)[0];
+}
+
+test('a source updated upstream after our sync alerts once the grace period is over', () => {
+  const v = withUpstream('HDB', '2026-09-20T03:00:00+08:00');
+  assert.equal(v.level, 'stale');
+  assert.match(v.reason, /source updated 2026-09-20, last synced 2026-05-26; run the HDB sync/);
+});
+
+test('a recent upstream update is a review nudge, not yet an alert', () => {
+  assert.equal(withUpstream('HDB', '2026-10-08T11:06:29+08:00').level, 'review');
+});
+
+test('an upstream update older than our sync changes nothing', () => {
+  const v = withUpstream('JTC', '2025-07-03T16:20:46+08:00');
+  assert.equal(v.level, 'ok');
+  assert.equal(v.reason, 'no automated feed');
+});
+
+test('a source that was never synced is behind any upstream update', () => {
+  const r = report([{ ...src('JTC', null), last_synced: null }]);
+  r.upstream = { JTC: '2025-07-03T16:20:46+08:00' };
+  const v = evaluateFreshness(r, NOW)[0];
+  assert.equal(v.level, 'stale');
+  assert.match(v.reason, /last synced never/);
+});
+
+test('without upstream data the existing rules stand', () => {
+  assert.equal(evaluateFreshness(report([src('HDB', '2026-05-31T00:00:00Z')]), NOW)[0].level, 'ok');
+});
