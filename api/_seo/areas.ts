@@ -11,4 +11,5 @@ export {
   SEO_AREAS,
   findArea,
   nearestAreas,
+  areaContaining,
 } from '../../src/lib/seoAreas';

@@ -13,7 +13,7 @@ import type { SearchFailure } from '../lib/searchFailure';
 import { CarparkCard } from '../components/CarparkCard';
 import { StayPlanner } from '../components/StayPlanner';
 import { RealResultsMap } from '../components/RealResultsMap';
-import { DetailScreen } from '../screens/DetailScreen';
+import { DetailScreen, type CompareTarget } from '../screens/DetailScreen';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import { ResultFilters } from '../components/ResultFilters';
 import { vehicleEmptyCopy } from '../lib/lotTypes';
@@ -63,6 +63,8 @@ export type FindParkingDesktopProps = {
   detailLoading?: boolean;
   onOpenDetail: (cp: Carpark) => void;
   onCloseDetail: () => void;
+  /** From a carpark opened on its own: search the carparks around it. */
+  onCompareNearby: (place: CompareTarget) => void;
   isCarparkSaved: (id: string) => boolean;
   onToggleSaveCarpark: (cp: Carpark) => void;
   /** Signed-in user + sign-in prompt — powers crowdsourced check-ins in Detail. */
@@ -89,7 +91,7 @@ export function FindParkingDesktop(
     destinationInput, setDestinationInput, headerDestination, onSearch, onPickPlace,
     onNearMe, nearMeBusy, carparks, state, failure, onRetry, destinationCoords, refreshedSecondsAgo,
     stay, setStay, availableOnly, setAvailableOnly, vehicles, setVehicles,
-    detailCp, detailLoading, onOpenDetail, onCloseDetail, isCarparkSaved, onToggleSaveCarpark, saved,
+    detailCp, detailLoading, onOpenDetail, onCloseDetail, onCompareNearby, isCarparkSaved, onToggleSaveCarpark, saved,
     user, onRequireSignIn, onShareResults, recents, radiusM, onRadius, onOpenSaved, onOpenAccount,
   } = props;
 
@@ -198,6 +200,7 @@ export function FindParkingDesktop(
             onToggleSave={() => onToggleSaveCarpark(detailCp)}
             user={user}
             onRequireSignIn={onRequireSignIn}
+            onCompareNearby={onCompareNearby}
           />
         ) : detailLoading ? (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: 'var(--text-3)', fontSize: 13 }}>

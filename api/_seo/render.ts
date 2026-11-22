@@ -26,7 +26,7 @@ import {
   synthesizeCap,
 } from '../../src/lib/rateDisplay';
 import type { SeoCarpark } from './db';
-import { type SeoArea, SEO_AREAS, nearestAreas } from './areas';
+import { type SeoArea, SEO_AREAS, nearestAreas, areaContaining } from './areas';
 
 export const ORIGIN = 'https://wheretopark.sg';
 const SITE_NAME = 'wheretopark.sg';
@@ -285,6 +285,15 @@ export function renderCarparkPage(
           .join('')}</ul>`
       : '';
 
+  // Link up to the area page that lists this carpark, so a visitor (or a
+  // crawler) landing on one carpark can reach the comparison for the area.
+  const area = areaContaining(cp);
+  const areaHtml = area
+    ? `<h2>Parking near ${escapeHtml(area.name)}</h2>
+<p>${escapeHtml(cp.name)} is one of the carparks near ${escapeHtml(area.name)}. Compare them all and get the cheapest for your stay.</p>
+<a class="cta" href="/parking-near/${area.slug}">Compare carparks near ${escapeHtml(area.name)}</a>`
+    : '';
+
   const inner = `
 <h1>${escapeHtml(cp.name)}</h1>
 <p class="muted">${meta.join(' · ')}</p>
@@ -293,6 +302,7 @@ ${estimateTable(cp.rates.weekday)}
 ${rateTable('Weekday rates', cp.rates.weekday)}
 ${rateTable('Saturday rates', cp.rates.saturday)}
 ${rateTable('Sunday & public holiday rates', cp.rates.sundayPH)}
+${areaHtml}
 ${nearbyHtml}
 `;
 
@@ -305,6 +315,9 @@ ${nearbyHtml}
       carparkJsonLd(cp, oneHour),
       breadcrumbLd([
         { name: SITE_NAME, url: `${ORIGIN}/` },
+        ...(area
+          ? [{ name: `Parking near ${area.name}`, url: `${ORIGIN}/parking-near/${area.slug}` }]
+          : []),
         { name: cp.name, url: canonical },
       ]),
     ],
