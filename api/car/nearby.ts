@@ -1,8 +1,8 @@
 /**
  * GET /api/car/nearby?lat=&lng=&hours=2&limit=12[&label=]
  *
- * Carparks around a point for the Android Auto screens
- * (android/.../car/CarApi.java), ranked cheapest-first and priced for the
+ * Carparks around a point for the Android Auto and CarPlay screens
+ * (android/.../car/CarApi.java, ios/App/App/CarPlay/CarApi.swift), ranked cheapest-first and priced for the
  * stay in Singapore time, with live free lots and EV status: the same list
  * the phone's Results screen shows (see _car/results.ts). Live counts
  * change every minute, so responses are not cached.

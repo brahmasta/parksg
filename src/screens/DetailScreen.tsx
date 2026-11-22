@@ -634,6 +634,7 @@ export function DetailScreen({
             <RealWalkMap
               origin={cp.coords.entrance}
               destination={destinationCoords}
+              destinationLabel={destination}
               geometry={walk.geometry}
               walkMin={walk.minutes}
               walkMeters={walk.meters}
