@@ -336,6 +336,7 @@ export function FindParkingDesktop(
               onSelect={onOpenDetail}
               degraded={state === 'degraded'}
               destinationCoords={destinationCoords}
+              destinationLabel={headerDestination}
             />
           </div>
         ) : detailCp ? (
@@ -353,6 +354,7 @@ export function FindParkingDesktop(
               onSelect={onOpenDetail}
               degraded={state === 'degraded'}
               destinationCoords={destinationCoords}
+              destinationLabel={headerDestination}
             />
           </div>
         ) : (

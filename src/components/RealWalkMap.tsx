@@ -4,20 +4,12 @@ import 'leaflet/dist/leaflet.css';
 import { formatDistance } from '../lib/availability';
 import { IconWalk } from './icons';
 
-// OneMap raster tiles — free, CORS-enabled, rate-limited per IP.
-// Styles: Default, Original, Grey, Night. "Grey" reads cleanly under
-// the teal route line on our light theme.
-const ONEMAP_TILE = 'https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png';
-const ONEMAP_ATTRIBUTION =
-  '<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">© OneMap</a>';
-
-// OneMap's published bbox for Singapore. Pan is locked to this region so
-// the user can't drag off the map.
-const SG_BOUNDS = L.latLngBounds([1.144, 103.6], [1.494, 104.1]);
+import { addOneMapTiles, destinationMarker, MAP_MAX_ZOOM, MAP_MIN_ZOOM, SG_BOUNDS } from '../lib/oneMap';
 
 export function RealWalkMap({
   origin,
   destination,
+  destinationLabel,
   geometry,
   walkMin,
   walkMeters,
@@ -25,6 +17,8 @@ export function RealWalkMap({
 }: {
   origin: [number, number];
   destination: [number, number];
+  /** Name of the searched place, shown under its pin. */
+  destinationLabel?: string | null;
   /** Decoded route as a series of [lat, lng] points */
   geometry: [number, number][];
   walkMin: number;
@@ -44,16 +38,10 @@ export function RealWalkMap({
       attributionControl: true,
       zoomControl: false,
       maxBounds: SG_BOUNDS,
-      minZoom: 11,
-      maxZoom: 19,
+      minZoom: MAP_MIN_ZOOM,
+      maxZoom: MAP_MAX_ZOOM,
     });
-    L.tileLayer(ONEMAP_TILE, {
-      attribution: ONEMAP_ATTRIBUTION,
-      opacity: 0.82,
-      className: 'psg-basemap',
-      detectRetina: true,
-      bounds: SG_BOUNDS,
-    }).addTo(map);
+    addOneMapTiles(map, { opacity: 0.82 });
     mapRef.current = map;
     return () => {
       map.remove();
@@ -73,7 +61,6 @@ export function RealWalkMap({
 
     const accent = getCssVar('--accent', '#0D9488');
     const accentOn = getCssVar('--accent-on', '#FFFFFF');
-    const text1 = getCssVar('--text-1', '#242A33');
 
     // Route polyline (use real geometry; fall back to a straight line if empty)
     const path: [number, number][] = geometry.length >= 2 ? geometry : [origin, destination];
@@ -101,24 +88,14 @@ export function RealWalkMap({
       }),
     }).addTo(map);
 
-    // Destination pin — solid dot
-    L.marker(destination, {
-      icon: L.divIcon({
-        className: 'psg-pin-dest',
-        html: `<div style="
-          width:14px;height:14px;border-radius:50%;
-          background:${text1}; border:2px solid #fff;
-          box-shadow:0 2px 6px rgba(0,0,0,0.3);
-        "></div>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
-      }),
-    }).addTo(map);
+    // Destination — the same labelled pin as the results map.
+    destinationMarker(destination, destinationLabel).addTo(map);
 
     // Fit to route with breathing room — only when the route key changes.
     const key = `${origin[0]},${origin[1]}->${destination[0]},${destination[1]}`;
     if (key !== fittedKey.current) {
-      map.fitBounds(route.getBounds(), { padding: [28, 28], maxZoom: 17 });
+      // Extra room on top for the destination pin and its label.
+      map.fitBounds(route.getBounds(), { paddingTopLeft: [28, 56], paddingBottomRight: [28, 36], maxZoom: 17 });
       fittedKey.current = key;
     }
 
@@ -127,7 +104,7 @@ export function RealWalkMap({
 
     // Silence unused-var lints for the colors we already passed inline.
     void accentOn;
-  }, [origin[0], origin[1], destination[0], destination[1], geometry]);
+  }, [origin[0], origin[1], destination[0], destination[1], destinationLabel, geometry]);
 
   return (
     <div
@@ -208,7 +185,7 @@ export function RealWalkMap({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span
-            style={{ width: 6, height: 6, borderRadius: 999, background: '#F5F6F8' }}
+            style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--bad)' }}
           />
           <span style={{ opacity: 0.68 }}>Destination</span>
         </div>

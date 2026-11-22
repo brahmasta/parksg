@@ -2,10 +2,8 @@ import { useEffect, useRef } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const ONEMAP_TILE = 'https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png';
-const ONEMAP_ATTRIBUTION =
-  '<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">© OneMap</a>';
-const SG_BOUNDS = L.latLngBounds([1.144, 103.6], [1.494, 104.1]);
+import { addOneMapTiles, MAP_MAX_ZOOM, MAP_MIN_ZOOM, SG_BOUNDS } from '../lib/oneMap';
+
 const SG_CENTER: [number, number] = [1.3521, 103.8198];
 
 /** Interactive Singapore map for picking a coordinate. Click anywhere or drag
@@ -38,15 +36,10 @@ export function LatLngPicker({
       attributionControl: true,
       zoomControl: true,
       maxBounds: SG_BOUNDS,
-      minZoom: 11,
-      maxZoom: 19,
+      minZoom: MAP_MIN_ZOOM,
+      maxZoom: MAP_MAX_ZOOM,
     }).setView(start, lat != null && lng != null ? 17 : 12);
-    L.tileLayer(ONEMAP_TILE, {
-      attribution: ONEMAP_ATTRIBUTION,
-      detectRetina: true,
-      bounds: SG_BOUNDS,
-      className: 'psg-basemap',
-    }).addTo(map);
+    addOneMapTiles(map);
 
     const marker = L.marker(start, { draggable: true });
     if (lat != null && lng != null) marker.addTo(map);

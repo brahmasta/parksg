@@ -21,6 +21,28 @@ npm run cap:ios   # build:native → cap sync ios → open Xcode
 - Account deletion revokes the Apple grant (`api/_account/appleRevoke.ts`).
 - Near me outside Singapore explains the coverage instead of searching.
 
+## CarPlay
+
+`App/CarPlay/` is a CarPlay *parking* app built from templates, on the same
+`/api/car/nearby` endpoint as Android Auto: Home (Parking near me, plus the
+phone's saved and recent destinations) → carparks on the map → rates, with
+Navigate handing off to Apple Maps. The parking category has no search or
+keyboard template, so a new place is searched on the phone first.
+
+- Apple has to grant the team the `com.apple.developer.carplay-parking`
+  entitlement: request it at developer.apple.com/contact/carplay (category
+  Parking). Until then a device or App Store build signed with it fails.
+- So the entitlement lives in `App.CarPlay.entitlements`, which only
+  simulator builds use (`CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]` in the
+  project). Once Apple grants it: enable CarPlay Parking on the App ID, add
+  the key to `App.entitlements`, and delete the simulator override and the
+  extra file.
+- Testing needs the entitlement and a real iPhone. From Xcode 27 the
+  simulator has no CarPlay display (I/O → External Displays is gone): run
+  the app on an iPhone connected to the Mac, then in Device Hub select the
+  iPhone and choose Device → CarPlay Simulator. Xcode 26 and earlier can
+  still use Simulator → I/O → External Displays → CarPlay without the grant.
+
 ## One-time setup
 
 1. Apple Developer Program: team `WPSXGHD68F` (set in the Xcode project and

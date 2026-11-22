@@ -4,10 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import type { Carpark, DurationHours } from '../lib/types';
 import { availabilityStatus, formatCost } from '../lib/availability';
 
-const ONEMAP_TILE = 'https://www.onemap.gov.sg/maps/tiles/Grey/{z}/{x}/{y}.png';
-const ONEMAP_ATTRIBUTION =
-  '<a href="https://www.onemap.gov.sg/" target="_blank" rel="noopener">© OneMap</a>';
-const SG_BOUNDS = L.latLngBounds([1.144, 103.6], [1.494, 104.1]);
+import { addOneMapTiles, destinationMarker, MAP_MAX_ZOOM, MAP_MIN_ZOOM, SG_BOUNDS } from '../lib/oneMap';
 
 type Props = {
   carparks: Carpark[];
@@ -17,6 +14,8 @@ type Props = {
   onSelect: (cp: Carpark) => void;
   degraded: boolean;
   destinationCoords: [number, number] | null;
+  /** Name of the searched place, shown under its pin. */
+  destinationLabel?: string | null;
   /** 'card' (default) = the mobile fixed-height card with padding; 'fill' =
    * fill the parent (desktop map pane), no padding/border/radius. */
   variant?: 'card' | 'fill';
@@ -31,7 +30,7 @@ type Props = {
   walkGeometry?: [number, number][] | null;
 };
 
-export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, variant = 'card', costOf, activeId, walkGeometry }: Props) {
+export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degraded, destinationCoords, destinationLabel, variant = 'card', costOf, activeId, walkGeometry }: Props) {
   const fill = variant === 'fill';
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -55,17 +54,14 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       attributionControl: true,
       zoomControl: false,
       maxBounds: SG_BOUNDS,
-      minZoom: 11,
-      maxZoom: 19,
+      minZoom: MAP_MIN_ZOOM,
+      maxZoom: MAP_MAX_ZOOM,
     });
-    L.tileLayer(ONEMAP_TILE, {
-      attribution: ONEMAP_ATTRIBUTION,
-      detectRetina: true,
-      bounds: SG_BOUNDS,
-      // Mute the basemap so the colored price pins read clearly against it.
-      opacity: 0.82,
-      className: 'psg-basemap',
-    }).addTo(map);
+    // Pinch works on phones; the buttons make the full zoom range reachable
+    // with one hand and with a mouse.
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    // Mute the basemap so the colored price pins read clearly against it.
+    addOneMapTiles(map, { opacity: 0.82 });
     mapRef.current = map;
     return () => {
       map.remove();
@@ -118,22 +114,9 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
       }
     }
 
-    // Destination marker — central solid dot
+    // The searched place: a labelled pin under the carpark pills.
     if (destinationCoords) {
-      L.marker(destinationCoords, {
-        icon: L.divIcon({
-          className: 'psg-pin-dest',
-          html: `<div style="
-            width:16px;height:16px;border-radius:50%;
-            background:${text1}; border:2px solid #fff;
-            box-shadow:0 2px 6px rgba(0,0,0,0.3);
-          "></div>`,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
-        }),
-        // Always rendered behind the carpark pins; they tap-target priority.
-        zIndexOffset: -100,
-      }).addTo(map);
+      destinationMarker(destinationCoords, destinationLabel).addTo(map);
     }
 
     // Carpark pins — cost label with a small tail
@@ -222,7 +205,7 @@ export function RealResultsMap({ carparks, cheapestId, duration, onSelect, degra
 
     // Make sure tiles render after container layout settles.
     setTimeout(() => map.invalidateSize(), 50);
-  }, [carparks, cheapestId, duration, degraded, destinationCoords, costOf, activeId, walkGeometry]);
+  }, [carparks, cheapestId, duration, degraded, destinationCoords, destinationLabel, costOf, activeId, walkGeometry]);
 
   return (
     <div style={fill ? { height: '100%', display: 'flex', flexDirection: 'column' } : { padding: '0 16px' }}>

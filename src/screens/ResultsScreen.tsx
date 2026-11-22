@@ -328,6 +328,7 @@ export function ResultsScreen({
               onSelect={onSelect}
               degraded={state === 'degraded'}
               destinationCoords={destinationCoords}
+              destinationLabel={destination}
             />
           ) : (
             <div
