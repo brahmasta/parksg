@@ -11,7 +11,7 @@ import type {
 } from './lib/types';
 import { HomeScreen } from './screens/HomeScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
-import { DetailScreen } from './screens/DetailScreen';
+import { DetailScreen, type CompareTarget } from './screens/DetailScreen';
 import { AboutScreen } from './screens/AboutScreen';
 import { AccountScreen } from './screens/AccountScreen';
 import { SavedScreen } from './screens/SavedScreen';
@@ -334,6 +334,22 @@ function App() {
     trackEvent('search_submitted', { via: 'place_pick' });
     setScreen('results');
     searchAtCoords(place.label, place.lat, place.lng, place.address);
+  };
+
+  // From a carpark opened on its own (an SEO `/carpark/:slug` landing, a saved
+  // carpark): run the search that page has no results for. Inside a curated
+  // area the address bar becomes that area's page, so a refresh or a share
+  // gives the same list; elsewhere it drops the carpark path it no longer shows.
+  const goCompareNearby = (place: CompareTarget) => {
+    resultsScrollRef.current = 0;
+    searchStartedByUser.current = true;
+    trackEvent('search_submitted', { via: 'carpark_page' });
+    if (!isNative) {
+      window.history.replaceState(null, '', place.areaSlug ? `/parking-near/${place.areaSlug}` : '/');
+    }
+    setSelectedCarpark(null);
+    setScreen('results');
+    searchAtCoords(place.label, place.lat, place.lng);
   };
 
   const goDetail = (cp: Carpark) => {
@@ -813,6 +829,7 @@ function App() {
         setSelectedCarpark(cp);
       },
       onCloseDetail: () => setSelectedCarpark(null),
+      onCompareNearby: goCompareNearby,
       isCarparkSaved: (id) => saves.isCarparkSaved(id),
       onToggleSaveCarpark: toggleSaveCarpark,
       user,
@@ -950,6 +967,7 @@ function App() {
         onToggleSave={() => toggleSaveCarpark(selectedCarpark)}
         user={user}
         onRequireSignIn={handleSignIn}
+        onCompareNearby={goCompareNearby}
       />
     );
   } else if (screen === 'detail') {
