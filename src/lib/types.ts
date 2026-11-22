@@ -182,7 +182,9 @@ export type RecentDestination = {
 export type DurationOption = { value: DurationHours; label: string };
 
 export type AvailabilityStatus = 'available' | 'limited' | 'full' | 'unknown';
-export type ResultsState = 'loading' | 'loaded' | 'degraded' | 'empty';
+/** 'empty' = the search worked and found no carparks; 'error' = it could not
+ *  be completed (see lib/searchFailure.ts). */
+export type ResultsState = 'loading' | 'loaded' | 'degraded' | 'empty' | 'error';
 export type Screen =
   | 'home'
   | 'results'

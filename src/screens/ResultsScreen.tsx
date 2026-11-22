@@ -11,6 +11,8 @@ import { Spinner } from '../components/atoms';
 import { CarparkCard } from '../components/CarparkCard';
 import { StayPlanner } from '../components/StayPlanner';
 import { DegradedBanner } from '../components/DegradedBanner';
+import { SearchFailed } from '../components/SearchFailed';
+import type { SearchFailure } from '../lib/searchFailure';
 import { AvailableEmptyResults } from '../components/AvailableEmptyResults';
 import { EVEmptyResults } from '../components/EVEmptyResults';
 import { AddCarparkLink } from '../components/AddCarparkLink';
@@ -36,6 +38,7 @@ export function ResultsScreen({
   setStay,
   carparks,
   state,
+  failure,
   availableOnly,
   setAvailableOnly,
   evOnly,
@@ -63,6 +66,8 @@ export function ResultsScreen({
   setStay: (s: Stay) => void;
   carparks: Carpark[];
   state: ResultsState;
+  /** Why the search failed; set when state is 'error'. */
+  failure?: SearchFailure;
   availableOnly: boolean;
   setAvailableOnly: (v: boolean) => void;
   evOnly: boolean;
@@ -255,8 +260,8 @@ export function ResultsScreen({
           />
         </div>
 
-        {/* Result summary */}
-        <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-2)' }}>
+        {/* Result summary — not for a failed search, which has no count. */}
+        <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-2)', visibility: state === 'error' ? 'hidden' : undefined }}>
           {state === 'empty' ? '0' : ranked.length} carpark
           {ranked.length === 1 ? '' : 's'}
           <span style={{ color: 'var(--text-3)' }}> · within </span>
@@ -284,6 +289,10 @@ export function ResultsScreen({
         )}
 
         {state === 'loading' && <ResultsLoading />}
+
+        {state === 'error' && (
+          <SearchFailed failure={failure ?? 'unknown'} query={destination} onRetry={onRetry} onBack={onBack} />
+        )}
 
         {state === 'empty' && (
           <EmptyResults

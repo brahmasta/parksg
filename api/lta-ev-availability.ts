@@ -12,6 +12,11 @@
 // connector, and cache the result for 60s so a burst of searches share
 // one upstream pull. LTA refreshes the underlying file every ~5 min.
 //
+// Both hops share one UPSTREAM_TIMEOUT_MS deadline. LTA is sometimes slow
+// enough that the function used to run into the platform's 25s limit; now it
+// answers 504 quickly and the app shows carparks without EV data. The app
+// itself stops waiting after 10s, so the deadline sits under that.
+//
 // Env:
 //   LTA_ACCOUNT_KEY  required, same key as /api/lta-availability.
 //
@@ -19,11 +24,13 @@
 //   200 { ok: true, lastUpdatedTime, count, locations: [...] }
 //   500 { ok: false, error }   missing key
 //   502 { ok: false, error }   upstream failure
+//   504 { ok: false, error }   upstream too slow
 
 export const config = { runtime: 'edge' };
 
 const POLL_URL = 'https://datamall2.mytransport.sg/ltaodataservice/EVCBatch';
 const CACHE_TTL_MS = 60_000;
+const UPSTREAM_TIMEOUT_MS = 8_000;
 
 type PollResponse = { value?: Array<{ Link?: string }> };
 
@@ -102,10 +109,13 @@ export default async function handler(_req: Request): Promise<Response> {
     );
   }
 
+  // One deadline for both hops, including reading the 3 MB body.
+  const signal = AbortSignal.timeout(UPSTREAM_TIMEOUT_MS);
   try {
     // 1) Poll endpoint for the signed S3 URL.
     const pollRes = await fetch(POLL_URL, {
       headers: { AccountKey: key, accept: 'application/json' },
+      signal,
     });
     if (!pollRes.ok) {
       const detail = await pollRes.text().catch(() => '');
@@ -121,7 +131,7 @@ export default async function handler(_req: Request): Promise<Response> {
     }
 
     // 2) Fetch the signed dump.
-    const dumpRes = await fetch(link);
+    const dumpRes = await fetch(link, { signal });
     if (!dumpRes.ok) {
       return json({ ok: false, error: `EV dump download returned ${dumpRes.status}` }, 502);
     }
@@ -150,6 +160,9 @@ export default async function handler(_req: Request): Promise<Response> {
       60,
     );
   } catch (err) {
+    if (signal.aborted) {
+      return json({ ok: false, error: `EVCBatch did not answer within ${UPSTREAM_TIMEOUT_MS / 1000}s` }, 504);
+    }
     return json(
       {
         ok: false,

@@ -18,6 +18,7 @@ import { evSnapshotAgeMinutes, fetchEvAvailability } from '../lib/api/ltaEv';
 import { attachEvData } from '../lib/ev';
 import { applyUraRates, currentDayType } from '../lib/uraJoin';
 import { buildLiveLotsIndex, buildUraRatesIndex, dbRowToCarpark } from '../lib/carparkMapping';
+import { retryOnce, type SearchFailure } from '../lib/searchFailure';
 
 const REFRESH_MS = 60_000;
 const AVAIL_TIMEOUT_MS = 5_000;
@@ -44,6 +45,10 @@ export type SearchResult = {
   carparks: Carpark[];
   /** Seconds since the live lot counts last refreshed; null while loading. */
   refreshedSecondsAgo: number | null;
+  /** Set with state 'error': why the search could not be completed. */
+  failure?: SearchFailure;
+  /** Set with state 'error': what was searched, for the message and the log. */
+  failedQuery?: string;
 };
 
 const EMPTY: SearchResult = {
@@ -168,9 +173,30 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
         }, REFRESH_MS);
       };
 
+      // A search that could not be completed. Shown as an error with a retry,
+      // never as "No carparks nearby": that would say the area has no parking
+      // when we simply could not check. A background refresh keeps the list
+      // it already has and tries again later.
+      const fail = (failure: SearchFailure, destination: GeocodedPlace | null = null) => {
+        if (requestSeq.current !== seq) return;
+        if (isAvailOnly) {
+          scheduleRefresh(t, radius);
+          return;
+        }
+        setResult({
+          state: 'error',
+          destination,
+          carparks: [],
+          refreshedSecondsAgo: null,
+          failure,
+          failedQuery: t.kind === 'query' ? t.query : t.label,
+        });
+      };
+
       try {
         // For an availability-only refresh we keep the current destination
         // and just re-pull the lot counts.
+        let geocodeFailed = false;
         const dest: GeocodedPlace | null = isAvailOnly
           ? result.destination
           : t.kind === 'coords'
@@ -181,21 +207,14 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
                 lat: t.lat,
                 lng: t.lng,
               }
-            : await geocode(t.query);
+            : // One dropped request should not dead-end the search.
+              await retryOnce(() => geocode(t.query)).catch(() => {
+                geocodeFailed = true;
+                return null;
+              });
         if (!dest) {
-          if (requestSeq.current !== seq) return;
-          // Preserve the loaded list on a background refresh; only a fresh
-          // search with no resolvable destination should show the empty state.
-          if (isAvailOnly) {
-            scheduleRefresh(t, radius);
-            return;
-          }
-          setResult({
-            state: 'empty',
-            destination: null,
-            carparks: [],
-            refreshedSecondsAgo: null,
-          });
+          // "The lookup failed" and "no such place" need different messages.
+          fail(geocodeFailed ? 'place_lookup' : 'place_not_found');
           return;
         }
 
@@ -205,7 +224,7 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
         // independent — a failed availability call yields a degraded
         // result rather than blocking the whole search.
         const [dbCarparks, hdbAvail, ltaAvail, jpAvail, evSettled] = await Promise.all([
-          fetchNearbyCarparks(dest, radius).catch(() => null),
+          retryOnce(() => fetchNearbyCarparks(dest, radius)).catch(() => null),
           withTimeout(getHdbAvailability(), AVAIL_TIMEOUT_MS).catch(() => null),
           withTimeout(getLtaCarparks(), 8_000).catch(() => null),
           withTimeout(getJustParkLots(), 8_000).catch(() => null),
@@ -220,15 +239,18 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
         // otherwise blank the very results the user navigates back to from
         // Detail — the reported "back shows 0 carparks, must Search wider"
         // bug. Keep the current list and re-arm the loop so it self-heals.
-        if (!dbCarparks && isAvailOnly) {
-          scheduleRefresh(t, radius);
+        // On a fresh search the same failure (after one retry) is an error,
+        // not an empty area and not a list of Google-only places with no
+        // rates: our own carparks are what the search is for.
+        if (!dbCarparks) {
+          fail('carparks', dest);
           return;
         }
         // An empty DB result is NOT a dead end — we still query Google below.
         // Sparse areas (e.g. Jewel/Changi Airport) carry no HDB/URA/LTA carpark
         // but do have Google parking, so proceed with whatever the DB returned
-        // and decide empty/degraded from the FINAL merged list.
-        const dbList = dbCarparks ?? [];
+        // and decide empty from the FINAL merged list.
+        const dbList = dbCarparks;
 
         // Index live lots by DB carpark id so we can merge in O(1).
         const lotsByDbId = buildLiveLotsIndex(hdbAvail, ltaAvail, jpAvail);
@@ -271,16 +293,15 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
           }
         }
 
-        // Nothing from the DB and nothing net-new from Google → empty (or
-        // degraded if the DB fetch itself failed). On a background refresh,
-        // never wipe an already-loaded list.
+        // Nothing from the DB and nothing net-new from Google → empty. On a
+        // background refresh, never wipe an already-loaded list.
         if (carparks.length === 0) {
           if (isAvailOnly) {
             scheduleRefresh(t, radius);
             return;
           }
           setResult({
-            state: dbCarparks ? 'empty' : 'degraded',
+            state: 'empty',
             destination: dest,
             carparks: [],
             refreshedSecondsAgo: null,
@@ -312,19 +333,7 @@ export function useCarparks(initialTrigger: Trigger | null = null) {
         if (requestSeq.current !== seq) return;
         // eslint-disable-next-line no-console
         console.error('useCarparks failed', err);
-        // Same rule as above: a thrown error during a background refresh must
-        // not blank a good list — preserve it and keep retrying. Only a fresh
-        // search failure surfaces the empty state.
-        if (isAvailOnly) {
-          scheduleRefresh(t, radius);
-          return;
-        }
-        setResult({
-          state: 'empty',
-          destination: null,
-          carparks: [],
-          refreshedSecondsAgo: null,
-        });
+        fail('unknown');
       }
     },
     // result.destination is intentionally not a dep — `run` is invoked imperatively.
