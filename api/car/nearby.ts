@@ -1,6 +1,9 @@
 /**
  * GET /api/car/nearby?lat=&lng=&hours=2&limit=12[&label=]
  *
+ * `limit` defaults to 12 (what the car screens ask for) and may go up to 60,
+ * which the /beta map page uses to show every carpark within the radius.
+ *
  * Carparks around a point for the Android Auto and CarPlay screens
  * (android/.../car/CarApi.java, ios/App/App/CarPlay/CarApi.swift), ranked cheapest-first and priced for the
  * stay in Singapore time, with live free lots and EV status: the same list
@@ -78,7 +81,7 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ ok: false, error: 'wheretopark.sg covers Singapore only' }, 400);
   }
   const hours = Math.min(24, Math.max(0.5, Math.round(Number(q.get('hours') || 2) * 2) / 2));
-  const limit = Math.min(20, Math.max(1, Math.floor(Number(q.get('limit') || 12))));
+  const limit = Math.min(60, Math.max(1, Math.floor(Number(q.get('limit') || 12))));
   const label = q.get('label')?.trim() || undefined;
   if (!URL_BASE || !ANON_KEY) return json({ ok: false, error: 'Server not configured' }, 500);
 

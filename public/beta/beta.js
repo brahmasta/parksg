@@ -171,7 +171,9 @@ const view = () => {
   if (sortBy === 'near') list = [...list].sort((a, b) => a.distanceM - b.distanceM);
   return list;                                             // the service already ranks cheapest first
 };
-const best = () => results.find(c => c.cost != null) || null;
+const best = () => results.reduce((a, c) => c.cost != null && (!a || c.cost < a.cost) ? c : a, null);
+// The service lists cheapest first, except that the searched place's own carpark is put on top.
+const atDest = () => current && current.kind !== 'here' && results.length > 1 && results[0].cost != null && results[1].cost != null && results[0].cost > results[1].cost ? results[0] : null;
 const lotsText = c => c.lotsAvailable == null ? 'no live lot data' : c.lotsAvailable > 0 ? `<em>${c.lotsAvailable} lots free</em>` : 'full right now';
 const money = c => c.cost == null ? '–' : c.cost === 0 ? 'Free' : '$' + c.cost.toFixed(2);
 
@@ -187,7 +189,8 @@ function renderControls() {
 
 function renderResults() {
   renderControls();
-  const list = loadState === 'ok' ? view() : [], top = best();
+  const list = loadState === 'ok' ? view() : [], top = best(), here = atDest();
+  const tagFor = c => (here && c.id === here.id ? '<span class="tag dest">At destination</span>' : '') + (top && c.id === top.id ? '<span class="tag">Cheapest</span>' : '');
   bubbles.forEach(b => b.m.remove()); bubbles = [];
   if (focused && !list.some(c => c.id === focused.id)) focused = null;
   if (loadState === 'loading') {
@@ -207,23 +210,26 @@ function renderResults() {
         <b>${esc(c.name)}</b>
         <span class="price"><strong>${c.cost == null ? 'Rate not known' : money(c)}</strong>${c.cost == null ? '' : `<small>for ${stayLabel(stay)}</small>`}</span>
         <small>${c.walkMin} min walk · ${lotsText(c)}</small>
-        <span class="tags">${top && c.id === top.id ? '<span class="tag">Cheapest</span>' : ''}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}<i>Details</i></span></button>`).join('')
+        <span class="tags">${tagFor(c)}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}<i>Details</i></span></button>`).join('')
     : `<p class="empty">${results.length ? 'No carpark matches those filters.' : 'We have no carparks within 600 m of this place.'}</p>`;
   if (loadState === 'ok') {
     $('sheetTitle').textContent = results.length ? `${list.length} carpark${list.length === 1 ? '' : 's'} within 600 m` : 'No carparks nearby';
     $('sheetSub').textContent = results.length ? `price for ${stayLabel(stay)}${live ? '' : ' · live lots unavailable'}` : '';
     $('list').innerHTML = list.length ? list.map(c => `<button type="button" class="cp ${picked && picked.id === c.id ? 'on' : ''}" data-id="${esc(c.id)}"><span class="p">P</span>
-        <div><b>${esc(c.name)}</b><small>${c.walkMin} min walk · ${lotsText(c)}${top && c.id === top.id ? '<span class="tag">Cheapest</span>' : ''}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}</small></div>
+        <div><b>${esc(c.name)}</b><small>${c.walkMin} min walk · ${lotsText(c)}${tagFor(c)}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}</small></div>
         <strong>${money(c)}<small>${c.cost == null ? 'rate not known' : stayLabel(stay)}</small></strong></button>`).join('')
       : `<p class="empty">${results.length ? 'No carpark matches those filters.' : 'We have no carparks within 600 m of this place.'}</p>`;
     list.forEach((c, k) => {
       const lots = c.lotsAvailable == null ? '<small class="none">no data</small>' : `<small>${c.lotsAvailable} lots</small>`;
       const lit = picked ? picked.id === c.id : focused && focused.id === c.id;
-      const node = el('bub' + (lit ? ' on' : ''), `<i>${c.cost == null ? 'no rate' : money(c)} ${lots}</i>`);
+      // busy areas can have dozens: the first 14 get full bubbles, the rest a small price tag
+      const node = el('bub' + (lit ? ' on' : '') + (k >= 14 ? ' mini' : ''), `<i>${c.cost == null ? 'no rate' : money(c)} ${lots}</i>`);
       node.style.animationDelay = (k * 50) + 'ms';
       // collapsed: first tap picks the card, second tap opens it; in the full list a tap opens it
       node.onclick = e => { e.stopPropagation(); if (picked || body.classList.contains('list') || (focused && focused.id === c.id)) openDetail(c); else focus(c); };
-      bubbles.push({ c, m: new maplibregl.Marker({ element: node, anchor: 'bottom' }).setLngLat([c.lng, c.lat]).addTo(map) });
+      const m = new maplibregl.Marker({ element: node, anchor: 'bottom' }).setLngLat([c.lng, c.lat]).addTo(map);
+      m.getElement().style.zIndex = String(100 - k);
+      bubbles.push({ c, m });
     });
   }
   requestAnimationFrame(syncSheet);
@@ -233,7 +239,7 @@ async function loadCarparks(openId) {
   const p = current, id = ++reqId;
   loadState = 'loading'; results = []; renderResults();
   try {
-    const j = await (await fetch(`/api/car/nearby?lat=${(+p.lat).toFixed(6)}&lng=${(+p.lng).toFixed(6)}&hours=${stay}&limit=12`)).json();
+    const j = await (await fetch(`/api/car/nearby?lat=${(+p.lat).toFixed(6)}&lng=${(+p.lng).toFixed(6)}&hours=${stay}&limit=60${p.kind === 'here' ? '' : '&label=' + encodeURIComponent(p.name)}`)).json();
     if (id !== reqId) return;
     if (!j.ok) throw new Error(j.error || 'failed');
     results = j.carparks || []; live = !!j.live; checkedAt = new Date(); loadState = 'ok';
