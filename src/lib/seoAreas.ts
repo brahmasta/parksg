@@ -12,6 +12,8 @@
  * internal links, so don't rename one without a redirect.
  */
 
+import { haversineMeters } from './geo';
+
 export type SeoArea = {
   slug: string;
   /** Display name, e.g. "Orchard Road". */
@@ -73,4 +75,20 @@ export function nearestAreas(area: SeoArea, n: number): SeoArea[] {
     .sort((x, y) => x.d - y.d)
     .slice(0, n)
     .map((x) => x.a);
+}
+
+/**
+ * The curated area a point belongs to: the nearest area whose own search
+ * radius covers it, so the carpark is one that area's page actually lists.
+ * Undefined when no area covers the point — most of the island.
+ *
+ * Used to link a carpark page up to its `/parking-near/:area` page.
+ */
+export function areaContaining(point: { lat: number; lng: number }): SeoArea | undefined {
+  let best: { area: SeoArea; d: number } | undefined;
+  for (const area of SEO_AREAS) {
+    const d = haversineMeters(point, area);
+    if (d <= area.radiusM && (!best || d < best.d)) best = { area, d };
+  }
+  return best?.area;
 }

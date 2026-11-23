@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>wheretopark.sg beta · toy 3D map</title>
+<meta name="description" content="A preview of wheretopark.sg on a toy 3D map of Singapore: search a place, compare carpark prices and free lots, and navigate.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://tiles.openfreemap.org">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="/beta/vendor/maplibre-gl.css" rel="stylesheet">
+<link href="/beta/beta.css" rel="stylesheet">
+</head>
+<body class="home boot">
+<div id="map"></div>
+
+<div class="brand" aria-label="wheretopark.sg">
+  <svg viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0.21" y1="0.09" x2="0.79" y2="0.91"><stop offset="0" stop-color="#2ee3c2"/><stop offset="1" stop-color="#14c9b6"/></linearGradient></defs><rect width="512" height="512" rx="128" fill="url(#g)"/><path fill="#0b2e2a" d="M217 366.1L175.5 366.1L175.5 145.9L266.1 145.9Q286.8 145.9 302.7 154.3Q318.6 162.6 327.6 177.7Q336.5 192.8 336.5 213.5L336.5 217.9Q336.5 238.4 327.2 253.6Q318 268.9 302.1 277.2Q286.2 285.6 266.1 285.6L217 285.6L217 366.1M217 183.7L217 247.8L262 247.8Q276.8 247.8 285.9 239.6Q295 231.5 295 217.3L295 214.2Q295 200 285.9 191.8Q276.8 183.7 262 183.7"/></svg>
+  <b>wheretopark<span>.sg</span></b><em>beta</em>
+</div>
+
+<button class="avatar mode" id="mode" type="button" aria-label="Switch to the night view" aria-pressed="false">
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.200"/><path d="M12 2.500v2.500M12 19v2.500M2.500 12H5M19 12h2.500M5.300 5.300l1.800 1.800M16.900 16.900l1.800 1.800M5.300 18.700l1.800-1.800M16.900 7.100l1.800-1.800"/></svg>
+  <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.500A8.500 8.500 0 0 1 9.500 4a8.500 8.500 0 1 0 10.500 10.500z"/></svg>
+</button>
+
+<form class="search" id="search" autocomplete="off">
+  <button type="button" id="glass" aria-label="Search" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></button>
+  <button type="button" id="back" aria-label="Back to start"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <input id="q" type="text" inputmode="search" enterkeyhint="search" placeholder="Where are you going?" aria-label="Where are you going?">
+  <button type="button" id="locate" aria-label="Use my location"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="6.500"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><path d="M12 2v3.500M12 18.500V22M2 12h3.500M18.500 12H22"/></svg></button>
+  <button type="button" id="clear" aria-label="Clear"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</form>
+
+<section class="sugg" id="sugg"></section>
+
+<button class="tilt" id="tilt">Flat map</button>
+<section class="sheet" id="sheet" aria-live="polite">
+  <button type="button" class="grab" id="grab" aria-label="Show the full list"></button>
+  <div id="peek">
+    <div class="peek-head"><div><b id="peekTitle"></b><span id="peekSub"></span></div><button type="button" class="chip" id="more">List and filters</button></div>
+    <div class="cards" id="cards"></div>
+  </div>
+  <div id="listView">
+    <header><b id="sheetTitle"></b><span id="sheetSub"></span></header>
+    <div class="ctl" id="ctl"></div>
+    <div class="list" id="list"></div>
+  </div>
+  <div id="detail"></div>
+</section>
+
+<div class="modal" id="nav" role="dialog" aria-modal="true" aria-labelledby="navTitle"><div class="box">
+  <h3 id="navTitle"></h3><p>Opens driving directions to the carpark entrance.</p>
+  <div class="nav" id="navList"></div>
+  <button type="button" class="btn" id="navClose">Cancel</button>
+</div></div>
+<div class="modal" id="when" role="dialog" aria-modal="true" aria-labelledby="whenTitle"><div class="box">
+  <h3 id="whenTitle">When will you park?</h3><p>Singapore time. Free lots shown are always the current ones.</p>
+  <div class="when">
+    <label>Start<input type="datetime-local" id="whenStart" step="1800"></label>
+    <label>End<input type="datetime-local" id="whenEnd" step="1800"></label>
+  </div>
+  <p class="when-note" id="whenNote" role="status"></p>
+  <button type="button" class="btn go" id="whenApply">Show prices</button>
+  <button type="button" class="btn" id="whenNow">Park now instead</button>
+  <button type="button" class="btn" id="whenCancel">Cancel</button>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+
+
+
+<div class="credit">A preview of a new look. <a href="/"><b>Back to wheretopark.sg</b></a><br>Map: <a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://www.openmaptiles.org">OpenMapTiles</a>, data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></div>
+<div class="osm">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></div>
+
+<script src="/beta/vendor/maplibre-gl.js"></script>
+<script src="/beta/beta.js"></script>
+<script type="module" src="/beta/toy3d.js"></script>
+</body>
+</html>

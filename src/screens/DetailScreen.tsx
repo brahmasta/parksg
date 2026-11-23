@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { Carpark, DurationHours, User } from '../lib/types';
 import { isStaleRates } from '../lib/rateSource';
 import {
@@ -12,6 +12,7 @@ import { NavigateSheet } from '../components/NavigateSheet';
 import { NavigateModal } from '../components/NavigateModal';
 import { openDirections } from '../hooks/useCarparkNavigation';
 import { siteOrigin } from '../lib/apiBase';
+import { areaContaining } from '../lib/seoAreas';
 import { shareLink } from '../lib/shareResults';
 import { ReportInaccuracyDialog } from '../components/ReportInaccuracyDialog';
 import { SuggestEditDialog } from '../components/SuggestEditDialog';
@@ -35,6 +36,7 @@ import { RateTable } from '../components/RateTable';
 import { WalkMap } from '../components/WalkMap';
 import { RealWalkMap } from '../components/RealWalkMap';
 import {
+  IconArrowRight,
   IconBookmark,
   IconCheck,
   IconChevronDown,
@@ -74,6 +76,9 @@ function toEditableRates(cp: Carpark): EditableRate[] {
   return out;
 }
 
+/** Where "compare carparks nearby" searches: a curated area, or the carpark itself. */
+export type CompareTarget = { label: string; lat: number; lng: number; areaSlug?: string };
+
 export function DetailScreen({
   cp,
   destination,
@@ -94,6 +99,7 @@ export function DetailScreen({
   hideWalkMap = false,
   user = null,
   onRequireSignIn,
+  onCompareNearby,
 }: {
   cp: Carpark;
   destination: string;
@@ -126,7 +132,23 @@ export function DetailScreen({
   user?: User | null;
   /** Prompt sign-in when a signed-out user taps a check-in button. */
   onRequireSignIn?: () => void;
+  /** Search the carparks around this one. Offered only when the carpark was
+   * opened on its own (a `/carpark/:slug` landing, a saved carpark), where
+   * there are no results to go back to and nothing to compare it with. */
+  onCompareNearby?: (place: CompareTarget) => void;
 }) {
+  // Opened without a destination search: offer the comparison this page lacks.
+  // Inside a curated area that is the area's own page; elsewhere, a search
+  // centred on the carpark.
+  const compareTarget: CompareTarget | null = useMemo(() => {
+    if (!onCompareNearby || destinationCoords) return null;
+    const [lat, lng] = cp.coords.entrance;
+    const area = areaContaining({ lat, lng });
+    return area
+      ? { label: area.name, lat: area.lat, lng: area.lng, areaSlug: area.slug }
+      : { label: cp.name, lat, lng };
+  }, [onCompareNearby, destinationCoords, cp.coords.entrance, cp.name]);
+
   const status = degraded ? availabilityStatus(null) : availabilityStatus(cp.lotsAvailable);
 
   // Navigation: open the carpark entrance in a maps app. First time shows the
@@ -581,6 +603,42 @@ export function DetailScreen({
               <DurationStrip value={duration} onChange={setDuration} compact />
             </div>
           ) : null)}
+
+        {/* Compare nearby — the way on from a carpark opened on its own. */}
+        {compareTarget && onCompareNearby && (
+          <button
+            type="button"
+            data-track={compareTarget.areaSlug ? 'detail_compare_area' : 'detail_compare_nearby'}
+            onClick={() => onCompareNearby(compareTarget)}
+            style={{
+              appearance: 'none',
+              width: '100%',
+              marginTop: 16,
+              padding: '13px 14px',
+              borderRadius: 12,
+              border: '0.5px solid color-mix(in srgb, var(--accent) 45%, transparent)',
+              background: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+              color: 'var(--text-1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              textAlign: 'left',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 14, fontWeight: 600 }}>
+                {compareTarget.areaSlug
+                  ? `Compare parking near ${compareTarget.label}`
+                  : 'Compare carparks near here'}
+              </span>
+              <span style={{ display: 'block', marginTop: 2, fontSize: 12.5, color: 'var(--text-2)', lineHeight: 1.4 }}>
+                Get the cheapest for your stay
+              </span>
+            </span>
+            <IconArrowRight size={16} stroke={2} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+          </button>
+        )}
 
         {/* EV charging (between stat cards and walk map per E8 design spec). */}
         <EVSection ev={cp.ev} />

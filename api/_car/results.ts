@@ -47,6 +47,13 @@ export type CarCarpark = {
   heightLimitM: number | null;
   evAvailable: number | null;
   evTotal: number | null;
+  /** Charging providers at this carpark, most connectors first; empty when none are known. */
+  evOperators: string[];
+  /** True when the carpark is known to have motorcycle / heavy-vehicle lots. False means "not known", not "none". */
+  motorcycle: boolean;
+  motorcycleLots: number | null;
+  heavy: boolean;
+  heavyLots: number | null;
   rateLines: string[];
 };
 
@@ -109,6 +116,11 @@ export function buildCarResults(input: CarResultInput): CarCarpark[] {
       heightLimitM: cp.heightLimitM ?? null,
       evAvailable: ev ? ev.available : null,
       evTotal: ev ? ev.total : null,
+      evOperators: cp.ev?.operators ?? [],
+      motorcycle: cp.lotTypes.includes('M'),
+      motorcycleLots: cp.lotCounts?.M ?? null,
+      heavy: cp.lotTypes.includes('H'),
+      heavyLots: cp.lotCounts?.H ?? null,
       rateLines: cp.rateUnknown ? [] : rateLines(cp, now),
     };
   });
