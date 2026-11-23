@@ -6,8 +6,10 @@
 //
 // Reads the read-only `admin_data_freshness` RPC (db/migrations/019) and
 // applies the per-source rules in src/lib/server/dataFreshness.ts. When any
-// source is `stale` — URA rates older than 2 days, or the last URA ingest run
-// failed — the handler answers 500, so the run shows as failed in Vercel's
+// source is `stale` — URA rates older than 2 days, the last URA ingest run
+// failed, or a hand-ingested data.gov.sg source (HDB, JTC) was updated by its
+// publisher more than a week ago and has not been synced since — the handler
+// answers 500, so the run shows as failed in Vercel's
 // cron view and triggers Vercel's failed-cron notification. That is the alert:
 // no new notification channel, no keys leave the server.
 //
@@ -29,6 +31,7 @@ import {
   evaluateFreshness,
   type FreshnessReport,
 } from '../../src/lib/server/dataFreshness.js';
+import { fetchUpstreamUpdates } from '../../src/lib/server/upstreamDatasets.js';
 
 export const config = { maxDuration: 30 };
 
@@ -70,6 +73,7 @@ export default async function handler(
     }
 
     const report = (await r.json()) as FreshnessReport;
+    report.upstream = await fetchUpstreamUpdates();
     const verdicts = evaluateFreshness(report);
     const stale = verdicts.filter((v) => v.level === 'stale');
     if (stale.length > 0) {

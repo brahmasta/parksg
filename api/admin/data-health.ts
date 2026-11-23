@@ -6,6 +6,7 @@
 import { verifyAdmin, json } from '../_admin/auth';
 import { SB_URL, sbHeaders, hasServiceConfig } from '../_admin/db';
 import { evaluateFreshness, type FreshnessReport } from '../../src/lib/server/dataFreshness';
+import { fetchUpstreamUpdates } from '../../src/lib/server/upstreamDatasets';
 
 export const config = { runtime: 'edge' };
 
@@ -23,5 +24,6 @@ export default async function handler(req: Request): Promise<Response> {
   if (!r.ok) return json({ error: 'Data health query failed.' }, r.status === 404 ? 404 : 502);
 
   const report = (await r.json()) as FreshnessReport;
+  report.upstream = await fetchUpstreamUpdates();
   return json({ ...report, verdicts: evaluateFreshness(report) });
 }

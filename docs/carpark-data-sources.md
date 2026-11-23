@@ -184,3 +184,23 @@ Found along the way:
 5. Refresh curated rate cards every ~6 months (each entry carries
    `provenance.verified`; the guard test in `scripts/lib/curated-malls.test.ts`
    requires it).
+
+## Keeping HDB and JTC current
+
+HDB and JTC carparks are synced by hand from data.gov.sg. The daily
+`/api/cron/data-health` check compares each dataset's own "last updated" date
+with our last sync (`src/lib/server/upstreamDatasets.ts`): a source that
+changed upstream is a review note for a week, then an alert (the cron fails,
+which is the notification). Unchanged sources never alert, however old.
+
+When HDB is flagged:
+
+```bash
+npm run sync:hdb:dry   # what would change; writes nothing
+npm run sync:hdb       # sync HDB carparks and rates only
+```
+
+The dry run lists new carparks, carparks whose address, type, payment system
+or rate-affecting fields changed, and carparks that are gone from the source.
+A sync never deletes those: check each and remove it by hand if it has closed.
+Every run that writes is recorded in `ingest_runs`.
