@@ -74,20 +74,31 @@ class Builder {            // collects triangles for one merged mesh
   }
 }
 
+const nightU = { value: 0 };   // 0 by day, 1 at night: switches the lit windows on
 const blocksMat = new THREE.MeshLambertMaterial({ vertexColors: true });
 blocksMat.onBeforeCompile = sh => {   // floors are painted by height, so a 40-storey tower is one box
   sh.uniforms.uFloor = { value: FLOOR };
+  sh.uniforms.uNight = nightU;
   sh.vertexShader = sh.vertexShader
-    .replace('#include <common>', '#include <common>\nattribute float kind;\nvarying float vKind;\nvarying float vUp;')
-    .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKind = kind;\nvUp = position.z;');
+    .replace('#include <common>', '#include <common>\nattribute float kind;\nvarying float vKind;\nvarying vec3 vAt;\nvarying vec3 vFace;')
+    .replace('#include <begin_vertex>', '#include <begin_vertex>\nvKind = kind;\nvAt = position;\nvFace = normal;');
   sh.fragmentShader = sh.fragmentShader
-    .replace('#include <common>', '#include <common>\nuniform float uFloor;\nvarying float vKind;\nvarying float vUp;')
+    .replace('#include <common>', '#include <common>\nuniform float uFloor;\nuniform float uNight;\nvarying float vKind;\nvarying vec3 vAt;\nvarying vec3 vFace;')
     .replace('#include <color_fragment>', `#include <color_fragment>
+      float fl = vAt.z / uFloor;
       if (vKind > 0.5) {
-        float fl = vUp / uFloor;
         if (fl < 1.0) diffuseColor.rgb = vec3(0.604, 0.521, 0.396);                 // ground floor
         else if (fract(fl) < 0.68) diffuseColor.rgb = vec3(1.0, 0.939, 0.823);      // cream wall; the rest keeps the stripe colour
-      }`);
+      }
+      // at night some windows are lit: a grid along each wall, each cell on or off by a fixed pattern
+      vec3 nightGlow = vec3(0.0);
+      if (uNight > 0.5 && abs(vFace.z) < 0.5 && fl > 1.0) {
+        float along = (vAt.x * -vFace.y + vAt.y * vFace.x) / 3.4;
+        float pick = fract(sin(dot(vec2(floor(along), floor(fl)), vec2(12.9898, 78.233))) * 43758.5453);
+        float pane = step(0.14, fract(fl)) * step(fract(fl), 0.62) * step(0.2, fract(along)) * step(fract(along), 0.8);
+        if (pick > 0.58) nightGlow = vec3(1.0, 0.72, 0.36) * pane * (0.55 + 0.45 * fract(pick * 7.0));
+      }`)
+    .replace('#include <opaque_fragment>', 'outgoingLight += nightGlow;\n#include <opaque_fragment>');
 };
 
 // one tree = trunk + two crowns in a single shape, drawn thousands of times
@@ -256,7 +267,7 @@ const land = new THREE.Group(); scene.add(land);
 // Invisible except where a shadow falls on the map. It floats a metre up: any lower and it flickers against the map's own ground.
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(4200, 4200), new THREE.ShadowMaterial({ opacity: 0.3, color: '#16324a' }));
 ground.position.z = 1; ground.receiveShadow = true; scene.add(ground);
-scene.add(new THREE.HemisphereLight('#ffffff', '#d5d9cf', 1.75));
+const sky = new THREE.HemisphereLight('#ffffff', '#d5d9cf', 1.75); scene.add(sky);
 const sun = new THREE.DirectionalLight('#fff1d6', 2.5), SUN_DIR = new THREE.Vector3(-700, -520, 720);
 sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096);
 Object.assign(sun.shadow.camera, { left: -950, right: 950, top: 950, bottom: -950, near: 10, far: 3200 });
@@ -344,4 +355,17 @@ const layer = {
 const add = () => { if (!map.getLayer('three3d')) map.addLayer(layer, map.getLayer('place-name') ? 'place-name' : undefined); };
 if (map.isStyleLoaded()) add(); else map.once('load', add);
 map.on('moveend', () => map.triggerRepaint());
+// ---------- day and night ----------
+// beta.js decides which it is (Singapore time, or the button) and says so with a "beta-night" event.
+function setNight(on) {
+  nightU.value = on ? 1 : 0;
+  sky.color.set(on ? '#8ea2e0' : '#ffffff'); sky.groundColor.set(on ? '#131b2b' : '#d5d9cf'); sky.intensity = on ? 0.62 : 1.75;
+  sun.color.set(on ? '#b4c4ff' : '#fff1d6'); sun.intensity = on ? 0.75 : 2.5;          // moonlight
+  ground.material.opacity = on ? 0.42 : 0.3; ground.material.color.set(on ? '#03070f' : '#16324a');
+  traffic.setNight(on);
+  map.triggerRepaint();
+}
+addEventListener('beta-night', e => setNight(!!e.detail));
+setNight(!!window.BETA_NIGHT);
+
 window.toy3d = { stats, tiles, scene, sun, traffic, info: () => renderer && renderer.info.render, SHOW_FROM };

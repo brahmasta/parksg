@@ -27,6 +27,14 @@ let savedCps = store.get('toy.savedCarparks', []);     // starred carparks
 let stay = store.get('toy.stay', 2);
 const STAYS = [1, 2, 3, 4, 8];
 const stayLabel = h => `${h} h`;
+// A chosen start and end, in Singapore time ("YYYY-MM-DDTHH:mm"), or null to price from now for `stay` hours.
+let custom = null;
+const H = () => (custom ? custom.hours : stay);
+const sgNow = () => new Date(Date.now() + 8 * 3600e3);                     // read with getUTC*: Singapore wall clock
+const sgInput = d => d.toISOString().slice(0, 16);
+const sgParse = v => Date.parse(v + ':00Z');
+const sgText = v => { const d = new Date(sgParse(v)), h = d.getUTCHours(), m = d.getUTCMinutes();
+  return `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getUTCDay()]} ${h % 12 || 12}${m ? ':' + String(m).padStart(2, '0') : ''}${h < 12 ? 'am' : 'pm'}`; };
 
 // ---------- the flat map under the toy pieces (OpenFreeMap tiles, our own toy colours) ----------
 const HOME = [103.8562, 1.2868];                      // start over Marina Bay, looking at the city
@@ -79,6 +87,43 @@ map.touchZoomRotate.enable();
 map.touchPitch.enable();
 let ready = false;
 map.once('load', () => { ready = true; });
+
+// ---------- day and night ----------
+// Night is 7pm to 7am in Singapore. The sun/moon button flips it by hand until the page is reloaded.
+const NIGHT_PAINT = {
+  land: { 'background-color': '#1b2f33' },
+  green: { 'fill-color': ['match', ['get', 'class'], 'wood', '#1d4435', 'sand', '#4a4636', '#234d3d'] },
+  park: { 'fill-color': '#234d3d' },
+  play: { 'fill-color': ['match', ['get', 'class'], 'playground', '#6b5a2e', '#6e4a35'] },
+  water: { 'fill-color': '#0e2746' },
+  stream: { 'line-color': '#0e2746' },
+  runway: { 'line-color': '#39424e' },
+  paths: { 'line-color': '#4d4b42' },
+  kerb: { 'line-color': '#4a586b' },
+  roads: { 'line-color': ['match', ['get', 'class'], 'service', '#2d3643', '#252d39'] },
+  rail: { 'line-color': '#8492a8' },
+  'far-blocks': { 'fill-extrusion-color': '#3a4660' },
+  'place-name': { 'text-color': '#eef3fa', 'text-halo-color': 'rgba(8,14,26,.85)' },
+};
+const DAY_PAINT = {};
+for (const l of STYLE.layers) if (NIGHT_PAINT[l.id]) { DAY_PAINT[l.id] = {}; for (const k in NIGHT_PAINT[l.id]) DAY_PAINT[l.id][k] = l.paint[k]; }
+const sgIsNight = () => { const h = new Date(Date.now() + 8 * 3600e3).getUTCHours(); return h >= 19 || h < 7; };
+let nightOverride = null, night = null;
+function applyNight() {
+  const on = nightOverride == null ? sgIsNight() : nightOverride;
+  if (on === night) return;
+  night = on; window.BETA_NIGHT = on;
+  document.body.classList.toggle('night', on);
+  const paint = on ? NIGHT_PAINT : DAY_PAINT;
+  for (const id in paint) if (map.getLayer(id)) for (const k in paint[id]) map.setPaintProperty(id, k, paint[id][k]);
+  const b = document.getElementById('mode');
+  if (b) { b.setAttribute('aria-label', on ? 'Switch to the day view' : 'Switch to the night view'); b.setAttribute('aria-pressed', String(on)); }
+  dispatchEvent(new CustomEvent('beta-night', { detail: on }));
+}
+window.BETA_NIGHT = sgIsNight();
+document.body.classList.toggle('night', window.BETA_NIGHT);
+map.once('load', applyNight);
+setInterval(() => { if (ready) applyNight(); }, 60000);          // follows the clock across 7pm and 7am
 
 // ---------- state ----------
 let spinning = true, flat = false, pin = null, bubbles = [], current = null, picked = null, focused = null, routeId = 0;
@@ -178,7 +223,8 @@ const lotsText = c => c.lotsAvailable == null ? 'no live lot data' : c.lotsAvail
 const money = c => c.cost == null ? '–' : c.cost === 0 ? 'Free' : '$' + c.cost.toFixed(2);
 
 function renderControls() {
-  $('ctl').innerHTML = STAYS.map(h => `<button type="button" class="chip ${h === stay ? 'on' : ''}" data-stay="${h}">${stayLabel(h)}</button>`).join('') +
+  $('ctl').innerHTML = STAYS.map(h => `<button type="button" class="chip ${!custom && h === stay ? 'on' : ''}" data-stay="${h}">${stayLabel(h)}</button>`).join('') +
+    `<button type="button" class="chip ${custom ? 'on' : ''}" data-when>${custom ? `${sgText(custom.start)} to ${sgText(custom.end)}` : 'Set times'}</button>` +
     '<span class="sep"></span>' +
     `<button type="button" class="chip ${sortBy === 'cost' ? 'on' : ''}" data-sort="cost">Cheapest</button>` +
     `<button type="button" class="chip ${sortBy === 'near' ? 'on' : ''}" data-sort="near">Nearest</button>` +
@@ -202,22 +248,22 @@ function renderResults() {
   }
   // the collapsed strip: one card per carpark, swiped sideways, so the map stays in view
   $('peekTitle').textContent = loadState === 'ok' ? (results.length ? `${list.length} carpark${list.length === 1 ? '' : 's'}` : 'No carparks nearby') : loadState === 'error' ? 'Could not load carparks' : 'Finding carparks';
-  $('peekSub').textContent = loadState === 'ok' && results.length ? `${sortBy === 'near' ? 'nearest' : 'cheapest'} first · ${stayLabel(stay)}` : '';
+  $('peekSub').textContent = loadState === 'ok' && results.length ? `${sortBy === 'near' ? 'nearest' : 'cheapest'} first · ${custom ? 'from ' + sgText(custom.start) + ', ' : ''}${stayLabel(H())}` : '';
   $('more').hidden = loadState !== 'ok' || !results.length;
   $('cards').innerHTML = loadState === 'loading' ? '<p class="loading">Checking prices and free lots…</p>'
     : loadState === 'error' ? '<p class="empty">The carpark service did not answer.</p><button type="button" class="chip retry" data-retry>Try again</button>'
     : list.length ? list.map(c => `<button type="button" class="card ${focused && focused.id === c.id ? 'on' : ''}" data-id="${esc(c.id)}">
         <b>${esc(c.name)}</b>
-        <span class="price"><strong>${c.cost == null ? 'Rate not known' : money(c)}</strong>${c.cost == null ? '' : `<small>for ${stayLabel(stay)}</small>`}</span>
+        <span class="price"><strong>${c.cost == null ? 'Rate not known' : money(c)}</strong>${c.cost == null ? '' : `<small>for ${stayLabel(H())}</small>`}</span>
         <small>${c.walkMin} min walk · ${lotsText(c)}</small>
         <span class="tags">${tagFor(c)}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}<i>Details</i></span></button>`).join('')
     : `<p class="empty">${results.length ? 'No carpark matches those filters.' : 'We have no carparks within 600 m of this place.'}</p>`;
   if (loadState === 'ok') {
     $('sheetTitle').textContent = results.length ? `${list.length} carpark${list.length === 1 ? '' : 's'} within 600 m` : 'No carparks nearby';
-    $('sheetSub').textContent = results.length ? `price for ${stayLabel(stay)}${live ? '' : ' · live lots unavailable'}` : '';
+    $('sheetSub').textContent = results.length ? `price for ${stayLabel(H())}${custom ? ' from ' + sgText(custom.start) : ''}${live ? '' : ' · live lots unavailable'}` : '';
     $('list').innerHTML = list.length ? list.map(c => `<button type="button" class="cp ${picked && picked.id === c.id ? 'on' : ''}" data-id="${esc(c.id)}"><span class="p">P</span>
         <div><b>${esc(c.name)}</b><small>${c.walkMin} min walk · ${lotsText(c)}${tagFor(c)}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}</small></div>
-        <strong>${money(c)}<small>${c.cost == null ? 'rate not known' : stayLabel(stay)}</small></strong></button>`).join('')
+        <strong>${money(c)}<small>${c.cost == null ? 'rate not known' : stayLabel(H())}</small></strong></button>`).join('')
       : `<p class="empty">${results.length ? 'No carpark matches those filters.' : 'We have no carparks within 600 m of this place.'}</p>`;
     list.forEach((c, k) => {
       const lots = c.lotsAvailable == null ? '' : `<small>${c.lotsAvailable} lots</small>`;       // nothing shown when there is no live count
@@ -239,7 +285,7 @@ async function loadCarparks(openId) {
   const p = current, id = ++reqId;
   loadState = 'loading'; results = []; renderResults();
   try {
-    const j = await (await fetch(`/api/car/nearby?lat=${(+p.lat).toFixed(6)}&lng=${(+p.lng).toFixed(6)}&hours=${stay}&limit=60${p.kind === 'here' ? '' : '&label=' + encodeURIComponent(p.name)}`)).json();
+    const j = await (await fetch(`/api/car/nearby?lat=${(+p.lat).toFixed(6)}&lng=${(+p.lng).toFixed(6)}&hours=${H()}${custom ? '&start=' + custom.start : ''}&limit=60${p.kind === 'here' ? '' : '&label=' + encodeURIComponent(p.name)}`)).json();
     if (id !== reqId) return;
     if (!j.ok) throw new Error(j.error || 'failed');
     results = j.carparks || []; live = !!j.live; checkedAt = new Date(); loadState = 'ok';
@@ -298,7 +344,7 @@ function openDetail(c, keepCamera) {
   ].join('');
   $('detail').innerHTML = `<div class="d-top"><span class="p">P</span><div><h1>${esc(c.name)}</h1>${c.subtitle && c.subtitle.toLowerCase() !== c.name.toLowerCase() ? `<p>${esc(c.subtitle)}</p>` : ''}</div></div>
     <div class="stats">
-      <div class="stat"><b class="${c.cost == null ? 'none' : ''}">${c.cost == null ? 'Not known' : money(c)}</b><small>${c.cost == null ? 'price' : 'for ' + stayLabel(stay)}</small></div>
+      <div class="stat"><b class="${c.cost == null ? 'none' : ''}">${c.cost == null ? 'Not known' : money(c)}</b><small>${c.cost == null ? 'price' : 'for ' + stayLabel(H())}</small></div>
       <div class="stat"><b id="walkB">${c.walkMin} min</b><small id="walkS">${c.distanceM} m walk</small></div>
       <div class="stat">${lots}</div>
     </div>
@@ -306,8 +352,8 @@ function openDetail(c, keepCamera) {
       <button type="button" class="btn sq ${isSaved(c) ? 'on' : ''}" id="star" aria-label="${isSaved(c) ? 'Remove from saved' : 'Save this carpark'}" aria-pressed="${isSaved(c)}">${STAR(isSaved(c))}</button>
       <button type="button" class="btn sq" id="share" aria-label="Share this carpark"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 7.500L12 3.500l4 4M6 11.500H5a1 1 0 0 0-1 1V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6.500a1 1 0 0 0-1-1h-1"/></svg></button></div>
     <div class="extra">${facts ? `<div class="facts">${facts}</div>` : ''}
-    <h2>Rates today</h2>${rates}
-    <p class="fine">Live from wheretopark.sg${checkedAt ? ', checked ' + checkedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}. Prices are estimates; check the signboard on entry.</p></div>
+    <h2>${custom ? 'Rates on ' + sgText(custom.start).split(' ')[0] : 'Rates today'}</h2>${rates}
+    <p class="fine">Live from wheretopark.sg${checkedAt ? ', checked ' + checkedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}. ${custom ? ' Priced from ' + sgText(custom.start) + ' to ' + sgText(custom.end) + '; free lots are as of now.' : ''} Prices are estimates; check the signboard on entry.</p></div>
     <button type="button" class="morelink" id="dmore">Rates and more</button>`;
   body.classList.add('detail');
   bubbles.forEach(b => b.m.getElement().classList.toggle('on', b.c.id === c.id));
@@ -342,7 +388,7 @@ function shareUrl(c) {
 }
 async function shareCarpark(c) {
   const url = shareUrl(c), title = `${c.name} · wheretopark.sg`;
-  const text = `Parking at ${c.name}${c.cost == null ? '' : `: ${money(c)} for ${stayLabel(stay)}`}`;
+  const text = `Parking at ${c.name}${c.cost == null ? '' : `: ${money(c)} for ${stayLabel(H())}`}`;
   if (navigator.share) {
     try { await navigator.share({ title, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }   // closed the share sheet
   }
@@ -356,6 +402,46 @@ function openShared() {
   history.replaceState(null, '', location.pathname);
   showResults({ name, lat: to[0], lng: to[1], kind: '' }, p.get('cp'));
 }
+
+// ---------- set a start and end time ----------
+function openWhen() {
+  const now = sgNow(); now.setUTCMinutes(now.getUTCMinutes() < 30 ? 30 : 60, 0, 0);          // next half hour
+  const start = custom ? custom.start : sgInput(now);
+  const end = custom ? custom.end : sgInput(new Date(sgParse(start) + stay * 3600e3));
+  $('whenStart').value = start; $('whenEnd').value = end;
+  $('whenStart').min = sgInput(new Date(sgNow().getTime() - 3600e3)); $('whenStart').max = sgInput(new Date(sgNow().getTime() + 6 * 86400e3));
+  whenCheck();
+  $('when').classList.add('open');
+}
+// what the two fields currently mean: { start, end, hours } or a message saying what is wrong
+function whenRead() {
+  const start = $('whenStart').value, end = $('whenEnd').value, a = sgParse(start), b = sgParse(end);
+  if (!start || !end || !Number.isFinite(a) || !Number.isFinite(b)) return { error: 'Pick a start and an end time.' };
+  if (b <= a) return { error: 'The end time must be after the start time.' };
+  if (Math.abs(a - sgNow().getTime()) > 6.9 * 86400e3) return { error: 'Pick a start time within the next week.' };
+  const hours = Math.round((b - a) / 1800e3) / 2;
+  if (hours > 24) return { error: 'Stays longer than 24 hours cannot be priced here.' };
+  return { start, end, hours: Math.max(0.5, hours) };
+}
+function whenCheck() {
+  const r = whenRead();
+  $('whenNote').textContent = r.error || `${r.hours} h, from ${sgText(r.start)} to ${sgText(r.end)}. Prices are worked out for that time.`;
+  $('whenNote').classList.toggle('bad', !!r.error);
+  $('whenApply').disabled = !!r.error;
+}
+// moving the start keeps the same length of stay
+let whenLen = 0;
+$('whenStart').addEventListener('focus', () => { const a = sgParse($('whenStart').value), b = sgParse($('whenEnd').value); whenLen = b > a ? b - a : stay * 3600e3; });
+$('whenStart').addEventListener('input', () => { const a = sgParse($('whenStart').value); if (Number.isFinite(a) && whenLen) $('whenEnd').value = sgInput(new Date(a + whenLen)); whenCheck(); });
+$('whenEnd').addEventListener('input', whenCheck);
+$('when').addEventListener('click', e => {
+  if (e.target === $('when') || e.target.closest('#whenCancel')) return $('when').classList.remove('open');
+  if (e.target.closest('#whenNow')) { custom = null; $('when').classList.remove('open'); return loadCarparks(); }
+  if (e.target.closest('#whenApply')) {
+    const r = whenRead(); if (r.error) return;
+    custom = r; $('when').classList.remove('open'); loadCarparks();
+  }
+});
 
 // ---------- navigate ----------
 const APPLE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
@@ -378,7 +464,7 @@ q.addEventListener('focus', () => { if (!body.classList.contains('typing')) { q.
 q.addEventListener('input', () => { suggest(); setState('typing'); });
 $('search').addEventListener('submit', e => { e.preventDefault(); const h = suggest(); if (h.length) choose(h[0]); });
 $('sugg').addEventListener('click', e => { const r = e.target.closest('.row'); if (r) choose(hits[+r.dataset.i]); });
-const back = () => { if ($('nav').classList.contains('open')) closeNavigate(); else if (body.classList.contains('detail')) closeDetail(); else if (body.classList.contains('results') && body.classList.contains('list')) setList(false); else if (body.classList.contains('typing') && current) { q.blur(); showResults(current); } else goHome(); };
+const back = () => { if ($('when').classList.contains('open')) $('when').classList.remove('open'); else if ($('nav').classList.contains('open')) closeNavigate(); else if (body.classList.contains('detail')) closeDetail(); else if (body.classList.contains('results') && body.classList.contains('list')) setList(false); else if (body.classList.contains('typing') && current) { q.blur(); showResults(current); } else goHome(); };
 $('back').onclick = back;
 addEventListener('keydown', e => { if (e.key === 'Escape') back(); });
 $('clear').onclick = () => { q.value = ''; q.focus(); body.classList.remove('detail'); suggest(); setState('typing'); };
@@ -443,7 +529,8 @@ $('grab').addEventListener('pointerup', e => {
 
 $('ctl').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if (!b) return;
-  if (b.dataset.stay) { stay = +b.dataset.stay; store.set('toy.stay', stay); return loadCarparks(); }
+  if (b.dataset.stay) { stay = +b.dataset.stay; custom = null; store.set('toy.stay', stay); return loadCarparks(); }
+  if ('when' in b.dataset) return openWhen();
   if (b.dataset.sort) sortBy = b.dataset.sort;
   if (b.dataset.f === 'free') onlyFree = !onlyFree;
   if (b.dataset.f === 'ev') onlyEv = !onlyEv;
@@ -482,6 +569,7 @@ map.on('click', e => {
 });
 ['mousedown', 'touchstart', 'wheel'].forEach(ev => map.getCanvas().addEventListener(ev, () => { spinning = false; }, { passive: true }));
 
+$('mode').onclick = () => { nightOverride = !night; applyNight(); };
 requestAnimationFrame(() => requestAnimationFrame(() => body.classList.remove('boot')));
 map.setPadding(homePad());
 map.once('load', openShared);

@@ -21,6 +21,11 @@
   <b>wheretopark<span>.sg</span></b><em>beta</em>
 </div>
 
+<button class="avatar mode" id="mode" type="button" aria-label="Switch to the night view" aria-pressed="false">
+  <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.200"/><path d="M12 2.500v2.500M12 19v2.500M2.500 12H5M19 12h2.500M5.300 5.300l1.800 1.800M16.900 16.900l1.800 1.800M5.300 18.700l1.800-1.800M16.900 7.100l1.800-1.800"/></svg>
+  <svg class="moon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.500A8.500 8.500 0 0 1 9.500 4a8.500 8.500 0 1 0 10.500 10.500z"/></svg>
+</button>
+
 <form class="search" id="search" autocomplete="off">
   <button type="button" id="glass" aria-label="Search" tabindex="-1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></button>
   <button type="button" id="back" aria-label="Back to start"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
@@ -50,6 +55,17 @@
   <h3 id="navTitle"></h3><p>Opens driving directions to the carpark entrance.</p>
   <div class="nav" id="navList"></div>
   <button type="button" class="btn" id="navClose">Cancel</button>
+</div></div>
+<div class="modal" id="when" role="dialog" aria-modal="true" aria-labelledby="whenTitle"><div class="box">
+  <h3 id="whenTitle">When will you park?</h3><p>Singapore time. Free lots shown are always the current ones.</p>
+  <div class="when">
+    <label>Start<input type="datetime-local" id="whenStart" step="1800"></label>
+    <label>End<input type="datetime-local" id="whenEnd" step="1800"></label>
+  </div>
+  <p class="when-note" id="whenNote" role="status"></p>
+  <button type="button" class="btn go" id="whenApply">Show prices</button>
+  <button type="button" class="btn" id="whenNow">Park now instead</button>
+  <button type="button" class="btn" id="whenCancel">Cancel</button>
 </div></div>
 <div class="toast" id="toast" role="status"></div>
 

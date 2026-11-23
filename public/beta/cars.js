@@ -259,5 +259,8 @@ export function makeTraffic(THREE, scene, TILE_M) {
     return cars.length;
   }
 
-  return { addTile, frame, cars, links, stats: () => ({ cars: cars.length, links: links.length, near: near.length, nearLen: Math.round(nearLen) }) };
+  // at night the cabins glow a little, like interior lights
+  const setNight = on => { cabin.material.emissive.set(on ? '#ffcf80' : '#000000'); cabin.material.emissiveIntensity = on ? 0.7 : 0; };
+
+  return { addTile, frame, setNight, cars, links, stats: () => ({ cars: cars.length, links: links.length, near: near.length, nearLen: Math.round(nearLen) }) };
 }

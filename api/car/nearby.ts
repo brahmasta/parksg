@@ -1,6 +1,10 @@
 /**
  * GET /api/car/nearby?lat=&lng=&hours=2&limit=12[&label=]
  *
+ * `start` (optional) prices the stay from that Singapore time instead of now,
+ * as YYYY-MM-DDTHH:mm, up to a week either side. Free-lot counts are always
+ * the live ones.
+ *
  * `limit` defaults to 12 (what the car screens ask for) and may go up to 60,
  * which the /beta map page uses to show every carpark within the radius.
  *
@@ -81,6 +85,15 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ ok: false, error: 'wheretopark.sg covers Singapore only' }, 400);
   }
   const hours = Math.min(24, Math.max(0.5, Math.round(Number(q.get('hours') || 2) * 2) / 2));
+  let startMs = Date.now();
+  const startRaw = q.get('start');
+  if (startRaw) {
+    const t = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(startRaw) ? Date.parse(`${startRaw}:00+08:00`) : NaN;
+    if (!Number.isFinite(t) || Math.abs(t - Date.now()) > 7 * 86_400_000) {
+      return json({ ok: false, error: 'start must be Singapore time as YYYY-MM-DDTHH:mm, within a week' }, 400);
+    }
+    startMs = t;
+  }
   const limit = Math.min(60, Math.max(1, Math.floor(Number(q.get('limit') || 12))));
   const label = q.get('label')?.trim() || undefined;
   if (!URL_BASE || !ANON_KEY) return json({ ok: false, error: 'Server not configured' }, 500);
@@ -116,7 +129,7 @@ export default async function handler(req: Request): Promise<Response> {
     ev: ev ? { locations: ev.locations, ageMinutes: evAgeMinutes(ev.lastUpdatedTime) } : null,
     google,
     hours,
-    now: sgWallClock(),
+    now: sgWallClock(startMs),
     limit,
   });
   return json({ ok: true, hours, live: !!(hdb || lta), carparks });
