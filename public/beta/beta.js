@@ -459,6 +459,21 @@ function openNavigate(c) {
 }
 const closeNavigate = () => $('nav').classList.remove('open');
 
+// ---------- phone keyboards ----------
+// When the keyboard opens, iPhone Safari slides the whole page up to show the field that was tapped, which was the
+// search bar near the bottom; the bar then moves to the top and lands off screen. So: put the page back, and keep
+// the search bar and its list inside the part of the screen that is actually visible above the keyboard.
+const vv = window.visualViewport;
+function fitViewport() {
+  if (!vv) return;
+  if (vv.offsetTop > 0 || window.scrollY > 0) window.scrollTo(0, 0);
+  document.documentElement.style.setProperty('--vvt', Math.max(0, vv.offsetTop) + 'px');
+  document.documentElement.style.setProperty('--vvh', vv.height + 'px');
+}
+if (vv) { vv.addEventListener('resize', fitViewport); vv.addEventListener('scroll', fitViewport); }
+q.addEventListener('focus', () => [0, 120, 350, 700].forEach(ms => setTimeout(fitViewport, ms)));
+q.addEventListener('blur', () => [0, 350].forEach(ms => setTimeout(fitViewport, ms)));
+
 // ---------- wiring ----------
 q.addEventListener('focus', () => { if (!body.classList.contains('typing')) { q.select(); body.classList.remove('detail'); suggest(); setState('typing'); spinning = false; } });
 q.addEventListener('input', () => { suggest(); setState('typing'); });

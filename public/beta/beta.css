@@ -20,7 +20,7 @@
   .avatar svg { display: block; width: 100%; height: 100%; }
 
   /* the search pill travels: low on the home card, up to the top once you type */
-  .search { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; width: min(430px, calc(100vw - 28px)); height: 56px;
+  .search { position: fixed; top: calc(max(14px, env(safe-area-inset-top)) + var(--vvt, 0px)); left: 50%; width: min(430px, calc(100vw - 28px)); height: 56px;
     padding: 0 8px 0 6px; display: flex; align-items: center; gap: 4px; background: var(--card); border-radius: 28px; z-index: 8;
     box-shadow: 0 10px 30px rgba(29,43,58,.18), 0 2px 6px rgba(29,43,58,.1);
     transform: translate(-50%, 0); transition: transform .6s cubic-bezier(.3,.7,.2,1), box-shadow .4s; }
@@ -45,7 +45,7 @@
   .row small { display: block; font-size: 12.5px; color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row > div { min-width: 0; }
 
-  .sugg { position: fixed; top: calc(max(14px, env(safe-area-inset-top)) + 66px); left: 50%; width: min(430px, calc(100vw - 28px)); max-height: calc(100dvh - 110px);
+  .sugg { position: fixed; top: calc(max(14px, env(safe-area-inset-top)) + 66px + var(--vvt, 0px)); left: 50%; width: min(430px, calc(100vw - 28px)); max-height: calc(var(--vvh, 100dvh) - 96px - max(14px, env(safe-area-inset-top)));
     overflow: auto; padding: 14px 8px 8px; background: var(--card); border-radius: 24px; z-index: 7; box-shadow: 0 14px 36px rgba(29,43,58,.2);
     transform: translate(-50%, -12px); opacity: 0; pointer-events: none; transition: opacity .3s, transform .45s cubic-bezier(.3,.7,.2,1); }
   body.typing .sugg { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; transition-delay: .2s; }
