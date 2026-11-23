@@ -182,10 +182,27 @@ function buildTile(vt, tx, ty) {
     return false;
   };
 
+  // sea, rivers, reservoirs and pools: no trees there (a point is in the water if an odd number of its rings surround it)
+  const waters = [];
+  each('water', (f, ext) => {
+    if (f.type !== 3) return;
+    const rs = rings(f, ext); let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (const r of rs) for (const p of r) { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); }
+    waters.push({ rs, x0, y0, x1, y1 });
+  });
+  const wet = (x, y) => {
+    for (const w of waters) {
+      if (x < w.x0 || x > w.x1 || y < w.y0 || y > w.y1) continue;
+      let n = 0; for (const r of w.rs) if (inside(x, y, r)) n++;
+      if (n % 2) return true;
+    }
+    return false;
+  };
+
   // trees: along the streets, and scattered through parks, grass and woods ("city in a garden")
   const trees = [], tgrid = new Map();
   const plant = (x, y, s, gap) => {
-    if (trees.length >= TREES_PER_TILE || x < 0 || x >= TILE_M || y > 0 || y <= -TILE_M || blocked(x, y)) return;
+    if (trees.length >= TREES_PER_TILE || x < 0 || x >= TILE_M || y > 0 || y <= -TILE_M || blocked(x, y) || wet(x, y)) return;
     const gx = Math.floor(x / 8), gy = Math.floor(y / 8);
     for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (const q of tgrid.get((gx + i) + ',' + (gy + j)) || []) if (Math.hypot(x - q[0], y - q[1]) < gap) return;
     const k = gx + ',' + gy; (tgrid.get(k) || tgrid.set(k, []).get(k)).push([x, y]);
