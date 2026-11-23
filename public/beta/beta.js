@@ -3,6 +3,10 @@
 // Live data: /api/car/nearby (prices, free lots, EV) and /api/onemap-route (walking route) from this site,
 // place search from OneMap (the Singapore government geocoder).
 
+// Inside the Android and iOS apps this page is a file in the app (https://localhost or capacitor://localhost),
+// so this site's own services and the links people share must name the real site.
+const IN_APP = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const SITE = IN_APP ? 'https://wheretopark.sg' : '';
 const $ = id => document.getElementById(id);
 const q = $('q'), body = document.body;
 const el = (cls, html) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; return d; };
@@ -197,7 +201,7 @@ const newToken = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().
 async function findPlaces(term) {
   try {
     gToken = gToken || newToken();
-    const res = await fetch('/api/google-places-autocomplete?q=' + encodeURIComponent(term) + '&sessiontoken=' + gToken);
+    const res = await fetch(SITE + '/api/google-places-autocomplete?q=' + encodeURIComponent(term) + '&sessiontoken=' + gToken);
     const j = await res.json();
     if (!res.ok || !j.ok) throw new Error('search');
     fromGoogle = true;
@@ -210,7 +214,7 @@ async function findPlaces(term) {
 // a Google suggestion has no position until it is picked
 async function locate(p) {
   const token = gToken; gToken = null;
-  const res = await fetch('/api/google-places-details?place_id=' + encodeURIComponent(p.placeId) + (token ? '&sessiontoken=' + token : ''));
+  const res = await fetch(SITE + '/api/google-places-details?place_id=' + encodeURIComponent(p.placeId) + (token ? '&sessiontoken=' + token : ''));
   const j = await res.json();
   if (!res.ok || !j.ok || !j.place) throw new Error('details');
   return { ...p, lat: j.place.lat, lng: j.place.lng };
@@ -314,7 +318,7 @@ async function loadCarparks(openId) {
   const p = current, id = ++reqId;
   loadState = 'loading'; results = []; renderResults();
   try {
-    const j = await (await fetch(`/api/car/nearby?lat=${(+p.lat).toFixed(6)}&lng=${(+p.lng).toFixed(6)}&hours=${H()}${custom ? '&start=' + custom.start : ''}&limit=60${p.kind === 'here' ? '' : '&label=' + encodeURIComponent(p.name)}`)).json();
+    const j = await (await fetch(SITE + `/api/car/nearby?lat=${(+p.lat).toFixed(6)}&lng=${(+p.lng).toFixed(6)}&hours=${H()}${custom ? '&start=' + custom.start : ''}&limit=60${p.kind === 'here' ? '' : '&label=' + encodeURIComponent(p.name)}`)).json();
     if (id !== reqId) return;
     if (!j.ok) throw new Error(j.error || 'failed');
     results = j.carparks || []; live = !!j.live; checkedAt = new Date(); loadState = 'ok';
@@ -389,7 +393,7 @@ function openDetail(c, keepCamera) {
   // straight line at once, then the real walking route when it arrives (kept straight if the service fails)
   const ends = [[c.lng, c.lat], [current.lng, current.lat]], rid = ++routeId, dest = current;
   walkLine(ends);
-  fetch(`/api/onemap-route?start=${c.lat.toFixed(6)},${c.lng.toFixed(6)}&end=${(+dest.lat).toFixed(6)},${(+dest.lng).toFixed(6)}`).then(r => r.json()).then(j => {
+  fetch(SITE + `/api/onemap-route?start=${c.lat.toFixed(6)},${c.lng.toFixed(6)}&end=${(+dest.lat).toFixed(6)},${(+dest.lng).toFixed(6)}`).then(r => r.json()).then(j => {
     if (rid !== routeId || picked !== c || !j.ok || j.distance == null) return;
     const line = j.geometry ? decodeLine(j.geometry) : [];
     if (line.length > 1) walkLine([ends[0], ...line, ends[1]]);
@@ -413,7 +417,7 @@ function closeDetail(quiet) {
 // A link back to this page that reopens the same search with this carpark's details showing.
 function shareUrl(c) {
   const p = new URLSearchParams({ to: `${(+current.lat).toFixed(6)},${(+current.lng).toFixed(6)}`, dest: current.label || current.name, cp: c.id });
-  return `${location.origin}/beta?${p}`;
+  return `${SITE || location.origin}/beta?${p}`;
 }
 async function shareCarpark(c) {
   const url = shareUrl(c), title = `${c.name} · wheretopark.sg`;
@@ -487,6 +491,15 @@ function openNavigate(c) {
   $('nav').classList.add('open');
 }
 const closeNavigate = () => $('nav').classList.remove('open');
+// In the apps, links to other sites (navigation apps, map credits) must be handed to the phone, not opened in the app's own window.
+if (IN_APP) document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a[href]');
+  if (!a || !/^https?:$/.test(a.protocol) || a.host === location.host) return;
+  const launcher = window.Capacitor.Plugins && window.Capacitor.Plugins.AppLauncher;
+  if (!launcher) return;
+  e.preventDefault();
+  launcher.openUrl({ url: a.href }).catch(() => { window.open(a.href, '_blank', 'noopener'); });
+});
 
 // ---------- phone keyboards ----------
 // When the keyboard opens, iPhone Safari slides the whole page up to show the field that was tapped, which was the

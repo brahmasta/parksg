@@ -43,6 +43,7 @@ export const FEATURES: Feature[] = [
   { id: 'nav_account', label: 'Account (nav)', area: 'Navigation' },
   { id: 'nav_home_wordmark', label: 'Wordmark → home', area: 'Navigation' },
   { id: 'nav_back', label: 'Back', area: 'Navigation' },
+  { id: 'beta_open', label: 'Try the 3D map (beta)', area: 'Navigation' },
 
   // Search
   { id: 'search_near_me', label: 'Use my location', area: 'Search' },

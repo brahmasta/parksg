@@ -22,6 +22,7 @@ import { useCarparkNavigation } from '../hooks/useCarparkNavigation';
 import { RadiusSelect } from '../components/RadiusSelect';
 import { pickHeroCopy } from '../lib/heroCopy';
 import { AppFooter } from '../components/AppFooter';
+import { BetaInvite } from '../components/BetaInvite';
 import { HomeRecentSection, HomeSavedSection } from '../components/HomeSections';
 import { IconLocation, IconShare } from '../components/icons';
 
@@ -442,6 +443,8 @@ function LandingDesktop({
           {nearMeBusy ? <Spinner /> : <span style={{ color: 'var(--accent)', display: 'inline-flex' }}><IconLocation size={16} stroke={2} /></span>}
           {nearMeBusy ? 'Locating…' : 'Use my location'}
         </button>
+
+        <BetaInvite />
 
         <HomeSavedSection
           merged={saved.merged}
