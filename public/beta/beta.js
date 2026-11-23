@@ -316,11 +316,11 @@ async function showResults(p, openId) {
 }
 
 function goHome() {
+  const mc = map.getCenter(), at = current ? [current.lng, current.lat] : [mc.lng, mc.lat];
   ++reqId; ++routeId; clearMarkers(); walkLine(null); current = null; picked = null; focused = null; q.value = ''; q.blur(); flat = false; $('tilt').textContent = 'Flat map';
   body.classList.remove('detail', 'list'); setState('home');
-  const c = map.getCenter();
-  if (metresFrom({ lng: c.lng, lat: c.lat }, { lng: HOME[0], lat: HOME[1] }) > 2500) map.jumpTo({ ...HOME_VIEW, zoom: 15.6, padding: homePad() });
-  map.easeTo({ ...HOME_VIEW, padding: homePad(), duration: 1400 });
+  // stay where you were looking; only the camera relaxes back to the start pose, and the slow spin resumes
+  map.easeTo({ center: at, zoom: Math.min(16.6, Math.max(15.5, map.getZoom())), pitch: HOME_VIEW.pitch, padding: homePad(), duration: 1200 });
   spinning = true;
 }
 
@@ -534,13 +534,26 @@ function setList(open) {
   requestAnimationFrame(() => { syncSheet(); if (current) map.easeTo({ padding: sheetPad(), duration: 500 }); if (!open && focused && !picked) focus(focused, false, true); });
 }
 $('more').onclick = () => setList(true);
-let grabY = null;
-$('grab').addEventListener('pointerdown', e => { grabY = e.clientY; $('grab').setPointerCapture(e.pointerId); });
-$('grab').addEventListener('pointerup', e => {
-  if (grabY == null) return;
-  const dy = e.clientY - grabY; grabY = null;
-  setList(dy < -20 ? true : dy > 20 ? false : !isOpen());   // drag up / down, or tap to flip
-});
+// Drag the handle (or the strip's header) up for more, down for less. Dragging down when it is already
+// at its smallest closes it: details go back to the results, and the results are cleared.
+function dragSheet(el, tapFlips) {
+  el.addEventListener('pointerdown', e => {
+    const y0 = e.clientY;
+    // listen on the window so the drag still ends properly when the finger leaves the handle
+    const end = up => {
+      removeEventListener('pointerup', end); removeEventListener('pointercancel', cancel);
+      const dy = up.clientY - y0;
+      if (dy < -20) setList(true);
+      else if (dy > 20) { if (isOpen()) setList(false); else if (body.classList.contains('detail')) closeDetail(); else goHome(); }
+      else if (tapFlips) setList(!isOpen());
+    };
+    const cancel = () => { removeEventListener('pointerup', end); removeEventListener('pointercancel', cancel); };
+    addEventListener('pointerup', end); addEventListener('pointercancel', cancel);
+  });
+}
+dragSheet($('grab'), true);
+dragSheet(document.querySelector('.peek-head'), false);
+dragSheet(document.querySelector('#listView header'), false);
 
 $('ctl').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if (!b) return;
@@ -588,6 +601,25 @@ $('mode').onclick = () => { nightOverride = !night; applyNight(); };
 requestAnimationFrame(() => requestAnimationFrame(() => body.classList.remove('boot')));
 map.setPadding(homePad());
 map.once('load', openShared);
+
+// ---------- start where the user is ----------
+// Asks the browser for the location once at the start. If it is given (and is in Singapore) the start view moves
+// there and marks it; otherwise the page stays over Marina Bay. A shared link or a search already under way wins.
+let meMarker = null;
+function startAtUser() {
+  if (!navigator.geolocation || new URLSearchParams(location.search).has('to')) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    if (lat < 1.15 || lat > 1.49 || lng < 103.55 || lng > 104.1) return;
+    if (!meMarker) meMarker = new maplibregl.Marker({ element: el('me', ''), anchor: 'center' });
+    meMarker.setLngLat([lng, lat]).addTo(map);
+    if (!body.classList.contains('home') || current) return;          // already searching: leave the view alone
+    const c = map.getCenter(), far = metresFrom({ lng, lat }, { lng: c.lng, lat: c.lat }) > 1500;
+    if (far) map.jumpTo({ center: [lng, lat], zoom: 15.4, padding: homePad() });
+    map.easeTo({ center: [lng, lat], zoom: 16.3, pitch: HOME_VIEW.pitch, padding: homePad(), duration: far ? 1200 : 1600 });
+  }, () => { /* no permission or no fix: keep the default start */ }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+}
+map.once('load', startAtUser);
 (function tick() {
   if (spinning && ready && !map.isEasing()) map.setBearing(map.getBearing() + 0.06);
   requestAnimationFrame(tick);
