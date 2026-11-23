@@ -5,6 +5,7 @@ import type {
   User,
 } from '../lib/types';
 import { AppFooter } from '../components/AppFooter';
+import { BetaInvite } from '../components/BetaInvite';
 import { PlaceAutocomplete } from '../components/PlaceAutocomplete';
 import type { ResolvedPlace } from '../lib/api/googlePlaces';
 import { ThemeToggleButton } from '../components/ThemeToggleButton';
@@ -220,6 +221,8 @@ export function HomeScreen({
             {nearMeBusy ? 'Finding your location…' : 'Use my location'}
           </button>
         </div>
+
+        <BetaInvite />
 
         <HomeSavedSection
           merged={merged}
