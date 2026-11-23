@@ -220,7 +220,7 @@ function renderResults() {
         <strong>${money(c)}<small>${c.cost == null ? 'rate not known' : stayLabel(stay)}</small></strong></button>`).join('')
       : `<p class="empty">${results.length ? 'No carpark matches those filters.' : 'We have no carparks within 600 m of this place.'}</p>`;
     list.forEach((c, k) => {
-      const lots = c.lotsAvailable == null ? '<small class="none">no data</small>' : `<small>${c.lotsAvailable} lots</small>`;
+      const lots = c.lotsAvailable == null ? '' : `<small>${c.lotsAvailable} lots</small>`;       // nothing shown when there is no live count
       const lit = picked ? picked.id === c.id : focused && focused.id === c.id;
       // busy areas can have dozens: the first 14 get full bubbles, the rest a small price tag
       const node = el('bub' + (lit ? ' on' : '') + (k >= 14 ? ' mini' : ''), `<i>${c.cost == null ? 'no rate' : money(c)} ${lots}</i>`);
@@ -290,6 +290,9 @@ function openDetail(c, keepCamera) {
     : `<b class="${c.lotsAvailable > 0 ? 'good' : ''}">${c.lotsAvailable}</b><small>${c.lotsTotal ? `of ${c.lotsTotal} lots free` : 'lots free now'}</small>`;
   const facts = [
     c.evTotal > 0 ? `<span class="fact">EV charging: ${c.evAvailable == null ? c.evTotal + ' points' : `${c.evAvailable} of ${c.evTotal} free`}</span>` : '',
+    c.evOperators && c.evOperators.length ? `<span class="fact">Charging by ${esc(c.evOperators.join(', '))}</span>` : '',
+    c.motorcycle ? `<span class="fact plain">Motorcycle lots${c.motorcycleLots ? ': ' + c.motorcycleLots : ''}</span>` : '',
+    c.heavy ? `<span class="fact plain">Heavy vehicle lots${c.heavyLots ? ': ' + c.heavyLots : ''}</span>` : '',
     c.heightLimitM ? `<span class="fact plain">Height limit ${c.heightLimitM} m</span>` : '',
     c.lotsAvailable == null && c.lotsTotal ? `<span class="fact plain">${c.lotsTotal} lots in total</span>` : '',
   ].join('');
@@ -300,7 +303,8 @@ function openDetail(c, keepCamera) {
       <div class="stat">${lots}</div>
     </div>
     <div class="btns"><button type="button" class="btn go" id="go"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3L3 10.500l7 2.500 2.500 7z"/></svg>Navigate</button>
-      <button type="button" class="btn sq ${isSaved(c) ? 'on' : ''}" id="star" aria-label="${isSaved(c) ? 'Remove from saved' : 'Save this carpark'}" aria-pressed="${isSaved(c)}">${STAR(isSaved(c))}</button></div>
+      <button type="button" class="btn sq ${isSaved(c) ? 'on' : ''}" id="star" aria-label="${isSaved(c) ? 'Remove from saved' : 'Save this carpark'}" aria-pressed="${isSaved(c)}">${STAR(isSaved(c))}</button>
+      <button type="button" class="btn sq" id="share" aria-label="Share this carpark"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 7.500L12 3.500l4 4M6 11.500H5a1 1 0 0 0-1 1V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6.500a1 1 0 0 0-1-1h-1"/></svg></button></div>
     <div class="extra">${facts ? `<div class="facts">${facts}</div>` : ''}
     <h2>Rates today</h2>${rates}
     <p class="fine">Live from wheretopark.sg${checkedAt ? ', checked ' + checkedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}. Prices are estimates; check the signboard on entry.</p></div>
@@ -328,6 +332,29 @@ function decodeLine(str) {
 function closeDetail(quiet) {
   picked = null; ++routeId; body.classList.remove('detail', 'dfull'); walkLine(null); renderResults();
   if (!quiet) requestAnimationFrame(() => { if (current) map.easeTo({ center: [current.lng, current.lat], zoom: 16.75, padding: sheetPad(), duration: 900 }); });
+}
+
+// ---------- share ----------
+// A link back to this page that reopens the same search with this carpark's details showing.
+function shareUrl(c) {
+  const p = new URLSearchParams({ to: `${(+current.lat).toFixed(6)},${(+current.lng).toFixed(6)}`, dest: current.label || current.name, cp: c.id });
+  return `${location.origin}/beta?${p}`;
+}
+async function shareCarpark(c) {
+  const url = shareUrl(c), title = `${c.name} · wheretopark.sg`;
+  const text = `Parking at ${c.name}${c.cost == null ? '' : `: ${money(c)} for ${stayLabel(stay)}`}`;
+  if (navigator.share) {
+    try { await navigator.share({ title, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }   // closed the share sheet
+  }
+  try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch { toast('Could not copy the link'); }
+}
+// opening a shared link: /beta?to=lat,lng&dest=Name&cp=carpark-id
+function openShared() {
+  const p = new URLSearchParams(location.search), to = (p.get('to') || '').split(',').map(Number);
+  if (to.length !== 2 || !Number.isFinite(to[0]) || !Number.isFinite(to[1]) || to[0] < 1.15 || to[0] > 1.49 || to[1] < 103.55 || to[1] > 104.1) return;
+  const name = (p.get('dest') || 'Shared place').slice(0, 80);
+  history.replaceState(null, '', location.pathname);
+  showResults({ name, lat: to[0], lng: to[1], kind: '' }, p.get('cp'));
 }
 
 // ---------- navigate ----------
@@ -431,6 +458,7 @@ $('detail').addEventListener('click', e => {
   if (!picked) return;
   if (e.target.closest('#go')) return openNavigate(picked);
   if (e.target.closest('#dmore')) return setList(true);
+  if (e.target.closest('#share')) return shareCarpark(picked);
   if (e.target.closest('#star')) {
     const c = picked, had = isSaved(c);
     savedCps = had ? savedCps.filter(s => s.id !== c.id) : [{ id: c.id, name: c.name, lat: c.lat, lng: c.lng }, ...savedCps];
@@ -456,6 +484,7 @@ map.on('click', e => {
 
 requestAnimationFrame(() => requestAnimationFrame(() => body.classList.remove('boot')));
 map.setPadding(homePad());
+map.once('load', openShared);
 (function tick() {
   if (spinning && ready && !map.isEasing()) map.setBearing(map.getBearing() + 0.06);
   requestAnimationFrame(tick);

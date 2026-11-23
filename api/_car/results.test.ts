@@ -64,6 +64,11 @@ test('prices the stay from the rate rows and sorts cheapest first', () => {
   const out = buildCarResults(input({ rows: [row('HDB:A', 100, 120), row('HDB:B', 300, 60)] }));
   assert.deepEqual(out.map((c) => [c.id, c.cost]), [['hdb:b', 2.4], ['hdb:a', 4.8]]);
   assert.equal(out[0].heightLimitM, 2.1);
+  // extras for the map page: nothing is claimed when the source does not say
+  assert.deepEqual(out[0].evOperators, []);
+  assert.equal(typeof out[0].motorcycle, 'boolean');
+  assert.equal(out[0].heavy, false);
+  assert.equal(out[0].heavyLots, null);
   assert.ok(out[0].rateLines[0].includes('$0.60 / 30 min'));
 });
 
