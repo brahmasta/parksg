@@ -152,8 +152,9 @@ function suggest() {
   const block = (title, list) => list.length ? `<h2 style="margin-top:${n ? 12 : 0}px">${title}</h2>` + list.map(p => rowHtml(p, n++)).join('') : '';
   let html = block('Saved places', places) + block('Saved carparks', carparks) + block('Recent', recent) + block('Places', found);
   if (term.length >= 2 && (searching || remoteFor !== term)) html += '<p>Searching Singapore…</p>';
-  else if (term.length >= 2 && !hits.length) html += '<p>No place found for that. Try a building name, a street or a postal code.</p>';
+  else if (term.length >= 2 && !hits.length) html += '<p>No place found for that. Try a place name, a street or a postal code.</p>';
   else if (!term && !hits.length) html += '<p>Type a place, a street or a postal code to search all of Singapore.</p>';
+  if (found.length && fromGoogle) html += '<p class="by">Powered by Google</p>';
   $('sugg').innerHTML = html;
 
   clearTimeout(searchTimer);
@@ -169,9 +170,10 @@ function suggest() {
   return hits;
 }
 
-// OneMap search, tidied into { name, addr, lat, lng }
+// Place search: Google Places through this site (the same search the main app uses, so restaurants and shops are found),
+// with OneMap, the government address finder, as the fallback if Google does not answer.
 const titleCase = t => t.toLowerCase().replace(/(^|[\s(/-])([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\bHdb\b/g, 'HDB').replace(/\bMrt\b/g, 'MRT');
-async function findPlaces(term) {
+async function findOneMap(term) {
   const res = await fetch('https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&pageNum=1&searchVal=' + encodeURIComponent(term));
   if (!res.ok) throw new Error(res.status);
   const seen = new Set(), places = [];
@@ -190,8 +192,35 @@ async function findPlaces(term) {
   return places;
 }
 
-function choose(p) {
+let gToken = null, fromGoogle = false;                    // one token per typing session, so Google bills the session once
+const newToken = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+async function findPlaces(term) {
+  try {
+    gToken = gToken || newToken();
+    const res = await fetch('/api/google-places-autocomplete?q=' + encodeURIComponent(term) + '&sessiontoken=' + gToken);
+    const j = await res.json();
+    if (!res.ok || !j.ok) throw new Error('search');
+    fromGoogle = true;
+    return (j.suggestions || []).slice(0, 7).map(s => ({ name: s.primary, addr: (s.secondary || '').replace(/, Singapore$/, ''), placeId: s.placeId }));
+  } catch {
+    fromGoogle = false;
+    return findOneMap(term);
+  }
+}
+// a Google suggestion has no position until it is picked
+async function locate(p) {
+  const token = gToken; gToken = null;
+  const res = await fetch('/api/google-places-details?place_id=' + encodeURIComponent(p.placeId) + (token ? '&sessiontoken=' + token : ''));
+  const j = await res.json();
+  if (!res.ok || !j.ok || !j.place) throw new Error('details');
+  return { ...p, lat: j.place.lat, lng: j.place.lng };
+}
+
+async function choose(p) {
   if (!p) return;
+  if (p.lat == null && p.placeId) {
+    try { p = await locate(p); } catch { toast('Could not open that place. Try again.'); return; }
+  }
   if (p.kind === '' || p.kind === 'recent') {              // remember searches, newest first
     recents = [{ name: p.name, addr: p.addr || '', lat: p.lat, lng: p.lng }, ...recents.filter(r => r.name !== p.name)].slice(0, 5);
     store.set('toy.recents', recents);
