@@ -5,6 +5,7 @@
 // MapLibre still owns the camera, gestures, flat ground and labels. Loaded after beta.js; uses its `map`.
 import * as THREE from './vendor/three.module.min.js';
 import { Pbf, VectorTile } from './vendor/vt.js';
+import { makeTraffic } from './cars.js';
 
 const TILE_Z = 14;            // the most detailed zoom these tiles are published at
 const SHOW_FROM = 14.7;       // below this zoom the flat map's simple blocks are shown instead
@@ -263,6 +264,8 @@ sun.shadow.camera.updateProjectionMatrix();
 sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.6;
 scene.add(sun, sun.target);
 
+const traffic = makeTraffic(THREE, scene, TILE_M);
+
 // ---------- loading tiles as the map moves ----------
 const tiles = new Map();      // "x/y" -> { group, seen, state }
 let template = null, lastScan = 0;
@@ -279,6 +282,7 @@ async function load(key, x, y) {
     await new Promise(r => setTimeout(r, 0));                 // let a frame through before the heavy part
     const t0 = performance.now();
     rec.group = buildTile(vt, x, y);
+    traffic.addTile(vt, key, rec.group.position.x, rec.group.position.y);      // its roads join the network the cars drive on
     stats.buildMs += performance.now() - t0; stats.built++;
     rec.state = 'ready';
     if (tiles.get(key) === rec) land.add(rec.group);
@@ -307,7 +311,7 @@ function scan(cx, cy, on) {
 
 // ---------- the MapLibre layer ----------
 const camera = new THREE.Camera();
-let renderer = null;
+let renderer = null, lastFrame = performance.now();
 const layer = {
   id: 'three3d', type: 'custom', renderingMode: '3d',
   onAdd(m, gl) {
@@ -319,6 +323,7 @@ const layer = {
   },
   render(gl, matrix) {
     const t0 = performance.now(), c = map.getCenter(), [cx, cy] = metresOf([c.lng, c.lat]), on = map.getZoom() >= SHOW_FROM;
+    const dt = Math.min(0.05, (t0 - lastFrame) / 1000); lastFrame = t0;
     if (t0 - lastScan > 250) { lastScan = t0; scan(cx, cy, on); }
     land.visible = ground.visible = on;
     if (!on) return;
@@ -326,15 +331,17 @@ const layer = {
     const sx = Math.round(cx / 25) * 25, sy = Math.round(cy / 25) * 25;
     sun.target.position.set(sx, sy, 0); sun.position.set(sx + SUN_DIR.x, sy + SUN_DIR.y, SUN_DIR.z);
     ground.position.set(sx, sy, 1);
+    const moving = traffic.frame(dt, cx, cy, map.getZoom());
     camera.projectionMatrix = new THREE.Matrix4().fromArray(matrix).multiply(toBoard);
     const cv = map.getCanvas();
     renderer.setViewport(0, 0, cv.width, cv.height);
     renderer.resetState();
     renderer.render(scene, camera);
     stats.frames++; stats.ms += performance.now() - t0;
+    if (moving && !document.hidden) map.triggerRepaint();                  // keep drawing while cars are on the move
   },
 };
 const add = () => { if (!map.getLayer('three3d')) map.addLayer(layer, map.getLayer('place-name') ? 'place-name' : undefined); };
 if (map.isStyleLoaded()) add(); else map.once('load', add);
 map.on('moveend', () => map.triggerRepaint());
-window.toy3d = { stats, tiles, scene, sun, info: () => renderer && renderer.info.render, SHOW_FROM };
+window.toy3d = { stats, tiles, scene, sun, traffic, info: () => renderer && renderer.info.render, SHOW_FROM };
