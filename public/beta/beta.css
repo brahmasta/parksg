@@ -217,3 +217,10 @@ body.results:not(.list) #listView { display: none; }
 .osm { position: fixed; left: 10px; bottom: calc(var(--sheet, 0px) + 6px); z-index: 5; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,.75); font-size: 10px; color: var(--mute); display: none; }
 .osm a { color: inherit; }
 body.results .osm { display: block; }
+
+/* many carparks: the ones further down the list show as small price tags until picked */
+.bub.mini:not(.on) i { padding: 3px 7px; border-radius: 10px; font-size: 11px; opacity: .93; }
+.bub.mini:not(.on) i small { display: none; }
+.bub.mini:not(.on)::after { height: 9px; width: 2px; }
+.bub.on { z-index: 200 !important; }
+.cp .tag.dest, .card .tag.dest { background: #fff0ea; color: #d9532f; }
