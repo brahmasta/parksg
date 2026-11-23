@@ -224,3 +224,29 @@ body.results .osm { display: block; }
 .bub.mini:not(.on)::after { height: 9px; width: 2px; }
 .bub.on { z-index: 200 !important; }
 .cp .tag.dest, .card .tag.dest { background: #fff0ea; color: #d9532f; }
+
+/* set a start and end time */
+.when { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 4px 8px 8px; }
+.when label { display: block; font-size: 12px; font-weight: 600; color: var(--mute); min-width: 0; }
+.when input { display: block; width: 100%; min-width: 0; height: 46px; margin-top: 4px; padding: 0 10px; border: 1.5px solid #e3e9ef; border-radius: 14px;
+  font: 600 14px 'Plus Jakarta Sans', system-ui, sans-serif; color: var(--ink); background: #fff; }
+.when input:focus-visible { outline: 0; border-color: #14c9b6; }
+.modal p.when-note { margin: 0 8px 4px; min-height: 34px; color: var(--ink); }
+.modal p.when-note.bad { color: #c2410c; }
+.modal .btn:disabled { opacity: .45; cursor: default; box-shadow: none; }
+@media (max-width: 420px) { .when { grid-template-columns: 1fr; } }
+
+/* day / night button, and the night sky behind the map */
+.mode { background: rgba(255,255,255,.9); border: 0; color: #e09a00; display: grid; place-items: center; }
+.mode svg { width: 22px; height: 22px; }
+.mode .sun { display: none; } body.night .mode .sun { display: block; } body.night .mode .moon { display: none; }
+.mode .moon { color: #46546a; }
+body.night { background: #0a1322; }
+body.night #map { background:
+  radial-gradient(1.2px 1.2px at 12% 9%, #fff 55%, transparent 60%), radial-gradient(1px 1px at 31% 4%, #cfe0ff 55%, transparent 60%),
+  radial-gradient(1.4px 1.4px at 47% 11%, #fff 55%, transparent 60%), radial-gradient(1px 1px at 63% 6%, #fff 55%, transparent 60%),
+  radial-gradient(1.2px 1.2px at 78% 12%, #cfe0ff 55%, transparent 60%), radial-gradient(1px 1px at 91% 5%, #fff 55%, transparent 60%),
+  radial-gradient(1px 1px at 22% 15%, #fff 55%, transparent 60%), radial-gradient(1.3px 1.3px at 70% 17%, #fff 55%, transparent 60%),
+  linear-gradient(#081120, #14233a 45%, #1b2f33); }
+body.night .credit { color: #b9c6d6; }
+body.night .osm { background: rgba(10,19,34,.7); color: #b9c6d6; }
