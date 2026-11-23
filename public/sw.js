@@ -58,6 +58,8 @@ self.addEventListener('fetch', (event) => {
   // Only handle same-origin; never touch API calls or third-party requests.
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return;
+  // The beta toy-map page is its own static page, not part of the app shell.
+  if (url.pathname === '/beta' || url.pathname.startsWith('/beta/')) return;
   // SEO pages are server-rendered and must stay fresh — never cache them.
   if (isSeoRoute(url.pathname)) return;
 
