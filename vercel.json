@@ -12,6 +12,8 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/delete-account", "destination": "/delete-account.html" },
+    { "source": "/beta", "destination": "/beta/index.html" },
+    { "source": "/beta/", "destination": "/beta/index.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
