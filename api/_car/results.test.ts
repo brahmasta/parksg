@@ -110,4 +110,8 @@ test('carParkKind sorts source types into kinds for the icon', () => {
   assert.equal(carParkKind('LTA:3', undefined), 'building');
   assert.equal(carParkKind('OPERATOR:guoco_tower', 'MALL'), 'building');
   assert.equal(carParkKind('GOOGLE:x', undefined), null);
+  // the app's own carparks carry lower-case ids
+  assert.equal(carParkKind('ura:a0021', 'Car'), 'street');
+  assert.equal(carParkKind('operator:maxwell_house', 'MALL'), 'building');
+  assert.equal(carParkKind('manual:mnd_complex_carpark', undefined), 'building');
 });
