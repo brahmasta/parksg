@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCarResults, sgWallClock, type CarResultInput } from './results';
+import { buildCarResults, carParkKind, sgWallClock, type CarResultInput } from './results';
 import type { DbCarparkRaw } from '../../src/lib/api/dbCarparks';
 
 const DEST = { lat: 1.3, lng: 103.85 };
@@ -98,4 +98,16 @@ test('sgWallClock reads Singapore time whatever the server zone', () => {
   assert.equal(d.getHours(), 14);
   assert.equal(d.getMinutes(), 30);
   assert.equal(d.getDate(), 7);
+});
+
+test('carParkKind sorts source types into kinds for the icon', () => {
+  assert.equal(carParkKind('HDB:A1', 'MULTI-STOREY CAR PARK'), 'multi');
+  assert.equal(carParkKind('HDB:A2', 'SURFACE/MULTI-STOREY CAR PARK'), 'multi');
+  assert.equal(carParkKind('HDB:A3', 'MECHANISED AND SURFACE CAR PARK'), 'multi');
+  assert.equal(carParkKind('HDB:A4', 'SURFACE CAR PARK'), 'surface');
+  assert.equal(carParkKind('HDB:A5', 'BASEMENT CAR PARK'), 'basement');
+  assert.equal(carParkKind('URA:A0006', 'Car'), 'street');
+  assert.equal(carParkKind('LTA:3', undefined), 'building');
+  assert.equal(carParkKind('OPERATOR:guoco_tower', 'MALL'), 'building');
+  assert.equal(carParkKind('GOOGLE:x', undefined), null);
 });

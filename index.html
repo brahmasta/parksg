@@ -15,6 +15,20 @@
          %…% placeholder at build time), else 'auto'. 'auto' follows the
          device. Kept inline and dependency-free — it runs before the bundle. -->
     <script>
+      // "Always open the 3D map" (set on the /beta page): the home page hands over to it.
+      // Any other address, or ?view=classic from the beta's back button, stays here.
+      (function () {
+        try {
+          var l = window.location;
+          if (l.search === '?view=classic') { history.replaceState(null, '', l.pathname + l.hash); return; }
+          if (localStorage.getItem('wtp.view') !== 'beta') return;
+          if ((l.pathname === '/' || l.pathname === '/index.html') && !l.search && !l.hash) {
+            l.replace(/^https?:$/.test(l.protocol) && l.hostname !== 'localhost' ? '/beta' : '/beta/index.html');
+          }
+        } catch (e) { /* storage blocked: stay on this page */ }
+      })();
+    </script>
+    <script>
       (function () {
         var PREFS = { auto: 1, sunlight: 1, light: 1, dark: 1 };
         var COLORS = { sunlight: '#eef1f5', light: '#fafafa', dark: '#12151a' };

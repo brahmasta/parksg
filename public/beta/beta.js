@@ -22,6 +22,21 @@ const ICON = {
   cp: '<b style="font:700 17px \'Space Grotesk\',system-ui,sans-serif">P</b>',
   '': '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.300-7-11.500A7 7 0 0 1 19 9.500c0 5.200-7 11.500-7 11.500z"/><circle cx="12" cy="9.500" r="2.500"/></svg>',
 };
+// One picture per kind of carpark (the site's /api/car/nearby says which), with a bolt in the corner when it has EV charging.
+const KIND = {
+  multi: ['Multi-storey carpark', '<path d="M4 20V7.500l8-3.500 8 3.500V20"/><path d="M4 11.500h16M4 15.700h16M2.500 20h19"/>'],
+  surface: ['Open-air carpark', '<rect x="3" y="6.500" width="18" height="11" rx="2.500"/><path d="M8 6.500v6.500M12 6.500v6.500M16 6.500v6.500"/>'],
+  basement: ['Basement carpark', '<path d="M2.500 7h19"/><path d="M5.500 7v10.500a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7"/><path d="M12 10v6M9.300 13.500L12 16.200l2.700-2.700"/>'],
+  street: ['Street or open-air parking', '<rect x="6.500" y="3" width="11" height="10.500" rx="3"/><path d="M12 13.500V21M8.500 21h7"/><path d="M10.700 10.700V5.800h1.800a1.600 1.600 0 0 1 0 3.200h-1.800" stroke-width="1.700"/>'],
+  building: ['Building carpark', '<path d="M5.500 20.500V5a1.500 1.500 0 0 1 1.500-1.500h10A1.500 1.500 0 0 1 18.500 5v15.500M3 20.500h18"/><path d="M10.200 16.500V8h2.600a2.400 2.400 0 0 1 0 4.800h-2.600"/>'],
+};
+const BOLT = '<i class="evb" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M13.500 2L5 13.500h5.500L9.500 22 19 10h-6z"/></svg></i>';
+const kindName = c => (KIND[c.kind] || ['Carpark'])[0];
+function cpIcon(c) {
+  const k = KIND[c.kind], ev = c.evTotal > 0;
+  return `<span class="p${ev ? ' ev' : ''}" role="img" aria-label="${kindName(c)}${ev ? ', EV charging' : ''}" title="${kindName(c)}${ev ? ' · EV charging' : ''}">${k
+    ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${k[1]}</svg>` : 'P'}${ev ? BOLT : ''}</span>`;
+}
 const STAR = on => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.500l2.600 5.400 5.900.800-4.300 4.100 1 5.900L12 16.900l-5.200 2.800 1-5.900L3.500 9.700l5.900-.8z"/></svg>`;
 
 // ---------- what the mockup remembers (this browser only) ----------
@@ -135,8 +150,12 @@ let results = [], live = false, checkedAt = null, loadState = 'idle', reqId = 0;
 let sortBy = 'cost', onlyFree = false, onlyEv = false;
 let hits = [], remote = [], remoteFor = '', searching = false, searchTimer = 0;
 const setState = s => { body.classList.remove('home', 'typing', 'results'); body.classList.add(s); };
-const sheetPad = () => ({ top: 70, left: 0, right: 0, bottom: Math.min($('sheet').offsetHeight || 320, innerHeight * 0.56) });
-const syncSheet = () => body.style.setProperty('--sheet', ($('sheet').offsetHeight || 320) + 'px');
+// On a wide window the results are a panel down the left side (see the 900px rule in beta.css); on a phone, a sheet at the bottom.
+const WIDE = matchMedia('(min-width: 900px)');
+const sheetPad = () => WIDE.matches ? { top: 40, left: 432, right: 0, bottom: 0 }
+  : { top: 70, left: 0, right: 0, bottom: Math.min($('sheet').offsetHeight || 320, innerHeight * 0.56) };
+const syncSheet = () => body.style.setProperty('--sheet', WIDE.matches ? '0px' : ($('sheet').offsetHeight || 320) + 'px');
+WIDE.addEventListener('change', () => { syncSheet(); if (current) map.easeTo({ center: [current.lng, current.lat], padding: sheetPad(), duration: 500 }); });
 let toastTimer = 0;
 const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 1800); };
 
@@ -294,7 +313,7 @@ function renderResults() {
   if (loadState === 'ok') {
     $('sheetTitle').textContent = results.length ? `${list.length} carpark${list.length === 1 ? '' : 's'} within 600 m` : 'No carparks nearby';
     $('sheetSub').textContent = results.length ? `price for ${stayLabel(H())}${custom ? ' from ' + sgText(custom.start) : ''}${live ? '' : ' · live lots unavailable'}` : '';
-    $('list').innerHTML = list.length ? list.map(c => `<button type="button" class="cp ${picked && picked.id === c.id ? 'on' : ''}" data-id="${esc(c.id)}"><span class="p">P</span>
+    $('list').innerHTML = list.length ? list.map(c => `<button type="button" class="cp ${picked && picked.id === c.id ? 'on' : ''}" data-id="${esc(c.id)}">${cpIcon(c)}
         <div><b>${esc(c.name)}</b><small>${c.walkMin} min walk · ${lotsText(c)}${tagFor(c)}${c.evTotal > 0 ? '<span class="tag ev">EV</span>' : ''}</small></div>
         <strong>${money(c)}<small>${c.cost == null ? 'rate not known' : stayLabel(H())}</small></strong></button>`).join('')
       : `<p class="empty">${results.length ? 'No carpark matches those filters.' : 'We have no carparks within 600 m of this place.'}</p>`;
@@ -368,6 +387,7 @@ function openDetail(c, keepCamera) {
   const lots = c.lotsAvailable == null ? '<b class="none">No data</b><small>live lots</small>'
     : `<b class="${c.lotsAvailable > 0 ? 'good' : ''}">${c.lotsAvailable}</b><small>${c.lotsTotal ? `of ${c.lotsTotal} lots free` : 'lots free now'}</small>`;
   const facts = [
+    KIND[c.kind] ? `<span class="fact plain">${kindName(c)}</span>` : '',
     c.evTotal > 0 ? `<span class="fact">EV charging: ${c.evAvailable == null ? c.evTotal + ' points' : `${c.evAvailable} of ${c.evTotal} free`}</span>` : '',
     c.evOperators && c.evOperators.length ? `<span class="fact">Charging by ${esc(c.evOperators.join(', '))}</span>` : '',
     c.motorcycle ? `<span class="fact plain">Motorcycle lots${c.motorcycleLots ? ': ' + c.motorcycleLots : ''}</span>` : '',
@@ -375,7 +395,7 @@ function openDetail(c, keepCamera) {
     c.heightLimitM ? `<span class="fact plain">Height limit ${c.heightLimitM} m</span>` : '',
     c.lotsAvailable == null && c.lotsTotal ? `<span class="fact plain">${c.lotsTotal} lots in total</span>` : '',
   ].join('');
-  $('detail').innerHTML = `<div class="d-top"><span class="p">P</span><div><h1>${esc(c.name)}</h1>${c.subtitle && c.subtitle.toLowerCase() !== c.name.toLowerCase() ? `<p>${esc(c.subtitle)}</p>` : ''}</div></div>
+  $('detail').innerHTML = `<div class="d-top">${cpIcon(c)}<div><h1>${esc(c.name)}</h1>${c.subtitle && c.subtitle.toLowerCase() !== c.name.toLowerCase() ? `<p>${esc(c.subtitle)}</p>` : ''}</div></div>
     <div class="stats">
       <div class="stat"><b class="${c.cost == null ? 'none' : ''}">${c.cost == null ? 'Not known' : money(c)}</b><small>${c.cost == null ? 'price' : 'for ' + stayLabel(H())}</small></div>
       <div class="stat"><b id="walkB">${c.walkMin} min</b><small id="walkS">${c.distanceM} m walk</small></div>
@@ -491,6 +511,20 @@ function openNavigate(c) {
   $('nav').classList.add('open');
 }
 const closeNavigate = () => $('nav').classList.remove('open');
+
+// ---------- start here every time ----------
+// 'wtp.view' = 'beta' makes the main site open this page (the inline script in the site's index.html reads it).
+const VIEW_KEY = 'wtp.view';
+const startsHere = () => { try { return localStorage.getItem(VIEW_KEY) === 'beta'; } catch { return false; } };
+function paintStart() { const on = startsHere(), b = $('startHere'); b.setAttribute('aria-pressed', on); b.classList.toggle('on', on); }
+$('startHere').onclick = () => {
+  const on = !startsHere();
+  try { if (on) localStorage.setItem(VIEW_KEY, 'beta'); else localStorage.removeItem(VIEW_KEY); }
+  catch { return toast('This browser will not let the page remember that.'); }
+  paintStart();
+  toast(on ? 'wheretopark.sg will now open on the 3D map.' : 'wheretopark.sg will open on the classic view.');
+};
+paintStart();
 // In the apps, links to other sites (navigation apps, map credits) must be handed to the phone, not opened in the app's own window.
 if (IN_APP) document.addEventListener('click', e => {
   const a = e.target.closest && e.target.closest('a[href]');
@@ -551,7 +585,7 @@ function focus(c, fromSwipe, quiet) {
   if (quiet) return;
   // bring the carpark into the visible part of the map only when it is off screen or under the sheet
   const pt = map.project([c.lng, c.lat]), pad = sheetPad();
-  if (pt.x < 40 || pt.x > innerWidth - 40 || pt.y < pad.top + 30 || pt.y > innerHeight - pad.bottom - 10) map.easeTo({ center: [c.lng, c.lat], padding: pad, duration: 700 });
+  if (pt.x < pad.left + 40 || pt.x > innerWidth - 40 || pt.y < pad.top + 30 || pt.y > innerHeight - pad.bottom - 10) map.easeTo({ center: [c.lng, c.lat], padding: pad, duration: 700 });
 }
 let swipeTimer = 0;
 $('cards').addEventListener('scroll', () => {
