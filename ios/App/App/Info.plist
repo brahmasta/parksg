@@ -28,6 +28,10 @@
 	<false/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to find carparks near you. It is not stored.</string>
+	<!-- Not requested (the app only asks While Using), but a linked SDK
+	     references the Always API, so App Store Connect wants it (ITMS-90683). -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to find carparks near you. It is not stored.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<!-- Google Sign-In returns here. GOOGLE_REVERSED_CLIENT_ID is a build
@@ -44,8 +48,9 @@
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
+		<!-- CarPlay runs as a second scene beside the phone's. -->
 		<key>UIApplicationSupportsMultipleScenes</key>
-    <false/>
+		<true/>
     <key>UISceneConfigurations</key>
     <dict>
       <key>UIWindowSceneSessionRoleApplication</key>
@@ -57,6 +62,18 @@
             <string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
             <key>UISceneStoryboardFile</key>
             <string>Main</string>
+        </dict>
+      </array>
+      <!-- CarPlay (App/CarPlay): parking near the car or a saved place. -->
+      <key>CPTemplateApplicationSceneSessionRoleApplication</key>
+      <array>
+        <dict>
+            <key>UISceneClassName</key>
+            <string>CPTemplateApplicationScene</string>
+            <key>UISceneConfigurationName</key>
+            <string>CarPlay</string>
+            <key>UISceneDelegateClassName</key>
+            <string>$(PRODUCT_MODULE_NAME).CarPlaySceneDelegate</string>
         </dict>
       </array>
     </dict>
