@@ -43,8 +43,9 @@ export function carParkKind(id: string, type: string | undefined): CarParkKind |
   if (t.includes('BASEMENT')) return 'basement';
   if (t.includes('MULTI-STOREY') || t.includes('MECHANISED') || t.includes('COVERED')) return 'multi';
   if (t.includes('SURFACE')) return 'surface';
-  if (id.startsWith('URA:')) return 'street';
-  if (/^(LTA|OPERATOR|MANUAL):/.test(id)) return 'building';
+  // ids reach here lower-cased (carparkMapping), the database keeps them upper-case
+  if (/^ura:/i.test(id)) return 'street';
+  if (/^(lta|operator|manual):/i.test(id)) return 'building';
   return null;
 }
 
