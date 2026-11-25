@@ -33,6 +33,21 @@ export type CarResultInput = {
   limit: number;
 };
 
+export type CarParkKind = 'multi' | 'surface' | 'basement' | 'street' | 'building';
+
+/** Sorts a source's carpark type into a few kinds a driver can picture. HDB and JTC
+ *  name the structure; URA lots are kerbside or open-air; the rest are the carparks
+ *  of malls, hotels and offices, whose structure the sources do not give. */
+export function carParkKind(id: string, type: string | undefined): CarParkKind | null {
+  const t = (type ?? '').toUpperCase();
+  if (t.includes('BASEMENT')) return 'basement';
+  if (t.includes('MULTI-STOREY') || t.includes('MECHANISED') || t.includes('COVERED')) return 'multi';
+  if (t.includes('SURFACE')) return 'surface';
+  if (id.startsWith('URA:')) return 'street';
+  if (/^(LTA|OPERATOR|MANUAL):/.test(id)) return 'building';
+  return null;
+}
+
 export type CarCarpark = {
   id: string;
   name: string;
@@ -45,6 +60,8 @@ export type CarCarpark = {
   lotsAvailable: number | null;
   lotsTotal: number | null;
   heightLimitM: number | null;
+  /** How the carpark is built, for an icon. Null when the source does not say. */
+  kind: CarParkKind | null;
   evAvailable: number | null;
   evTotal: number | null;
   /** Charging providers at this carpark, most connectors first; empty when none are known. */
@@ -114,6 +131,7 @@ export function buildCarResults(input: CarResultInput): CarCarpark[] {
       lotsAvailable: cp.lotsAvailable,
       lotsTotal: cp.lotsTotal > 0 ? cp.lotsTotal : null,
       heightLimitM: cp.heightLimitM ?? null,
+      kind: carParkKind(cp.id, cp.carParkType),
       evAvailable: ev ? ev.available : null,
       evTotal: ev ? ev.total : null,
       evOperators: cp.ev?.operators ?? [],
