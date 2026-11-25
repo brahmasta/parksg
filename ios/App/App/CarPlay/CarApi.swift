@@ -68,7 +68,7 @@ enum CarApi {
                     result = .failure(CarApiError(message: "Unexpected response from wheretopark.sg"))
                 }
             } else {
-                result = .failure(CarApiError(message: "No connection. Check your phone's data."))
+                result = .failure(CarApiError(message: "No connection. Try again in a moment."))
             }
             DispatchQueue.main.async { completion(result) }
         }.resume()

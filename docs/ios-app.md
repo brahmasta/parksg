@@ -29,14 +29,10 @@ phone's saved and recent destinations) → carparks on the map → rates, with
 Navigate handing off to Apple Maps. The parking category has no search or
 keyboard template, so a new place is searched on the phone first.
 
-- Apple has to grant the team the `com.apple.developer.carplay-parking`
-  entitlement: request it at developer.apple.com/contact/carplay (category
-  Parking). Until then a device or App Store build signed with it fails.
-- So the entitlement lives in `App.CarPlay.entitlements`, which only
-  simulator builds use (`CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]` in the
-  project). Once Apple grants it: enable CarPlay Parking on the App ID, add
-  the key to `App.entitlements`, and delete the simulator override and the
-  extra file.
+- Apple granted the team the `com.apple.developer.carplay-parking`
+  entitlement on 2026-11-24 and CarPlay Parking App is enabled on the App ID.
+  The key is in `App.entitlements` and the CarPlay scene is declared in
+  `Info.plist`; 1.1.2 (build 7) is the first build that ships it.
 - Testing needs the entitlement and a real iPhone. From Xcode 27 the
   simulator has no CarPlay display (I/O → External Displays is gone): run
   the app on an iPhone connected to the Mac, then in Device Hub select the

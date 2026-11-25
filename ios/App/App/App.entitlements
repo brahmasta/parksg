@@ -6,6 +6,9 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<!-- CarPlay parking app; granted to the team by Apple on 2026-11-24. -->
+	<key>com.apple.developer.carplay-parking</key>
+	<true/>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:wheretopark.sg</string>

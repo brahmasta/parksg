@@ -8,8 +8,9 @@ import UIKit
 /// wheretopark.sg API as Android Auto (android/.../car).
 ///
 /// wheretopark.sg is a CarPlay *parking* app. That category has no search or
-/// keyboard template, so the car offers parking near the car and near the
-/// phone's saved and recent destinations; a new place is searched on the phone.
+/// keyboard template, so the car offers parking near the car, near the
+/// phone's saved and recent destinations, and near popular places. Nothing on
+/// the car screen asks the driver to pick up the phone (CarPlay guideline).
 ///
 /// Home (list) → carparks on the map (point-of-interest) → rates (information).
 final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
@@ -80,17 +81,32 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
             .filter { !savedNames.contains($0.label.lowercased()) }
             .prefix(min(4, room)))
         if !recents.isEmpty {
+            room -= recents.count
             sections.append(CPListSection(items: recents.map { row($0, symbol: "clock.arrow.circlepath") },
                                           header: "Recent", sectionIndexTitle: nil))
         }
-        if saved.isEmpty && recents.isEmpty {
-            let hint = CPListItem(text: "Search a place on your phone first",
-                                  detailText: "Your saved and recent destinations show up here")
-            hint.isEnabled = false
-            sections.append(CPListSection(items: [hint], header: "Destinations", sectionIndexTitle: nil))
+        // Popular places fill the rest, so the car always has somewhere to
+        // pick without the phone, even on first use.
+        let taken = savedNames.union(recents.map { $0.label.lowercased() })
+        let popular = Array(Self.popular
+            .filter { !taken.contains($0.label.lowercased()) }
+            .prefix(room))
+        if !popular.isEmpty {
+            sections.append(CPListSection(items: popular.map { row($0, symbol: "mappin.and.ellipse") },
+                                          header: "Popular", sectionIndexTitle: nil))
         }
         return sections
     }
+
+    /// Busy Singapore destinations, each with carparks in /api/car/nearby.
+    private static let popular: [CarDestination] = [
+        ("ION Orchard", 1.30404, 103.83186),
+        ("Marina Bay Sands", 1.284145, 103.858871),
+        ("Suntec City", 1.29486, 103.860334),
+        ("VivoCity", 1.26437, 103.82221),
+        ("Bugis Junction", 1.299113, 103.855411),
+        ("Jewel Changi Airport", 1.360341, 103.989078),
+    ].map { CarDestination(label: $0.0, coordinate: CLLocationCoordinate2D(latitude: $0.1, longitude: $0.2)) }
 
     private func row(_ destination: CarDestination, symbol: String) -> CPListItem {
         let item = CPListItem(text: destination.label, detailText: nil, image: UIImage(systemName: symbol))
@@ -111,8 +127,8 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
                 done()
                 let denied = [.denied, .restricted].contains(self.locationManager.authorizationStatus)
                 self.alert(denied
-                    ? "Allow location for wheretopark.sg on your iPhone to find parking near you"
-                    : "Couldn't get your location. Pick a saved or recent destination.")
+                    ? "Location is off for wheretopark.sg. Pick a destination instead."
+                    : "Couldn't get your location. Pick a destination instead.")
                 return
             }
             self.showCarparks(near: CarDestination(label: "you", coordinate: location.coordinate), nearMe: true, done)
